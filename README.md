@@ -76,50 +76,50 @@ Install-Package Newtonsoft.Json
 </select>
 
 @section scripts {
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    let provinceData = [];
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let provinceData = [];
 
-    // Gọi API lấy toàn bộ dữ liệu tỉnh/thành/huyện/xã
-    $(document).ready(function () {
-        $.getJSON('@Url.Action("LoadProvinces", "DiaChi")', function (data) {
+        // Gọi API lấy toàn bộ dữ liệu tỉnh/thành/huyện/xã
+        $(document).ready(function () {
+                   $.getJSON('@Url.Action("LoadProvinces", "Address")', function (data) {
             provinceData = data;
             data.forEach(p => {
                 $('#province').append(`<option value="${p.code}">${p.name}</option>`);
             });
         });
 
-        // Khi chọn tỉnh → load huyện
-        $('#province').on('change', function () {
-            const selected = $(this).val();
-            $('#district').html('<option value="">-- Chọn Quận/Huyện --</option>');
-            $('#ward').html('<option value="">-- Chọn Phường/Xã --</option>');
 
-            const province = provinceData.find(p => p.code === selected);
-            if (province) {
-                province.districts.forEach(d => {
-                    $('#district').append(`<option value="${d.code}">${d.name}</option>`);
-                });
-            }
+            // Khi chọn tỉnh → load huyện
+            $('#province').on('change', function () {
+                const selected = $(this).val();
+                $('#district').html('<option value="">-- Chọn Quận/Huyện --</option>');
+                $('#ward').html('<option value="">-- Chọn Phường/Xã --</option>');
+
+                const province = provinceData.find(p => p.code === selected);
+                if (province) {
+                    province.districts.forEach(d => {
+                        $('#district').append(`<option value="${d.code}">${d.name}</option>`);
+                    });
+                }
+            });
+
+            // Khi chọn huyện → load xã
+            $('#district').on('change', function () {
+                const selectedDistrict = $(this).val();
+                const province = provinceData.find(p => p.code === $('#province').val());
+                const district = province.districts.find(d => d.code === selectedDistrict);
+
+                $('#ward').html('<option value="">-- Chọn Phường/Xã --</option>');
+                if (district) {
+                    district.wards.forEach(w => {
+                        $('#ward').append(`<option value="${w.code}">${w.name}</option>`);
+                    });
+                }
+            });
         });
-
-        // Khi chọn huyện → load xã
-        $('#district').on('change', function () {
-            const selectedDistrict = $(this).val();
-            const province = provinceData.find(p => p.code === $('#province').val());
-            const district = province.districts.find(d => d.code === selectedDistrict);
-
-            $('#ward').html('<option value="">-- Chọn Phường/Xã --</option>');
-            if (district) {
-                district.wards.forEach(w => {
-                    $('#ward').append(`<option value="${w.code}">${w.name}</option>`);
-                });
-            }
-        });
-    });
-</script>
+    </script>
 }
-
 🧠 Mở rộng (nếu bạn muốn làm chuyên sâu)
 
 Bạn có thể:
