@@ -1,0 +1,70 @@
+-- Insert
+CREATE PROC sp_CTMH_Insert
+(
+    @MaDMH CHAR(11),
+    @MaSP VARCHAR(10),
+    @SLM INT,
+    @DGM MONEY
+)
+AS
+BEGIN
+    INSERT INTO CTMH (MaDMH, MaSP, SLM, DGM)
+    VALUES (@MaDMH, @MaSP, @SLM, @DGM);
+END;
+GO
+
+-- Update
+CREATE PROC sp_CTMH_Update
+(
+    @MaDMH CHAR(11),
+    @MaSP VARCHAR(10),
+    @SLM INT,
+    @DGM MONEY
+)
+AS
+BEGIN
+    UPDATE CTMH
+    SET SLM = @SLM,
+        DGM = @DGM
+    WHERE MaDMH = @MaDMH AND MaSP = @MaSP;
+END;
+GO
+
+-- Delete
+CREATE PROC sp_CTMH_Delete
+(
+    @MaDMH CHAR(11),
+    @MaSP VARCHAR(10)
+)
+AS
+BEGIN
+    DELETE FROM CTMH
+    WHERE MaDMH = @MaDMH AND MaSP = @MaSP;
+END;
+GO
+
+-- Get All
+CREATE PROC sp_CTMH_GetAll
+AS
+BEGIN
+    SELECT CT.*, SP.TenSP, SP.DonGia, NCC.TenNCC
+    FROM CTMH CT
+    JOIN SanPham SP ON CT.MaSP = SP.MaSP
+    JOIN NhaCC NCC ON SP.MaNCC = NCC.MaNCC;
+END;
+GO
+
+-- Get by ID
+CREATE PROC sp_CTMH_GetByID
+(
+    @MaDMH CHAR(11)
+)
+AS
+BEGIN
+    SELECT CT.*, SP.TenSP, SP.DonGia, NCC.TenNCC
+    FROM CTMH CT
+    JOIN SanPham SP ON CT.MaSP = SP.MaSP
+    JOIN NhaCC NCC ON SP.MaNCC = NCC.MaNCC
+    WHERE CT.MaDMH = @MaDMH;
+END;
+GO

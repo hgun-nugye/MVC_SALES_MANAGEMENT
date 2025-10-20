@@ -1,0 +1,72 @@
+-- Insert
+CREATE PROC sp_CTBH_Insert
+(
+    @MaDBH CHAR(11),
+    @MaSP VARCHAR(10),
+    @SLM INT,
+    @DGM MONEY
+)
+AS
+BEGIN
+    INSERT INTO CTBH (MaDBH, MaSP, SLM, DGM)
+    VALUES (@MaDBH, @MaSP, @SLM, @DGM);
+END;
+GO
+
+-- Update
+CREATE PROC sp_CTBH_Update
+(
+    @MaDBH CHAR(11),
+    @MaSP VARCHAR(10),
+    @SLM INT,
+    @DGM MONEY
+)
+AS
+BEGIN
+    UPDATE CTBH
+    SET SLM = @SLM,
+        DGM = @DGM
+    WHERE MaDBH = @MaDBH AND MaSP = @MaSP;
+END;
+GO
+
+--Delete
+CREATE PROC sp_CTBH_Delete
+(
+    @MaDBH CHAR(11),
+    @MaSP VARCHAR(10)
+)
+AS
+BEGIN
+    DELETE FROM CTBH
+    WHERE MaDBH = @MaDBH AND MaSP = @MaSP;
+END;
+GO
+
+--Get All
+CREATE PROC sp_CTBH_GetAll
+AS
+BEGIN
+    SELECT CT.*, SP.TenSP, SP.GiaBan, KH.TenKH
+    FROM CTBH CT
+    JOIN SanPham SP ON CT.MaSP = SP.MaSP
+    JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
+    JOIN KhachHang KH ON DBH.MaKH = KH.MaKH;
+END;
+GO
+
+-- Get by ID
+CREATE PROC sp_CTBH_GetByID
+(
+    @MaDBH CHAR(11)
+)
+AS
+BEGIN
+    SELECT CT.*, SP.TenSP, SP.GiaBan, KH.TenKH
+    FROM CTBH CT
+    JOIN SanPham SP ON CT.MaSP = SP.MaSP
+    JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
+    JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
+    WHERE CT.MaDBH = @MaDBH;
+END;
+GO

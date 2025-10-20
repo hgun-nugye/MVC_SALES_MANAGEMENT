@@ -1,0 +1,191 @@
+﻿CREATE DATABASE DB_QLBH;
+GO
+USE DB_QLBH;
+GO
+
+-- =============================
+-- BẢNG QUỐC GIA, TỈNH, XÃ
+-- =============================
+CREATE TABLE QuocGia(
+	MaQG CHAR(2) PRIMARY KEY NOT NULL,       -- ISO 3166-1 alpha-2
+	TenQG NVARCHAR(90) NOT NULL
+);
+GO
+
+CREATE TABLE Tinh(
+	MaTinh CHAR(6) PRIMARY KEY NOT NULL,     -- ISO 3166-2
+	TenTinh NVARCHAR(90) NOT NULL,
+	MaQG CHAR(2) NOT NULL,
+	CONSTRAINT FK_Tinh_QuocGia FOREIGN KEY (MaQG)
+		REFERENCES QuocGia(MaQG) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE Xa(
+	MaXa CHAR(6) PRIMARY KEY NOT NULL,       -- Mã hành chính Việt Nam (6 ký tự)
+	TenXa NVARCHAR(90) NOT NULL,
+	MaTinh CHAR(6) NOT NULL,
+	CONSTRAINT FK_Xa_Tinh FOREIGN KEY (MaTinh)
+		REFERENCES Tinh(MaTinh) ON DELETE CASCADE
+);
+GO
+
+-- =============================
+-- BẢNG NHÀ CUNG CẤP
+-- =============================
+CREATE TABLE NhaCC (
+    MaNCC VARCHAR(10) PRIMARY KEY NOT NULL,
+    TenNCC NVARCHAR(100) NOT NULL,
+    DienThoaiNCC VARCHAR(15) NOT NULL,
+    EmailNCC VARCHAR(100) NULL,
+	MaXa CHAR(6) NULL,
+	MaQG CHAR(2) NULL,
+	CONSTRAINT FK_NhaCC_Xa FOREIGN KEY (MaXa)
+		REFERENCES Xa(MaXa),
+	CONSTRAINT FK_NhaCC_QuocGia FOREIGN KEY (MaQG)
+		REFERENCES QuocGia(MaQG)
+);
+GO
+
+-- =============================
+-- ĐƠN MUA HÀNG (NHẬP HÀNG)
+-- =============================
+CREATE TABLE DonMuaHang(
+	MaDMH CHAR(11) NOT NULL PRIMARY KEY,
+	NgayMH DATE NOT NULL,
+	MaNCC VARCHAR(10) NOT NULL,
+	CONSTRAINT FK_DonMuaHang_NhaCC FOREIGN KEY (MaNCC)
+		REFERENCES NhaCC(MaNCC) ON DELETE CASCADE
+);
+GO
+
+-- =============================
+-- KHÁCH HÀNG
+-- =============================
+CREATE TABLE KhachHang(
+	MaKH VARCHAR(10) NOT NULL PRIMARY KEY,
+	TenKH NVARCHAR(50) NOT NULL,
+	DienThoaiKH VARCHAR(10) NOT NULL,
+	EmailKH NVARCHAR(255) NOT NULL,
+	DiaChiKH NVARCHAR(255) NOT NULL
+);
+GO
+
+-- =============================
+-- ĐƠN BÁN HÀNG (XUẤT HÀNG)
+-- =============================
+CREATE TABLE DonBanHang(
+	MaDBH CHAR(11) NOT NULL PRIMARY KEY,
+	NgayBH DATE NOT NULL,
+	MaKH VARCHAR(10) NOT NULL,
+	CONSTRAINT FK_DonBanHang_KhachHang FOREIGN KEY (MaKH)
+		REFERENCES KhachHang(MaKH) ON DELETE CASCADE
+);
+GO
+
+-- =============================
+-- BẢNG NHÓM SẢN PHẨM
+-- =============================
+CREATE TABLE NhomSP (
+    MaNhom VARCHAR(10) PRIMARY KEY NOT NULL,
+    TenNhom NVARCHAR(100) NOT NULL,
+    MoTa NVARCHAR(255) NULL
+);
+GO
+
+-- =============================
+-- LOẠI SẢN PHẨM
+-- =============================
+CREATE TABLE LoaiSP(
+	MaLoai VARCHAR(10) NOT NULL PRIMARY KEY,
+	TenLSP NVARCHAR(50) NOT NULL,
+	MaNhom VARCHAR(10) NOT NULL
+    CONSTRAINT FK_LoaiSP_NhomSP FOREIGN KEY (MaNhom)
+        REFERENCES NhomSP(MaNhom)
+);
+GO
+
+-- =============================
+-- SẢN PHẨM
+-- =============================
+CREATE TABLE SanPham(
+	MaSP VARCHAR(10) NOT NULL PRIMARY KEY,
+	TenSP NVARCHAR(50) NOT NULL,
+	DonGia MONEY NOT NULL,
+	GiaBan MONEY NOT NULL,
+	MoTaSP NVARCHAR(MAX) NOT NULL,
+	AnhMH NVARCHAR(255) NOT NULL,            -- Ảnh minh họa
+	TrangThai NVARCHAR(50) NOT NULL,
+	SoLuongTon INT NOT NULL,
+	MaLoai VARCHAR(10) NOT NULL,
+	MaNCC VARCHAR(10) NOT NULL,
+	CONSTRAINT FK_SanPham_LoaiSP FOREIGN KEY (MaLoai)
+		REFERENCES LoaiSP(MaLoai) ON DELETE CASCADE,
+	CONSTRAINT FK_SanPham_NhaCC FOREIGN KEY (MaNCC)
+		REFERENCES NhaCC(MaNCC) ON DELETE CASCADE
+);
+GO
+
+-- =============================
+-- ĐÁNH GIÁ SẢN PHẨM
+-- =============================
+CREATE TABLE DanhGia (
+    MaDG INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    MaSP VARCHAR(10) NOT NULL,
+    MaKH VARCHAR(10) NOT NULL,
+    SoSao TINYINT CHECK (SoSao BETWEEN 1 AND 5),
+    NoiDung NVARCHAR(MAX) NULL,
+    NgayDG DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_DanhGia_SanPham FOREIGN KEY (MaSP)
+        REFERENCES SanPham(MaSP) ON DELETE CASCADE,
+    CONSTRAINT FK_DanhGia_KhachHang FOREIGN KEY (MaKH)
+        REFERENCES KhachHang(MaKH) ON DELETE CASCADE
+);
+GO
+
+-- =============================
+-- CHI TIẾT MUA HÀNG 
+-- =============================
+CREATE TABLE CTMH(
+	MaDMH CHAR(11) NOT NULL,
+	MaSP VARCHAR(10) NOT NULL, 
+	SLM INT NOT NULL,
+	DGM MONEY NOT NULL,
+	CONSTRAINT PK_CTMH PRIMARY KEY(MaDMH, MaSP),
+	CONSTRAINT FK_CTMH_DonMuaHang FOREIGN KEY (MaDMH)
+		REFERENCES DonMuaHang(MaDMH) ON DELETE  NO ACTION,
+	CONSTRAINT FK_CTMH_SanPham FOREIGN KEY (MaSP)
+		REFERENCES SanPham(MaSP) ON DELETE NO ACTION
+);
+GO
+
+-- =============================
+-- CHI TIẾT BÁN HÀNG
+-- =============================
+CREATE TABLE CTBH(
+	MaDBH CHAR(11) NOT NULL,
+	MaSP VARCHAR(10) NOT NULL, 
+	SLM INT NOT NULL,
+	DGM MONEY NOT NULL,
+	CONSTRAINT PK_CTBH PRIMARY KEY(MaDBH, MaSP),
+	CONSTRAINT FK_CTBH_DonBanHang FOREIGN KEY (MaDBH)
+		REFERENCES DonBanHang(MaDBH) ON DELETE  NO ACTION,
+	CONSTRAINT FK_CTBH_SanPham FOREIGN KEY (MaSP)
+		REFERENCES SanPham(MaSP) ON DELETE  NO ACTION
+);
+GO
+
+-- =============================
+-- KHUYẾN MÃI
+-- =============================
+CREATE TABLE KhuyenMai (
+    MaKM VARCHAR(10) PRIMARY KEY NOT NULL,
+    TenKM NVARCHAR(100) NOT NULL,          
+    MoTa NVARCHAR(500) NULL,                
+    GiaTriKM DECIMAL(10,2) NOT NULL,       
+    NgayBatDau DATETIME NOT NULL,
+    NgayKetThuc DATETIME NOT NULL,
+    DieuKienApDung NVARCHAR(255) NULL,     
+    TrangThai BIT DEFAULT 1
+);
+
