@@ -1,85 +1,164 @@
--- Insert
-CREATE PROC sp_NhaCC_Insert
+﻿USE DB_QLBH;
+GO
+
+-- ==========================================
+-- INSERT: Thêm nhà cung cấp
+-- ==========================================
+CREATE OR ALTER PROC sp_NhaCC_Insert
 (
     @TenNCC NVARCHAR(100),
     @DienThoaiNCC VARCHAR(15),
     @EmailNCC VARCHAR(100),
-    @MaXa CHAR(6),
-    @MaQG CHAR(2)
+    @DiaChiNCC NVARCHAR(255)
 )
 AS
 BEGIN
     SET NOCOUNT ON;
+    BEGIN TRY
+        -- Kiểm tra trùng tên hoặc email hoặc số điện thoại
+        IF EXISTS (SELECT 1 FROM NhaCC WHERE TenNCC = @TenNCC)
+        BEGIN
+            RAISERROR(N'Tên nhà cung cấp đã tồn tại.', 16, 1);
+            RETURN;
+        END
 
-    DECLARE @MaNCC VARCHAR(10);
-    DECLARE @Count INT;
+        IF EXISTS (SELECT 1 FROM NhaCC WHERE DienThoaiNCC = @DienThoaiNCC)
+        BEGIN
+            RAISERROR(N'Số điện thoại đã được sử dụng.', 16, 1);
+            RETURN;
+        END
 
-    SELECT @Count = COUNT(*) + 1 FROM NhaCC;
-    SET @MaNCC = 'NCC' + RIGHT('000' + CAST(@Count AS VARCHAR(3)), 3);
+        IF EXISTS (SELECT 1 FROM NhaCC WHERE EmailNCC = @EmailNCC)
+        BEGIN
+            RAISERROR(N'Email đã tồn tại.', 16, 1);
+            RETURN;
+        END
 
-    INSERT INTO NhaCC(MaNCC, TenNCC, DienThoaiNCC, EmailNCC, MaXa, MaQG)
-    VALUES (@MaNCC, @TenNCC, @DienThoaiNCC, @EmailNCC, @MaXa, @MaQG);
+        -- Sinh mã NCC tự động
+        DECLARE @MaNCC VARCHAR(10);
+        SELECT @MaNCC = 'NCC' + RIGHT('0000000' + CAST(ISNULL(COUNT(*) + 1, 1) AS VARCHAR(7)),7)
+        FROM NhaCC;
+
+        -- Thêm dữ liệu
+        INSERT INTO NhaCC(MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC)
+        VALUES (@MaNCC, @TenNCC, @DienThoaiNCC, @EmailNCC, @DiaChiNCC);
+
+        PRINT N'Thêm nhà cung cấp thành công.';
+    END TRY
+    BEGIN CATCH
+        RAISERROR(N'Lỗi khi thêm nhà cung cấp: %s', 16, 1, ERROR_MESSAGE());
+    END CATCH
 END;
 GO
 
--- Update
-CREATE PROC sp_NhaCC_Update
+-- ==========================================
+-- UPDATE: Cập nhật nhà cung cấp
+-- ==========================================
+CREATE OR ALTER PROC sp_NhaCC_Update
 (
     @MaNCC VARCHAR(10),
     @TenNCC NVARCHAR(100),
     @DienThoaiNCC VARCHAR(15),
     @EmailNCC VARCHAR(100),
-    @MaXa CHAR(6),
-    @MaQG CHAR(2)
+    @DiaChiNCC NVARCHAR(255)
 )
 AS
 BEGIN
-    UPDATE NhaCC
-    SET TenNCC = @TenNCC,
-        DienThoaiNCC = @DienThoaiNCC,
-        EmailNCC = @EmailNCC,
-        MaXa = @MaXa,
-        MaQG = @MaQG
+    SET NOCOUNT ON;
+    BEGIN TRY
+        -- Kiểm tra mã NCC có tồn tại không
+        IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
+        BEGIN
+            RAISERROR(N'Mã nhà cung cấp không tồn tại.', 16, 1);
+            RETURN;
+        END
+
+        -- Kiểm tra trùng tên / email / SDT với bản ghi khác
+        IF EXISTS (SELECT 1 FROM NhaCC WHERE TenNCC = @TenNCC AND MaNCC <> @MaNCC)
+        BEGIN
+            RAISERROR(N'Tên nhà cung cấp đã tồn tại.', 16, 1);
+            RETURN;
+        END
+
+        IF EXISTS (SELECT 1 FROM NhaCC WHERE DienThoaiNCC = @DienThoaiNCC AND MaNCC <> @MaNCC)
+        BEGIN
+            RAISERROR(N'Số điện thoại đã được sử dụng.', 16, 1);
+            RETURN;
+        END
+
+        IF EXISTS (SELECT 1 FROM NhaCC WHERE EmailNCC = @EmailNCC AND MaNCC <> @MaNCC)
+        BEGIN
+            RAISERROR(N'Email đã tồn tại.', 16, 1);
+            RETURN;
+        END
+
+        -- Cập nhật dữ liệu
+        UPDATE NhaCC
+        SET TenNCC = @TenNCC,
+            DienThoaiNCC = @DienThoaiNCC,
+            EmailNCC = @EmailNCC,
+            DiaChiNCC = @DiaChiNCC
+        WHERE MaNCC = @MaNCC;
+
+        PRINT N'Cập nhật nhà cung cấp thành công.';
+    END TRY
+    BEGIN CATCH
+        RAISERROR(N'Lỗi khi cập nhật nhà cung cấp: %s', 16, 1, ERROR_MESSAGE());
+    END CATCH
+END;
+GO
+
+-- ==========================================
+-- DELETE: Xóa nhà cung cấp
+-- ==========================================
+CREATE OR ALTER PROC sp_NhaCC_Delete
+(
+    @MaNCC VARCHAR(10)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
+        BEGIN
+            RAISERROR(N'Mã nhà cung cấp không tồn tại.', 16, 1);
+            RETURN;
+        END
+
+        DELETE FROM NhaCC WHERE MaNCC = @MaNCC;
+        PRINT N'Xóa nhà cung cấp thành công.';
+    END TRY
+    BEGIN CATCH
+        RAISERROR(N'Lỗi khi xóa nhà cung cấp: %s', 16, 1, ERROR_MESSAGE());
+    END CATCH
+END;
+GO
+
+-- ==========================================
+-- GET ALL: Lấy danh sách nhà cung cấp
+-- ==========================================
+CREATE OR ALTER PROC sp_NhaCC_GetAll
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC
+    FROM NhaCC
+    ORDER BY TenNCC;
+END;
+GO
+
+-- ==========================================
+-- GET BY ID: Lấy nhà cung cấp theo mã
+-- ==========================================
+CREATE OR ALTER PROC sp_NhaCC_GetByID
+(
+    @MaNCC VARCHAR(10)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC
+    FROM NhaCC
     WHERE MaNCC = @MaNCC;
 END;
 GO
-
--- Delete
-CREATE PROC sp_NhaCC_Delete
-(
-    @MaNCC VARCHAR(10)
-)
-AS
-BEGIN
-    DELETE FROM NhaCC WHERE MaNCC = @MaNCC;
-END;
-GO
-
--- GetAll
-CREATE PROC sp_NhaCC_GetAll
-AS
-BEGIN
-    SELECT NCC.*, Xa.TenXa, Tinh.TenTinh, QG.TenQG
-    FROM NhaCC NCC
-    LEFT JOIN Xa ON NCC.MaXa = Xa.MaXa
-    LEFT JOIN Tinh ON Xa.MaTinh = Tinh.MaTinh
-    LEFT JOIN QuocGia QG ON NCC.MaQG = QG.MaQG;
-END;
-GO
-
--- Get by ID
-CREATE PROC sp_NhaCC_GetByID
-(
-    @MaNCC VARCHAR(10)
-)
-AS
-BEGIN
-    SELECT NCC.*, Xa.TenXa, Tinh.TenTinh, QG.TenQG
-    FROM NhaCC NCC
-    LEFT JOIN Xa ON NCC.MaXa = Xa.MaXa
-    LEFT JOIN Tinh ON Xa.MaTinh = Tinh.MaTinh
-    LEFT JOIN QuocGia QG ON NCC.MaQG = QG.MaQG
-    WHERE NCC.MaNCC = @MaNCC;
-END;
-GO
-

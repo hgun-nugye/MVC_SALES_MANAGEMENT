@@ -1,28 +1,57 @@
--- Insert
-CREATE PROC sp_KhachHang_Insert
+﻿USE DB_QLBH;
+GO
+
+-- ============================
+-- INSERT
+-- ============================
+CREATE OR ALTER PROC sp_KhachHang_Insert
 (
     @TenKH NVARCHAR(50),
     @DienThoaiKH VARCHAR(10),
-    @EmailKH VARCHAR(255),
+    @EmailKH NVARCHAR(255),
     @DiaChiKH NVARCHAR(255)
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Kiểm tra trùng dữ liệu
+    IF EXISTS (SELECT 1 FROM KhachHang WHERE DienThoaiKH = @DienThoaiKH)
+    BEGIN
+        RAISERROR(N'Số điện thoại khách hàng đã tồn tại.', 16, 1);
+        RETURN;
+    END;
+
+    IF EXISTS (SELECT 1 FROM KhachHang WHERE EmailKH = @EmailKH)
+    BEGIN
+        RAISERROR(N'Email khách hàng đã tồn tại.', 16, 1);
+        RETURN;
+    END;
+
     DECLARE @MaKH VARCHAR(10);
     DECLARE @Count INT;
 
     SELECT @Count = COUNT(*) + 1 FROM KhachHang;
-    SET @MaKH = 'KH' + RIGHT('000' + CAST(@Count AS VARCHAR(3)), 3);
+    SET @MaKH = 'KH' + RIGHT('00000000' + CAST(@Count AS VARCHAR(8)), 8);
 
-    INSERT INTO KhachHang(MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH)
-    VALUES (@MaKH, @TenKH, @DienThoaiKH, @EmailKH, @DiaChiKH);
+    BEGIN TRY
+        INSERT INTO KhachHang(MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH)
+        VALUES (@MaKH, @TenKH, @DienThoaiKH, @EmailKH, @DiaChiKH);
+
+        PRINT N'Thêm khách hàng thành công!';
+    END TRY
+    BEGIN CATCH
+        DECLARE @Error NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(N'Lỗi khi thêm khách hàng: %s', 16, 1, @Error);
+    END CATCH
 END;
 GO
 
--- Update
-CREATE PROC sp_KhachHang_Update
+
+-- ============================
+-- UPDATE
+-- ============================
+CREATE OR ALTER PROC sp_KhachHang_Update
 (
     @MaKH VARCHAR(10),
     @TenKH NVARCHAR(50),
@@ -32,41 +61,103 @@ CREATE PROC sp_KhachHang_Update
 )
 AS
 BEGIN
-    UPDATE KhachHang
-    SET TenKH = @TenKH,
-        DienThoaiKH = @DienThoaiKH,
-        EmailKH = @EmailKH,
-        DiaChiKH = @DiaChiKH
-    WHERE MaKH = @MaKH;
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM KhachHang WHERE MaKH = @MaKH)
+    BEGIN
+        RAISERROR(N'Không tìm thấy khách hàng cần cập nhật.', 16, 1);
+        RETURN;
+    END;
+
+    -- Kiểm tra trùng số điện thoại và email với khách hàng khác
+    IF EXISTS (SELECT 1 FROM KhachHang WHERE DienThoaiKH = @DienThoaiKH AND MaKH <> @MaKH)
+    BEGIN
+        RAISERROR(N'Số điện thoại đã được sử dụng bởi khách hàng khác.', 16, 1);
+        RETURN;
+    END;
+
+    IF EXISTS (SELECT 1 FROM KhachHang WHERE EmailKH = @EmailKH AND MaKH <> @MaKH)
+    BEGIN
+        RAISERROR(N'Email đã được sử dụng bởi khách hàng khác.', 16, 1);
+        RETURN;
+    END;
+
+    BEGIN TRY
+        UPDATE KhachHang
+        SET TenKH = @TenKH,
+            DienThoaiKH = @DienThoaiKH,
+            EmailKH = @EmailKH,
+            DiaChiKH = @DiaChiKH
+        WHERE MaKH = @MaKH;
+
+        PRINT N'Cập nhật thông tin khách hàng thành công!';
+    END TRY
+    BEGIN CATCH
+        DECLARE @Error NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(N'Lỗi khi cập nhật khách hàng: %s', 16, 1, @Error);
+    END CATCH
 END;
 GO
 
--- Delete
-CREATE PROC sp_KhachHang_Delete
+
+-- ============================
+-- DELETE
+-- ============================
+CREATE OR ALTER PROC sp_KhachHang_Delete
 (
     @MaKH VARCHAR(10)
 )
 AS
 BEGIN
-    DELETE FROM KhachHang WHERE MaKH = @MaKH;
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM KhachHang WHERE MaKH = @MaKH)
+    BEGIN
+        RAISERROR(N'Không tìm thấy khách hàng cần xóa.', 16, 1);
+        RETURN;
+    END;
+
+    BEGIN TRY
+        DELETE FROM KhachHang WHERE MaKH = @MaKH;
+        PRINT N'Xóa khách hàng thành công!';
+    END TRY
+    BEGIN CATCH
+        DECLARE @Error NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(N'Lỗi khi xóa khách hàng: %s', 16, 1, @Error);
+    END CATCH
 END;
 GO
 
--- GetAll
-CREATE PROC sp_KhachHang_GetAll
+
+-- ============================
+-- GET ALL
+-- ============================
+CREATE OR ALTER PROC sp_KhachHang_GetAll
 AS
 BEGIN
-    SELECT * FROM KhachHang;
+    SET NOCOUNT ON;
+    SELECT * FROM KhachHang ORDER BY MaKH;
 END;
 GO
 
--- Get by ID
-CREATE PROC sp_KhachHang_GetByID
+
+-- ============================
+-- GET BY ID
+-- ============================
+CREATE OR ALTER PROC sp_KhachHang_GetByID
 (
     @MaKH VARCHAR(10)
 )
 AS
 BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM KhachHang WHERE MaKH = @MaKH)
+    BEGIN
+        RAISERROR(N'Không tìm thấy khách hàng với mã này.', 16, 1);
+        RETURN;
+    END;
+
     SELECT * FROM KhachHang WHERE MaKH = @MaKH;
 END;
 GO

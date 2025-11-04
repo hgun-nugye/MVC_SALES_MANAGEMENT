@@ -1,5 +1,10 @@
--- Insert
-CREATE PROC sp_CTBH_Insert
+﻿USE DB_QLBH;
+GO
+
+-- =========================================
+-- INSERT
+-- =========================================
+CREATE OR ALTER PROC sp_CTBH_Insert
 (
     @MaDBH CHAR(11),
     @MaSP VARCHAR(10),
@@ -8,13 +13,26 @@ CREATE PROC sp_CTBH_Insert
 )
 AS
 BEGIN
+    SET NOCOUNT ON;
+
+    -- Kiểm tra trùng sản phẩm trong cùng đơn
+    IF EXISTS (SELECT 1 FROM CTBH WHERE MaDBH = @MaDBH AND MaSP = @MaSP)
+    BEGIN
+        RAISERROR(N'Sản phẩm đã tồn tại trong đơn hàng.', 16, 1);
+        RETURN;
+    END;
+
+    -- Thêm chi tiết đơn hàng
     INSERT INTO CTBH (MaDBH, MaSP, SLM, DGM)
     VALUES (@MaDBH, @MaSP, @SLM, @DGM);
 END;
 GO
 
--- Update
-CREATE PROC sp_CTBH_Update
+
+-- =========================================
+-- UPDATE
+-- =========================================
+CREATE OR ALTER PROC sp_CTBH_Update
 (
     @MaDBH CHAR(11),
     @MaSP VARCHAR(10),
@@ -23,6 +41,8 @@ CREATE PROC sp_CTBH_Update
 )
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     UPDATE CTBH
     SET SLM = @SLM,
         DGM = @DGM
@@ -30,24 +50,43 @@ BEGIN
 END;
 GO
 
---Delete
-CREATE PROC sp_CTBH_Delete
+
+-- =========================================
+-- DELETE
+-- =========================================
+CREATE OR ALTER PROC sp_CTBH_Delete
 (
     @MaDBH CHAR(11),
     @MaSP VARCHAR(10)
 )
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     DELETE FROM CTBH
     WHERE MaDBH = @MaDBH AND MaSP = @MaSP;
 END;
 GO
 
---Get All
-CREATE PROC sp_CTBH_GetAll
+
+-- =========================================
+-- GET ALL
+-- =========================================
+CREATE OR ALTER PROC sp_CTBH_GetAll
 AS
 BEGIN
-    SELECT CT.*, SP.TenSP, SP.GiaBan, KH.TenKH
+    SET NOCOUNT ON;
+
+    SELECT 
+        CT.MaDBH,
+        CT.MaSP,
+        SP.TenSP,
+        SP.GiaBan,
+        CT.SLM,
+        CT.DGM,
+        (CT.SLM * CT.DGM) AS ThanhTien,
+        DBH.NgayBH,
+        KH.TenKH
     FROM CTBH CT
     JOIN SanPham SP ON CT.MaSP = SP.MaSP
     JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
@@ -55,14 +94,28 @@ BEGIN
 END;
 GO
 
--- Get by ID
-CREATE PROC sp_CTBH_GetByID
+
+-- =========================================
+-- GET BY ID
+-- =========================================
+CREATE OR ALTER PROC sp_CTBH_GetByID
 (
     @MaDBH CHAR(11)
 )
 AS
 BEGIN
-    SELECT CT.*, SP.TenSP, SP.GiaBan, KH.TenKH
+    SET NOCOUNT ON;
+
+    SELECT 
+        CT.MaDBH,
+        CT.MaSP,
+        SP.TenSP,
+        SP.GiaBan,
+        CT.SLM,
+        CT.DGM,
+        (CT.SLM * CT.DGM) AS ThanhTien,
+        DBH.NgayBH,
+        KH.TenKH
     FROM CTBH CT
     JOIN SanPham SP ON CT.MaSP = SP.MaSP
     JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
