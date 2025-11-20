@@ -1,0 +1,76 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.SanPham>
+
+@{
+    ViewBag.Title = "Quản lý Sản phẩm";
+}
+<div class="container">
+    <h2 class="mb-3 text-primary">
+        <i class="fa-solid fa-truck"></i> Danh sách Sản phẩm
+    </h2>
+
+    <p>
+        <a href="@Url.Action("Create", "SanPham")" class="btn btn-success">
+            <i class="fa-solid fa-circle-plus"></i> Thêm Sản phẩm
+        </a>
+    </p>
+
+    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+        <thead class="table-primary">
+            <tr>
+                <th class=""><i class="fa-solid fa-hashtag"></i> Mã Sản phẩm</th>
+                <th class=""><i class="fa-solid fa-id-badge"></i> Tên Sản phẩm</th>
+                <th class=""><i class="fa-solid fa-hashtag"></i> Giá sản phẩm</th>
+                <th class=""><i class="fa-solid fa-hashtag"></i> Mô tả sản phẩm</th>
+                <th class=""><i class="fa-solid fa-hashtag"></i> Loại sản phẩm</th>
+                <th class=""><i class="fa-solid fa-hashtag"></i> Gian hàng</th>
+
+                <th class=""><i class="fa-solid fa-gear "></i> Hành động</th>
+            </tr>
+        </thead>
+        <tbody class="text-start">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MaSP</td>
+                    <td>@item.TenSP</td>
+                    <td>@item.DonGia</td>
+                    <td>@item.MoTaSP</td>
+                    <td>@item.TenLoai</td>
+                    <td>@item.TenGH</td>
+
+                    <td class="flex justify-content-between text-center">
+                        <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "SanPham", new { id = item.MaSP })">
+                            <i class="fa-solid fa-eye"></i> Chi tiết
+                        </a>
+                        <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "SanPham", new { id = item.MaSP })">
+                            <i class="fa-solid fa-pen-to-square"></i> Sửa
+                        </a>
+                        <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "SanPham", new { id = item.MaSP })">
+                            <i class="fa-solid fa-trash"></i> Xóa
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    h2 i {
+        margin-right: 8px;
+    }
+
+    .btn i {
+        margin-right: 5px;
+    }
+
+    .table th {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5faff;
+        transition: 0.2s;
+    }
+</style>
+

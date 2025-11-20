@@ -3,27 +3,45 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
 {
+	[Table("CTMH")]
 	public class CTMH
 	{
 		[Key, Column(Order = 0)]
+		[StringLength(11)]
 		[Display(Name = "Mã đơn mua hàng")]
-		public required string MaDMH { get; set; }
+		public string? MaDMH { get; set; }
 
 		[Key, Column(Order = 1)]
+		[StringLength(10)]
 		[Display(Name = "Mã sản phẩm")]
-		public required string MaSP { get; set; }
+		public string? MaSP { get; set; }
 
+		[Required(ErrorMessage = "Số lượng mua không được để trống")]
 		[Display(Name = "Số lượng mua")]
-		public required	int SLM { get; set; }
+		[Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0")]
+		public int SLM { get; set; }
 
+		[Required(ErrorMessage = "Đơn giá mua không được để trống")]
 		[Display(Name = "Đơn giá mua")]
-		[DataType(DataType.Currency)]
-		public required decimal DGM { get; set; }
+		[Column(TypeName = "money")]
+		public decimal DGM { get; set; }
 
+		// 🔗 Khóa ngoại đến DonMuaHang
 		[ForeignKey("MaDMH")]
-		public DonMuaHang? DonMuaHang { get; set; }
+		public virtual DonMuaHang? DonMuaHang { get; set; }
 
+		// 🔗 Khóa ngoại đến SanPham
 		[ForeignKey("MaSP")]
-		public SanPham? SanPham { get; set; }
+		public virtual SanPham? SanPham { get; set; }
+
+		public string? TenSP { get; set; }
+	}
+	public class CTMHDetailDto
+	{
+		public string MaDMH { get; set; }
+		public string MaSP { get; set; }
+		public int SLM { get; set; }
+		public decimal DGM { get; set; }
+		public string TenSP { get; set; }
 	}
 }

@@ -1,0 +1,49 @@
+﻿@model QuanLyBanHang.Models.GianHang
+@{
+    ViewBag.Title = "Sửa Gian hàng";
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<div class="container">
+    <h2 class="text-warning mb-3">
+        <i class="fa-solid fa-pen-to-square"></i> Sửa Thông Tin Gian hàng
+    </h2>
+
+    <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-hashtag"></i> Mã GH</label>
+            <input asp-for="MaGH" class="form-control" readonly />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-id-badge"></i> Tên GH</label>
+            <input asp-for="TenGH" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-id-badge"></i>Mô tả</label>
+            <input asp-for="MoTaGH" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-id-badge"></i>Ngày tạo</label>
+            <input type="date" asp-for="NgayTao" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-phone"></i> Điện thoại</label>
+            <input asp-for="DienThoaiGH" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-envelope"></i> Email</label>
+            <input asp-for="EmailGH" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-location-dot"></i> Địa chỉ</label>
+            <input asp-for="DiaChiGH" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-warning text-white">
+            <i class="fa-solid fa-save"></i> Cập nhật
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </form>
+</div>

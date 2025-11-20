@@ -1,0 +1,41 @@
+﻿@model QuanLyBanHang.Models.KhachHang
+@{
+    ViewBag.Title = "Sửa Khách hàng";
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<div class="container">
+    <h2 class="text-warning mb-3">
+        <i class="fa-solid fa-pen-to-square"></i> Sửa Thông Tin Khách hàng
+    </h2>
+
+    <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-hashtag"></i> Mã KH</label>
+            <input asp-for="MaKH" class="form-control" readonly />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-id-badge"></i> Tên KH</label>
+            <input asp-for="TenKH" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-phone"></i> Điện thoại</label>
+            <input asp-for="DienThoaiKH" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-envelope"></i> Email</label>
+            <input asp-for="EmailKH" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label><i class="fa-solid fa-location-dot"></i> Địa chỉ</label>
+            <input asp-for="DiaChiKH" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-warning text-white">
+            <i class="fa-solid fa-save"></i> Cập nhật
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </form>
+</div>

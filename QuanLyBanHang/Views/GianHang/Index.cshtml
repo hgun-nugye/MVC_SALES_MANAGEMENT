@@ -1,0 +1,85 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.GianHang>
+
+@{
+    ViewBag.Title = "Quản lý Nhà Cung Cấp";
+}
+
+<div class="container">
+    <h2 class="mb-3 text-primary">
+        <i class="fa-solid fa-truck"></i> Danh sách Nhà Cung Cấp
+    </h2>
+
+    <p>
+        <a href="@Url.Action("Create", "GianHang")" class="btn btn-success">
+            <i class="fa-solid fa-circle-plus"></i> Thêm Nhà Cung Cấp
+        </a>
+    </p>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center shadow-sm w-100" style="min-width: 1200px;">
+            <thead class="table-primary">
+                <tr>
+                    <th><i class="fa-solid fa-hashtag"></i> Mã GH</th>
+                    <th><i class="fa-solid fa-id-badge"></i> Tên GH</th>
+                    <th><i class="fa-solid fa-id-badge"></i> Mô tả</th>
+                    <th><i class="fa-solid fa-id-badge"></i>Ngày tạo</th>
+                    <th><i class="fa-solid fa-phone"></i> Điện thoại</th>
+                    <th><i class="fa-solid fa-envelope"></i> Email</th>
+                    <th><i class="fa-solid fa-location-dot"></i> Địa chỉ</th>
+                    <th><i class="fa-solid fa-gear"></i> Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.MaGH</td>
+                        <td>@item.TenGH</td>
+                        <td>@item.MoTaGH</td>
+                        <td>@item.NgayTao</td>
+                        <td>@item.DienThoaiGH</td>
+                        <td>@item.EmailGH</td>
+                        <td>@item.DiaChiGH</td>
+                        <td class="flex justify-content-between">
+                            <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "GianHang", new { id = item.MaGH })">
+                                <i class="fa-solid fa-eye"></i> Chi tiết
+                            </a>
+                            <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "GianHang", new { id = item.MaGH })">
+                                <i class="fa-solid fa-pen-to-square"></i> Sửa
+                            </a>
+                            <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "GianHang", new { id = item.MaGH })">
+                                <i class="fa-solid fa-trash"></i> Xóa
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<style>
+    h2 i {
+        margin-right: 8px;
+    }
+
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .btn i {
+        margin-right: 5px;
+    }
+
+    .table th {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5faff;
+        transition: 0.2s;
+    }
+</style>

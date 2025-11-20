@@ -3,27 +3,47 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
 {
+	[Table("CTBH")]
 	public class CTBH
 	{
 		[Key, Column(Order = 0)]
+		[StringLength(11)]
 		[Display(Name = "Mã đơn bán hàng")]
-		public required string MaDBH { get; set; }
+		public string? MaDBH { get; set; }
 
 		[Key, Column(Order = 1)]
+		[StringLength(10)]
 		[Display(Name = "Mã sản phẩm")]
-		public required string MaSP { get; set; }
+		public string? MaSP { get; set; }
 
+		[Required(ErrorMessage = "Số lượng bán không được để trống")]
 		[Display(Name = "Số lượng bán")]
-		public required int SLB { get; set; }
+		[Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0")]
+		public int SLB { get; set; }
 
+		[Required(ErrorMessage = "Đơn giá bán không được để trống")]
 		[Display(Name = "Đơn giá bán")]
-		[DataType(DataType.Currency)]
-		public required decimal DGB { get; set; }
+		[Column(TypeName = "money")]
+		public decimal DGB { get; set; }
 
-		[ForeignKey("MaDBH")]
-		public DonBanHang? DonBanHang { get; set; }
-
+		// 🔗 Khóa ngoại đến SanPham
 		[ForeignKey("MaSP")]
 		public SanPham? SanPham { get; set; }
+
+		[ForeignKey("MaDBH")]
+		public DonBanHang? DonBanHang { get; set; } = null;
+		public string? TenSP { get; set; }
+
 	}
+
+	public class CTBHDetailDto
+	{
+		public string MaDBH { get; set; }
+		public string MaSP { get; set; }
+		public int SLB { get; set; }
+		public decimal DGB { get; set; }
+		public string TenSP { get; set; }
+	}
+
+
 }

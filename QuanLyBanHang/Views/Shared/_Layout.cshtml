@@ -4,46 +4,226 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - QuanLyBanHang</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/QuanLyBanHang.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    @* //icon *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    @* //animation *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+    @* //font preconnect *@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    @* //font *@
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            display: flex;
+            font-family: "Segoe UI", sans-serif;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background: #fffffa;
+            color: #04bf9d;
+            position: fixed;
+            left: 0;
+            padding-top: 20px;
+            font-weight:bolder;
+            border-right: 2px solid #04bf9d;
+        }
+        
+        .sidebar h4 {
+                text-align: center;
+                margin-bottom: 20px;
+                font-weight: 600;
+        }
+        
+        .sidebar a {
+                color: #04bf9d;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 20px;
+                text-decoration: none;
+                font-size: 15px;
+                transition: 0.2s;
+            }
+            
+        .sidebar a i {
+                    width: 22px;
+                    text-align: center;
+                }
+        
+                .sidebar a:hover {
+                    background: #04bf9d;
+                    color: #fff;
+                    zoom:1.02;
+                }
+
+                    .sidebar a:hover i {
+                        color: #FFFFE0;
+                    }
+
+                .sidebar a.active {
+                    background: #04bf9d;
+                    color: #fff;
+                }
+
+                    .sidebar a.active i {
+                        color: #FFFFE0;
+                    }
+
+
+        .content {
+            margin-left: 260px;
+            padding: 25px;
+            width: calc(100% - 260px);
+        }
+    </style>
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">QuanLyBanHang</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h4 class="pb-3 border-bottom"> <i class="fa-solid fa-folder"></i> Danh mục</h4>
+
+        @* <a asp-controller="CTBH" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "CTBH" ? "active" : "")">
+            <i class="fa-solid fa-receipt"></i> CTBH
+        </a>
+
+        <a asp-controller="CTMH" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "CTMH" ? "active" : "")">
+            <i class="fa-solid fa-cart-shopping"></i> CTMH
+        </a> *@
+
+        <a asp-controller="DonBanHang" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonBanHang" ? "active" : "")">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Đơn Bán Hàng
+        </a>
+
+        <a asp-controller="DonMuaHang" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonMuaHang" ? "active" : "")">
+            <i class="fa-solid fa-file-invoice"></i> Đơn Mua Hàng
+        </a>
+
+        <a asp-controller="GianHang" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "GianHang" ? "active" : "")">
+            <i class="fa-solid fa-store"></i> Gian Hàng
+        </a>
+
+        <a asp-controller="KhachHang" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active" : "")">
+            <i class="fa-solid fa-users"></i> Khách Hàng
+        </a>
+
+        <a asp-controller="LoaiSP" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "LoaiSP" ? "active" : "")">
+            <i class="fa-solid fa-tags"></i> Loại Sản Phẩm
+        </a>
+
+        <a asp-controller="NhaCC" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhaCC" ? "active" : "")">
+            <i class="fa-solid fa-truck-field"></i> Nhà Cung Cấp
+        </a>
+
+        <a asp-controller="NhomSP" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhomSP" ? "active" : "")">
+            <i class="fa-solid fa-layer-group"></i> Nhóm Sản Phẩm
+        </a>
+
+        <a asp-controller="SanPham" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "")">
+            <i class="fa-solid fa-box"></i> Sản Phẩm
+        </a>
+
+
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content d-flex flex-column min-vh-100">
+
+        <header class="mb-3">
+            @* <h2>@ViewData["Title"]</h2> *@
+        </header>
+
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+
+        <footer class="border-top footer text-muted mt-auto">
+            <div class="container">
+                &copy; 2025 - QuanLyBanHang
+            </div>
+        </footer>
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - QuanLyBanHang - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: '@Html.Raw(TempData["SuccessMessage"])',
+                showConfirmButton: false,
+                timer: 2000,
+                showClass: { popup: 'animate__animated animate__bounceIn' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        </script>
+    }
+    else if (TempData["UpdateMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã cập nhật!',
+                text: '@Html.Raw(TempData["UpdateMessage"])',
+                showConfirmButton: false,
+                timer: 2000,
+                showClass: { popup: 'animate__animated animate__bounceIn' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        </script>
+    }
+    else if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: '@Html.Raw(TempData["ErrorMessage"])',
+                showConfirmButton: false,
+                timer: 2000,
+                showClass: { popup: 'animate__animated animate__bounceIn' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' }
+            });
+        </script>
+    }
+
 </body>
 </html>

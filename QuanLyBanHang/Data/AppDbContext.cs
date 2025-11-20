@@ -12,6 +12,8 @@ namespace QuanLyBanHang.Services
 		// ======== KHAI BÁO CÁC BẢNG ========
 		public DbSet<NhaCC> NhaCC { get; set; } = null!;
 		public DbSet<KhachHang> KhachHang { get; set; } = null!;
+		public DbSet<GianHang> GianHang { get; set; } = null!;
+
 		public DbSet<NhomSP> NhomSP { get; set; } = null!;
 		public DbSet<LoaiSP> LoaiSP { get; set; } = null!;
 		public DbSet<SanPham> SanPham { get; set; } = null!;
@@ -23,11 +25,18 @@ namespace QuanLyBanHang.Services
 		public DbSet<DanhGia> DanhGia { get; set; } = null!;
 		public DbSet<TaiKhoan> TaiKhoan { get; set; } = null!;
 
+		public DbSet<DonMuaHangDetail> DonMuaHangDetail { get; set; } = null!;
+		public DbSet<DonBanHangDetail> DonBanHangDetail { get; set; } = null!;
+		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; }
+		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; }
+
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			// ======== Khóa chính ========
 			modelBuilder.Entity<NhaCC>().HasKey(n => n.MaNCC);
 			modelBuilder.Entity<KhachHang>().HasKey(kh => kh.MaKH);
+			modelBuilder.Entity<GianHang>().HasKey(g => g.MaGH);
 			modelBuilder.Entity<NhomSP>().HasKey(nsp => nsp.MaNhom);
 			modelBuilder.Entity<LoaiSP>().HasKey(lsp => lsp.MaLoai);
 			modelBuilder.Entity<SanPham>().HasKey(sp => sp.MaSP);
@@ -38,6 +47,10 @@ namespace QuanLyBanHang.Services
 			modelBuilder.Entity<KhuyenMai>().HasKey(km => km.MaKM);
 			modelBuilder.Entity<DanhGia>().HasKey(dg => dg.MaDG);
 			modelBuilder.Entity<TaiKhoan>().HasKey(tk => tk.TenUser);
+
+			modelBuilder.Entity<CTBHDetailDto>().HasNoKey();   // DTO không có khóa
+			modelBuilder.Entity<CTMHDetailDto>().HasNoKey();   // DTO không có khóa
+
 
 			// ======== Quan hệ: LoaiSP → NhomSP ========
 			modelBuilder.Entity<LoaiSP>()
@@ -58,6 +71,13 @@ namespace QuanLyBanHang.Services
 				.HasOne(sp => sp.NhaCC)
 				.WithMany(ncc => ncc.SanPhams)
 				.HasForeignKey(sp => sp.MaNCC)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// ======== Khóa ngoại: SanPham → GianHang ========
+			modelBuilder.Entity<SanPham>()
+				.HasOne(sp => sp.GianHang)
+				.WithMany(g => g.DsSanPham)
+				.HasForeignKey(sp => sp.MaGH)
 				.OnDelete(DeleteBehavior.Cascade);
 
 			// ======== Quan hệ: Đơn Mua Hàng → NhaCC ========
@@ -87,7 +107,7 @@ namespace QuanLyBanHang.Services
 				.HasForeignKey(ct => ct.MaSP)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			// ======== Quan hệ: CTBH → DonBanHang & SanPham ========
+			 //======== Quan hệ: CTBH → DonBanHang & SanPham ========
 			modelBuilder.Entity<CTBH>()
 				.HasOne(ct => ct.DonBanHang)
 				.WithMany()
