@@ -29,25 +29,24 @@
         
         /* Sidebar */
         .sidebar {
-            width: 260px;
+            width: 330px;
             height: 100vh;
             background: #fffffa;
-            color: #04bf9d;
-            position: fixed;
-            left: 0;
+            color: #198754;
             padding-top: 20px;
             font-weight:bolder;
-            border-right: 2px solid #04bf9d;
+            border-right: 2px solid #198754;
         }
         
         .sidebar h4 {
                 text-align: center;
                 margin-bottom: 20px;
-                font-weight: 600;
+                font-weight: 700;
+                font-size: 30px;
         }
         
         .sidebar a {
-                color: #04bf9d;
+                color: #198754;
                 display: flex;
                 align-items: center;
                 gap: 12px;
@@ -55,6 +54,8 @@
                 text-decoration: none;
                 font-size: 15px;
                 transition: 0.2s;
+                font-size: large;
+                font-weight:bold;
             }
             
         .sidebar a i {
@@ -63,7 +64,7 @@
                 }
         
                 .sidebar a:hover {
-                    background: #04bf9d;
+                    background: #198754;
                     color: #fff;
                     zoom:1.02;
                 }
@@ -73,7 +74,7 @@
                     }
 
                 .sidebar a.active {
-                    background: #04bf9d;
+                    background: #198754;
                     color: #fff;
                 }
 
@@ -83,9 +84,8 @@
 
 
         .content {
-            margin-left: 260px;
             padding: 25px;
-            width: calc(100% - 260px);
+            width: calc(100% - 330px);
         }
     </style>
 </head>
@@ -107,42 +107,42 @@
         </a> *@
 
         <a asp-controller="DonBanHang" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonBanHang" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonBanHang" ? "active" : "") mb-3">
             <i class="fa-solid fa-file-invoice-dollar"></i> Đơn Bán Hàng
         </a>
 
         <a asp-controller="DonMuaHang" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonMuaHang" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonMuaHang" ? "active" : "") mb-3">
             <i class="fa-solid fa-file-invoice"></i> Đơn Mua Hàng
         </a>
 
         <a asp-controller="GianHang" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "GianHang" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "GianHang" ? "active" : "") mb-3">
             <i class="fa-solid fa-store"></i> Gian Hàng
         </a>
 
         <a asp-controller="KhachHang" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active" : "") mb-3">
             <i class="fa-solid fa-users"></i> Khách Hàng
         </a>
 
         <a asp-controller="LoaiSP" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "LoaiSP" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "LoaiSP" ? "active" : "") mb-3">
             <i class="fa-solid fa-tags"></i> Loại Sản Phẩm
         </a>
 
         <a asp-controller="NhaCC" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhaCC" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhaCC" ? "active" : "") mb-3">
             <i class="fa-solid fa-truck-field"></i> Nhà Cung Cấp
         </a>
 
         <a asp-controller="NhomSP" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhomSP" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhomSP" ? "active" : "") mb-3">
             <i class="fa-solid fa-layer-group"></i> Nhóm Sản Phẩm
         </a>
 
         <a asp-controller="SanPham" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "")">
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "") mb-3">
             <i class="fa-solid fa-box"></i> Sản Phẩm
         </a>
 

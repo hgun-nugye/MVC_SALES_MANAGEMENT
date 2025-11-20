@@ -1,0 +1,31 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.DonBanHang>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.MaDBH</td>
+            <td>@item.NgayBH.ToString("dd/MM/yyyy")</td>
+            <td>@item.MaKH</td>
+            <td>@item.TenKH</td>
+            <td>
+                <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "DonBanHang", new { id = item.MaDBH })">
+                    <i class="fa-solid fa-eye"></i> Chi tiết
+                </a>
+                <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "DonBanHang", new { id = item.MaDBH })">
+                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                </a>
+                <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "DonBanHang", new { id = item.MaDBH })">
+                    <i class="fa-solid fa-trash"></i> Xóa
+                </a>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="5" class="text-muted fst-italic">Không có đơn hàng nào.</td>
+    </tr>
+}

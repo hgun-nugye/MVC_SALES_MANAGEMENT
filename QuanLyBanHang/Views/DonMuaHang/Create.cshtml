@@ -107,34 +107,58 @@
         document.addEventListener("DOMContentLoaded", function () {
             const addRowBtn = document.getElementById("addRow");
             const tableBody = document.querySelector("#ctmhTable tbody");
-            let index = tableBody.rows.length;
 
+            // Lấy sẵn option HTML
             const spOptionsHtml = `@Html.Raw(spOptions)`;
 
+            // Hàm reset index để model binder nhận đúng
+            function resetIndices() {
+                const rows = tableBody.querySelectorAll("tr");
+                rows.forEach((row, i) => {
+                    row.querySelectorAll("input, select").forEach(el => {
+                        if (el.name.includes("CTMHs")) {
+                            const nameParts = el.name.split(".");
+                            nameParts[0] = `CTMHs[${i}]`;
+                            el.name = nameParts.join(".");
+                        }
+                    });
+                });
+            }
+
+            // Thêm dòng mới
             addRowBtn.addEventListener("click", () => {
                 const newRow = document.createElement("tr");
                 newRow.innerHTML = `
                     <td>
-                        <select name="CTMHs[${index}].MaSP" class="form-select">
+                        <select class="form-select" name="CTMHs[${tableBody.rows.length}].MaSP">
                             <option value="">-- Chọn sản phẩm --</option>
                             ${spOptionsHtml}
                         </select>
                     </td>
-                    <td><input name="CTMHs[${index}].SLM" type="number" min="1" class="form-control" /></td>
-                    <td><input name="CTMHs[${index}].DGM" type="number" min="0" step="1000" class="form-control" /></td>
+                    <td><input type="number" name="CTMHs[${tableBody.rows.length}].SLM" min="1" class="form-control" /></td>
+                    <td><input type="number" name="CTMHs[${tableBody.rows.length}].DGM" min="0" step="1000" class="form-control" /></td>
                     <td>
                         <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tableBody.appendChild(newRow);
-                index++;
             });
 
+            // Xóa dòng và reset index
             tableBody.addEventListener("click", function (e) {
                 if (e.target.closest(".removeRow")) {
                     e.target.closest("tr").remove();
+                    resetIndices();
+                }
+            });
+
+            // Nếu có dòng ban đầu, bỏ số 0 ở input trống (SLM/DGM)
+            tableBody.querySelectorAll("input[type='number']").forEach(input => {
+                if (!input.value || input.value === "0") {
+                    input.value = "";
                 }
             });
         });
     </script>
 }
+

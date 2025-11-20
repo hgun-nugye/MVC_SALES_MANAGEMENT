@@ -5,85 +5,85 @@
 }
 
 <div class="container">
-    <h2 class="mb-3 text-primary">
-        <i class="fa-solid fa-file-invoice-dollar"></i> Danh sách Đơn bán hàng
+    <h2 class="mb-5 text-primary">
+        <i class="fa-solid fa-file-invoice-dollar pe-2"></i> Danh sách Đơn bán hàng
     </h2>
+  
+    <!-- FORM LỌC -->
+    <form id="filterForm" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <!-- SEARCH -->
+        <div class="input-group" style="flex: 1; min-width: 250px; max-width: 400px;">
+            <span class="input-group-text bg-light border-end-0">
+                <i class="fa fa-search text-info"></i>
+            </span>
+            <input id="searchBox" type="text" name="search" value="@ViewBag.Search"
+                   class="form-control border-start-0 bg-light"
+                   placeholder="Tìm đơn hàng, khách hàng, ngày bán...">
+        </div>
 
-    <p>
-        <a href="@Url.Action("Create", "DonBanHang")" class="btn btn-success">
-            <i class="fa-solid fa-circle-plus"></i> Thêm Đơn bán hàng
-        </a>
-    </p>
-    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
-        <thead class="table-primary">
-            <tr>
-                <th><i class="fa-solid fa-hashtag"></i> Mã Đơn</th>
-                <th><i class="fa-solid fa-calendar-days"></i> Ngày bán hàng</th>
-                <th><i class="fa-solid fa-user"></i> Mã khách hàng</th>
-                <th><i class="fa-solid fa-user-tag"></i> Tên khách hàng</th>
-                <th><i class="fa-solid fa-gear"></i> Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model)
+        <!-- FILTERS -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- LỌC THÁNG -->
+            <select name="month" id="monthSelect" class="form-select" style="width: 120px;">
+                <option value="">-- Tháng --</option>
+                @for (int i = 1; i <= 12; i++)
                 {
-                    <tr>
-                        <td>@item.MaDBH</td>
-                        <td>@item.NgayBH.ToString("dd/MM/yyyy")</td>
-                        <td>@item.MaKH</td>
-                        <td>@item.TenKH</td>
-                        <td>
-                            <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "DonBanHang", new { id = item.MaDBH })">
-                                <i class="fa-solid fa-eye"></i> Chi tiết
-                            </a>
-                            <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "DonBanHang", new { id = item.MaDBH })">
-                                <i class="fa-solid fa-pen-to-square"></i> Sửa
-                            </a>
-                            <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "DonBanHang", new { id = item.MaDBH })">
-                                <i class="fa-solid fa-trash"></i> Xóa
-                            </a>
-                        </td>
-                    </tr>
+                    @Html.Raw($"<option value='{i}' {(ViewBag.Month == i ? "selected" : "")}>Tháng {i}</option>")
                 }
-            }
-            else
-            {
+            </select>
+
+            <!-- LỌC NĂM -->
+            <select name="year" id="yearSelect" class="form-select" style="width: 120px; ">
+                <option value="">-- Năm --</option>
+                @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 10; y--)
+                {
+                    @Html.Raw($"<option value='{y}' {(ViewBag.Year == y ? "selected" : "")}>{y}</option>")
+                }
+            </select>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-filter"></i> Lọc
+            </button>
+
+            <a href="@Url.Action("Create", "DonBanHang")" class="btn btn-success ms-2">
+                <i class="fa-solid fa-circle-plus"></i> Thêm
+            </a>
+        </div>
+    </form>
+
+    <!-- TABLE -->
+    <div id="tableContainer">
+        <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+            <thead class="table-primary">
                 <tr>
-                    <td colspan="5" class="text-muted fst-italic">Không có đơn bán hàng nào.</td>
+                    <th>Mã Đơn</th>
+                    <th>Ngày bán hàng</th>
+                    <th>Mã KH</th>
+                    <th>Tên KH</th>
+                    <th>Hành động</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody id="tableBody">
+                @await Html.PartialAsync("DonBanHangTable", Model)
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function () {
-            var successMessage = @Html.Raw(TempData["SuccessMessage"]);
-            var errorMessage   = @Html.Raw((TempData["ErrorMessage"]));
+        $("#searchBox").on("keyup", function () {
+            let keyword = $(this).val();
 
-            if (successMessage) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công',
-                    text: successMessage,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            }
-
-            if (errorMessage) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi',
-                    text: errorMessage,
-                    timer: 3000,
-                    showConfirmButton: true
-                });
-            }
+            $.ajax({
+                url: "/DonBanHang/Search",
+                type: "GET",
+                data: { keyword: keyword },
+                success: function (result) {
+                    $("#tableBody").html(result);
+                }
+            });
         });
     </script>
 }

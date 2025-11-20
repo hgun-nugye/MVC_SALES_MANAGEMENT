@@ -1,0 +1,76 @@
+﻿@model QuanLyBanHang.Models.CTMH
+
+@{
+    ViewBag.Title = "Xóa Chi tiết mua hàng";
+}
+
+<div class="container">
+    <h2 class="mb-3 text-danger">
+        <i class="fa-solid fa-trash"></i> Xóa Chi tiết mua hàng
+    </h2>
+
+    <div class="alert alert-warning">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Bạn có chắc chắn muốn xóa chi tiết mua hàng <strong>@Model.MaSP</strong> của đơn <strong>@Model.MaDMH</strong> không?
+    </div>
+
+    <div class="card shadow-sm p-4">
+        <dl class="row">
+            <dt class="col-sm-3">Mã đơn mua hàng:</dt>
+            <dd class="col-sm-9">@Model.MaDMH</dd>
+
+            <dt class="col-sm-3">Mã sản phẩm:</dt>
+            <dd class="col-sm-9">@Model.MaSP</dd>
+
+            <dt class="col-sm-3">Tên sản phẩm:</dt>
+            <dd class="col-sm-9">@Model.TenSP</dd>
+
+            <dt class="col-sm-3">Số lượng mua:</dt>
+            <dd class="col-sm-9">@Model.SLM</dd>
+
+            <dt class="col-sm-3">Đơn giá mua:</dt>
+            <dd class="col-sm-9">@Model.DGM.ToString("N0")</dd>
+
+        </dl>
+
+        <form id="deleteForm" method="post"
+              action="@Url.Action("DeleteDetailConfirmed", "DonMuaHang")">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="MaDMH" value="@Model.MaDMH" />
+            <input type="hidden" name="maSP" value="@Model.MaSP" />
+
+
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                <i class="fa-solid fa-trash"></i> Xóa
+            </button>
+
+            <a href="@Url.Action("Details", "DonMuaHang", new { MaDMH = Model.MaDMH, maSP = Model.MaSP })" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Hủy
+            </a>
+        </form>
+    </div>
+
+
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete() {
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: 'Bạn có chắc chắn muốn xóa chi tiết mua hàng này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+    </script>
+}

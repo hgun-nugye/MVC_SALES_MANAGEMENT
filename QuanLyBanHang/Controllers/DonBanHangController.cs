@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
-using QuanLyBanHang.Services;
 using QuanLyBanHang.Models;
+using QuanLyBanHang.Services;
+using System.Data;
 
 namespace QuanLyBanHang.Controllers
 {
@@ -17,16 +17,25 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		
-		// ============ READ ============
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(int? month, int? year)
 		{
+			ViewBag.Month = month;
+			ViewBag.Year = year;
+
+			var parameters = new[]
+			{
+		new SqlParameter("@Month", month ?? (object)DBNull.Value),
+		new SqlParameter("@Year", year ?? (object)DBNull.Value)
+	};
+
 			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_GetAll")
+				.FromSqlRaw("EXEC DonBanHang_Filter @Month, @Year", parameters)
 				.ToListAsync();
 
 			return View(data);
 		}
+
+
 
 		// ============ DETAILS ============
 		public async Task<IActionResult> Details(string id)
@@ -37,7 +46,7 @@ namespace QuanLyBanHang.Controllers
 			var result = await _context.DonBanHangDetail
 				.FromSqlRaw("EXEC DonBanHang_GetById_Detail @MaDBH", param)
 				.ToListAsync();
-			
+
 			return View(result);
 		}
 
@@ -105,7 +114,7 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP");
 			return View(model);
 		}
-
+				
 		// ============ EDIT (GET) ============
 		public async Task<IActionResult> Edit(string id)
 		{
@@ -130,7 +139,7 @@ namespace QuanLyBanHang.Controllers
 
 			return View(ct);
 		}
-				
+
 		// ============ EDIT (POST) ============
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -172,7 +181,7 @@ namespace QuanLyBanHang.Controllers
 			return View(model);
 
 		}
-				
+
 		// ============ DELETE (GET) ============
 		public async Task<IActionResult> Delete(string id)
 		{
@@ -208,6 +217,78 @@ namespace QuanLyBanHang.Controllers
 
 			return RedirectToAction(nameof(Index));
 		}
+
+		// ============ DELETE DETAIL(GET) ============
+		[HttpGet]
+		public async Task<IActionResult> DeleteDetail(string maDBH, string maSP)
+		{
+			if (string.IsNullOrEmpty(maDBH) || string.IsNullOrEmpty(maSP))
+				return NotFound();
+
+			var parameters = new[]
+			{
+				new SqlParameter("@MaDBH", maDBH),
+				new SqlParameter("@MaSP", maSP)
+			};
+
+			// Lấy đúng 1 chi tiết bằng Proc
+			var data = await _context.CTBHDetailDtos
+				.FromSqlRaw("EXEC CTBH_GetById_Detail @MaDBH, @MaSP", parameters)
+				.ToListAsync();
+
+			var model = data.FirstOrDefault();
+			if (model == null) return NotFound();
+
+			// Chuyển DTO sang Model CTBH (View Xóa đang dùng CTBH)
+			var ctbh = new CTBH
+			{
+				MaDBH = model.MaDBH,
+				MaSP = model.MaSP,
+				SLB = model.SLB,
+				DGB = model.DGB,
+				TenSP = model.TenSP
+			};
+
+			return View("DeleteDetail", ctbh);
+		}
+
+
+		// ============ DELETE DETAIL(POST) ============
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteDetailConfirmed(string maDBH, string maSP)
+		{
+			try
+			{
+				await _context.Database.ExecuteSqlRawAsync(
+					"EXEC CTBH_Delete @MaDBH, @MaSP",
+					new SqlParameter("@MaDBH", maDBH),
+					new SqlParameter("@MaSP", maSP)
+				);
+
+				TempData["SuccessMessage"] = "Xóa chi tiết sản phẩm thành công!";
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = "Lỗi khi xóa: " + ex.Message;
+			}
+
+			return RedirectToAction("Details", "DonBanHang", new { id = maDBH });
+		}
+
+		// ============ SEARCH ============
+		[HttpGet]
+		public async Task<IActionResult> Search(string keyword)
+		{
+			var param = new SqlParameter("@Search", keyword ?? (object)DBNull.Value);
+
+			var data = await _context.DonBanHang
+				.FromSqlRaw("EXEC DonBanHang_Search @Search", param)
+				.ToListAsync();
+
+			return PartialView("DonBanHangTable", data);
+		}
+
 	}
 }
 

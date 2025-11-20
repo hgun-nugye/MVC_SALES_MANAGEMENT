@@ -36,6 +36,8 @@
                     <th class="text-center">Số lượng mua</th>
                     <th class="text-end">Đơn giá mua</th>
                     <th class="text-end">Thành tiền</th>
+                    <th class="text-center">Xóa sản phẩm</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -50,14 +52,22 @@
                         <td class="text-end">
                             @(((ct.SLM ?? 0) * (ct.DGM ?? 0))
                                                 .ToString("#,##0.################", new System.Globalization.CultureInfo("vi-VN"))) ₫
-                </td>
-            </tr>
-                        }
+                        </td>
+
+                                <td class="text-center">
+                                    <a href="@Url.Action("DeleteDetail", "DonMuaHang",
+                                                                  new { maDMH = ct.MaDMH, maSP = ct.MaSP })"
+                               class="btn btn-sm btn-danger">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                     </tr>
+                }
         </tbody>
         <tfoot>
             <tr class="table-secondary fw-bold">
                 <td colspan="3" class="text-end">Tổng cộng:</td>
-                <td class="text-end">
+                <td colspan="2" class="text-end">
                     @(
                                         Model.Sum(x => (x.SLM ?? 0) * (x.DGM ?? 0))
                                         .ToString("#,##0.################", new System.Globalization.CultureInfo("vi-VN"))

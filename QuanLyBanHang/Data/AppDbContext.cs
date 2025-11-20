@@ -30,7 +30,7 @@ namespace QuanLyBanHang.Services
 		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; }
 		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; }
 
-
+		//Kiểm tra tồn tại 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			// ======== Khóa chính ========
@@ -107,7 +107,7 @@ namespace QuanLyBanHang.Services
 				.HasForeignKey(ct => ct.MaSP)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			 //======== Quan hệ: CTBH → DonBanHang & SanPham ========
+			//======== Quan hệ: CTBH → DonBanHang & SanPham ========
 			modelBuilder.Entity<CTBH>()
 				.HasOne(ct => ct.DonBanHang)
 				.WithMany()
