@@ -190,3 +190,18 @@ BEGIN
 END;
 GO
 
+-- Kiểm tra tồn tại
+CREATE OR ALTER PROC KhachHang_Exists
+(
+    @MaKH VARCHAR(10)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*) AS ExistsCount
+    FROM KhachHang
+    WHERE MaKH = @MaKH;
+END;
+GO
+

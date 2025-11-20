@@ -129,7 +129,7 @@ GO
 
 -- Get By ID Detail
 CREATE OR ALTER PROC CTBH_GetById_Detail @MaDBH CHAR(11), @MaSP VARCHAR(10)
-AS SELECT C.*, S.TenSP FROM CTBH C JOIN SanPham S ON S.MaSP=C.MaSP WHERE C.MaDBH = @MaDBH AND S.MaSP = @MaSP;
+AS SELECT C.*, S.TenSP FROM CTBH C JOIN SanPham S ON S.MaSP=C.MaSP WHERE C.MaDBH = @MaDBH AND C.MaSP = @MaSP;
 GO
 
 -- =========================================

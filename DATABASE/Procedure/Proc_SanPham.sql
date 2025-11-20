@@ -240,3 +240,18 @@ BEGIN
        OR N.TenNCC LIKE N'%' + @Keyword + '%';
 END;
 GO
+
+-- Kiểm tra tồn tại
+CREATE OR ALTER PROC SanPham_Exists
+(
+    @MaSP VARCHAR(10)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*) AS ExistsCount
+    FROM SanPham
+    WHERE MaSP = @MaSP;
+END;
+GO

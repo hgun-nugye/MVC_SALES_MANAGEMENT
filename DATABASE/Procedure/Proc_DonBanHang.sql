@@ -170,26 +170,43 @@ GO
 -- ========== SEARCH ==========
 ---------------------------------------------------------
 CREATE OR ALTER PROC DonBanHang_Search
-(
-    @MaDBH CHAR(11) = NULL,
-    @MaKH VARCHAR(10) = NULL,
-    @TenKH NVARCHAR(100) = NULL,
-    @TuNgay DATE = NULL,
-    @DenNgay DATE = NULL
-)
+    @Search NVARCHAR(100) = NULL  -- Cho phép NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT DBH.*, KH.TenKH
-    FROM DonBanHang DBH
-    JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
+    SELECT D.*, K.TenKH
+    FROM DonBanHang D
+    JOIN KhachHang K ON K.MaKH = D.MaKH
+    WHERE 
+        (@Search IS NULL OR @Search = '' 
+            OR D.MaDBH LIKE '%' + @Search + '%'
+            OR D.MaKH LIKE '%' + @Search + '%'
+            OR K.TenKH LIKE N'%' + @Search + '%'
+            OR CONVERT(VARCHAR(10), D.NgayBH, 103) LIKE '%' + @Search + '%'
+        )
+    ORDER BY D.NgayBH DESC;
+END;
+GO
+
+
+---------------------------------------------------------
+-- ========== FILTER ==========
+---------------------------------------------------------
+CREATE OR ALTER PROC DonBanHang_Filter
+    @Month INT = NULL,
+    @Year INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT D.*, K.TenKH
+    FROM DonBanHang D
+    JOIN KhachHang K ON K.MaKH = D.MaKH
     WHERE
-        (@MaDBH IS NULL OR DBH.MaDBH = @MaDBH)
-        AND (@MaKH IS NULL OR DBH.MaKH = @MaKH)
-        AND (@TenKH IS NULL OR KH.TenKH LIKE '%' + @TenKH + '%')
-        AND (@TuNgay IS NULL OR DBH.NgayBH >= @TuNgay)
-        AND (@DenNgay IS NULL OR DBH.NgayBH <= @DenNgay)
-    ORDER BY DBH.NgayBH DESC;
+         (@Month IS NULL OR CAST(SUBSTRING(MaDBH, 4, 2) AS INT) = @Month)
+        AND (@Year IS NULL 
+     OR (LEN(MaDBH) >= 3 AND CAST(SUBSTRING(MaDBH, 2, 2) AS INT) + 2000 = @Year))
+    ORDER BY D.NgayBH DESC;
 END;
 GO

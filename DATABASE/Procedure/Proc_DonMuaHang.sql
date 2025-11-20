@@ -1,7 +1,7 @@
-﻿USE DB_QLBH;
+﻿USE DM_QLBH;
 GO
 
-CREATE TYPE dbo.CTMH_List AS TABLE
+CREATE TYPE DMo.CTMH_List AS TABLE
 (
     MaSP VARCHAR(10),
     SLM INT,
@@ -147,30 +147,51 @@ AS SELECT D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC AS TenNCC, C.SLM as SLM, C.DGM as
 		join SanPham S on S.MaSP=C.MaSP
 		WHERE D.MaDMH=@MaDMH;
 GO
+
 ---------------------------------------------------------
 -- ========== SEARCH ==========
 ---------------------------------------------------------
 CREATE OR ALTER PROC DonMuaHang_Search
-(
-    @MaDMH CHAR(11) = NULL,
-    @MaNCC VARCHAR(10) = NULL,
-    @TenNCC NVARCHAR(100) = NULL,
-    @TuNgay DATE = NULL,
-    @DenNgay DATE = NULL
-)
+    @Search NVARCHAR(100) = NULL  -- Cho phép NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT DMH.*, NCC.TenNCC
-    FROM DonMuaHang DMH
-    JOIN NhaCC NCC ON DMH.MaNCC = NCC.MaNCC
-    WHERE
-        (@MaDMH IS NULL OR DMH.MaDMH = @MaDMH)
-        AND (@MaNCC IS NULL OR DMH.MaNCC = @MaNCC)
-        AND (@TenNCC IS NULL OR NCC.TenNCC LIKE '%' + @TenNCC + '%')
-        AND (@TuNgay IS NULL OR DMH.NgayMH >= @TuNgay)
-        AND (@DenNgay IS NULL OR DMH.NgayMH <= @DenNgay)
-    ORDER BY DMH.NgayMH DESC;
+    SELECT D.*, N.TenNCC
+    FROM DonMuaHang D
+    JOIN NhaCC N
+	ON N.MaNCC=D.MaNCC
+    WHERE 
+        (@Search IS NULL OR @Search = '' 
+            OR D.MaDMH LIKE '%' + @Search + '%'
+            OR D.MaNCC LIKE '%' + @Search + '%'
+            OR N.TenNCC LIKE N'%' + @Search + '%'
+            OR CONVERT(VARCHAR(10), D.NgayMH, 103) LIKE '%' + @Search + '%'
+        )
+    ORDER BY D.NgayMH DESC;
 END;
 GO
+
+
+---------------------------------------------------------
+-- ========== FILTER ==========
+---------------------------------------------------------
+CREATE OR ALTER PROC DonMuaHang_Filter
+    @Month INT = NULL,
+    @Year INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT D.*, N.TenNCC
+    FROM DonMuaHang D
+    JOIN NhaCC N
+	ON N.MaNCC=D.MaNCC
+    WHERE
+         (@Month IS NULL OR CAST(SUBSTRING(MaDMH, 4, 2) AS INT) = @Month)
+       AND (@Year IS NULL 
+     OR (LEN(MaDMH) >= 3 AND CAST(SUBSTRING(MaDMH, 2, 2) AS INT) + 2000 = @Year))
+    ORDER BY D.NgayMH DESC;
+END;
+GO
+
