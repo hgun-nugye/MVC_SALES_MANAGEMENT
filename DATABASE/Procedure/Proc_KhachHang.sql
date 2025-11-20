@@ -4,7 +4,7 @@ GO
 -- ============================
 -- INSERT
 -- ============================
-CREATE OR ALTER PROC sp_KhachHang_Insert
+CREATE OR ALTER PROC KhachHang_Insert
 (
     @TenKH NVARCHAR(50),
     @DienThoaiKH VARCHAR(10),
@@ -51,7 +51,7 @@ GO
 -- ============================
 -- UPDATE
 -- ============================
-CREATE OR ALTER PROC sp_KhachHang_Update
+CREATE OR ALTER PROC KhachHang_Update
 (
     @MaKH VARCHAR(10),
     @TenKH NVARCHAR(50),
@@ -103,7 +103,7 @@ GO
 -- ============================
 -- DELETE
 -- ============================
-CREATE OR ALTER PROC sp_KhachHang_Delete
+CREATE OR ALTER PROC KhachHang_Delete
 (
     @MaKH VARCHAR(10)
 )
@@ -132,7 +132,7 @@ GO
 -- ============================
 -- GET ALL
 -- ============================
-CREATE OR ALTER PROC sp_KhachHang_GetAll
+CREATE OR ALTER PROC KhachHang_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -144,7 +144,7 @@ GO
 -- ============================
 -- GET BY ID
 -- ============================
-CREATE OR ALTER PROC sp_KhachHang_GetByID
+CREATE OR ALTER PROC KhachHang_GetByID
 (
     @MaKH VARCHAR(10)
 )
@@ -161,3 +161,32 @@ BEGIN
     SELECT * FROM KhachHang WHERE MaKH = @MaKH;
 END;
 GO
+
+-- ============================
+-- SEARCH
+-- ============================
+CREATE OR ALTER PROC KhachHang_Search
+(
+    @Keyword NVARCHAR(200) = NULL       -- Từ khóa tìm kiếm (Tên, Email, SĐT, Địa chỉ)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        MaKH,
+        TenKH,
+        DienThoaiKH,
+        EmailKH,
+        DiaChiKH
+    FROM KhachHang
+    WHERE
+        @Keyword IS NULL
+        OR TenKH LIKE '%' + @Keyword + '%'
+        OR EmailKH LIKE '%' + @Keyword + '%'
+        OR DienThoaiKH LIKE '%' + @Keyword + '%'
+        OR DiaChiKH LIKE '%' + @Keyword + '%'
+    ORDER BY TenKH ASC;
+END;
+GO
+

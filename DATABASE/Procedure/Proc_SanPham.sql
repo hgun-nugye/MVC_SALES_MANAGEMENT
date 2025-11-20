@@ -4,7 +4,7 @@ GO
 ---------------------------------------------------------
 -- ========== INSERT ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_SanPham_Insert
+CREATE OR ALTER PROC SanPham_Insert
 (
     @TenSP NVARCHAR(50),
     @DonGia MONEY,
@@ -14,7 +14,8 @@ CREATE OR ALTER PROC sp_SanPham_Insert
     @TrangThai NVARCHAR(50),
     @SoLuongTon INT,
     @MaLoai VARCHAR(10),
-    @MaNCC VARCHAR(10)
+    @MaNCC VARCHAR(10),
+	@MaGH VARCHAR(10)
 )
 AS
 BEGIN
@@ -51,15 +52,15 @@ BEGIN
     END;
 
     -- Thực hiện thêm mới
-    INSERT INTO SanPham(MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH, TrangThai, SoLuongTon, MaLoai, MaNCC)
-    VALUES (@MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @TrangThai, @SoLuongTon, @MaLoai, @MaNCC);
+    INSERT INTO SanPham(MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH, TrangThai, SoLuongTon, MaLoai, MaNCC, MaGH)
+    VALUES (@MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH);
 END;
 GO
 
 ---------------------------------------------------------
 -- ========== UPDATE ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_SanPham_Update
+CREATE OR ALTER PROC SanPham_Update
 (
     @MaSP VARCHAR(10),
     @TenSP NVARCHAR(50),
@@ -70,7 +71,9 @@ CREATE OR ALTER PROC sp_SanPham_Update
     @TrangThai NVARCHAR(50),
     @SoLuongTon INT,
     @MaLoai VARCHAR(10),
-    @MaNCC VARCHAR(10)
+    @MaNCC VARCHAR(10),
+	@MaGH VARCHAR(10)
+
 )
 AS
 BEGIN
@@ -106,7 +109,8 @@ BEGIN
         TrangThai = @TrangThai,
         SoLuongTon = @SoLuongTon,
         MaLoai = @MaLoai,
-        MaNCC = @MaNCC
+        MaNCC = @MaNCC,
+		MaGH = @MaGH
     WHERE MaSP = @MaSP;
 END;
 GO
@@ -114,7 +118,7 @@ GO
 ---------------------------------------------------------
 -- ========== DELETE ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_SanPham_Delete
+CREATE OR ALTER PROC SanPham_Delete
 (
     @MaSP VARCHAR(10)
 )
@@ -135,13 +139,13 @@ GO
 ---------------------------------------------------------
 -- ========== GET ALL ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_SanPham_GetAll
+CREATE OR ALTER PROC SanPham_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
 
     SELECT SP.*, 
-           L.TenLSP, 
+           L.TenLoai, 
            N.TenNCC
     FROM SanPham SP
     JOIN LoaiSP L ON SP.MaLoai = L.MaLoai
@@ -152,7 +156,7 @@ GO
 ---------------------------------------------------------
 -- ========== GET BY ID ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_SanPham_GetByID
+CREATE OR ALTER PROC SanPham_GetByID
 (
     @MaSP VARCHAR(10)
 )
@@ -161,7 +165,7 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT SP.*, 
-           L.TenLSP, 
+           L.TenLoai, 
            N.TenNCC
     FROM SanPham SP
     JOIN LoaiSP L ON SP.MaLoai = L.MaLoai
@@ -170,10 +174,54 @@ BEGIN
 END;
 GO
 
+-- ====== SHOW NAME DETAIL ======
+CREATE OR ALTER PROC SanPham_GetAll_Detail
+AS
+BEGIN
+    SELECT 
+        sp.MaSP,
+        sp.TenSP,
+        sp.DonGia,
+        sp.MoTaSP,
+        sp.AnhMH,
+        sp.MaLoai,
+        lsp.TenLoai AS TenLoai,
+        sp.MaGH,
+        gh.TenGH AS TenGH
+    FROM SanPham sp
+    JOIN LoaiSP lsp ON sp.MaLoai = lsp.MaLoai
+    JOIN GianHang gh ON sp.MaGH = gh.MaGH;
+END;
+GO
+
+-- get By ID Detail
+CREATE OR ALTER PROC SanPham_GetByID_Detail
+(
+    @MaSP VARCHAR(10)
+)
+AS
+BEGIN
+    SELECT 
+        sp.MaSP,
+        sp.TenSP,
+        sp.DonGia,
+        sp.MoTaSP,
+        sp.AnhMH,
+        sp.MaLoai,
+        lsp.TenLoai AS TenLoai,
+        sp.MaGH,
+        gh.TenGH AS TenGH
+    FROM SanPham sp
+    JOIN LoaiSP lsp ON sp.MaLoai = lsp.MaLoai
+    JOIN GianHang gh ON sp.MaGH = gh.MaGH
+    WHERE sp.MaSP = @MaSP;
+END;
+GO
+
 ---------------------------------------------------------
 -- ========== SEARCH (tùy chọn, cho MVC lọc dữ liệu) ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_SanPham_Search
+CREATE OR ALTER PROC SanPham_Search
 (
     @Keyword NVARCHAR(100)
 )
@@ -182,13 +230,13 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT SP.*, 
-           L.TenLSP, 
+           L.TenLoai, 
            N.TenNCC
     FROM SanPham SP
     JOIN LoaiSP L ON SP.MaLoai = L.MaLoai
     JOIN NhaCC N ON SP.MaNCC = N.MaNCC
     WHERE SP.TenSP LIKE N'%' + @Keyword + '%'
-       OR L.TenLSP LIKE N'%' + @Keyword + '%'
+       OR L.TenLoai LIKE N'%' + @Keyword + '%'
        OR N.TenNCC LIKE N'%' + @Keyword + '%';
 END;
 GO

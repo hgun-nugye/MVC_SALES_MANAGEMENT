@@ -4,10 +4,10 @@ GO
 -- =============================================
 -- ================ INSERT =====================
 -- =============================================
-CREATE OR ALTER PROC sp_KhuyenMai_Insert
+CREATE OR ALTER PROC KhuyenMai_Insert
 (
     @TenKM NVARCHAR(100),
-    @MoTa NVARCHAR(MAX) = NULL,
+    @MoTaKM NVARCHAR(MAX) = NULL,
     @GiaTriKM DECIMAL(10,2),
     @NgayBatDau DATETIME,
     @NgayKetThuc DATETIME,
@@ -32,8 +32,8 @@ BEGIN
         SELECT @Count = COUNT(*) + 1 FROM KhuyenMai;
         SET @MaKM = 'KM' + RIGHT('00000000' + CAST(@Count AS VARCHAR(8)), 8);
 
-        INSERT INTO KhuyenMai(MaKM, TenKM, MoTa, GiaTriKM, NgayBatDau, NgayKetThuc, DieuKienApDung, TrangThai)
-        VALUES (@MaKM, @TenKM, @MoTa, @GiaTriKM, @NgayBatDau, @NgayKetThuc, @DieuKienApDung, @TrangThai);
+        INSERT INTO KhuyenMai(MaKM, TenKM, MoTaKM, GiaTriKM, NgayBatDau, NgayKetThuc, DieuKienApDung, TrangThai)
+        VALUES (@MaKM, @TenKM, @MoTaKM, @GiaTriKM, @NgayBatDau, @NgayKetThuc, @DieuKienApDung, @TrangThai);
 
         PRINT N'Thêm khuyến mãi thành công!';
         SELECT @MaKM AS MaKhuyenMaiMoi;
@@ -49,11 +49,11 @@ GO
 -- =============================================
 -- ================ UPDATE =====================
 -- =============================================
-CREATE OR ALTER PROC sp_KhuyenMai_Update
+CREATE OR ALTER PROC KhuyenMai_Update
 (
     @MaKM VARCHAR(10),
     @TenKM NVARCHAR(100),
-    @MoTa NVARCHAR(MAX),
+    @MoTaKM NVARCHAR(MAX),
     @GiaTriKM DECIMAL(10,2),
     @NgayBatDau DATETIME,
     @NgayKetThuc DATETIME,
@@ -73,7 +73,7 @@ BEGIN
 
         UPDATE KhuyenMai
         SET TenKM = @TenKM,
-            MoTa = @MoTa,
+            MoTaKM = @MoTaKM,
             GiaTriKM = @GiaTriKM,
             NgayBatDau = @NgayBatDau,
             NgayKetThuc = @NgayKetThuc,
@@ -94,7 +94,7 @@ GO
 -- =============================================
 -- ================ DELETE =====================
 -- =============================================
-CREATE OR ALTER PROC sp_KhuyenMai_Delete
+CREATE OR ALTER PROC KhuyenMai_Delete
 (
     @MaKM VARCHAR(10)
 )
@@ -124,12 +124,12 @@ GO
 -- =============================================
 -- ================ GET ALL ====================
 -- =============================================
-CREATE OR ALTER PROC sp_KhuyenMai_GetAll
+CREATE OR ALTER PROC KhuyenMai_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT MaKM, TenKM, MoTa, GiaTriKM, NgayBatDau, NgayKetThuc, 
+    SELECT MaKM, TenKM, MoTaKM, GiaTriKM, NgayBatDau, NgayKetThuc, 
            DieuKienApDung, TrangThai
     FROM KhuyenMai
     ORDER BY NgayBatDau DESC;
@@ -140,7 +140,7 @@ GO
 -- =============================================
 -- ================ GET BY ID ==================
 -- =============================================
-CREATE OR ALTER PROC sp_KhuyenMai_GetByID
+CREATE OR ALTER PROC KhuyenMai_GetByID
 (
     @MaKM VARCHAR(10)
 )
@@ -148,9 +148,53 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT MaKM, TenKM, MoTa, GiaTriKM, NgayBatDau, NgayKetThuc, 
+    SELECT MaKM, TenKM, MoTaKM, GiaTriKM, NgayBatDau, NgayKetThuc, 
            DieuKienApDung, TrangThai
     FROM KhuyenMai
     WHERE MaKM = @MaKM;
+END;
+GO
+
+-- ============================
+-- SEARCH
+-- ============================
+CREATE OR ALTER PROC KhuyenMai_Search
+(
+    @Keyword NVARCHAR(200) = NULL,        -- Từ khoá tìm trong Tên, Mô tả, Điều kiện
+    @TrangThai BIT = NULL,                -- Lọc trạng thái (NULL = không lọc)
+    @TuNgay DATETIME = NULL,              -- Lọc từ ngày bắt đầu
+    @DenNgay DATETIME = NULL              -- Lọc đến ngày kết thúc
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        MaKM,
+        TenKM,
+        MoTaKM,
+        GiaTriKM,
+        NgayBatDau,
+        NgayKetThuc,
+        DieuKienApDung,
+        TrangThai
+    FROM KhuyenMai
+    WHERE
+        -- Tìm kiếm theo keyword
+        (
+            @Keyword IS NULL OR
+            TenKM LIKE '%' + @Keyword + '%' OR
+            MoTaKM LIKE '%' + @Keyword + '%' OR
+            DieuKienApDung LIKE '%' + @Keyword + '%'
+        )
+        AND
+        -- Lọc trạng thái
+        (@TrangThai IS NULL OR TrangThai = @TrangThai)
+        AND
+        -- Lọc theo ngày
+        (@TuNgay IS NULL OR NgayBatDau >= @TuNgay)
+        AND
+        (@DenNgay IS NULL OR NgayKetThuc <= @DenNgay)
+    ORDER BY NgayBatDau DESC;
 END;
 GO

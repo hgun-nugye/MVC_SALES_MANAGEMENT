@@ -4,10 +4,9 @@ GO
 -- ============================
 -- INSERT
 -- ============================
-CREATE OR ALTER PROC sp_NhomSP_Insert
+CREATE OR ALTER PROC Nhom_Insert
 (
-    @TenNhom NVARCHAR(100),
-    @MoTa NVARCHAR(255) = NULL
+    @TenNhom NVARCHAR(100)
 )
 AS
 BEGIN
@@ -27,8 +26,8 @@ BEGIN
     SET @MaNhom = 'NSP' + RIGHT('0000000' + CAST(@Count AS VARCHAR(7)), 7);
 
     BEGIN TRY
-        INSERT INTO NhomSP (MaNhom, TenNhom, MoTa)
-        VALUES (@MaNhom, @TenNhom, @MoTa);
+        INSERT INTO NhomSP (MaNhom, TenNhom)
+        VALUES (@MaNhom, @TenNhom);
 
         PRINT N'Thêm nhóm sản phẩm thành công!';
     END TRY
@@ -43,11 +42,10 @@ GO
 -- ============================
 -- UPDATE
 -- ============================
-CREATE OR ALTER PROC sp_NhomSP_Update
+CREATE OR ALTER PROC Nhom_Update
 (
     @MaNhom VARCHAR(10),
-    @TenNhom NVARCHAR(100),
-    @MoTa NVARCHAR(255)
+    @TenNhom NVARCHAR(100)
 )
 AS
 BEGIN
@@ -69,8 +67,7 @@ BEGIN
 
     BEGIN TRY
         UPDATE NhomSP
-        SET TenNhom = @TenNhom,
-            MoTa = @MoTa
+        SET TenNhom = @TenNhom
         WHERE MaNhom = @MaNhom;
 
         PRINT N'Cập nhật nhóm sản phẩm thành công!';
@@ -86,7 +83,7 @@ GO
 -- ============================
 -- DELETE
 -- ============================
-CREATE OR ALTER PROC sp_NhomSP_Delete
+CREATE OR ALTER PROC Nhom_Delete
 (
     @MaNhom VARCHAR(10)
 )
@@ -115,7 +112,7 @@ GO
 -- ============================
 -- GET ALL
 -- ============================
-CREATE OR ALTER PROC sp_NhomSP_GetAll
+CREATE OR ALTER PROC Nhom_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -127,7 +124,7 @@ GO
 -- ============================
 -- GET BY ID
 -- ============================
-CREATE OR ALTER PROC sp_NhomSP_GetByID
+CREATE OR ALTER PROC Nhom_GetByID
 (
     @MaNhom VARCHAR(10)
 )
@@ -142,5 +139,26 @@ BEGIN
     END;
 
     SELECT * FROM NhomSP WHERE MaNhom = @MaNhom;
+END;
+GO
+
+-- ============================
+-- SEARCH
+-- ============================
+CREATE OR ALTER PROC Nhom_Search
+(
+    @MaNhom VARCHAR(10) = NULL,
+    @TenNhom NVARCHAR(100) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM NhomSP
+    WHERE 
+        (@MaNhom IS NULL OR MaNhom LIKE '%' + @MaNhom + '%') AND
+        (@TenNhom IS NULL OR TenNhom LIKE '%' + @TenNhom + '%')
+    ORDER BY MaNhom;
 END;
 GO

@@ -4,7 +4,7 @@ GO
 -- ============================
 -- INSERT
 -- ============================
-CREATE OR ALTER PROC sp_LoaiSP_Insert
+CREATE OR ALTER PROC Loai_Insert
 (
     @TenLSP NVARCHAR(50),
     @MaNhom VARCHAR(10)
@@ -50,7 +50,7 @@ GO
 -- ============================
 -- UPDATE
 -- ============================
-CREATE OR ALTER PROC sp_LoaiSP_Update
+CREATE OR ALTER PROC Loai_Update
 (
     @MaLoai VARCHAR(10),
     @TenLSP NVARCHAR(50),
@@ -93,7 +93,7 @@ GO
 -- ============================
 -- DELETE
 -- ============================
-CREATE OR ALTER PROC sp_LoaiSP_Delete
+CREATE OR ALTER PROC Loai_Delete
 (
     @MaLoai VARCHAR(10)
 )
@@ -122,7 +122,7 @@ GO
 -- ============================
 -- GET ALL
 -- ============================
-CREATE OR ALTER PROC sp_LoaiSP_GetAll
+CREATE OR ALTER PROC Loai_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -138,7 +138,7 @@ GO
 -- ============================
 -- GET BY ID
 -- ============================
-CREATE OR ALTER PROC sp_LoaiSP_GetByID
+CREATE OR ALTER PROC Loai_GetByID
 (
     @MaLoai VARCHAR(10)
 )
@@ -156,5 +156,39 @@ BEGIN
     FROM LoaiSP L
     LEFT JOIN NhomSP N ON L.MaNhom = N.MaNhom
     WHERE L.MaLoai = @MaLoai;
+END;
+GO
+
+-- Get All MaNhom
+CREATE OR ALTER PROC Loai_Nhom_GetAll AS SELECT L.MaLoai, L.TenLoai, L.MaNhom, N.TenNhom FROM LoaiSP L JOIN NhomSP N ON L.MaNhom=N.MaNhom;
+GO
+
+-- ============================
+-- SEARCH
+-- ============================
+CREATE OR ALTER PROC Loai_Search
+(
+    @MaLoai VARCHAR(10) = NULL,
+    @TenLSP NVARCHAR(50) = NULL,
+    @MaNhom VARCHAR(10) = NULL,
+    @TenNhom NVARCHAR(100) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        L.MaLoai,
+        L.TenLoai,
+        L.MaNhom,
+        N.TenNhom
+    FROM LoaiSP L
+    LEFT JOIN NhomSP N ON L.MaNhom = N.MaNhom
+    WHERE
+        (@MaLoai IS NULL OR L.MaLoai LIKE '%' + @MaLoai + '%') AND
+        (@TenLSP IS NULL OR L.TenLoai LIKE '%' + @TenLSP + '%') AND
+        (@MaNhom IS NULL OR L.MaNhom LIKE '%' + @MaNhom + '%') AND
+        (@TenNhom IS NULL OR N.TenNhom LIKE '%' + @TenNhom + '%')
+    ORDER BY L.MaLoai;
 END;
 GO

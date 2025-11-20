@@ -4,7 +4,7 @@ GO
 -- ==========================================
 -- INSERT: Thêm nhà cung cấp
 -- ==========================================
-CREATE OR ALTER PROC sp_NhaCC_Insert
+CREATE OR ALTER PROC NhaCC_Insert
 (
     @TenNCC NVARCHAR(100),
     @DienThoaiNCC VARCHAR(15),
@@ -46,7 +46,7 @@ BEGIN
         PRINT N'Thêm nhà cung cấp thành công.';
     END TRY
     BEGIN CATCH
-        RAISERROR(N'Lỗi khi thêm nhà cung cấp: %s', 16, 1, ERROR_MESSAGE());
+        RAISERROR(N'Lỗi khi thêm nhà cung cấp: %s', 16, 1);
     END CATCH
 END;
 GO
@@ -54,7 +54,7 @@ GO
 -- ==========================================
 -- UPDATE: Cập nhật nhà cung cấp
 -- ==========================================
-CREATE OR ALTER PROC sp_NhaCC_Update
+CREATE OR ALTER PROC NhaCC_Update
 (
     @MaNCC VARCHAR(10),
     @TenNCC NVARCHAR(100),
@@ -103,7 +103,7 @@ BEGIN
         PRINT N'Cập nhật nhà cung cấp thành công.';
     END TRY
     BEGIN CATCH
-        RAISERROR(N'Lỗi khi cập nhật nhà cung cấp: %s', 16, 1, ERROR_MESSAGE());
+        RAISERROR(N'Lỗi khi cập nhật nhà cung cấp: %s', 16, 1);
     END CATCH
 END;
 GO
@@ -111,7 +111,7 @@ GO
 -- ==========================================
 -- DELETE: Xóa nhà cung cấp
 -- ==========================================
-CREATE OR ALTER PROC sp_NhaCC_Delete
+CREATE OR ALTER PROC NhaCC_Delete
 (
     @MaNCC VARCHAR(10)
 )
@@ -129,7 +129,7 @@ BEGIN
         PRINT N'Xóa nhà cung cấp thành công.';
     END TRY
     BEGIN CATCH
-        RAISERROR(N'Lỗi khi xóa nhà cung cấp: %s', 16, 1, ERROR_MESSAGE());
+        RAISERROR(N'Lỗi khi xóa nhà cung cấp: %s', 16, 1);
     END CATCH
 END;
 GO
@@ -137,7 +137,7 @@ GO
 -- ==========================================
 -- GET ALL: Lấy danh sách nhà cung cấp
 -- ==========================================
-CREATE OR ALTER PROC sp_NhaCC_GetAll
+CREATE OR ALTER PROC NhaCC_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -150,7 +150,7 @@ GO
 -- ==========================================
 -- GET BY ID: Lấy nhà cung cấp theo mã
 -- ==========================================
-CREATE OR ALTER PROC sp_NhaCC_GetByID
+CREATE OR ALTER PROC NhaCC_GetByID
 (
     @MaNCC VARCHAR(10)
 )
@@ -160,5 +160,32 @@ BEGIN
     SELECT MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC
     FROM NhaCC
     WHERE MaNCC = @MaNCC;
+END;
+GO
+
+-- ============================
+-- SEARCH
+-- ============================
+CREATE OR ALTER PROC NhaCC_Search
+(
+    @MaNCC VARCHAR(10) = NULL,
+    @TenNCC NVARCHAR(100) = NULL,
+    @DienThoaiNCC VARCHAR(15) = NULL,
+    @EmailNCC VARCHAR(100) = NULL,
+    @DiaChiNCC NVARCHAR(255) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC
+    FROM NhaCC
+    WHERE 
+        (@MaNCC IS NULL OR MaNCC LIKE '%' + @MaNCC + '%') AND
+        (@TenNCC IS NULL OR TenNCC LIKE '%' + @TenNCC + '%') AND
+        (@DienThoaiNCC IS NULL OR DienThoaiNCC LIKE '%' + @DienThoaiNCC + '%') AND
+        (@EmailNCC IS NULL OR EmailNCC LIKE '%' + @EmailNCC + '%') AND
+        (@DiaChiNCC IS NULL OR DiaChiNCC LIKE '%' + @DiaChiNCC + '%')
+    ORDER BY TenNCC;
 END;
 GO

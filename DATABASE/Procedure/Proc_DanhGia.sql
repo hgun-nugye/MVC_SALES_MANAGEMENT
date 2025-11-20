@@ -3,7 +3,7 @@ GO
 -- =========================================
 -- ============ INSERT =====================
 -- =========================================
-CREATE OR ALTER PROC sp_DanhGia_Insert
+CREATE OR ALTER PROC DanhGia_Insert
 (
     @MaSP VARCHAR(10),
     @MaKH VARCHAR(10),
@@ -22,7 +22,7 @@ GO
 -- =========================================
 -- ============ UPDATE =====================
 -- =========================================
-CREATE OR ALTER PROC sp_DanhGia_Update
+CREATE OR ALTER PROC DanhGia_Update
 (
     @MaDG INT,
     @SoSao TINYINT,
@@ -43,7 +43,7 @@ GO
 -- =========================================
 -- ============ DELETE =====================
 -- =========================================
-CREATE OR ALTER PROC sp_DanhGia_Delete
+CREATE OR ALTER PROC DanhGia_Delete
 (
     @MaDG INT
 )
@@ -59,7 +59,7 @@ GO
 -- =========================================
 -- ============ GET ALL ====================
 -- =========================================
-CREATE OR ALTER PROC sp_DanhGia_GetAll
+CREATE OR ALTER PROC DanhGia_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -75,7 +75,7 @@ GO
 -- =========================================
 -- ============ GET BY ID ==================
 -- =========================================
-CREATE OR ALTER PROC sp_DanhGia_GetByID
+CREATE OR ALTER PROC DanhGia_GetByID
 (
     @MaDG INT
 )
@@ -94,7 +94,7 @@ GO
 -- =========================================
 -- ============ GET BY PRODUCT =============
 -- =========================================
-CREATE OR ALTER PROC sp_DanhGia_GetBySP
+CREATE OR ALTER PROC DanhGia_GetBySP
 (
     @MaSP VARCHAR(10)
 )
@@ -106,6 +106,45 @@ BEGIN
     FROM DanhGia DG
     JOIN KhachHang KH ON DG.MaKH = KH.MaKH
     WHERE DG.MaSP = @MaSP
+    ORDER BY DG.NgayDG DESC;
+END;
+GO
+
+-- =========================================
+-- SEARCH
+-- =========================================
+CREATE OR ALTER PROC DanhGia_Search
+(
+    @MaSP VARCHAR(10) = NULL,
+    @MaKH VARCHAR(10) = NULL,
+    @TenKH NVARCHAR(100) = NULL,
+    @SoSao TINYINT = NULL,
+    @TuNgay DATE = NULL,
+    @DenNgay DATE = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        DG.MaDG,
+        DG.MaSP,
+        SP.TenSP,
+        DG.MaKH,
+        KH.TenKH,
+        DG.SoSao,
+        DG.NoiDung,
+        DG.NgayDG
+    FROM DanhGia DG
+    JOIN SanPham SP ON DG.MaSP = SP.MaSP
+    JOIN KhachHang KH ON DG.MaKH = KH.MaKH
+    WHERE
+        (@MaSP IS NULL OR DG.MaSP = @MaSP)
+        AND (@MaKH IS NULL OR DG.MaKH = @MaKH)
+        AND (@TenKH IS NULL OR KH.TenKH LIKE '%' + @TenKH + '%')
+        AND (@SoSao IS NULL OR DG.SoSao = @SoSao)
+        AND (@TuNgay IS NULL OR DG.NgayDG >= @TuNgay)
+        AND (@DenNgay IS NULL OR DG.NgayDG <= @DenNgay)
     ORDER BY DG.NgayDG DESC;
 END;
 GO

@@ -1,103 +1,149 @@
-﻿-- Quốc gia
-INSERT INTO QuocGia VALUES
-('VN', N'Việt Nam'),
-('US', N'Hoa Kỳ'),
-('KR', N'Hàn Quốc'),
-('JP', N'Nhật Bản'),
-('FR', N'Pháp');
+﻿USE DB_QLBH;
+GO
 
--- Tỉnh
-INSERT INTO Tinh VALUES
-('VN-HN', N'Hà Nội', 'VN'),
-('VN-HCM', N'Hồ Chí Minh', 'VN'),
-('KR-11', N'Seoul', 'KR'),
-('FR-75', N'Paris', 'FR'),
-('US-CA', N'California', 'US');
+---------------------------------------------------------
+-- 1 Nhà cung cấp
+---------------------------------------------------------
+EXEC NhaCC_Insert N'Watsons Vietnam', '0909000999', 'contact@watsons.vn', 'VN';
+EXEC NhaCC_Insert N'Innisfree Co., Ltd', '0082-100-2222', 'support@innisfree.kr', 'KR';
+EXEC NhaCC_Insert N'L’Oréal Paris', '0033-145-006600', 'contact@loreal.fr', 'FR';
+EXEC NhaCC_Insert N'Estée Lauder Inc', '001-800-315-8393', 'info@esteelauder.com', 'US';
+GO
 
--- Xã
-INSERT INTO Xa VALUES
-('010101', N'Phúc Xá', 'VN-HN'),
-('010102', N'Trúc Bạch', 'VN-HN'),
-('020101', N'Bến Nghé', 'VN-HCM'),
-('020102', N'Đa Kao', 'VN-HCM');
+---------------------------------------------------------
+-- 2 Khách hàng
+---------------------------------------------------------
+EXEC KhachHang_Insert N'Nguyễn Thị Hoa', '0901234567', 'hoa.nguyen@example.com', N'Hà Nội';
+EXEC KhachHang_Insert N'Lê Minh Tuấn', '0912345678', 'tuan.le@example.com', N'Hồ Chí Minh';
+EXEC KhachHang_Insert N'Phạm Mai Anh', '0934567890', 'anh.pham@example.com', N'Hà Nội';
+GO
 
--- Nhóm & Loại sản phẩm
-EXEC sp_NhomSP_Insert N'Mỹ phẩm dưỡng da', N'Sản phẩm chăm sóc, bảo vệ và làm đẹp da';
-EXEC sp_NhomSP_Insert N'Trang điểm', N'Sản phẩm trang điểm cho môi, mắt, da mặt';
-EXEC sp_LoaiSP_Insert N'Kem dưỡng da', 'NSP001';
-EXEC sp_LoaiSP_Insert N'Serum', 'NSP001';
-EXEC sp_LoaiSP_Insert N'Sữa rửa mặt', 'NSP001';
-EXEC sp_LoaiSP_Insert N'Son môi', 'NSP002';
-EXEC sp_LoaiSP_Insert N'Nước tẩy trang', 'NSP001';
+---------------------------------------------------------
+-- 3 Gian hàng
+---------------------------------------------------------
+EXEC GianHang_Insert 
+    N'L''Oréal Official Store', 
+    N'Gian hàng chính hãng L''Oréal tại Việt Nam', 
+    '0901234567', 
+    'loreal@store.vn', 
+    N'123 Đường Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh';
 
--- Nhà cung cấp
-EXEC sp_NhaCC_Insert N'Watsons Vietnam', '0909000999', 'contact@watsons.vn', '020101', 'VN';
-EXEC sp_NhaCC_Insert N'Innisfree Co., Ltd', '0082-100-2222', 'support@innisfree.kr', NULL, 'KR';
-EXEC sp_NhaCC_Insert N'L’Oréal Paris', '0033-145-006600', 'contact@loreal.fr', NULL, 'FR';
-EXEC sp_NhaCC_Insert N'Estée Lauder Inc', '001-800-315-8393', 'info@esteelauder.com', NULL, 'US';
+EXEC GianHang_Insert 
+    N'Unilever Official Store', 
+    N'Gian hàng chính hãng Unilever', 
+    '0909988776', 
+    'unilever@store.vn', 
+    N'45 Đường Cộng Hòa, Quận Tân Bình, TP. Hồ Chí Minh';
 
--- Sản phẩm
-EXEC sp_SanPham_Insert N'La Roche-Posay Cicaplast Baume B5', 300000, 300000, 
+EXEC GianHang_Insert 
+    N'Senka Japan Store', 
+    N'Sản phẩm chăm sóc da từ Nhật Bản', 
+    '0911222333', 
+    'senka@store.jp', 
+    N'Tokyo, Nhật Bản';
+GO
+
+---------------------------------------------------------
+-- 4 Nhóm sản phẩm
+---------------------------------------------------------
+EXEC Nhom_Insert N'Mỹ phẩm dưỡng da';
+EXEC Nhom_Insert N'Trang điểm';
+GO
+
+---------------------------------------------------------
+-- 5 Loại sản phẩm
+---------------------------------------------------------
+-- Giả sử nhóm 1 = Mỹ phẩm dưỡng da, nhóm 2 = Trang điểm
+EXEC Loai_Insert N'Kem dưỡng da', 'NSP0000001';
+EXEC Loai_Insert N'Serum', 'NSP0000001';
+EXEC Loai_Insert N'Sữa rửa mặt', 'NSP0000001';
+EXEC Loai_Insert N'Son môi', 'NSP0000002';
+EXEC Loai_Insert N'Nước tẩy trang', 'NSP0000001';
+GO
+
+---------------------------------------------------------
+-- 6 Sản phẩm
+---------------------------------------------------------
+EXEC SanPham_Insert N'La Roche-Posay Cicaplast Baume B5', 300000, 300000, 
     N'Kem phục hồi da, giảm kích ứng, phù hợp mọi loại da', 
-    N'cicaplast_baume.jpg', N'Bán chạy', 100, 'LSP001', 'NCC003';
+    N'cicaplast_baume.jpg', N'Còn Hàng', 100, 'LSP0000001', 'NCC0000001', 'GH00000001';
 
-EXEC sp_SanPham_Insert N'Estée Lauder Advanced Night Repair', 2200000, 2500000, 
+EXEC SanPham_Insert N'Estée Lauder Advanced Night Repair', 2200000, 2500000, 
     N'Serum phục hồi da ban đêm, chống lão hóa nổi tiếng', 
-    N'anr_serum.jpg', N'Cao cấp', 50, 'LSP002', 'NCC004';
+    N'anr_serum.jpg', N'Hết Hàng', 50, 'LSP0000002', 'NCC0000004', 'GH00000002';
 
-EXEC sp_SanPham_Insert N'Cetaphil Gentle Skin Cleanser 125ml', 250000, 260000, 
+EXEC SanPham_Insert N'Cetaphil Gentle Skin Cleanser 125ml', 250000, 260000, 
     N'Sữa rửa mặt dịu nhẹ, dùng cho da nhạy cảm', 
-    N'cetaphil_cleanser.jpg', N'Ổn định', 80, 'LSP003', 'NCC001';
+    N'cetaphil_cleanser.jpg', N'Cháy Hàng', 80, 'LSP0000003', 'NCC0000001', 'GH00000001';
 
-EXEC sp_SanPham_Insert N'Maybelline SuperStay Matte Ink', 230000, 230000, 
+EXEC SanPham_Insert N'Maybelline SuperStay Matte Ink', 230000, 230000, 
     N'Son lì lâu trôi, giữ màu cả ngày', 
-    N'maybelline_matteink.jpg', N'Mới', 150, 'LSP004', 'NCC001';
+    N'maybelline_matteink.jpg', N'Cháy Hàng', 150, 'LSP0000004', 'NCC0000001', 'GH00000003';
 
-EXEC sp_SanPham_Insert N'L’Oréal Micellar Water 3-in-1', 180000, 180000, 
+EXEC SanPham_Insert N'L’Oréal Micellar Water 3-in-1', 180000, 180000, 
     N'Nước tẩy trang micellar làm sạch sâu', 
-    N'loreal_micellar.jpg', N'Bán chạy', 120, 'LSP005', 'NCC003';
-
--- Khuyến mãi
-EXEC sp_KhuyenMai_Insert N'Khuyến mãi hè 2025', N'Giảm 15% cho toàn bộ mỹ phẩm dưỡng da', 
-15, '2025-06-01', '2025-06-15', N'Không áp dụng sản phẩm đã giảm giá', 1;
-
-EXEC sp_KhuyenMai_Insert N'MUA 2 TẶNG 1 Serum', N'Mua 2 serum bất kỳ tặng 1 mini size', 
-0, '2025-07-01', '2025-07-10', N'Chỉ áp dụng nhóm Serum', 1;
-
--- Khách hàng & đánh giá
-EXEC sp_KhachHang_Insert N'Nguyễn Thị Hoa', '0901234567', 'hoa.nguyen@example.com', N'Hà Nội';
-EXEC sp_KhachHang_Insert N'Lê Minh Tuấn', '0912345678', 'tuan.le@example.com', N'Hồ Chí Minh';
-EXEC sp_KhachHang_Insert N'Phạm Mai Anh', '0934567890', 'anh.pham@example.com', N'Hà Nội';
-
-INSERT INTO DanhGia (MaSP, MaKH, SoSao, NoiDung)
-VALUES
-('SP001', 'KH001', 5, N'Kem dưỡng tuyệt vời, da mềm và mịn hơn.'),
-('SP002', 'KH002', 4, N'Serum thấm nhanh, da sáng hơn sau 1 tuần.'),
-('SP003', 'KH003', 5, N'Sữa rửa mặt dịu nhẹ, dùng hằng ngày rất ổn.'),
-('SP005', 'KH001', 4, N'Nước tẩy trang làm sạch tốt, không cay mắt.');
+    N'loreal_micellar.jpg', N'Sắp Hết', 120, 'LSP0000005', 'NCC0000003', 'GH00000002';
 GO
 
--- Giả sử đã có các đơn mua hàng
-EXEC sp_DonMuaHang_Insert '2025-10-19', 'NCC001';
-EXEC sp_DonMuaHang_Insert '2025-10-19', 'NCC002';
-EXEC sp_DonMuaHang_Insert '2025-10-20', 'NCC001';
+---------------------------------------------------------
+-- 7 Đơn mua hàng
+---------------------------------------------------------
+EXEC DonMuaHang_Insert '2025-10-19', 'NCC0000001';
+EXEC DonMuaHang_Insert '2025-10-19', 'NCC0000002';
+EXEC DonMuaHang_Insert '2025-10-20', 'NCC0000001';
 GO
 
--- Chi tiết đơn mua hàng
-EXEC sp_CTMH_Insert 'M2510190001', 'SP001', 50, 250000;   -- La Roche-Posay
-EXEC sp_CTMH_Insert 'M2510190002', 'SP004', 100, 180000;  -- Son Maybelline
-
-EXEC sp_CTMH_Insert 'M2510200001', 'SP002', 30, 1800000;  -- Estee Lauder Serum
+---------------------------------------------------------
+-- 8 Đơn bán hàng
+---------------------------------------------------------
+EXEC DonBanHang_Insert '2025-10-19', 'KH00000001';
+EXEC DonBanHang_Insert '2025-10-19', 'KH00000002';
+EXEC DonBanHang_Insert '2025-10-20', 'KH00000001';
+GO
+---------------------------------------------------------
+-- 9 Chi tiết đơn mua hàng
+---------------------------------------------------------
+EXEC CTMH_Insert 'M2510190001', 'SP00000001', 50, 250000;
+EXEC CTMH_Insert 'M2510190002', 'SP00000004', 100, 180000;
+EXEC CTMH_Insert 'M2510200001', 'SP00000002', 30, 1800000;
 GO
 
--- Giả sử đã có các đơn bán hàng
-EXEC sp_DonBanHang_Insert '2025-10-19', 'KH001';
-EXEC sp_DonBanHang_Insert '2025-10-19', 'KH002';
-EXEC sp_DonBanHang_Insert '2025-10-20', 'KH001';
+---------------------------------------------------------
+-- 10 Chi tiết đơn bán hàng
+---------------------------------------------------------
+EXEC CTBH_Insert 'B2510190001', 'SP00000001', 3, 300000;
+EXEC CTBH_Insert 'B2510190002', 'SP00000005', 2, 180000;
+EXEC CTBH_Insert 'B2510200001', 'SP00000002', 1, 2000000;
 GO
 
--- Chi tiết đơn bán hàng
-EXEC sp_CTBH_Insert 'B2510190001', 'SP001', 3, 300000;  -- Kem dưỡng La Roche-Posay
-EXEC sp_CTBH_Insert 'B2510190002', 'SP005', 2, 180000;  -- Nước tẩy trang L’Oréal
-EXEC sp_CTBH_Insert 'B2510200001', 'SP002', 1, 2000000; -- Serum Estee Lauder
+---------------------------------------------------------
+-- 11 Khuyến mãi
+---------------------------------------------------------
+EXEC KhuyenMai_Insert N'Khuyến mãi hè 2025', 
+    N'Giảm 15% cho toàn bộ mỹ phẩm dưỡng da', 
+    15, '2025-06-01', '2025-06-15', N'Không áp dụng sản phẩm đã giảm giá', 1;
+
+EXEC KhuyenMai_Insert N'MUA 2 TẶNG 1 Serum', 
+    N'Mua 2 serum bất kỳ tặng 1 mini size', 
+    0, '2025-07-01', '2025-07-10', N'Chỉ áp dụng nhóm Serum', 1;
+GO
+
+---------------------------------------------------------
+-- 12 Đánh giá sản phẩm
+---------------------------------------------------------
+EXEC DanhGia_Insert 'SP00000001', 'KH00000001', 5, N'Kem dưỡng tuyệt vời, da mềm và mịn hơn.';
+EXEC DanhGia_Insert 'SP00000002', 'KH00000002', 4, N'Serum thấm nhanh, da sáng hơn sau 1 tuần.';
+EXEC DanhGia_Insert 'SP00000003', 'KH00000003', 5, N'Sữa rửa mặt dịu nhẹ, dùng hằng ngày rất ổn.';
+EXEC DanhGia_Insert 'SP00000005', 'KH00000001', 4, N'Nước tẩy trang làm sạch tốt, không cay mắt.';
+GO
+
+---------------------------------------------------------
+-- 13 Tài khoản (dùng procedure tương tự, giả sử đã có)
+---------------------------------------------------------
+EXEC TaiKhoan_Insert 'admin', '123456', N'Admin', NULL;
+EXEC TaiKhoan_Insert 'nv01', '123456', N'Admin', NULL;
+EXEC TaiKhoan_Insert 'nv02', '123456', N'Admin', NULL;
+EXEC TaiKhoan_Insert 'kh01', '123456', N'KhachHang', 'KH00000001';
+EXEC TaiKhoan_Insert 'kh02', '123456', N'KhachHang', 'KH00000002';
+EXEC TaiKhoan_Insert 'kh03', '123456', N'KhachHang', 'KH00000003';
 GO

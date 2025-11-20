@@ -1,13 +1,22 @@
 ﻿USE DB_QLBH;
 GO
 
+CREATE TYPE dbo.CTMH_List AS TABLE
+(
+    MaSP VARCHAR(10),
+    SLM INT,
+    DGM MONEY
+);
+GO
+
 ---------------------------------------------------------
 -- ========== INSERT ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_DonMuaHang_Insert
+CREATE OR ALTER PROC DonMuaHang_Insert
 (
     @NgayMH DATE,
-    @MaNCC VARCHAR(10)
+    @MaNCC VARCHAR(10),
+    @ChiTiet CTMH_List READONLY 
 )
 AS
 BEGIN
@@ -17,40 +26,34 @@ BEGIN
     DECLARE @Count INT;
     DECLARE @Prefix VARCHAR(8);
 
-    -- Prefix: M + YYMMDD (ví dụ: M251028)
+    -- Tạo mã MYYMMDD#### (vd: M2510190001)
     SET @Prefix = 'M' +
                   RIGHT(CAST(YEAR(@NgayMH) AS VARCHAR(4)), 2) +
                   RIGHT('0' + CAST(MONTH(@NgayMH) AS VARCHAR(2)), 2) +
                   RIGHT('0' + CAST(DAY(@NgayMH) AS VARCHAR(2)), 2);
 
-    -- Đếm số đơn trong ngày đó
     SELECT @Count = COUNT(*) + 1
     FROM DonMuaHang
     WHERE CONVERT(DATE, NgayMH) = @NgayMH;
 
-    -- Gộp thành mã: MYYMMDD#### → M2510280001
     SET @MaDMH = @Prefix + RIGHT('0000' + CAST(@Count AS VARCHAR(4)), 4);
 
-    -- Kiểm tra NCC có tồn tại không
-    IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
-    BEGIN
-        RAISERROR(N'Mã nhà cung cấp không tồn tại!', 16, 1);
-        RETURN;
-    END;
-
-    -- Thêm mới
+    -- Thêm đơn mua hàng
     INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC)
     VALUES (@MaDMH, @NgayMH, @MaNCC);
 
-    -- Xuất ra mã mới để kiểm tra / log
-    SELECT @MaDMH AS MaDonMuaHangMoi;
+    -- Thêm chi tiết mua hàng từ danh sách truyền vào
+    INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
+    SELECT @MaDMH, MaSP, SLM, DGM
+    FROM @ChiTiet;
+
 END;
 GO
 
 ---------------------------------------------------------
 -- ========== UPDATE ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_DonMuaHang_Update
+CREATE OR ALTER PROC DonMuaHang_Update
 (
     @MaDMH CHAR(11),
     @NgayMH DATE,
@@ -84,7 +87,7 @@ GO
 ---------------------------------------------------------
 -- ========== DELETE ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_DonMuaHang_Delete
+CREATE OR ALTER PROC DonMuaHang_Delete
 (
     @MaDMH CHAR(11)
 )
@@ -105,7 +108,7 @@ GO
 ---------------------------------------------------------
 -- ========== GET ALL ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_DonMuaHang_GetAll
+CREATE OR ALTER PROC DonMuaHang_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -120,7 +123,7 @@ GO
 ---------------------------------------------------------
 -- ========== GET BY ID ==========
 ---------------------------------------------------------
-CREATE OR ALTER PROC sp_DonMuaHang_GetByID
+CREATE OR ALTER PROC DonMuaHang_GetByID
 (
     @MaDMH CHAR(11)
 )
@@ -132,5 +135,42 @@ BEGIN
     FROM DonMuaHang DMH
     JOIN NhaCC NCC ON DMH.MaNCC = NCC.MaNCC
     WHERE DMH.MaDMH = @MaDMH;
+END;
+GO
+
+-- get By ID Detail
+CREATE OR ALTER PROC DonMuaHang_GetById_Detail 
+	@MaDMH CHAR(11)
+AS SELECT D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC AS TenNCC, C.SLM as SLM, C.DGM as DGM,S.MaSP, S.TenSP FROM DonMuaHang D 
+		join NhaCC N ON N.MaNCC=D.MaNCC 
+		join CTMH C on C.MaDMH=D.MaDMH
+		join SanPham S on S.MaSP=C.MaSP
+		WHERE D.MaDMH=@MaDMH;
+GO
+---------------------------------------------------------
+-- ========== SEARCH ==========
+---------------------------------------------------------
+CREATE OR ALTER PROC DonMuaHang_Search
+(
+    @MaDMH CHAR(11) = NULL,
+    @MaNCC VARCHAR(10) = NULL,
+    @TenNCC NVARCHAR(100) = NULL,
+    @TuNgay DATE = NULL,
+    @DenNgay DATE = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT DMH.*, NCC.TenNCC
+    FROM DonMuaHang DMH
+    JOIN NhaCC NCC ON DMH.MaNCC = NCC.MaNCC
+    WHERE
+        (@MaDMH IS NULL OR DMH.MaDMH = @MaDMH)
+        AND (@MaNCC IS NULL OR DMH.MaNCC = @MaNCC)
+        AND (@TenNCC IS NULL OR NCC.TenNCC LIKE '%' + @TenNCC + '%')
+        AND (@TuNgay IS NULL OR DMH.NgayMH >= @TuNgay)
+        AND (@DenNgay IS NULL OR DMH.NgayMH <= @DenNgay)
+    ORDER BY DMH.NgayMH DESC;
 END;
 GO
