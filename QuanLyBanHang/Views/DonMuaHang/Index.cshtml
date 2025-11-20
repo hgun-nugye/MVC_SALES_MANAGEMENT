@@ -1,0 +1,112 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.DonMuaHang>
+
+@{
+    ViewBag.Title = "Quản lý Đơn mua hàng";
+}
+<div class="container">
+    <h2 class="mb-3 text-primary">
+        <i class="fa-solid fa-file-invoice-dollar"></i> Danh sách Đơn mua hàng
+    </h2>
+
+    <p>
+        <a href="@Url.Action("Create", "DonMuaHang")" class="btn btn-success">
+            <i class="fa-solid fa-circle-plus"></i> Thêm Đơn mua hàng
+        </a>
+    </p>
+
+    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+        <thead class="table-primary">
+            <tr>
+                <th><i class="fa-solid fa-hashtag"></i> Mã Đơn</th>
+                <th><i class="fa-solid fa-calendar-days"></i> Ngày mua hàng</th>
+                <th><i class="fa-solid fa-building"></i> Mã Nhà cung cấp</th>
+                <th><i class="fa-solid fa-building"></i> Nhà cung cấp</th>
+                <th><i class="fa-solid fa-gear"></i> Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.MaDMH</td>
+                        <td>@item.NgayMH.ToString("dd/MM/yyyy")</td>
+                        <td>@item.MaNCC</td>
+                        <td>@item.TenNCC</td>
+                        <td class="justify-content-between">
+                            <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "DonMuaHang", new { id = item.MaDMH })">
+                                <i class="fa-solid fa-eye"></i> Chi tiết
+                            </a>
+                            <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "DonMuaHang", new { id = item.MaDMH })">
+                                <i class="fa-solid fa-pen-to-square"></i> Sửa
+                            </a>
+                            <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "DonMuaHang", new { id = item.MaDMH })">
+                                <i class="fa-solid fa-trash"></i> Xóa
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-muted fst-italic">Không có đơn mua hàng nào.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    h2 i {
+        margin-right: 8px;
+    }
+
+    .btn i {
+        margin-right: 5px;
+    }
+
+    .table th {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5faff;
+        transition: 0.2s;
+    }
+
+    .alert {
+        margin-top: 10px;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            var successMessage = @Html.Raw((TempData["SuccessMessage"]));
+            var errorMessage   = @Html.Raw((TempData["ErrorMessage"]));
+
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: successMessage,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+
+            if (errorMessage) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: errorMessage,
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+            }
+        });
+    </script>
+}

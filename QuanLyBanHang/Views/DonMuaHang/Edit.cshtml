@@ -1,0 +1,76 @@
+﻿@model QuanLyBanHang.Models.DonMuaHangEditCTMH
+
+@{
+    ViewBag.Title = "Sửa Đơn mua hàng";
+}
+
+<div class="container border p-4 rounded shadow-sm bg-light">
+
+    <h2 class="mb-3 text-warning">
+        <i class="fa-solid fa-pen-to-square"></i> Sửa Đơn mua hàng
+    </h2>
+
+    @using (Html.BeginForm("Edit", "DonMuaHang", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.MaDMH)
+
+        <!-- THÔNG TIN ĐƠN -->
+        <div class="mb-3">
+            @Html.LabelFor(model => model.NgayMH, "Ngày mua hàng", new { @class = "form-label fw-bold" })
+            @Html.TextBoxFor(model => model.NgayMH, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+            @Html.ValidationMessageFor(model => model.NgayMH, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="mb-3">
+            @Html.LabelFor(model => model.MaNCC, "Nhà cung cấp", new { @class = "form-label fw-bold" })
+            @Html.DropDownList("MaNCC", null, "-- Chọn nhà cung cấp --", new { @class = "form-select" })
+            @Html.ValidationMessageFor(model => model.MaNCC, "", new { @class = "text-danger" })
+        </div>
+
+        <hr />
+
+        <!-- BẢNG CHI TIẾT SẢN PHẨM (nếu có) -->
+        @if (Model.ChiTiet != null && Model.ChiTiet.Count > 0)
+        {
+            <h4>Chi tiết sản phẩm</h4>
+
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr class="table-warning">
+                        <th>Sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Đơn giá</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.ChiTiet.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                @Html.HiddenFor(m => m.ChiTiet[i].MaSP)
+                                <span>@Model.ChiTiet[i].TenSP</span>
+                            </td>
+
+                            <td>
+                                @Html.TextBoxFor(m => m.ChiTiet[i].SLM, new { @class = "form-control" })
+                            </td>
+
+                            <td>
+                                @Html.TextBoxFor(m => m.ChiTiet[i].DGM, new { @class = "form-control" })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <button type="submit" class="btn btn-warning text-white">
+            <i class="fa-solid fa-save"></i> Lưu thay đổi
+        </button>
+
+        <a href="@Url.Action("Index", "DonMuaHang")" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    }
+</div>

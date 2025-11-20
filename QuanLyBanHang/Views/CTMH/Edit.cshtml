@@ -1,0 +1,33 @@
+﻿@model QuanLyBanHang.Models.CTMH
+@{
+    ViewBag.Title = "Sửa Chi tiết mua hàng";
+}
+
+<h2>Thêm chi tiết cho đơn @Model.MaDMH</h2>
+
+<div class=" container">
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.MaDMH)
+
+        <div class="mb-3">
+            @Html.LabelFor(m => m.MaSP)
+            @Html.DropDownListFor(m => m.MaSP, (SelectList)ViewBag.MaSP, "-- Chọn sản phẩm --", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.MaSP)
+        </div>
+        <div class="mb-3">
+            @Html.LabelFor(m => m.SLM)
+            @Html.TextBoxFor(m => m.SLM, new { @class = "form-control", type = "number", min = 1 })
+            @Html.ValidationMessageFor(m => m.SLM)
+        </div>
+        <div class="mb-3">
+            @Html.LabelFor(m => m.DGM)
+            @Html.TextBoxFor(m => m.DGM, new { @class = "form-control", type = "number", step = 100 })
+            @Html.ValidationMessageFor(m => m.DGM)
+        </div>
+
+        <button type="submit" class="btn btn-success">Cập nhật</button>
+        <a asp-action="Index" asp-route-maDMH="@Model.MaDMH" class="btn btn-secondary">Quay lại</a>
+    }
+</div>

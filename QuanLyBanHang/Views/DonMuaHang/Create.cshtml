@@ -1,0 +1,140 @@
+﻿@model QuanLyBanHang.Models.DonMuaHang
+
+@{
+    ViewBag.Title = "Thêm Đơn mua hàng";
+    var spOptions = "";
+    foreach (var sp in ViewBag.MaSP as SelectList)
+    {
+        spOptions += $"<option value='{sp.Value}'>{sp.Text}</option>";
+    }
+
+}
+
+<div class="container border p-4 rounded shadow-sm bg-light">
+    <h2 class="mb-3 text-primary">
+        <i class="fa-solid fa-cart-plus"></i> Thêm Đơn mua hàng
+    </h2>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="NgayMH" class="form-label"></label>
+            <input asp-for="NgayMH" class="form-control" type="date" readonly />
+            <span asp-validation-for="NgayMH" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="MaNCC" class="form-label"></label>
+            <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select">
+                <option value="">-- Chọn nhà cung cấp --</option>
+            </select>
+            <span asp-validation-for="MaNCC" class="text-danger"></span>
+        </div>
+
+        <h5 class="mt-4 mb-3"><i class="fa-solid fa-box"></i> Chi tiết sản phẩm</h5>
+
+        <table class="table table-bordered align-middle text-center" id="ctmhTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.CTMHs != null && Model.CTMHs.Count > 0)
+                {
+                    for (int i = 0; i < Model.CTMHs.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                <select asp-for="CTMHs[@i].MaSP" asp-items="ViewBag.MaSP" class="form-select">
+                                    <option value="">-- Chọn sản phẩm --</option>
+                                </select>
+
+
+                            </td>
+                            <td><input name="CTMHs[@i].SLM" class="form-control" type="number" min="1" value="@Model.CTMHs[i].SLM" /></td>
+                            <td><input name="CTMHs[@i].DGM" class="form-control" type="number" min="0" step="1000" value="@Model.CTMHs[i].DGM" /></td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td>
+                            <select name="CTMHs[0].MaSP" class="form-select">
+                                <option value="">-- Chọn sản phẩm --</option>
+                                @foreach (var sp in ViewBag.MaSP)
+                                {
+                                    <option value="@sp.Value">@sp.Text</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input name="CTMHs[0].SLM" class="form-control" type="number" min="1" /></td>
+                        <td><input name="CTMHs[0].DGM" class="form-control" type="number" min="0" step="1000" /></td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <button type="button" id="addRow" class="btn btn-primary mb-3">
+            <i class="fa-solid fa-plus"></i> Thêm dòng
+        </button>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Thêm mới
+            </button>
+            <a asp-action="Index" asp-controller="DonMuaHang" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const addRowBtn = document.getElementById("addRow");
+            const tableBody = document.querySelector("#ctmhTable tbody");
+            let index = tableBody.rows.length;
+
+            const spOptionsHtml = `@Html.Raw(spOptions)`;
+
+            addRowBtn.addEventListener("click", () => {
+                const newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                    <td>
+                        <select name="CTMHs[${index}].MaSP" class="form-select">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            ${spOptionsHtml}
+                        </select>
+                    </td>
+                    <td><input name="CTMHs[${index}].SLM" type="number" min="1" class="form-control" /></td>
+                    <td><input name="CTMHs[${index}].DGM" type="number" min="0" step="1000" class="form-control" /></td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(newRow);
+                index++;
+            });
+
+            tableBody.addEventListener("click", function (e) {
+                if (e.target.closest(".removeRow")) {
+                    e.target.closest("tr").remove();
+                }
+            });
+        });
+    </script>
+}

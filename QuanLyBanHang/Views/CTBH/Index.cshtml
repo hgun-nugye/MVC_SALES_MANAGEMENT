@@ -1,0 +1,62 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.CTBHDetailDto>
+
+@{
+    ViewBag.Title = "Chi tiết bán hàng";
+}
+
+<div class="container">
+    <h2 class="mb-3 text-success">
+        <i class="fa-solid fa-list"></i> Chi tiết bán hàng
+    </h2>
+
+    <div class="mb-3">
+        <a asp-action="Create" asp-route-maDBH="@ViewBag.MaDBH" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Thêm chi tiết
+        </a>
+    </div>
+
+    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+        <thead class="table-light">
+            <tr>
+                <th><i class="fa-solid fa-hashtag"></i> Mã đơn</th>
+                <th><i class="fa-solid fa-box"></i> Tên SP</th>
+                <th><i class="fa-solid fa-sort-numeric-up"></i> Số lượng</th>
+                <th><i class="fa-solid fa-money-bill"></i> Đơn giá</th>
+                <th><i class="fa-solid fa-coins"></i> Thành tiền</th>
+                <th><i class="fa-solid fa-gear"></i> Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.MaDBH</td>
+                        <td>@item.TenSP</td>
+                        <td>@item.SLB</td>
+                        <td>@item.DGB.ToString("N0")</td>
+                        <td>@((item.SLB * item.DGB).ToString("N0"))</td>
+                        <td class="d-flex justify-content-center gap-1">
+                            <a asp-action="Details" asp-route-maDBH="@item.MaDBH" asp-route-maSP="@item.MaSP" class="btn btn-info btn-sm text-white">
+                                <i class="fa-solid fa-eye"></i> Xem
+                            </a>
+                            <a asp-action="Edit" asp-route-maDBH="@item.MaDBH" asp-route-maSP="@item.MaSP" class="btn btn-warning btn-sm text-white">
+                                <i class="fa-solid fa-pen-to-square"></i> Sửa
+                            </a>
+                            <a asp-action="Delete" asp-route-maDBH="@item.MaDBH" asp-route-maSP="@item.MaSP" class="btn btn-danger btn-sm">
+                                <i class="fa-solid fa-trash"></i> Xóa
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-muted fst-italic">Chưa có chi tiết sản phẩm nào.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

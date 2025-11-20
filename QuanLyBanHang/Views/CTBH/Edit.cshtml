@@ -1,0 +1,32 @@
+﻿@model QuanLyBanHang.Models.CTBH
+
+@{
+    ViewBag.Title = "Sửa chi tiết bán hàng";
+}
+
+<div class="container">
+    <h2 class="text-warning mb-3">
+        <i class="fa-solid fa-pen-to-square"></i> Sửa chi tiết bán hàng
+    </h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="MaDBH" />
+        <input type="hidden" asp-for="MaSP" />
+
+        <div class="mb-3">
+            <label>Tên sản phẩm</label>
+            <input asp-for="TenSP" class="form-control" readonly />
+        </div>
+        <div class="mb-3">
+            <label>Số lượng</label>
+            <input asp-for="SLB" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label>Đơn giá</label>
+            <input asp-for="DGB" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-success"><i class="fa-solid fa-save"></i> Cập nhật</button>
+        <a asp-action="Index" asp-route-maDBH="@Model.MaDBH" class="btn btn-secondary">Quay lại</a>
+    </form>
+
+</div>

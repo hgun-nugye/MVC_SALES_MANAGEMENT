@@ -1,0 +1,44 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.CTBHDetailDto>
+
+@{
+    ViewBag.Title = "Chi tiết sản phẩm trong đơn bán";
+    var item = Model.FirstOrDefault();
+}
+
+<div class="container">
+
+    <h2 class="text-info mb-3">
+        <i class="fa-solid fa-circle-info"></i> Chi tiết sản phẩm trong đơn
+    </h2>
+
+    @if (item != null)
+    {
+        <div class="card shadow-sm p-4">
+            <p><strong>Mã Đơn:</strong> @item.MaDBH</p>
+            <p><strong>Tên SP:</strong> @item.TenSP</p>
+            <p><strong>Số lượng:</strong> @item.SLB</p>
+            <p><strong>Đơn giá:</strong> @item.DGB.ToString("N0")</p>
+            <p><strong>Thành tiền:</strong> @((item.SLB * item.DGB).ToString("N0"))</p>
+        </div>
+    }
+    else
+    {
+        <p class="text-danger">Không tìm thấy dữ liệu.</p>
+    }
+
+</div>
+
+<div class="mt-3">
+    
+    @if (item != null)
+    {
+        <a href="@Url.Action("Edit", "DonBanHang", new { id = item.MaDBH })"
+           class="btn btn-warning text-white">
+            <i class="fa-solid fa-pen-to-square"></i> Sửa
+        </a>
+    }
+
+    <a asp-action="Index" asp-route-maDBH="@item?.MaDBH" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+    </a>
+</div>

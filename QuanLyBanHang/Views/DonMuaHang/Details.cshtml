@@ -1,0 +1,88 @@
+﻿@model List<QuanLyBanHang.Models.DonMuaHangDetail>
+
+@{
+    ViewBag.Title = "Chi tiết Đơn mua hàng";
+
+    // Lấy dòng đầu tiên để hiển thị thông tin chung
+    var don = Model.FirstOrDefault();
+}
+
+<div class="container">
+    <h2 class="mb-3 text-info">
+        <i class="fa-solid fa-eye"></i> Chi tiết Đơn mua hàng - Đơn @don?.MaDMH
+    </h2>
+
+    @if (don != null)
+    {
+        <!-- Thông tin chung của đơn -->
+        <div class="card shadow-sm p-4">
+            <dl class="row">
+                <dt class="col-sm-3">Ngày mua hàng:</dt>
+                <dd class="col-sm-9">@don.NgayMH.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-3">Nhà cung cấp:</dt>
+                <dd class="col-sm-9">@don.TenNCC</dd>
+            </dl>
+        </div>
+
+        <h4 class="text-success mt-4">
+            <i class="fa-solid fa-boxes-stacked"></i> Danh sách sản phẩm mua
+        </h4>
+
+        <table class="table table-bordered table-striped mt-2">
+            <thead class="table-light">
+                <tr>
+                    <th>Tên sản phẩm</th>
+                    <th class="text-center">Số lượng mua</th>
+                    <th class="text-end">Đơn giá mua</th>
+                    <th class="text-end">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ct in Model)
+                {
+                    <tr>
+                        <td>@ct.TenSP</td>
+                        <td class="text-center">@ct.SLM</td>
+                        <td class="text-end">
+                            @(ct.DGM?.ToString("#,##0.################", new System.Globalization.CultureInfo("vi-VN"))) ₫
+                        </td>
+                        <td class="text-end">
+                            @(((ct.SLM ?? 0) * (ct.DGM ?? 0))
+                                                .ToString("#,##0.################", new System.Globalization.CultureInfo("vi-VN"))) ₫
+                </td>
+            </tr>
+                        }
+        </tbody>
+        <tfoot>
+            <tr class="table-secondary fw-bold">
+                <td colspan="3" class="text-end">Tổng cộng:</td>
+                <td class="text-end">
+                    @(
+                                        Model.Sum(x => (x.SLM ?? 0) * (x.DGM ?? 0))
+                                        .ToString("#,##0.################", new System.Globalization.CultureInfo("vi-VN"))
+                                        ) ₫
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+        }
+    else
+    {
+        <div class="alert alert-warning">
+            Không tìm thấy đơn mua hàng cần xem chi tiết.
+        </div>
+    }
+
+    <div class="mt-3">
+        @if (don != null)
+        {
+            <a href="@Url.Action("Edit", "DonMuaHang", new { id = don.MaDMH })" class="btn btn-warning text-white">
+                <i class="fa-solid fa-pen-to-square"></i> Sửa
+            </a>
+        }
+        <a href="@Url.Action("Index", "DonMuaHang")" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
