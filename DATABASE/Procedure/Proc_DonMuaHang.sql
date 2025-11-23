@@ -148,35 +148,9 @@ AS SELECT D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC AS TenNCC, C.SLM as SLM, C.DGM as
 		WHERE D.MaDMH=@MaDMH;
 GO
 
----------------------------------------------------------
--- ========== SEARCH ==========
----------------------------------------------------------
-CREATE OR ALTER PROC DonMuaHang_Search
-    @Search NVARCHAR(100) = NULL  -- Cho phép NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT D.*, N.TenNCC
-    FROM DonMuaHang D
-    JOIN NhaCC N
-	ON N.MaNCC=D.MaNCC
-    WHERE 
-        (@Search IS NULL OR @Search = '' 
-            OR D.MaDMH LIKE '%' + @Search + '%'
-            OR D.MaNCC LIKE '%' + @Search + '%'
-            OR N.TenNCC LIKE N'%' + @Search + '%'
-            OR CONVERT(VARCHAR(10), D.NgayMH, 103) LIKE '%' + @Search + '%'
-        )
-    ORDER BY D.NgayMH DESC;
-END;
-GO
-
-
----------------------------------------------------------
--- ========== FILTER ==========
----------------------------------------------------------
-CREATE OR ALTER PROC DonMuaHang_Filter
+-- Search Filter
+CREATE OR ALTER PROC DonMuaHang_SearchFilter
+    @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
     @Year INT = NULL
 AS
@@ -185,12 +159,20 @@ BEGIN
 
     SELECT D.*, N.TenNCC
     FROM DonMuaHang D
-    JOIN NhaCC N
-	ON N.MaNCC=D.MaNCC
+    JOIN NhaCC N ON N.MaNCC= D.MaNCC
     WHERE
-         (@Month IS NULL OR CAST(SUBSTRING(MaDMH, 4, 2) AS INT) = @Month)
-       AND (@Year IS NULL 
-     OR (LEN(MaDMH) >= 3 AND CAST(SUBSTRING(MaDMH, 2, 2) AS INT) + 2000 = @Year))
+        -- SEARCH
+        (
+            @Search IS NULL OR @Search = '' 
+            OR D.MaDMH LIKE '%' + @Search + '%'
+            OR D.MaNCC LIKE '%' + @Search + '%'
+            OR N.MaNCC LIKE N'%' + @Search + '%'
+            OR CONVERT(VARCHAR(10), D.NgayMH, 103) LIKE '%' + @Search + '%'
+        )
+        -- FILTER MONTH
+        AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
+        -- FILTER YEAR
+        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year)
     ORDER BY D.NgayMH DESC;
 END;
 GO

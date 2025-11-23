@@ -150,25 +150,49 @@ BEGIN
 END;
 GO
 
--- ===========================
--- SEARCH
--- ===========================
-CREATE OR ALTER PROC GianHang_Search
-(
-    @Keyword NVARCHAR(200) = NULL    -- Tìm theo Tên, Mô tả, Email, SĐT
-)
+CREATE OR ALTER PROCEDURE GianHang_SearchFilter
+    @Search NVARCHAR(100) = NULL,
+    @Month INT = NULL,
+    @Year INT = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 10
 AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
+
     SELECT *
-    FROM GianHang
+    FROM GianHang G
     WHERE
-        @Keyword IS NULL
-        OR TenGH LIKE '%' + @Keyword + '%'
-        OR MoTaGH LIKE '%' + @Keyword + '%'
-        OR EmailGH LIKE '%' + @Keyword + '%'
-        OR DienThoaiGH LIKE '%' + @Keyword + '%'
-    ORDER BY TenGH ASC;
+        (@Search IS NULL OR @Search = '' 
+            OR G.MaGH LIKE '%' + @Search + '%'
+            OR G.TenGH LIKE '%' + @Search + '%'
+            OR G.EmailGH LIKE '%' + @Search + '%')
+        AND (@Month IS NULL OR MONTH(G.NgayTao) = @Month)
+        AND (@Year IS NULL OR YEAR(G.NgayTao) = @Year)
+    ORDER BY G.NgayTao DESC 
+    OFFSET @StartRow ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+GO
+
+CREATE OR ALTER PROC GianHang_Count
+    @Search NVARCHAR(100) = NULL,
+    @Month INT = NULL,
+    @Year INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*)
+    FROM GianHang G
+    WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR G.MaGH LIKE '%' + @Search + '%'
+            OR G.TenGH LIKE '%' + @Search + '%'
+            OR G.EmailGH LIKE '%' + @Search + '%')
+        AND (@Month IS NULL OR MONTH(G.NgayTao) = @Month)
+        AND (@Year IS NULL OR YEAR(G.NgayTao) = @Year);
 END;
 GO

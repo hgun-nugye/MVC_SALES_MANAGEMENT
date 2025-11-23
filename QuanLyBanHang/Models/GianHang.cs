@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
 
 namespace QuanLyBanHang.Models
 {
@@ -33,6 +32,14 @@ namespace QuanLyBanHang.Models
 		public string DiaChiGH { get; set; } = null!;
 
 		// Quan hệ 1-n: GianHang có nhiều SảnPhẩm
-		public ICollection<SanPham>? DsSanPham { get; set; }
+		public ICollection<SanPham>? DsSanPham { get; set; }		
 	}
+
+	
+	[Keyless]
+	public class GianHangCountDto
+	{
+		public int TotalRecords { get; set; }
+	}
+
 }

@@ -17,20 +17,21 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		// ============ INDEX / READ ============
-		public async Task<IActionResult> Index(int? month, int? year)
+		public async Task<IActionResult> Index(string? search, int? month, int? year)
 		{
+			ViewBag.Search = search;
 			ViewBag.Month = month;
 			ViewBag.Year = year;
 
 			var parameters = new[]
 			{
-				new SqlParameter("@Month", month ?? (object)DBNull.Value),
-				new SqlParameter("@Year", year ?? (object)DBNull.Value)
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
 			};
 
 			var data = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_Filter @Month, @Year", parameters)
+				.FromSqlRaw("EXEC DonMuaHang_SearchFilter @Search, @Month, @Year", parameters)
 				.ToListAsync();
 
 			return View(data);
@@ -270,12 +271,28 @@ namespace QuanLyBanHang.Controllers
 
 		// ============ SEARCH ============
 		[HttpGet]
-		public async Task<IActionResult> Search(string keyword)
+		public async Task<IActionResult> Search(string keyword, int? month, int? year)
 		{
-			var param = new SqlParameter("@Search", keyword ?? (object)DBNull.Value);
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
+				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+			};
 
 			var data = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_Search @Search", param)
+				.FromSqlRaw("EXEC DonMuaHang_SearchFilter @Search, @Month, @Year", parameters)
+				.ToListAsync();
+
+			return PartialView("DonMuaHangTable", data);
+		}
+
+
+		// ============ RESET FILTER ============
+		public async Task<IActionResult> ClearFilter()
+		{
+			var data = await _context.DonMuaHang
+				.FromSqlRaw("EXEC DonMuaHang_SearchFilter @Search=NULL, @Month=NULL, @Year=NULL")
 				.ToListAsync();
 
 			return PartialView("DonMuaHangTable", data);

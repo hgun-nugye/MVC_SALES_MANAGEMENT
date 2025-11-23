@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
@@ -14,15 +15,71 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		//  READ - DANH SÁCH 
-		public async Task<IActionResult> Index()
+		//public async Task<IActionResult> Index(string? search, int? month, int? year)
+		//{
+		//	ViewBag.Search = search;
+		//	ViewBag.Month = month;
+		//	ViewBag.Year = year;
+
+		//	// Lấy dữ liệu từ proc
+		//	var parameters = new[]
+		//	{
+		//		new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+		//		new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+		//		new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+		//	};
+
+		//	var model = await _context.GianHang
+		//		.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @Month, @Year", parameters)
+		//		.ToListAsync();
+
+		//	return View(model);
+		//}
+
+		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
 		{
-			var dsGH = await _context.GianHang
-				.FromSqlRaw("EXEC GianHang_GetAll")
+			ViewBag.Search = search;
+			ViewBag.Month = month;
+			ViewBag.Year = year;
+			ViewBag.PageNumber = pageNumber;
+			ViewBag.PageSize = pageSize;
+
+			// Tham số cho SP lấy danh sách
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value),
+				new SqlParameter("@PageNumber", pageNumber),
+				new SqlParameter("@PageSize", pageSize)
+			};
+
+			// Lấy danh sách gian hàng (chỉ các cột trong entity GianHang)
+			var model = await _context.GianHang
+				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @Month, @Year, @PageNumber, @PageSize", parameters)
 				.ToListAsync();
 
-			return View(dsGH);
+			// Lấy tổng số bản ghi (1 row)
+			var countParams = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+			};
+
+			var totalRecords =  _context.GianHangCountDtos
+							.FromSqlRaw("EXEC GianHang_Count @Search, @Month, @Year", countParams)
+							.AsEnumerable()          // <-- chuyển composition sang client
+							.Select(x => x.TotalRecords)
+							.FirstOrDefault();
+
+
+			ViewBag.TotalRecords = totalRecords;
+			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+			return View(model);
 		}
+
 
 		//  DETAILS 
 		public async Task<IActionResult> Details(string id)
@@ -183,5 +240,35 @@ namespace QuanLyBanHang.Controllers
 
 			return RedirectToAction(nameof(Index));
 		}
+
+		// ============ SEARCH ============
+		[HttpGet]
+		public async Task<IActionResult> Search(string keyword, int? month, int? year)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
+				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+			};
+
+			var data = await _context.GianHang
+				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @Month, @Year", parameters)
+				.ToListAsync();
+
+			return PartialView("GianHangTable", data);
+		}
+
+
+		// ============ RESET FILTER ============
+		public async Task<IActionResult> ClearFilter()
+		{
+			var data = await _context.GianHang
+				.FromSqlRaw("EXEC GianHang_SearchFilter @Search=NULL, @Month=NULL, @Year=NULL")
+				.ToListAsync();
+
+			return PartialView("GianHangTable", data);
+		}
+
 	}
 }

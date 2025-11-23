@@ -25,17 +25,19 @@
         body {
             display: flex;
             font-family: "Segoe UI", sans-serif;
+            max-height: 100vh;
         }
         
         /* Sidebar */
         .sidebar {
-            width: 330px;
+            width: 280px;
             height: 100vh;
             background: #fffffa;
             color: #198754;
             padding-top: 20px;
             font-weight:bolder;
             border-right: 2px solid #198754;
+            position: fixed;
         }
         
         .sidebar h4 {
@@ -66,7 +68,6 @@
                 .sidebar a:hover {
                     background: #198754;
                     color: #fff;
-                    zoom:1.02;
                 }
 
                     .sidebar a:hover i {
@@ -84,8 +85,11 @@
 
 
         .content {
+            margin-left: 280px;
             padding: 25px;
-            width: calc(100% - 330px);
+            padding-top: 0px;
+            width: calc(100% - 280px);
+            font-size: 14px;
         }
     </style>
 </head>
@@ -95,16 +99,6 @@
     <!-- SIDEBAR -->
     <div class="sidebar">
         <h4 class="pb-3 border-bottom"> <i class="fa-solid fa-folder"></i> Danh mục</h4>
-
-        @* <a asp-controller="CTBH" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "CTBH" ? "active" : "")">
-            <i class="fa-solid fa-receipt"></i> CTBH
-        </a>
-
-        <a asp-controller="CTMH" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "CTMH" ? "active" : "")">
-            <i class="fa-solid fa-cart-shopping"></i> CTMH
-        </a> *@
 
         <a asp-controller="DonBanHang" asp-action="Index"
            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonBanHang" ? "active" : "") mb-3">

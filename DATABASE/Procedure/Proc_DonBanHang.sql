@@ -166,34 +166,9 @@ BEGIN
 END;
 GO
 
----------------------------------------------------------
--- ========== SEARCH ==========
----------------------------------------------------------
-CREATE OR ALTER PROC DonBanHang_Search
-    @Search NVARCHAR(100) = NULL  -- Cho phép NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT D.*, K.TenKH
-    FROM DonBanHang D
-    JOIN KhachHang K ON K.MaKH = D.MaKH
-    WHERE 
-        (@Search IS NULL OR @Search = '' 
-            OR D.MaDBH LIKE '%' + @Search + '%'
-            OR D.MaKH LIKE '%' + @Search + '%'
-            OR K.TenKH LIKE N'%' + @Search + '%'
-            OR CONVERT(VARCHAR(10), D.NgayBH, 103) LIKE '%' + @Search + '%'
-        )
-    ORDER BY D.NgayBH DESC;
-END;
-GO
-
-
----------------------------------------------------------
--- ========== FILTER ==========
----------------------------------------------------------
-CREATE OR ALTER PROC DonBanHang_Filter
+-- Search Filter
+CREATE OR ALTER PROC DonBanHang_SearchFilter
+    @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
     @Year INT = NULL
 AS
@@ -204,9 +179,19 @@ BEGIN
     FROM DonBanHang D
     JOIN KhachHang K ON K.MaKH = D.MaKH
     WHERE
-         (@Month IS NULL OR CAST(SUBSTRING(MaDBH, 4, 2) AS INT) = @Month)
-        AND (@Year IS NULL 
-     OR (LEN(MaDBH) >= 3 AND CAST(SUBSTRING(MaDBH, 2, 2) AS INT) + 2000 = @Year))
+        -- SEARCH
+        (
+            @Search IS NULL OR @Search = '' 
+            OR D.MaDBH LIKE '%' + @Search + '%'
+            OR D.MaKH LIKE '%' + @Search + '%'
+            OR K.TenKH LIKE N'%' + @Search + '%'
+            OR CONVERT(VARCHAR(10), D.NgayBH, 103) LIKE '%' + @Search + '%'
+        )
+        -- FILTER MONTH
+        AND (@Month IS NULL OR MONTH(D.NgayBH) = @Month)
+        -- FILTER YEAR
+        AND (@Year IS NULL OR YEAR(D.NgayBH) = @Year)
     ORDER BY D.NgayBH DESC;
 END;
 GO
+
