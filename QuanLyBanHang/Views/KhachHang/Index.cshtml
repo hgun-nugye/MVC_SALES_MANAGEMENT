@@ -2,70 +2,210 @@
 
 @{
     ViewBag.Title = "Quản lý Khách hàng";
+    int totalPages = ViewBag.TotalPages;
+    int currentPage = ViewBag.PageNumber;
+    int pageWindow = 5;
+    int startPage = Math.Max(1, currentPage - pageWindow);
+    int endPage = Math.Min(totalPages, currentPage + pageWindow);
 }
-
-<div class=" container">
-    <h2 class="mb-3 text-primary">
-        <i class="fa-solid fa-truck"></i> Danh sách Khách hàng
-    </h2>
-
-    <p>
-        <a href="@Url.Action("Create", "KhachHang")" class="btn btn-success">
-            <i class="fa-solid fa-circle-plus"></i> Thêm Khách hàng
-        </a>
-    </p>
-
-    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
-        <thead class="table-primary">
-            <tr>
-                <th><i class="fa-solid fa-hashtag"></i> Mã KH</th>
-                <th><i class="fa-solid fa-id-badge"></i> Tên KH</th>
-                <th><i class="fa-solid fa-phone"></i> Điện thoại</th>
-                <th><i class="fa-solid fa-envelope"></i> Email</th>
-                <th><i class="fa-solid fa-location-dot"></i> Địa chỉ</th>
-                <th><i class="fa-solid fa-gear"></i> Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.MaKH</td>
-                    <td>@item.TenKH</td>
-                    <td>@item.DienThoaiKH</td>
-                    <td>@item.EmailKH</td>
-                    <td>@item.DiaChiKH</td>
-                    <td class="justify-content-between">
-                        <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "KhachHang", new { id = item.MaKH })">
-                            <i class="fa-solid fa-eye"></i> Chi tiết
-                        </a>
-                        <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "KhachHang", new { id = item.MaKH })">
-                            <i class="fa-solid fa-pen-to-square"></i> Sửa
-                        </a>
-                        <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "KhachHang", new { id = item.MaKH })">
-                            <i class="fa-solid fa-trash"></i> Xóa
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
 <style>
-    h2 i {
-        margin-right: 8px;
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
     }
 
-    .btn i {
-        margin-right: 5px;
-    }
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0d6efd;
+            pointer-events: none;
+        }
 
-    .table th {
-        vertical-align: middle;
-    }
+        .search-wrapper input {
+            padding-left: 38px !important;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+}
 
     .table-hover tbody tr:hover {
         background-color: #f5faff;
         transition: 0.2s;
     }
 </style>
+
+<div class="container">
+    <h4 class="mb-4 text-primary">
+        <i class="fa-solid fa-users"></i> Danh sách Khách hàng
+    </h4>
+
+    <!-- Filter Form -->
+    <form id="filterForm" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+
+        <div class="search-wrapper flex-grow-1">
+            <i class="fa fa-search"></i>
+            <input id="searchBox" type="text" name="search" value="@ViewBag.Search"
+                   class="form-control" placeholder="Tìm tên, email, SĐT...">
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- FILTER TỈNH -->
+
+            <div class="d-flex align-items-center gap-2">
+                <label class="w-100 text-end">Tỉnh/Thành phố</label>
+                <select id="provinceFilter" name="province" class="form-select">
+                    <option value="">-- Tất cả --</option>
+                </select>
+            </div>               
+
+            <button type="button" id="btnClearFilter" class="btn btn-secondary">
+                <i class="fa-solid fa-rotate-left"></i> Xóa
+            </button>
+
+            <a href="@Url.Action("Create", "KhachHang")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Thêm</a>
+
+        </div>
+
+        <!-- Hidden inputs giữ state -->
+        <input type="hidden" name="pageNumber" id="pageNumberInput" value="@currentPage" />
+        <input type="hidden" name="pageSize" id="pageSizeInput" value="@ViewBag.PageSize" />
+    </form>
+
+    <!-- TABLE -->
+    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+        <thead class="table-primary">
+            <tr>
+                <th>Mã KH</th>
+                <th>Tên KH</th>
+                <th>Điện thoại</th>
+                <th>Email</th>
+                <th>Địa chỉ</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @await Html.PartialAsync("KhachHangTable", Model)
+        </tbody>
+    </table>
+
+    <!-- Pagination + PageSize -->
+    <div class="d-flex justify-content-between align-items-center mt-2">
+
+        <!-- PageSize -->
+        <div class="d-flex align-items-center gap-2">
+            <label for="pageSizeSelect">Hiển thị:</label>
+            <select id="pageSizeSelect" class="form-select" style="width:120px;">
+                @foreach (int size in new int[] { 5, 10, 20, 50 })
+                {
+                    @Html.Raw($"<option value='{size}' {(ViewBag.PageSize == size ? "selected" : "")}>{size} /page</option>")
+                    ;
+                }
+            </select>
+        </div>
+
+        <!-- Pagination -->
+        <nav>
+            <ul class="pagination mb-0">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(1); return false;">&laquo;</a></li>
+                }
+
+                @if (currentPage - pageWindow > 1)
+                {
+                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(1); return false;">1</a></li>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(currentPage == i ? "active bg-success" : "")">
+                        <a class="page-link @(currentPage == i ? "text-white" : "")" href="#" onclick="changePage(@i); return false;">@i</a>
+                    </li>
+                }
+
+                @if (currentPage + pageWindow < totalPages)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(@totalPages); return false;">@totalPages</a></li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(@totalPages); return false;">&raquo;</a></li>
+                }
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // debounce function
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(context, args), delay);
+            };
+        }
+
+        // áp dụng cho searchBox
+        $("#searchBox").on("input", debounce(function() {
+            $("#pageNumberInput").val(1);
+            $("#filterForm").submit();
+        }, 400));
+
+        // province vẫn submit ngay khi chọn
+        $("#provinceFilter").on("change", function () {
+            $("#pageNumberInput").val(1);
+            $("#filterForm").submit();
+        });
+
+
+        // pageSize change
+        $("#pageSizeSelect").on("change", function () {
+            $("#pageSizeInput").val($(this).val());
+            $("#pageNumberInput").val(1);
+            $("#filterForm").submit();
+        });
+
+        // pagination
+        function changePage(page) {
+            $("#pageNumberInput").val(page);
+            $("#filterForm").submit();
+        }
+
+        // clear filter
+        $("#btnClearFilter").on("click", function () {
+            $("#searchBox").val("");
+            $("#provinceFilter").val("");
+            $("#pageSizeInput").val(10);
+            $("#pageNumberInput").val(1);
+            $("#filterForm").submit();
+        });
+
+        // Load danh sách tỉnh từ API khi load trang
+        $(document).ready(function () {
+            $.getJSON("/Address/LoadProvinces", function (data) {
+                data.forEach(p => {
+                    $("#provinceFilter").append(
+                        `<option value="${p.name}">${p.name}</option>`
+                    );
+                });
+
+                // Giữ selected province khi reload
+            var selected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SelectedProvince ?? ""));
+            if (selected) {
+                $("#provinceFilter").val(selected);
+            }
+            });
+        });
+
+
+    </script>
+}

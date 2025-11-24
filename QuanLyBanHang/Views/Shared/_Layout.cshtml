@@ -30,7 +30,7 @@
         
         /* Sidebar */
         .sidebar {
-            width: 280px;
+            width: 250px;
             height: 100vh;
             background: #fffffa;
             color: #198754;
@@ -40,7 +40,7 @@
             position: fixed;
         }
         
-        .sidebar h4 {
+        .sidebar {
                 text-align: center;
                 margin-bottom: 20px;
                 font-weight: 700;
@@ -85,12 +85,30 @@
 
 
         .content {
-            margin-left: 280px;
+            margin-left: 250px;
             padding: 25px;
             padding-top: 0px;
-            width: calc(100% - 280px);
+            width: calc(100% - 250px);
             font-size: 14px;
         }
+
+        .page-link{
+            border: 1px solid #198754 !important;
+            color: #198754 !important;
+        }
+
+        .page-item.active .page-link{
+            background-color: #198754 !important;
+            color: white !important;           
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #28a745 !important;
+            box-shadow: 0 0 0 0.25rem rgba(40,167,69,0.25) !important;
+        }
+
     </style>
 </head>
 
@@ -100,17 +118,12 @@
     <div class="sidebar">
         <h4 class="pb-3 border-bottom"> <i class="fa-solid fa-folder"></i> Danh mục</h4>
 
-        <a asp-controller="DonBanHang" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonBanHang" ? "active" : "") mb-3">
-            <i class="fa-solid fa-file-invoice-dollar"></i> Đơn Bán Hàng
+        <a asp-controller="NhaCC" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhaCC" ? "active" : "") mb-3">
+            <i class="fa-solid fa-truck-field"></i> Nhà Cung Cấp
         </a>
 
-        <a asp-controller="DonMuaHang" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonMuaHang" ? "active" : "") mb-3">
-            <i class="fa-solid fa-file-invoice"></i> Đơn Mua Hàng
-        </a>
-
-        <a asp-controller="GianHang" asp-action="Index"
+         <a asp-controller="GianHang" asp-action="Index"
            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "GianHang" ? "active" : "") mb-3">
             <i class="fa-solid fa-store"></i> Gian Hàng
         </a>
@@ -125,11 +138,6 @@
             <i class="fa-solid fa-tags"></i> Loại Sản Phẩm
         </a>
 
-        <a asp-controller="NhaCC" asp-action="Index"
-           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhaCC" ? "active" : "") mb-3">
-            <i class="fa-solid fa-truck-field"></i> Nhà Cung Cấp
-        </a>
-
         <a asp-controller="NhomSP" asp-action="Index"
            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhomSP" ? "active" : "") mb-3">
             <i class="fa-solid fa-layer-group"></i> Nhóm Sản Phẩm
@@ -139,15 +147,23 @@
            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "") mb-3">
             <i class="fa-solid fa-box"></i> Sản Phẩm
         </a>
+        <a asp-controller="DonBanHang" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonBanHang" ? "active" : "") mb-3">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Đơn Bán Hàng
+        </a>
 
-
+        <a asp-controller="DonMuaHang" asp-action="Index"
+           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DonMuaHang" ? "active" : "") mb-3">
+            <i class="fa-solid fa-file-invoice"></i> Đơn Mua Hàng
+        </a>
+               
     </div>
 
     <!-- CONTENT -->
     <div class="content d-flex flex-column min-vh-100">
 
         <header class="mb-3">
-            @* <h2>@ViewData["Title"]</h2> *@
+            @* <h4>@ViewData["Title"]</h4> *@
         </header>
 
         <main role="main" class="pb-3">

@@ -1,7 +1,7 @@
-﻿USE DM_QLBH;
+﻿USE DB_QLBH;
 GO
 
-CREATE TYPE DMo.CTMH_List AS TABLE
+CREATE TYPE dbo.CTMH_List AS TABLE
 (
     MaSP VARCHAR(10),
     SLM INT,
@@ -166,7 +166,7 @@ BEGIN
             @Search IS NULL OR @Search = '' 
             OR D.MaDMH LIKE '%' + @Search + '%'
             OR D.MaNCC LIKE '%' + @Search + '%'
-            OR N.MaNCC LIKE N'%' + @Search + '%'
+            OR N.TenNCC LIKE N'%' + @Search + '%'
             OR CONVERT(VARCHAR(10), D.NgayMH, 103) LIKE '%' + @Search + '%'
         )
         -- FILTER MONTH
@@ -177,3 +177,53 @@ BEGIN
 END;
 GO
 
+-- Search & Filter
+CREATE OR ALTER PROCEDURE DonMuaHang_SearchFilter
+    @Search NVARCHAR(100) = NULL,
+    @Month INT = NULL,
+    @Year INT = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
+
+    SELECT D.*, N.TenNCC
+    FROM DonMuaHang D
+	JOIN NhaCC N ON N.MaNCC=D.MaNCC
+    WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR D.MaDMH LIKE '%' + @Search + '%'
+            OR N.MaNCC LIKE '%' + @Search + '%'
+			OR N.TenNCC LIKE N'%' + @Search + '%'
+        AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
+        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year))
+    ORDER BY D.NgayMH DESC 
+    OFFSET @StartRow ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+GO
+
+-- count
+CREATE OR ALTER PROC DonMuaHang_Count
+    @Search NVARCHAR(100) = NULL,
+    @Month INT = NULL,
+    @Year INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*)
+    FROM DonMuaHang D
+	JOIN NhaCC N ON N.MaNCC=D.MaNCC
+    WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR D.MaDMH LIKE '%' + @Search + '%'
+            OR N.MaNCC LIKE '%' + @Search + '%'
+			OR N.TenNCC LIKE N'%' + @Search + '%'
+        AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
+        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year));
+END;
+GO

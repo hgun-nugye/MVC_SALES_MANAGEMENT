@@ -1,0 +1,32 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.KhachHang>
+
+@if (Model != null && Model.Any())
+{
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.MaKH</td>
+            <td>@item.TenKH</td>
+            <td>@item.DienThoaiKH</td>
+            <td>@item.EmailKH</td>
+            <td>@item.DiaChiKH</td>
+            <td>
+                <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "KhachHang", new { id = item.MaKH })">
+                    <i class="fa-solid fa-eye"></i> Chi tiết
+                </a>
+                <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "KhachHang", new { id = item.MaKH })">
+                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                </a>
+                <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "KhachHang", new { id = item.MaKH })">
+                    <i class="fa-solid fa-trash"></i> Xóa
+                </a>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="8" class="text-center text-muted fst-italic">Không có khách hàng nào.</td>
+    </tr>
+}

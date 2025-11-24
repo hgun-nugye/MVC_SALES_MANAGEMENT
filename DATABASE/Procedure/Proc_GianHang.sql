@@ -150,6 +150,7 @@ BEGIN
 END;
 GO
 
+-- Search & Filter
 CREATE OR ALTER PROCEDURE GianHang_SearchFilter
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
@@ -171,12 +172,13 @@ BEGIN
             OR G.EmailGH LIKE '%' + @Search + '%')
         AND (@Month IS NULL OR MONTH(G.NgayTao) = @Month)
         AND (@Year IS NULL OR YEAR(G.NgayTao) = @Year)
-    ORDER BY G.NgayTao DESC 
+    ORDER BY G.NgayTao ASC 
     OFFSET @StartRow ROWS
     FETCH NEXT @PageSize ROWS ONLY;
 END;
 GO
 
+-- count
 CREATE OR ALTER PROC GianHang_Count
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,

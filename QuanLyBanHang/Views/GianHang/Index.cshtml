@@ -48,9 +48,9 @@
 </style>
 
 <div class="container">
-    <h2 class="mb-4 text-success">
+    <h4 class="mb-4 text-success">
         <i class="fa-solid fa-truck"></i> Danh sách Gian hàng
-    </h2>
+    </h4>
 
     <!-- Filter Form -->
     <form id="filterForm" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
@@ -154,11 +154,21 @@
 
 @section Scripts {
 <script>
+            // debounce function
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(context, args), delay);
+            };
+        }
+
     // khi thay đổi filter -> submit form
-    $("#searchBox, #monthSelect, #yearSelect").on("change keyup", function(){
+    $("#searchBox, #monthSelect, #yearSelect").on("change keyup", debounce(function(){
         $("#pageNumberInput").val(1);
         $("#filterForm").submit();
-    });
+    }, 400));
 
     // pageSize change
     $("#pageSizeSelect").on("change", function(){

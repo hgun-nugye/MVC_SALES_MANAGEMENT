@@ -167,7 +167,7 @@ GO
 -- ============================
 CREATE OR ALTER PROC KhachHang_Search
 (
-    @Keyword NVARCHAR(200) = NULL       -- Từ khóa tìm kiếm (Tên, Email, SĐT, Địa chỉ)
+    @Search NVARCHAR(200) = NULL       -- Từ khóa tìm kiếm (Tên, Email, SĐT, Địa chỉ)
 )
 AS
 BEGIN
@@ -181,11 +181,11 @@ BEGIN
         DiaChiKH
     FROM KhachHang
     WHERE
-        @Keyword IS NULL
-        OR TenKH LIKE '%' + @Keyword + '%'
-        OR EmailKH LIKE '%' + @Keyword + '%'
-        OR DienThoaiKH LIKE '%' + @Keyword + '%'
-        OR DiaChiKH LIKE '%' + @Keyword + '%'
+        @Search IS NULL
+        OR TenKH LIKE '%' + @Search + '%'
+        OR EmailKH LIKE '%' + @Search + '%'
+        OR DienThoaiKH LIKE '%' + @Search + '%'
+        OR DiaChiKH LIKE '%' + @Search + '%'
     ORDER BY TenKH ASC;
 END;
 GO
@@ -205,3 +205,60 @@ BEGIN
 END;
 GO
 
+-- Search & Filter
+CREATE OR ALTER PROCEDURE KhachHang_SearchFilter
+    @Search NVARCHAR(200) = NULL,        
+    @TinhFilter NVARCHAR(100) = NULL,    -- filter theo Tỉnh
+    @PageNumber INT = 1,
+    @PageSize INT = 10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
+
+    SELECT 
+        KH.*
+    FROM KhachHang KH
+    WHERE
+        (
+            @Search IS NULL OR @Search = '' OR
+            KH.TenKH LIKE '%' + @Search + '%' OR
+            KH.EmailKH LIKE '%' + @Search + '%' OR
+            KH.DienThoaiKH LIKE '%' + @Search + '%'
+        )
+        AND (
+            @TinhFilter IS NULL 
+            OR KH.DiaChiKH LIKE '%' + @TinhFilter + '%'
+        )
+       
+    ORDER BY KH.MaKH ASC
+    OFFSET @StartRow ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+GO
+
+
+-- count
+CREATE OR ALTER PROC KhachHang_Count
+    @Search NVARCHAR(200) = NULL,
+    @TinhFilter NVARCHAR(100) = NULL    -- filter theo Tỉnh
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*)
+    FROM KhachHang KH
+     WHERE
+        (
+            @Search IS NULL OR @Search = '' OR
+            KH.TenKH LIKE '%' + @Search + '%' OR
+            KH.EmailKH LIKE '%' + @Search + '%' OR
+            KH.DienThoaiKH LIKE '%' + @Search + '%'
+        )
+        AND (
+            @TinhFilter IS NULL 
+            OR KH.DiaChiKH LIKE '%' + @TinhFilter + '%'
+        )
+END;
+GO

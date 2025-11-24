@@ -17,24 +17,68 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		public async Task<IActionResult> Index(string? search, int? month, int? year)
+		//public async Task<IActionResult> Index(string? search, int? month, int? year)
+		//{
+		//	ViewBag.Search = search;
+		//	ViewBag.Month = month;
+		//	ViewBag.Year = year;
+
+		//	var parameters = new[]
+		//	{
+		//		new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+		//		new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+		//		new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+		//	};
+
+		//	var data = await _context.DonBanHang
+		//		.FromSqlRaw("EXEC DonBanHang_SearchFilter @Search, @Month, @Year", parameters)
+		//		.ToListAsync();
+
+		//	return View(data);
+		//}
+
+		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
 		{
 			ViewBag.Search = search;
 			ViewBag.Month = month;
 			ViewBag.Year = year;
+			ViewBag.PageNumber = pageNumber;
+			ViewBag.PageSize = pageSize;
 
+			// Tham số cho SP lấy danh sách
 			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value),
+				new SqlParameter("@PageNumber", pageNumber),
+				new SqlParameter("@PageSize", pageSize)
+			};
+
+			// Lấy danh sách đơn bán hàng (chỉ các cột trong entity DonBanHang)
+			var model = await _context.DonBanHang
+				.FromSqlRaw("EXEC DonBanHang_SearchFilter @Search, @Month, @Year, @PageNumber, @PageSize", parameters)
+				.ToListAsync();
+
+			// Lấy tổng số bản ghi (1 row)
+			var countParams = new[]
 			{
 				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
 				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
 				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
 			};
 
-			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_SearchFilter @Search, @Month, @Year", parameters)
-				.ToListAsync();
+			var totalRecords = _context.DonBanHangCountDtos
+							.FromSqlRaw("EXEC DonBanHang_Count @Search, @Month, @Year", countParams)
+							.AsEnumerable()          
+							.Select(x => x.TotalRecords)
+							.FirstOrDefault();
 
-			return View(data);
+
+			ViewBag.TotalRecords = totalRecords;
+			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+			return View(model);
 		}
 
 

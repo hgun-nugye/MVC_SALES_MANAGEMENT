@@ -53,4 +53,10 @@ namespace QuanLyBanHang.Models
 		public List<DonBanHangDetail> ChiTiet { get; set; } = new();
 	}
 
+	[Keyless]
+	public class DonBanHangCountDto
+	{
+		public int TotalRecords { get; set; }
+	}
+
 }

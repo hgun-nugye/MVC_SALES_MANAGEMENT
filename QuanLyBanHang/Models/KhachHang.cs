@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace QuanLyBanHang.Models
 {
@@ -23,5 +24,11 @@ namespace QuanLyBanHang.Models
 		[Required, StringLength(255)]
 		[Display(Name = "Địa chỉ")]
 		public required string DiaChiKH { get; set; }
+	}
+
+	[Keyless]
+	public class KhachHangCountDto
+	{
+		public int TotalRecords { get; set; }
 	}
 }

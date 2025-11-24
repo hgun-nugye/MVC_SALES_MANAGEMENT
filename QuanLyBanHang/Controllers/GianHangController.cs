@@ -15,27 +15,6 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		//public async Task<IActionResult> Index(string? search, int? month, int? year)
-		//{
-		//	ViewBag.Search = search;
-		//	ViewBag.Month = month;
-		//	ViewBag.Year = year;
-
-		//	// Lấy dữ liệu từ proc
-		//	var parameters = new[]
-		//	{
-		//		new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-		//		new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-		//		new SqlParameter("@Year", (object?)year ?? DBNull.Value)
-		//	};
-
-		//	var model = await _context.GianHang
-		//		.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @Month, @Year", parameters)
-		//		.ToListAsync();
-
-		//	return View(model);
-		//}
-
 		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
 		{
 			ViewBag.Search = search;
@@ -67,9 +46,9 @@ namespace QuanLyBanHang.Controllers
 				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
 			};
 
-			var totalRecords =  _context.GianHangCountDtos
+			var totalRecords = _context.GianHangCountDtos
 							.FromSqlRaw("EXEC GianHang_Count @Search, @Month, @Year", countParams)
-							.AsEnumerable()          // <-- chuyển composition sang client
+							.AsEnumerable()         
 							.Select(x => x.TotalRecords)
 							.FirstOrDefault();
 

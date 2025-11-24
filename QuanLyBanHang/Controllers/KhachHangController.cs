@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
@@ -14,14 +15,43 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		// READ - Danh sách Khách hàng
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string search, string province, int pageNumber = 1, int pageSize = 10)
 		{
-			var dsKhachHang = await _context.KhachHang.FromSqlRaw("EXEC KhachHang_GetAll")
-				.ToListAsync();
+			ViewBag.Search = search;
+			ViewBag.PageNumber = pageNumber;
+			ViewBag.PageSize = pageSize;
 
-			return View(dsKhachHang);
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", string.IsNullOrEmpty(search) ? DBNull.Value : search),
+				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province),
+				new SqlParameter("@PageNumber", pageNumber),
+				new SqlParameter("@PageSize", pageSize)
+			};
+
+			var data = await _context.KhachHang
+				.FromSqlRaw("EXEC KhachHang_SearchFilter @Search, @DiaChiFilter, @PageNumber, @PageSize", parameters)
+				.ToListAsync();
+						
+			ViewBag.SelectedProvince = province;
+
+			// Lấy tổng số bản ghi (1 row)
+			var countParams = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@TinhFilter", (object?)province ?? DBNull.Value),
+			};
+			var totalRecords = _context.KhachHangCountDtos
+				.FromSqlRaw("EXEC KhachHang_Count @Search, @TinhFilter", countParams)
+				.AsEnumerable()
+				.Select(x => x.TotalRecords)
+				.FirstOrDefault();
+
+			ViewBag.TotalRecords = totalRecords;
+			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+			return View(data);
 		}
+
 
 		// DETAILS - Xem chi tiết
 		public async Task<IActionResult> Details(string id)
@@ -98,26 +128,24 @@ namespace QuanLyBanHang.Controllers
 				try
 				{
 					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-					EXEC KhachHang_Update 
-						@MaKH = {model.MaKH},
-						@TenKH = {model.TenKH}, 
-						@DienThoaiKH = {model.DienThoaiKH}, 
-						@EmailKH = {model.EmailKH}, 
-						@DiaChiKH = {model.DiaChiKH}
-				");
-
-					TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
+                EXEC KhachHang_Update 
+                    @MaKH = {model.MaKH},
+                    @TenKH = {model.TenKH}, 
+                    @DienThoaiKH = {model.DienThoaiKH}, 
+                    @EmailKH = {model.EmailKH}, 
+                    @DiaChiKH = {model.DiaChiKH}
+            ");
+					TempData["SuccessMessage"] = "Cập nhật thành công!";
 					return RedirectToAction(nameof(Index));
 				}
 				catch (Exception ex)
 				{
-					ModelState.AddModelError("", $"{ex.Message}");
-
-					TempData["ErrorMessage"] = "Lỗi: " + ex.Message;
+					ModelState.AddModelError("", ex.Message);
 				}
 			}
 			return View(model);
 		}
+
 
 		// DELETE - GET
 		[HttpGet]
@@ -163,6 +191,34 @@ namespace QuanLyBanHang.Controllers
 			}
 
 			return RedirectToAction(nameof(Index));
+		}
+
+		// ============ SEARCH ============
+		[HttpGet]
+		public async Task<IActionResult> Search(string search, string tinhFilter)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@TinhFilter", (object?)tinhFilter ?? DBNull.Value)
+			};
+
+			var data = await _context.KhachHang
+				.FromSqlRaw("EXEC KhachHang_SearchFilter @Search, @TinhFilter", parameters)
+				.ToListAsync();
+
+			return PartialView("KhachHangTable", data);
+		}
+
+
+		// ============ RESET FILTER ============
+		public async Task<IActionResult> ClearFilter()
+		{
+			var data = await _context.KhachHang
+				.FromSqlRaw("EXEC KhachHang_SearchFilter @Search=NULL, @TinhFilter=NULL")
+				.ToListAsync();
+
+			return PartialView("KhachHangTable", data);
 		}
 	}
 }
