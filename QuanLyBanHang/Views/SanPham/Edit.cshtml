@@ -33,87 +33,97 @@
         <div class="row g-3">
             <!-- Mã sản phẩm -->
             <div class="col-md-3">
-                <label class="form-label">Mã SP</label>
+                <label class="form-label fw-bold">Mã SP</label>
                 <input asp-for="MaSP" class="form-control" readonly />
             </div>
 
             <!-- Tên sản phẩm -->
             <div class="col-md-9">
-                <label class="form-label">Tên SP</label>
+                <label class="form-label fw-bold">Tên SP</label>
                 <input asp-for="TenSP" class="form-control" />
                 <span asp-validation-for="TenSP" class="text-danger"></span>
             </div>
 
             <!-- Đơn giá -->
             <div class="col-md-3">
-                <label class="form-label">Đơn giá</label>
+                <label class="form-label fw-bold">Đơn giá</label>
                 <input asp-for="DonGia" class="form-control" type="number" step="0.01" />
                 <span asp-validation-for="DonGia" class="text-danger"></span>
             </div>
 
             <!-- Giá bán -->
             <div class="col-md-3">
-                <label class="form-label">Giá bán</label>
+                <label class="form-label fw-bold">Giá bán</label>
                 <input asp-for="GiaBan" class="form-control" type="number" step="0.01" />
                 <span asp-validation-for="GiaBan" class="text-danger"></span>
             </div>
 
             <!-- Số lượng tồn -->
             <div class="col-md-3">
-                <label class="form-label">Số lượng tồn</label>
+                <label class="form-label fw-bold">Số lượng tồn</label>
                 <input asp-for="SoLuongTon" class="form-control" type="number" />
                 <span asp-validation-for="SoLuongTon" class="text-danger"></span>
             </div>
 
             <!-- Trạng thái -->
             <div class="col-md-3">
-                <label class="form-label">Trạng thái</label>
+                <label class="form-label fw-bold">Trạng thái</label>
                 <select asp-for="TrangThai" asp-items="ViewBag.TrangThai" class="form-select"></select>
                 <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>
 
             <!-- Mô tả -->
             <div class="col-12">
-                <label class="form-label">Mô tả</label>
+                <label class="form-label fw-bold">Mô tả</label>
                 <textarea asp-for="MoTaSP" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="MoTaSP" class="text-danger"></span>
             </div>
 
-            <!-- Ảnh minh họa + Chọn ảnh mới -->
-            <div class="col-md-6">
-                @if (!string.IsNullOrEmpty(Model?.AnhMH))
-                {
-                    <div class="mb-2">
-                        <strong>Ảnh hiện tại:</strong><br />
-                        <a href="@Model.AnhMH" target="_blank" rel="noopener noreferrer">
-                            <img src="@Model.AnhMH" alt="Ảnh sản phẩm" class="rounded border" style="max-width: 250px; height:auto;" />
-                        </a>
+            <div class="row mt-2">
+                <!-- Cột 1: 3 dropdown -->
+                <div class="col-md-6">
+                    <!-- Nhà cung cấp -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nhà cung cấp</label>
+                        <select asp-for="MaNCC" asp-items="ViewBag.NhaCC" class="form-select"></select>
+                        <span asp-validation-for="MaNCC" class="text-danger"></span>
                     </div>
-                }
-                <label class="form-label">Chọn ảnh mới:</label>
-                <input type="file" name="AnhFile" class="form-control" accept="image/*" />
+
+                    <!-- Gian hàng -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Gian hàng</label>
+                        <select asp-for="MaGH" asp-items="ViewBag.GianHang" class="form-select"></select>
+                        <span asp-validation-for="MaGH" class="text-danger"></span>
+                    </div>
+
+                    <!-- Loại sản phẩm -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Loại sản phẩm</label>
+                        <select asp-for="MaLoai" asp-items="ViewBag.LoaiSP" class="form-select"></select>
+                        <span asp-validation-for="MaLoai" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Ảnh minh họa + chọn ảnh mới -->
+                <div class="col-md-6">
+                    @if (!string.IsNullOrEmpty(Model?.AnhMH))
+                    {
+                        <div class="mb-3">
+                            <strong>Ảnh hiện tại:</strong><br />
+                            <a href="@Model.AnhMH" target="_blank" rel="noopener noreferrer">
+                                <img src="@Url.Content("~/images/" + Model.AnhMH)" alt="@Model.TenSP" style="max-width:100%; height:auto; border-radius:8px;" />
+                            </a>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label">Chọn ảnh mới:</label>
+                        <input type="file" name="AnhFile" class="form-control" accept="image/*" />
+                    </div>
+                </div>
             </div>
 
-            <!-- Loại sản phẩm -->
-            <div class="col-md-6">
-                <label class="form-label">Loại sản phẩm</label>
-                <select asp-for="MaLoai" asp-items="ViewBag.LoaiSP" class="form-select"></select>
-                <span asp-validation-for="MaLoai" class="text-danger"></span>
-            </div>
 
-            <!-- Nhà cung cấp -->
-            <div class="col-md-6">
-                <label class="form-label">Nhà cung cấp</label>
-                <select asp-for="MaNCC" asp-items="ViewBag.NhaCC" class="form-select"></select>
-                <span asp-validation-for="MaNCC" class="text-danger"></span>
-            </div>           
-                     
-            <!-- Gian hàng -->
-            <div class="col-md-6">
-                <label class="form-label">Gian hàng</label>
-                <select asp-for="MaGH" asp-items="ViewBag.GianHang" class="form-select"></select>
-                <span asp-validation-for="MaGH" class="text-danger"></span>
-            </div>
         </div>
 
         <div class="mt-4 d-flex gap-2">

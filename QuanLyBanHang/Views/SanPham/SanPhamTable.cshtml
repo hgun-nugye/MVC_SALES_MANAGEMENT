@@ -12,7 +12,14 @@
             <td>@sp.TenSP</td>
             <td>@String.Format("{0:N0}", sp.DonGia)</td>
             <td>@String.Format("{0:N0}", sp.GiaBan)</td>
-            <td>@sp.MoTaSP</td>
+            <td>
+                @{
+                    var moTa = sp.MoTaSP ?? "";
+                    var moTaHienThi = moTa.Length > 50 ? moTa.Substring(0, 50) + "..." : moTa;
+                }
+                @moTaHienThi
+            </td>
+
             <td>@sp.TenLoai</td>
             <td>@sp.TenGH</td>
             <td>@sp.SoLuongTon</td>

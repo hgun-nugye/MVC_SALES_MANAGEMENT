@@ -19,7 +19,6 @@ namespace QuanLyBanHang.Models
 		[StringLength(10)]
 		public string? MaNhom { get; set; } = null!;
 
-		[NotMapped]
 		public string? TenNhom { get; set; }
 
 		[ForeignKey(nameof(MaNhom))]

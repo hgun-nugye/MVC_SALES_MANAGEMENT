@@ -6,7 +6,7 @@ GO
 -- ============================
 CREATE OR ALTER PROC Loai_Insert
 (
-    @TenLSP NVARCHAR(50),
+    @TenLoai NVARCHAR(50),
     @MaNhom VARCHAR(10)
 )
 AS
@@ -14,7 +14,7 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Kiểm tra trùng tên loại trong cùng nhóm
-    IF EXISTS (SELECT 1 FROM LoaiSP WHERE TenLoai = @TenLSP AND MaNhom = @MaNhom)
+    IF EXISTS (SELECT 1 FROM LoaiSP WHERE TenLoai = @TenLoai AND MaNhom = @MaNhom)
     BEGIN
         RAISERROR(N'Tên loại sản phẩm đã tồn tại trong nhóm này.', 16, 1);
         RETURN;
@@ -35,7 +35,7 @@ BEGIN
 
     BEGIN TRY
         INSERT INTO LoaiSP(MaLoai, TenLoai, MaNhom)
-        VALUES (@MaLoai, @TenLSP, @MaNhom);
+        VALUES (@MaLoai, @TenLoai, @MaNhom);
 
         PRINT N'Thêm loại sản phẩm thành công!';
     END TRY
@@ -53,7 +53,7 @@ GO
 CREATE OR ALTER PROC Loai_Update
 (
     @MaLoai VARCHAR(10),
-    @TenLSP NVARCHAR(50),
+    @TenLoai NVARCHAR(50),
     @MaNhom VARCHAR(10)
 )
 AS
@@ -68,7 +68,7 @@ BEGIN
     END;
 
     -- Kiểm tra trùng tên trong cùng nhóm
-    IF EXISTS (SELECT 1 FROM LoaiSP WHERE TenLoai = @TenLSP AND MaNhom = @MaNhom AND MaLoai <> @MaLoai)
+    IF EXISTS (SELECT 1 FROM LoaiSP WHERE TenLoai = @TenLoai AND MaNhom = @MaNhom AND MaLoai <> @MaLoai)
     BEGIN
         RAISERROR(N'Tên loại sản phẩm đã tồn tại trong nhóm này.', 16, 1);
         RETURN;
@@ -76,7 +76,7 @@ BEGIN
 
     BEGIN TRY
         UPDATE LoaiSP
-        SET TenLoai = @TenLSP,
+        SET TenLoai = @TenLoai,
             MaNhom = @MaNhom
         WHERE MaLoai = @MaLoai;
 
@@ -159,20 +159,15 @@ BEGIN
 END;
 GO
 
--- Get All MaNhom
-CREATE OR ALTER PROC Loai_Nhom_GetAll AS SELECT L.MaLoai, L.TenLoai, L.MaNhom, N.TenNhom FROM LoaiSP L JOIN NhomSP N ON L.MaNhom=N.MaNhom;
-GO
-
 -- ============================
 -- SEARCH
 -- ============================
 CREATE OR ALTER PROC Loai_Search
 (
-    @MaLoai VARCHAR(10) = NULL,
-    @TenLSP NVARCHAR(50) = NULL,
-    @MaNhom VARCHAR(10) = NULL,
-    @TenNhom NVARCHAR(100) = NULL
-)
+     @Search NVARCHAR(100) = NULL,
+	  @PageNumber INT = 1,
+    @PageSize INT = 10
+	)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -183,12 +178,34 @@ BEGIN
         L.MaNhom,
         N.TenNhom
     FROM LoaiSP L
-    LEFT JOIN NhomSP N ON L.MaNhom = N.MaNhom
-    WHERE
-        (@MaLoai IS NULL OR L.MaLoai LIKE '%' + @MaLoai + '%') AND
-        (@TenLSP IS NULL OR L.TenLoai LIKE '%' + @TenLSP + '%') AND
-        (@MaNhom IS NULL OR L.MaNhom LIKE '%' + @MaNhom + '%') AND
-        (@TenNhom IS NULL OR N.TenNhom LIKE '%' + @TenNhom + '%')
+    JOIN NhomSP N ON L.MaNhom = N.MaNhom
+    
+      WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR L.MaLoai LIKE '%' + @Search + '%'
+            OR L.MaNhom LIKE '%' + @Search + '%'
+            OR N.TenNhom LIKE '%' + @Search + '%'
+            OR L.TenLoai LIKE '%' + @Search + '%')
     ORDER BY L.MaLoai;
+END;
+GO
+
+-- count
+CREATE OR ALTER PROC Loai_Count
+     @Search NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+      SELECT COUNT(*)
+    FROM LoaiSP L
+    JOIN NhomSP N ON L.MaNhom = N.MaNhom
+    
+      WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR L.MaLoai LIKE '%' + @Search + '%'
+            OR L.MaNhom LIKE '%' + @Search + '%'
+            OR N.TenNhom LIKE '%' + @Search + '%'
+            OR L.TenLoai LIKE '%' + @Search + '%')
 END;
 GO

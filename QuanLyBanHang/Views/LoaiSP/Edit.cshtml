@@ -11,16 +11,16 @@
 
     <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-hashtag"></i> Mã Loại sản phẩm</label>
+            <label>Mã Loại sản phẩm</label>
             <input asp-for="MaLoai" class="form-control" readonly />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i> Tên Loại sản phẩm</label>
+            <label>Tên Loại sản phẩm</label>
             <input asp-for="TenLoai" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i> Mã Nhóm sản phẩm</label>
-            <input asp-for="MaNhom" class="form-control" />
+            <label>Mã Nhóm sản phẩm</label>
+            <select asp-for="MaNhom" asp-items="ViewBag.NhomSPList" class="form-select"></select>
         </div>
 
         <button type="submit" class="btn btn-warning text-white">

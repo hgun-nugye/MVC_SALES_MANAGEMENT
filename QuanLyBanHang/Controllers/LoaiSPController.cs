@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
@@ -15,31 +16,52 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		// READ - Danh sách loại sản phẩm
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string? search, int pageNumber = 1, int pageSize = 10)
 		{
-			var dsLoaiSP = await _context.LoaiSP
-				.Join(
-					_context.NhomSP,
-					lsp => lsp.MaNhom,
-					nsp => nsp.MaNhom,
-					(lsp, nsp) => new LoaiSP
-					{
-						MaLoai = lsp.MaLoai,
-						TenLoai = lsp.TenLoai,
-						MaNhom = lsp.MaNhom,
-						TenNhom = nsp.TenNhom
-					}
-				)
+			// Lưu giá trị search và phân trang vào ViewBag
+			ViewBag.Search = search;
+			ViewBag.PageNumber = pageNumber;
+			ViewBag.PageSize = pageSize;
+
+			// Tham số cho SP lấy danh sách
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@PageNumber", pageNumber),
+				new SqlParameter("@PageSize", pageSize)
+			};
+
+			// Lấy danh sách LoaiSP theo stored procedure
+			var model = await _context.LoaiSP
+				.FromSqlRaw("EXEC Loai_Search @Search, @PageNumber, @PageSize", parameters)
 				.ToListAsync();
 
-			return View(dsLoaiSP);
+			// Lấy tổng số bản ghi
+			var countParams = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+			};
+
+			// Sử dụng FirstOrDefaultAsync để lấy tổng số bản ghi một cách async
+			var totalRecords = (await _context.LoaiSPCountDtos
+				.FromSqlRaw("EXEC Loai_Count @Search", parameters)
+				.ToListAsync())
+				.Select(x => x.TotalRecords)
+				.FirstOrDefault();
+
+
+			ViewBag.TotalRecords = totalRecords;
+			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+			return View(model);
 		}
+
+
 
 		// DETAILS - Xem chi tiết
 		public async Task<IActionResult> Details(string id)
 		{
-			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC LoaiSP_GetByID @MaLoai = {id}")
+			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
@@ -57,7 +79,6 @@ namespace QuanLyBanHang.Controllers
 			return View();
 		}
 
-
 		// CREATE - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -68,7 +89,7 @@ namespace QuanLyBanHang.Controllers
 				try
 				{
 					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-				EXEC LoaiSP_Insert 
+				EXEC Loai_Insert 
 					@TenLoai = {model.TenLoai},
 					@MaNhom = {model.MaNhom}
 			");
@@ -101,59 +122,64 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var tinh = (await _context.LoaiSP
-				.FromSqlInterpolated($"EXEC LoaiSP_GetByID @MaLoai = {id}")
+			var loai = (await _context.LoaiSP
+				.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
-			if (tinh == null)
+			if (loai == null)
 				return NotFound();
 
-			return View(tinh);
+			// Lấy danh sách nhóm sản phẩm, set giá trị mặc định
+			var nhomSPs = await _context.NhomSP.ToListAsync();
+			ViewBag.NhomSPList = new SelectList(nhomSPs, "MaNhom", "TenNhom", loai.MaNhom);
+
+			return View(loai);
 		}
+
 
 		// EDIT - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(LoaiSP model)
 		{
-			if (ModelState.IsValid)
+			if (!ModelState.IsValid)
 			{
-				try
-				{
-					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-					EXEC LoaiSP_Update 
+				// Nếu model lỗi, set lại dropdown để form không bị rỗng
+				var nhomSPs = await _context.NhomSP.ToListAsync();
+				ViewBag.NhomSPList = new SelectList(nhomSPs, "MaNhom", "TenNhom", model.MaNhom);
+				return View(model);
+			}
+
+			try
+			{
+				// Thực thi stored procedure
+				await _context.Database.ExecuteSqlInterpolatedAsync($@"
+					EXEC Loai_Update 
 						@MaLoai = {model.MaLoai},
 						@TenLoai = {model.TenLoai},
 						@MaNhom = {model.MaNhom}
 				");
 
-					TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
-					return RedirectToAction(nameof(Index));
-				}
-				catch (Exception ex)
-				{
-					if (ex is Microsoft.Data.SqlClient.SqlException sqlEx)
-					{
-						// Kiểm tra lỗi trùng dữ liệu (từ RAISERROR trong SQL)
-						if (sqlEx.Message.Contains("đã tồn tại"))
-						{
-							ModelState.AddModelError("", sqlEx.Message);
-							TempData["ErrorMessage"] = sqlEx.Message;
-						}
-						else
-						{
-							TempData["ErrorMessage"] = "Lỗi SQL: " + sqlEx.Message;
-						}
-					}
-					else
-					{
-						TempData["ErrorMessage"] = "Lỗi: " + ex.Message;
-					}
-				}
-
+				TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
+				return RedirectToAction(nameof(Index));
 			}
-			return View(model);
+			catch (Microsoft.Data.SqlClient.SqlException sqlEx)
+			{
+				ModelState.AddModelError("", sqlEx.Message);
+				TempData["ErrorMessage"] = sqlEx.Message;
+
+				var nhomSPs = await _context.NhomSP.ToListAsync();
+				ViewBag.NhomSPList = new SelectList(nhomSPs, "MaNhom", "TenNhom", model.MaNhom);
+				return View(model);
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError("", ex.Message);
+				var nhomSPs = await _context.NhomSP.ToListAsync();
+				ViewBag.NhomSPList = new SelectList(nhomSPs, "MaNhom", "TenNhom", model.MaNhom);
+				return View(model);
+			}
 		}
 
 		// DELETE - GET
@@ -163,7 +189,7 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC LoaiSP_GetByID @MaLoai = {id}")
+			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
@@ -184,13 +210,13 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC LoaiSP_GetByID @MaLoai = {id}")
+			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
 			if (tinh != null)
 			{
-				await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC LoaiSP_Delete @MaLoai = {id}");
+				await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC Loai_Delete @MaLoai = {id}");
 				TempData["SuccessMessage"] = "Đã xóa nhóm sản phẩm thành công!";
 			}
 			else
@@ -200,6 +226,30 @@ namespace QuanLyBanHang.Controllers
 			}
 
 			return RedirectToAction(nameof(Index));
+		}
+
+		// ============ SEARCH ============
+		[HttpGet]
+		public async Task<IActionResult> Search(string keyword)
+		{
+			var parameters = new SqlParameter("@Search", (object?)keyword ?? DBNull.Value);
+
+			var data = await _context.LoaiSP
+				.FromSqlRaw("EXEC Loai_Search @Search", parameters)
+				.ToListAsync();
+
+			return PartialView("LoaiSPTable", data);
+		}
+
+
+		// ============ RESET FILTER ============
+		public async Task<IActionResult> ClearFilter()
+		{
+			var data = await _context.LoaiSP
+				.FromSqlRaw("EXEC Loai_Search @Search=NULL")
+				.ToListAsync();
+
+			return PartialView("LoaiSPTable", data);
 		}
 	}
 }

@@ -17,26 +17,7 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		//public async Task<IActionResult> Index(string? search, int? month, int? year)
-		//{
-		//	ViewBag.Search = search;
-		//	ViewBag.Month = month;
-		//	ViewBag.Year = year;
-
-		//	var parameters = new[]
-		//	{
-		//		new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-		//		new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-		//		new SqlParameter("@Year", (object?)year ?? DBNull.Value)
-		//	};
-
-		//	var data = await _context.DonMuaHang
-		//		.FromSqlRaw("EXEC DonMuaHang_SearchFilter @Search, @Month, @Year", parameters)
-		//		.ToListAsync();
-
-		//	return View(data);
-		//}
-
+		
 		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
 		{
 			ViewBag.Search = search;
