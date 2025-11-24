@@ -4,24 +4,28 @@
     ViewBag.Title = "Chi tiết Sản phẩm";
 }
 
-<div class=" container">
+<div class="container">
     <h4 class="text-info mb-3">
-        <i class="fa-solid fa-eye"></i> Chi tiết Sản phẩm
+        Chi tiết Sản phẩm
     </h4>
 
     <div class="card shadow-sm border-info">
         <div class="card-body">
-            <p><strong><i class="fa-solid fa-hashtag"></i> Mã Sản phẩm:</strong> @Model.MaSP</p>
-            <p><strong><i class="fa-solid fa-id-badge"></i> Tên Sản phẩm:</strong> @Model.TenSP</p>
-            <p><strong><i class="fa-solid fa-money-bill"></i> Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</p>
-            <p><strong><i class="fa-solid fa-align-left"></i> Mô tả:</strong> @Model.MoTaSP</p>
-            <p><strong><i class="fa-solid fa-layer-group"></i> Loại sản phẩm:</strong> @Model.LoaiSP?.TenLSP</p>
-            <p><strong><i class="fa-solid fa-store"></i> Gian hàng:</strong> @Model.GianHang?.TenGH</p>
+            <p><strong>Mã Sản phẩm:</strong> @Model.MaSP</p>
+            <p><strong>Tên Sản phẩm:</strong> @Model.TenSP</p>
+            <p><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</p>
+            <p><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</p>
+            <p><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
+            <p><strong>Trạng thái:</strong> @Model.TrangThai</p>
+            <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
+            <p><strong>Loại sản phẩm:</strong> @Model.TenLoai</p>
+            <p><strong>Nhà cung cấp:</strong> @Model.TenNCC</p>
+            <p><strong>Gian hàng:</strong> @Model.TenGH</p>
 
             @if (!string.IsNullOrEmpty(Model.AnhMH))
             {
                 <div class="mt-3">
-                    <strong><i class="fa-solid fa-image"></i> Ảnh minh họa:</strong><br />
+                    <strong>Ảnh minh họa:</strong><br />
                     <a href="@Model.AnhMH" target="_blank">
                         <img src="@Model.AnhMH"
                              alt="Ảnh sản phẩm"
@@ -29,17 +33,15 @@
                     </a>
                 </div>
             }
-
         </div>
     </div>
 
-    <div class=" mt-3">
-        <a asp-action="Edit" asp-route-maSP="@Model.MaSP" class="btn btn-warning">
+    <div class="mt-3">
+        <a class="btn btn-warning text-white" href="@Url.Action("Edit", "SanPham", new { id = Model.MaSP })">
             <i class="fa-solid fa-pen-to-square"></i> Sửa
         </a>
         <a asp-action="Index" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
+            Quay lại
         </a>
     </div>
-
 </div>

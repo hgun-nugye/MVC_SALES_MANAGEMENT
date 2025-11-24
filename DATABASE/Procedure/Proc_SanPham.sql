@@ -144,12 +144,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT SP.*, 
-           L.TenLoai, 
-           N.TenNCC
-    FROM SanPham SP
-    JOIN LoaiSP L ON SP.MaLoai = L.MaLoai
-    JOIN NhaCC N ON SP.MaNCC = N.MaNCC;
+    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
+    FROM SanPham S
+	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
+	JOIN GianHang G ON G.MaGH=S.MaGH
+	JOIN NhaCC N ON N.MaNCC=S.MaNCC
 END;
 GO
 
@@ -164,57 +163,12 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT SP.*, 
-           L.TenLoai, 
-           N.TenNCC
-    FROM SanPham SP
-    JOIN LoaiSP L ON SP.MaLoai = L.MaLoai
-    JOIN NhaCC N ON SP.MaNCC = N.MaNCC
-    WHERE SP.MaSP = @MaSP;
-END;
-GO
-
--- ====== SHOW NAME DETAIL ======
-CREATE OR ALTER PROC SanPham_GetAll_Detail
-AS
-BEGIN
-    SELECT 
-        sp.MaSP,
-        sp.TenSP,
-        sp.DonGia,
-        sp.MoTaSP,
-        sp.AnhMH,
-        sp.MaLoai,
-        lsp.TenLoai AS TenLoai,
-        sp.MaGH,
-        gh.TenGH AS TenGH
-    FROM SanPham sp
-    JOIN LoaiSP lsp ON sp.MaLoai = lsp.MaLoai
-    JOIN GianHang gh ON sp.MaGH = gh.MaGH;
-END;
-GO
-
--- get By ID Detail
-CREATE OR ALTER PROC SanPham_GetByID_Detail
-(
-    @MaSP VARCHAR(10)
-)
-AS
-BEGIN
-    SELECT 
-        sp.MaSP,
-        sp.TenSP,
-        sp.DonGia,
-        sp.MoTaSP,
-        sp.AnhMH,
-        sp.MaLoai,
-        lsp.TenLoai AS TenLoai,
-        sp.MaGH,
-        gh.TenGH AS TenGH
-    FROM SanPham sp
-    JOIN LoaiSP lsp ON sp.MaLoai = lsp.MaLoai
-    JOIN GianHang gh ON sp.MaGH = gh.MaGH
-    WHERE sp.MaSP = @MaSP;
+    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
+    FROM SanPham S
+	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
+	JOIN GianHang G ON G.MaGH=S.MaGH
+	JOIN NhaCC N ON N.MaNCC=S.MaNCC
+    WHERE S.MaSP = @MaSP;
 END;
 GO
 
@@ -229,13 +183,12 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT SP.*, 
-           L.TenLoai, 
-           N.TenNCC
-    FROM SanPham SP
-    JOIN LoaiSP L ON SP.MaLoai = L.MaLoai
-    JOIN NhaCC N ON SP.MaNCC = N.MaNCC
-    WHERE SP.TenSP LIKE N'%' + @Keyword + '%'
+    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
+    FROM SanPham S
+	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
+	JOIN GianHang G ON G.MaGH=S.MaGH
+	JOIN NhaCC N ON N.MaNCC=S.MaNCC
+    WHERE S.TenSP LIKE N'%' + @Keyword + '%'
        OR L.TenLoai LIKE N'%' + @Keyword + '%'
        OR N.TenNCC LIKE N'%' + @Keyword + '%';
 END;
@@ -253,5 +206,63 @@ BEGIN
     SELECT COUNT(*) AS ExistsCount
     FROM SanPham
     WHERE MaSP = @MaSP;
+END;
+GO
+
+-- Search & Filter
+CREATE OR ALTER PROCEDURE SanPham_SearchFilter
+    @Search NVARCHAR(100) = NULL,
+    @TrangThai NVARCHAR(50) = NULL,
+    @TenLoai VARCHAR(10) = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
+
+    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
+    FROM SanPham S
+	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
+	JOIN GianHang G ON G.MaGH=S.MaGH
+	JOIN NhaCC N ON N.MaNCC=S.MaNCC
+    WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR G.TenGH LIKE '%' + @Search + '%'
+            OR S.TenSP LIKE '%' + @Search + '%'
+            OR S.MaSP LIKE '%' + @Search + '%'
+            OR N.TenNCC LIKE '%' + @Search + '%'
+            OR L.TenLoai LIKE '%' + @Search + '%')
+        AND (@TrangThai IS NULL OR S.TrangThai=@TrangThai)
+        AND (@TenLoai IS NULL OR L.MaLoai = @TenLoai)
+    ORDER BY S.MaSP ASC 
+    OFFSET @StartRow ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+GO
+
+-- count
+CREATE OR ALTER PROC SanPham_Count
+     @Search NVARCHAR(100) = NULL,
+    @TrangThai NVARCHAR(50) = NULL,
+    @TenLoai VARCHAR(10) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*) AS TotalRecords
+    FROM SanPham S
+	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
+	JOIN GianHang G ON G.MaGH=S.MaGH
+	JOIN NhaCC N ON N.MaNCC=S.MaNCC
+    WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR G.TenGH LIKE '%' + @Search + '%'
+            OR S.TenSP LIKE '%' + @Search + '%'
+            OR N.TenNCC LIKE '%' + @Search + '%'
+            OR L.TenLoai LIKE '%' + @Search + '%')
+        AND (@TrangThai IS NULL OR S.TrangThai=@TrangThai)
+        AND (@TenLoai IS NULL OR L.MaLoai = @TenLoai);
 END;
 GO

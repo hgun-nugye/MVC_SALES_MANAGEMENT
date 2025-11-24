@@ -29,10 +29,15 @@ namespace QuanLyBanHang.Services
 		public DbSet<DonBanHangDetail> DonBanHangDetail { get; set; } = null!;
 		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; }
 		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; }
+		public DbSet<SanPhamDto> SanPhamDtos { get; set; }
 		public DbSet<DonBanHangCountDto> DonBanHangCountDtos { get; set; }
 		public DbSet<DonMuaHangCountDto> DonMuaHangCountDtos { get; set; }
 		public DbSet<GianHangCountDto> GianHangCountDtos { get; set; }
 		public DbSet<KhachHangCountDto> KhachHangCountDtos { get; set; }
+		public DbSet<LoaiSPCountDto> LoaiSPCountDtos { get; set; }
+		public DbSet<NhomSPCountDto> NhomSPCountDtos { get; set; }
+		public DbSet<SanPhamCountDto> SanPhamCountDtos { get; set; }
+		public DbSet<NhaCCCountDto> NhaCCCountDtos { get; set; }
 
 		//Kiểm tra tồn tại 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

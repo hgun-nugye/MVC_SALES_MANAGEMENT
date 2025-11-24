@@ -26,7 +26,7 @@ namespace QuanLyBanHang.Controllers
 					(lsp, nsp) => new LoaiSP
 					{
 						MaLoai = lsp.MaLoai,
-						TenLSP = lsp.TenLSP,
+						TenLoai = lsp.TenLoai,
 						MaNhom = lsp.MaNhom,
 						TenNhom = nsp.TenNhom
 					}
@@ -69,7 +69,7 @@ namespace QuanLyBanHang.Controllers
 				{
 					await _context.Database.ExecuteSqlInterpolatedAsync($@"
 				EXEC LoaiSP_Insert 
-					@TenLSP = {model.TenLSP},
+					@TenLoai = {model.TenLoai},
 					@MaNhom = {model.MaNhom}
 			");
 
@@ -87,7 +87,7 @@ namespace QuanLyBanHang.Controllers
 			{
 				TempData["ErrorMessage"] = "Dữ liệu không hợp lệ!";
 			}
-			Console.WriteLine($"TenLSP = {model.TenLSP}, MaNhom = {model.MaNhom}");
+			Console.WriteLine($"TenLoai = {model.TenLoai}, MaNhom = {model.MaNhom}");
 
 			// Không redirect nếu có lỗi — ở lại form
 			return View(model);
@@ -124,7 +124,7 @@ namespace QuanLyBanHang.Controllers
 					await _context.Database.ExecuteSqlInterpolatedAsync($@"
 					EXEC LoaiSP_Update 
 						@MaLoai = {model.MaLoai},
-						@TenLSP = {model.TenLSP},
+						@TenLoai = {model.TenLoai},
 						@MaNhom = {model.MaNhom}
 				");
 

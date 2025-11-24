@@ -2009,7 +2009,7 @@ progress {
   color: var(--bs-table-hover-color);
 }
 
-.table-primary {
+.table-success {
   --bs-table-bg: #cfe2ff;
   --bs-table-striped-bg: #c5d7f2;
   --bs-table-striped-color: #000;

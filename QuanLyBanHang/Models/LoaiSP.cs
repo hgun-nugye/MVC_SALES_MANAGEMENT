@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
@@ -11,7 +12,7 @@ namespace QuanLyBanHang.Models
 
 		[Required]
 		[StringLength(50)]
-		public string? TenLSP { get; set; } = null!;
+		public string? TenLoai { get; set; } = null!;
 
 		// Khóa ngoại đến NhomSP
 		[Required]
@@ -25,5 +26,11 @@ namespace QuanLyBanHang.Models
 		public NhomSP? NhomSP { get; set; } = null;
 		public ICollection<SanPham>? SanPhams { get; set; }
 
+	}
+
+	[Keyless]
+	public class LoaiSPCountDto
+	{
+		public int TotalRecords { get; set; }
 	}
 }

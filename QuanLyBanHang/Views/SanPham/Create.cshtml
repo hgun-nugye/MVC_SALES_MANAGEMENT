@@ -3,69 +3,108 @@
 @{
     ViewBag.Title = "Thêm sản phẩm";
 }
-@Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-<div class=" container">
-    <h4 class="text-success mb-3">
-        <i class="fa-solid fa-circle-plus"></i> Thêm sản phẩm
+<div class="container">
+    <h4 class="text-success mb-4">
+        <i class="fa-regular fa-square-plus"></i> Thêm sản phẩm
     </h4>
 
-    <!-- ======== Form thêm sản phẩm ======== -->
     @using (Html.BeginForm("Create", "SanPham", FormMethod.Post, new { enctype = "multipart/form-data", @class = "border p-4 rounded shadow-sm bg-light" }))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
 
-        <div class="mb-3">
-            <label class="form-label"><i class="fa-solid fa-tag"></i> Tên sản phẩm</label>
-            @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", placeholder = "Nhập tên sản phẩm..." })
-            @Html.ValidationMessageFor(m => m.TenSP, "", new { @class = "text-danger" })
+        <div class="row g-3">
+            <!-- Tên sản phẩm -->
+            <div class="col-md-6">
+                <label class="form-label"><i class="fa-solid fa-font"></i> Tên sản phẩm</label>
+                @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", placeholder = "Nhập tên sản phẩm..." })
+                @Html.ValidationMessageFor(m => m.TenSP, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Đơn giá -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="fa-solid fa-money-check-dollar"></i> Đơn giá</label>
+                @Html.TextBoxFor(m => m.DonGia, new { @class = "form-control", type = "number", step = "0.01" })
+                @Html.ValidationMessageFor(m => m.DonGia, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Giá bán -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="fa-solid fa-sack-dollar"></i> Giá bán</label>
+                @Html.TextBoxFor(m => m.GiaBan, new { @class = "form-control", type = "number", step = "0.01" })
+                @Html.ValidationMessageFor(m => m.GiaBan, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Mô tả sản phẩm -->
+            <div class="col-12">
+                <label class="form-label"><i class="fa-regular fa-rectangle-list"></i> Mô tả sản phẩm</label>
+                @Html.TextAreaFor(m => m.MoTaSP, 5, 50, new { @class = "form-control", placeholder = "Nhập mô tả..." })
+                @Html.ValidationMessageFor(m => m.MoTaSP, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Trạng thái -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="fa-solid fa-clipboard-check"></i> Trạng thái</label>
+                @Html.DropDownListFor(
+                m => m.TrangThai,
+                        (SelectList)ViewBag.TrangThai,
+                        "-- Trạng thái --",
+                        new { @class = "form-select" }
+                        )
+            @Html.ValidationMessageFor(m => m.TrangThai, "", new { @class = "text-danger" })
         </div>
 
-        <div class="mb-3">
-            <label class="form-label"><i class="fa-solid fa-money-bill"></i> Đơn giá</label>
-            @Html.TextBoxFor(m => m.DonGia, new { @class = "form-control", type = "number", step = "0.01" })
-            @Html.ValidationMessageFor(m => m.DonGia, "", new { @class = "text-danger" })
+        <!-- Số lượng tồn -->
+        <div class="col-md-3">
+            <label class="form-label"><i class="fa-solid fa-boxes-stacked"></i> Số lượng tồn</label>
+            @Html.TextBoxFor(m => m.SoLuongTon, new { @class = "form-control", type = "number" })
+            @Html.ValidationMessageFor(m => m.SoLuongTon, "", new { @class = "text-danger" })
         </div>
 
-        <div class="mb-3">
-            <label class="form-label"><i class="fa-solid fa-align-left"></i> Mô tả sản phẩm</label>
-            @Html.TextAreaFor(m => m.MoTaSP, 5, 50, new { @class = "form-control", placeholder = "Nhập mô tả..." })
-            @Html.ValidationMessageFor(m => m.MoTaSP, "", new { @class = "text-danger" })
-        </div>
-
-        <div class="mb-3">
+        <!-- Ảnh minh họa -->
+        <div class="col-md-6">
             <label class="form-label"><i class="fa-solid fa-image"></i> Ảnh minh họa</label>
             <input type="file" name="AnhFile" class="form-control" accept="image/*" />
             <small class="text-muted">Chọn ảnh từ máy tính để tải lên.</small>
 
-            <!-- Hiển thị ảnh hiện tại nếu có (khi submit lỗi vẫn giữ lại) -->
             @if (!string.IsNullOrEmpty(Model?.AnhMH))
-            {
-                <div class="mt-2">
-                    <img src="~/images/@Model.AnhMH" width="150" class="rounded border" alt="Ảnh sản phẩm" />
-                </div>
-            }
+                {
+                    <div class="mt-2">
+                        <img src="~/images/@Model.AnhMH" width="150" class="rounded border" alt="Ảnh sản phẩm" />
+                    </div>
+                }
+            </div>
+
+            <!-- Loại sản phẩm -->
+            <div class="col-md-4">
+                <label class="form-label"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm</label>
+                @Html.DropDownListFor(model => model.MaLoai, (SelectList)ViewBag.LoaiSP, "--Chọn loại--", new { @class = "form-select" })
+                @Html.ValidationMessageFor(m => m.MaLoai, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Nhà cung cấp -->
+            <div class="col-md-4">
+                <label class="form-label"><i class="fa-solid fa-industry"></i> Nhà cung cấp</label>
+                @Html.DropDownListFor(model => model.MaNCC, (SelectList)ViewBag.NhaCC, "--Chọn nhà cung cấp--", new { @class = "form-select" })
+                @Html.ValidationMessageFor(m => m.MaNCC, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Gian hàng -->
+            <div class="col-md-4">
+                <label class="form-label"><i class="fa-solid fa-store"></i> Gian hàng</label>
+                @Html.DropDownListFor(model => model.MaGH, (SelectList)ViewBag.GianHang, "--Chọn gian hàng--", new { @class = "form-select" })
+                @Html.ValidationMessageFor(m => m.MaGH, "", new { @class = "text-danger" })
+            </div>
         </div>
 
-        <div class="form-group mb-3">
-            <label><i class="fa-solid fa-list"></i> Loại sản phẩm</label>
-            @Html.DropDownListFor(model => model.MaLoai, (SelectList)ViewBag.LoaiSP, "--Chọn loại--", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.MaLoai, "", new { @class = "text-danger" })
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Thêm mới
+            </button>
+            <a asp-action="Index" asp-controller="SanPham" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left-long"></i> Quay lại
+            </a>
         </div>
-
-        <div class="form-group mb-4">
-            <label><i class="fa-solid fa-store"></i> Gian hàng</label>
-            @Html.DropDownListFor(model => model.MaGH, (SelectList)ViewBag.GianHang, "--Chọn gian hàng--", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.MaGH, "", new { @class = "text-danger" })
-        </div>
-
-        <button type="submit" class="btn btn-success me-2">
-            <i class="fa-solid fa-save"></i> Lưu
-        </button>
-        <a asp-action="Index" asp-controller="SanPham" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
     }
-
 </div>

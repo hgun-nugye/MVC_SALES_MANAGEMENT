@@ -4,47 +4,49 @@
     ViewBag.Title = "Xóa Sản phẩm";
 }
 
-<div class=" container">
-    <h4 class="text-danger mb-3">
-        <i class="fa-solid fa-trash"></i> Xóa Sản phẩm
-    </h4>
+<div class="container">
+    <h4 class="text-danger mb-3">Xóa Sản phẩm</h4>
 
     <div class="alert alert-warning shadow-sm">
-        <i class="fa-solid fa-triangle-exclamation"></i>
         Bạn có chắc muốn xóa sản phẩm <strong>@Model.TenSP</strong> không?
     </div>
 
-    <div class="card p-3 shadow-sm mb-3">
-        <p><strong>Mã Sản phẩm:</strong> @Model.MaSP</p>
-        <p><strong>Tên Sản phẩm:</strong> @Model.TenSP</p>
+    <div class="card shadow-sm p-3 mb-3">
+        <p><strong>Mã sản phẩm:</strong> @Model.MaSP</p>
+        <p><strong>Tên sản phẩm:</strong> @Model.TenSP</p>
         <p><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</p>
+        <p><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</p>
+        <p><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
+        <p><strong>Trạng thái:</strong> @Model.TrangThai</p>
         <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
-        <p><strong>Loại sản phẩm:</strong> @Model.LoaiSP?.TenLSP</p>
-        <p><strong>Gian hàng:</strong> @Model.GianHang?.TenGH</p>
+        <p><strong>Loại sản phẩm:</strong> @Model.TenLoai</p>
+        <p><strong>Nhà cung cấp:</strong> @Model.TenNCC</p>
+        <p><strong>Gian hàng:</strong> @Model.TenGH</p>
 
-        @* Hiển thị ảnh minh họa nếu có *@
         @if (!string.IsNullOrEmpty(Model.AnhMH))
         {
             <div class="mt-3">
-                <strong>Ảnh minh họa:</strong><br />
-                <img src="@Model.AnhMH" alt="Ảnh sản phẩm" style="max-width: 200px; border-radius: 8px; border: 1px solid #ccc;" />
+                <img src="@Model.AnhMH" alt="Ảnh sản phẩm"
+                     style="max-width:300px; height:auto; border-radius:8px; border:1px solid #ccc;" />
             </div>
         }
     </div>
 
-    <form id="deleteForm" asp-action="Delete" method="post" class="mt-3">
+    <form id="deleteForm" asp-action="Delete" method="post">
         @Html.AntiForgeryToken()
+
+        <!-- Các field ẩn cần gửi lên controller -->
         <input type="hidden" asp-for="MaSP" />
 
-        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-            <i class="fa-solid fa-trash-can"></i> Xóa
-        </button>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
+        <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                <i class="fa-solid fa-trash-can"></i> Xóa
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+        </div>
     </form>
-
 </div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

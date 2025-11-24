@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace QuanLyBanHang.Models
 {
@@ -14,5 +15,11 @@ namespace QuanLyBanHang.Models
 
 		public ICollection<LoaiSP>? LoaiSPs { get; set; }
 
+	}
+
+	[Keyless]
+	public class NhomSPCountDto
+	{
+		public int TotalRecords { get; set; }
 	}
 }
