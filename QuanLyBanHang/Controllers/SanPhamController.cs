@@ -82,7 +82,7 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (id == null) return NotFound();
 
-			var sp = (await _context.SanPham
+			var sp = (await _context.SanPhamDtos
 			.FromSqlRaw("EXEC SanPham_GetByID @MaSP", new SqlParameter("@MaSP", id))
 			.ToListAsync())
 			.FirstOrDefault();

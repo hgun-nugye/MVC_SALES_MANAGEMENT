@@ -70,8 +70,8 @@
                 </select>
             </div>
 
-            <button type="button" id="btnClearFilter" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Xóa</button>
-            <a href="@Url.Action("Create", "NhaCC")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Thêm</a>
+            <button type="button" id="btnClearFilter" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
+            <a href="@Url.Action("Create", "NhaCC")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
         </div>
 
         <!-- Hidden inputs giữ state -->
@@ -82,12 +82,12 @@
     <table class="table table-bordered table-hover align-middle text-center shadow-sm">
         <thead class="table-success">
             <tr>
-                <th><i class="fa-solid fa-hashtag"></i> Mã NCC</th>
-                <th><i class="fa-solid fa-id-badge"></i> Tên NCC</th>
-                <th><i class="fa-solid fa-phone"></i> Điện thoại</th>
-                <th><i class="fa-solid fa-envelope"></i> Email</th>
-                <th><i class="fa-solid fa-location-dot"></i> Địa chỉ</th>
-                <th><i class="fa-solid fa-gear"></i> Hành động</th>
+                <th>Mã NCC</th>
+                <th>Tên NCC</th>
+                <th>Điện thoại</th>
+                <th>Email</th>
+                <th>Địa chỉ</th>
+                <th>Hành động</th>
             </tr>
         </thead>
         <tbody>
@@ -96,7 +96,7 @@
     </table>
 
     <!-- Pagination + PageSize -->
-    <div class="d-flex justify-content-between align-items-center mt-2">
+    <div class="d-flex justify-content-between align-items-center mt-4">
         <!-- PageSize bên trái -->
         <div class="d-flex align-items-center gap-2">
             <label for="pageSizeSelect">Hiển thị:</label>

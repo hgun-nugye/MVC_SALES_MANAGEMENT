@@ -10,15 +10,14 @@ namespace QuanLyBanHang.Models
 		[StringLength(10)]
 		public string? MaLoai { get; set; } = null!;
 
-		[Required]
 		[StringLength(50)]
 		public string? TenLoai { get; set; } = null!;
 
 		// Khóa ngoại đến NhomSP
-		[Required]
 		[StringLength(10)]
 		public string? MaNhom { get; set; } = null!;
 
+		[NotMapped]
 		public string? TenNhom { get; set; }
 
 		[ForeignKey(nameof(MaNhom))]
