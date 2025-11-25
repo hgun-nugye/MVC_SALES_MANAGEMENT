@@ -8,17 +8,15 @@
         <i class="fa-solid fa-eye"></i> Chi tiết Khách hàng
     </h4>
 
-    <div class="card shadow-sm border-info">
-        <div class="card-body">
+    <div class="border p-4 rounded shadow-sm bg-light"">
             <p><strong><i class="fa-solid fa-hashtag"></i> Mã KH:</strong> @Model.MaKH</p>
             <p><strong><i class="fa-solid fa-id-badge"></i> Tên KH:</strong> @Model.TenKH</p>
             <p><strong><i class="fa-solid fa-phone"></i> Điện thoại:</strong> @Model.DienThoaiKH</p>
             <p><strong><i class="fa-solid fa-envelope"></i> Email:</strong> @Model.EmailKH</p>
             <p><strong><i class="fa-solid fa-location-dot"></i> Địa chỉ:</strong> @Model.DiaChiKH</p>
-        </div>
     </div>
 
-   <div class=" mt-3">
+   <div class=" mt-4">
        
         <a class="btn btn-warning text-white" href="@Url.Action("Edit", "KhachHang", new { id = Model.MaKH })">
             <i class="fa-solid fa-pen-to-square"></i> Sửa

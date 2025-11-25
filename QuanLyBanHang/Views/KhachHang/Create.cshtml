@@ -16,14 +16,16 @@
             <input asp-for="TenKH" class="form-control" />
         </div>
 
-        <div class="form-group mb-3">
-            <label>Điện thoại</label>
-            <input asp-for="DienThoaiKH" class="form-control" />
-        </div>
+        <div class="row">
+            <div class="form-group mb-3 col-md-6">
+                <label>Điện thoại</label>
+                <input asp-for="DienThoaiKH" class="form-control" />
+            </div>
 
-        <div class="form-group mb-3">
-            <label>Email</label>
-            <input asp-for="EmailKH" class="form-control" />
+            <div class="form-group mb-3 col-md-6">
+                <label>Email</label>
+                <input asp-for="EmailKH" class="form-control" />
+            </div>
         </div>
 
         <!-- ĐỊA CHỈ -->
@@ -57,13 +59,15 @@
                     </select>
                 </div>
             </div>
-        </div>
+        </div>       
+    </form>
 
+    <div class="mt-4">
         <button type="submit" class="btn btn-success">
             <i class="fa-solid fa-check"></i> Thêm mới
         </button>
         <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-    </form>
+    </div>
 </div>
 
 @section Scripts {

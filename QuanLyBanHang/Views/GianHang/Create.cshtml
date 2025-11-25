@@ -20,14 +20,16 @@
             <input asp-for="MoTaGH" class="form-control" />
         </div>
 
-        <div class="form-group mb-3">
-            <label><i class="fa-solid fa-location-dot"></i> Điện thoại</label>
-            <input asp-for="DienThoaiGH" class="form-control" />
-        </div>
-        <div class="form-group mb-3">
-            <label><i class="fa-solid fa-location-dot"></i>Email</label>
-            <input asp-for="EmailGH" class="form-control" />
-        </div>
+       <div class="row">
+            <div class="form-group mb-3 col-md-6">
+                <label><i class="fa-solid fa-location-dot"></i> Điện thoại</label>
+                <input asp-for="DienThoaiGH" class="form-control" />
+            </div>
+            <div class="form-group mb-3 col-md-6">
+                <label><i class="fa-solid fa-location-dot"></i>Email</label>
+                <input asp-for="EmailGH" class="form-control" />
+            </div>
+       </div>
 
         <!-- ĐỊA CHỈ -->
         <div class="form-group mb-3">
@@ -61,11 +63,15 @@
             </div>
         </div>
 
+       
+    </form>
+
+    <div class="mt-4">
         <button type="submit" class="btn btn-success">
             <i class="fa-solid fa-check"></i> Thêm mới
         </button>
         <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-    </form>
+    </div>
 </div>
 
 

@@ -6,12 +6,9 @@ namespace QuanLyBanHang.Models
 	public class NhomSP
 	{
 		[Key]
-		[Display(Name = "Mã nhóm sản phẩm")]
 		public string? MaNhom { get; set; }
 
-		[Required, StringLength(100)]
-		[Display(Name = "Tên nhóm sản phẩm")]
-		public string? TenNhom { get; set; }
+		public string TenNhom { get; set; }
 
 		public ICollection<LoaiSP>? LoaiSPs { get; set; }
 

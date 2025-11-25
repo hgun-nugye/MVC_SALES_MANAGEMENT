@@ -16,15 +16,16 @@
             <label class="fw-bold">Tên NCC</label>
             <input asp-for="TenNCC" class="form-control" />
         </div>
-        <div class="form-group mb-3">
-            <label class="fw-bold">Điện thoại</label>
-            <input asp-for="DienThoaiNCC" class="form-control" />
+        <div class="row">
+            <div class="form-group mb-3 col-md-6">
+                <label class="fw-bold">Điện thoại</label>
+                <input asp-for="DienThoaiNCC" class="form-control" />
+            </div>
+            <div class="form-group mb-3 col-md-6">
+                <label class="fw-bold">Email</label>
+                <input asp-for="EmailNCC" class="form-control" />
+            </div>
         </div>
-        <div class="form-group mb-3">
-            <label class="fw-bold">Email</label>
-            <input asp-for="EmailNCC" class="form-control" />
-        </div>
-
         <!-- ĐỊA CHỈ -->
         <div class="form-group mb-3">
             <label class="fw-bold">Địa chỉ</label>
@@ -57,14 +58,17 @@
             </div>
         </div>
 
+    </form>
+
+    <div class="mt-4">
+
         <button type="submit" class="btn btn-success">
             <i class="fa-solid fa-save"></i> Lưu
         </button>
         <a asp-action="Index" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
-    </form>
-
+    </div>
 </div>
 
 @section Scripts {

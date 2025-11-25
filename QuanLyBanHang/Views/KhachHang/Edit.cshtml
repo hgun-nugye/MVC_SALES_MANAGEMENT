@@ -12,23 +12,23 @@
     <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
         <div class="row g-3">
             <div class="col-md-6">
-                <label><i class="fa-solid fa-hashtag"></i> Mã KH</label>
+                <label>Mã KH</label>
                 <input asp-for="MaKH" class="form-control" readonly />
             </div>
             <div class="col-md-6">
-                <label><i class="fa-solid fa-id-badge"></i> Tên KH</label>
+                <label>Tên KH</label>
                 <input asp-for="TenKH" class="form-control" />
             </div>
             <div class="col-md-6">
-                <label><i class="fa-solid fa-phone"></i> Điện thoại</label>
+                <label>Điện thoại</label>
                 <input asp-for="DienThoaiKH" class="form-control" />
             </div>
             <div class="col-md-6">
-                <label><i class="fa-solid fa-envelope"></i> Email</label>
+                <label>Email</label>
                 <input asp-for="EmailKH" class="form-control" />
             </div>
             <div class="col-12">
-                <label><i class="fa-solid fa-location-dot"></i> Địa chỉ</label>
+                <label>Địa chỉ</label>
                 <input asp-for="DiaChiKH" class="form-control mb-2" readonly />
 
                 <!-- Input số nhà / đường -->
@@ -48,17 +48,17 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="mt-4 d-flex gap-2">
-            <button type="submit" class="btn btn-warning text-white">
-                <i class="fa-solid fa-save"></i> Cập nhật
-            </button>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
-            </a>
-        </div>
+        </div>       
     </form>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-warning text-white">
+            <i class="fa-solid fa-save"></i> Cập nhật
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
 </div>
 
 @section Scripts {
@@ -162,7 +162,7 @@
                     fullAddress = `${ward}, ${district}, ${province}`;
                 }
 
-                $('input[name="DiaChiGKH"]').val(fullAddress);
+                $('input[name="DiaChiKH"]').val(fullAddress);
             });
         });
     </script>

@@ -1,46 +1,53 @@
-﻿@model QuanLyBanHang.Models.SanPham
+﻿@model QuanLyBanHang.Models.SanPhamDto
 
 @{
     ViewBag.Title = "Chi tiết Sản phẩm";
 }
 
-<div class="container mb-4">
-    <h4 class="text-info mb-3">
-        Chi tiết Sản phẩm
-    </h4>
+<div class="container my-4">
+    <h3 class="text-info mb-4">
+        <i class="fa-solid fa-box"></i> Chi tiết Sản phẩm
+    </h3>
 
-    <div class="card shadow-sm border-info">
-        <div class="card-body">
-            <p><strong>Mã Sản phẩm:</strong> @Model.MaSP</p>
-            <p><strong>Tên Sản phẩm:</strong> @Model.TenSP</p>
-            <p><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</p>
-            <p><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</p>
-            <p><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
-            <p><strong>Trạng thái:</strong> @Model.TrangThai</p>
-            <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
-            <p><strong>Loại sản phẩm:</strong> @Model.TenLoai</p>
-            <p><strong>Nhà cung cấp:</strong> @Model.TenNCC</p>
-            <p><strong>Gian hàng:</strong> @Model.TenGH</p>
+    <div class="shadow-sm">
+        <div class="row">
+            <!-- Ảnh minh họa -->
+            <div class="col-md-5 text-center">
+                        <img src="@Url.Content( Model.AnhMH)"
+                             alt="@Model.TenSP"
+                             class="img-fluid rounded border"
+                             style="max-height: 400px; object-fit: contain;" />
+            </div>
 
-            @if (!string.IsNullOrEmpty(Model.AnhMH))
-            {
-                <div class="mt-3">
-                    <strong>Ảnh minh họa:</strong><br />
-                    <a href="@Model.AnhMH" target="_blank">
-                        <img src="@Url.Content("~/images/" + Model.AnhMH)" alt="@Model.TenSP" class="rounded border mt-2" style="max-width: 250px; height:auto;" />
-                                               
-                    </a>
+            <!-- Thông tin sản phẩm -->
+            <div class="col-md-7">
+                <div class="p-3">
+                    <h4 class="text-primary mb-3">@Model.TenSP</h4>
+                    <p><strong>Mã sản phẩm:</strong> @Model.MaSP</p>
+                    <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-2"><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</div>
+                        <div class="col-md-6 mb-2"><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</div>
+                        <div class="col-md-6 mb-2"><strong>Số lượng tồn:</strong> @Model.SoLuongTon</div>
+                        <div class="col-md-6 mb-2"><strong>Trạng thái:</strong> @Model.TrangThai</div>
+                        <div class="col-md-6 mb-2"><strong>Loại sản phẩm:</strong> @Model.TenLoai</div>
+                        <div class="col-md-6 mb-2"><strong>Nhà cung cấp:</strong> @Model.TenNCC</div>
+                        <div class="col-md-12 mb-2"><strong>Gian hàng:</strong> @Model.TenGH</div>
+                    </div>
+
+                    
                 </div>
-            }
+            </div>
         </div>
     </div>
 
-    <div class="my-3">
-        <a class="btn btn-warning text-white" href="@Url.Action("Edit", "SanPham", new { id = Model.MaSP })">
-            <i class="fa-solid fa-pen-to-square"></i> Sửa
+    <div class="mt-4">
+        <a class="btn btn-warning me-2 text-white" href="@Url.Action("Edit", "SanPham", new { id = Model.MaSP })">
+            <i class="fa-solid fa-pen-to-square text-white"></i> Sửa
         </a>
-        <a asp-action="Index" class="btn btn-secondary">
-            Quay lại
+        <a class="btn btn-secondary" href="@Url.Action("Index", "SanPham")">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </div>
 </div>

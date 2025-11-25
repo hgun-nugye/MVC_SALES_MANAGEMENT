@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
@@ -36,6 +37,7 @@ namespace QuanLyBanHang.Models
 
 		public string? TenSP { get; set; }
 	}
+	[Keyless]
 	public class CTMHDetailDto
 	{
 		public string MaDMH { get; set; }

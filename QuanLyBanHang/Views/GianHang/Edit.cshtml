@@ -12,31 +12,31 @@
     <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
 
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-hashtag"></i> Mã GH</label>
+            <label>Mã GH</label>
             <input asp-for="MaGH" class="form-control" readonly />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i> Tên GH</label>
+            <label>Tên GH</label>
             <input asp-for="TenGH" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i>Mô tả</label>
+            <label>Mô tả</label>
             <input asp-for="MoTaGH" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i>Ngày tạo</label>
+            <label>Ngày tạo</label>
             <input type="date" asp-for="NgayTao" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-phone"></i> Điện thoại</label>
+            <label>Điện thoại</label>
             <input asp-for="DienThoaiGH" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-envelope"></i> Email</label>
+            <label>Email</label>
             <input asp-for="EmailGH" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-location-dot"></i> Địa chỉ</label>
+            <label>Địa chỉ</label>
             <input asp-for="DiaChiGH" class="form-control mb-2" readonly />
 
             <!-- Input số nhà / đường -->
@@ -55,18 +55,16 @@
                     <select id="wardSelect" class="form-select"></select>
                 </div>
             </div>
-        </div>
-
-        <div class="mt-4 d-flex gap-2">
-            <button type="submit" class="btn btn-warning text-white">
-                <i class="fa-solid fa-save"></i> Cập nhật
-            </button>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
-            </a>
-        </div>
-
-   </form>
+        </div>       
+    </form>
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-warning text-white">
+            <i class="fa-solid fa-save"></i> Cập nhật
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
 </div>
 
 @section Scripts {
