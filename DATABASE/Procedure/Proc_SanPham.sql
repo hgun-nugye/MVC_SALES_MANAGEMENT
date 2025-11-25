@@ -15,23 +15,24 @@ CREATE OR ALTER PROC SanPham_Insert
     @SoLuongTon INT,
     @MaLoai VARCHAR(10),
     @MaNCC VARCHAR(10),
-	@MaGH VARCHAR(10)
+    @MaGH VARCHAR(10)
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DECLARE @MaSP VARCHAR(10);
-    DECLARE @Next INT;
+    DECLARE @MaxID INT;
 
-    -- Lấy mã lớn nhất hiện có, rồi cộng thêm 1
-    SELECT @Next = ISNULL(MAX(CAST(SUBSTRING(MaSP, 8, LEN(MaSP)) AS INT)), 0) + 1
+    -- Lấy số lớn nhất hiện có
+    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaSP, 3, LEN(MaSP)-2) AS INT)), 0)
     FROM SanPham;
 
-    SET @MaSP = 'SP' + RIGHT('00000000' + CAST(@Next AS VARCHAR(8)), 8);
+    -- Tăng lên 1
+    SET @MaSP = 'SP' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
-    -- Kiểm tra trùng tên sản phẩm
-    IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP)
+    -- Kiểm tra trùng tên sản phẩm trong cùng gian hàng
+    IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP AND MaGH = @MaGH)
     BEGIN
         RAISERROR(N'Tên sản phẩm đã tồn tại!', 16, 1);
         RETURN;
@@ -51,11 +52,19 @@ BEGIN
         RETURN;
     END;
 
-    -- Thực hiện thêm mới
-    INSERT INTO SanPham(MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH, TrangThai, SoLuongTon, MaLoai, MaNCC, MaGH)
-    VALUES (@MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH);
+    BEGIN TRY
+        INSERT INTO SanPham(MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH, TrangThai, SoLuongTon, MaLoai, MaNCC, MaGH)
+        VALUES (@MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH);
+
+        PRINT N'Thêm sản phẩm thành công!';
+    END TRY
+    BEGIN CATCH
+        DECLARE @Err NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(N'Lỗi khi thêm sản phẩm: %s', 16, 1, @Err);
+    END CATCH
 END;
 GO
+
 
 ---------------------------------------------------------
 -- ========== UPDATE ==========
@@ -163,14 +172,19 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
-    FROM SanPham S
-	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
-	JOIN GianHang G ON G.MaGH=S.MaGH
-	JOIN NhaCC N ON N.MaNCC=S.MaNCC
-    WHERE S.MaSP = @MaSP;
+    SELECT 
+        sp.*,
+        l.TenLoai,
+        n.TenNCC,
+        g.TenGH
+    FROM SanPham sp
+    LEFT JOIN LoaiSP l ON sp.MaLoai = l.MaLoai
+    LEFT JOIN NhaCC n ON sp.MaNCC = n.MaNCC
+    LEFT JOIN GianHang g ON sp.MaGH = g.MaGH
+    WHERE sp.MaSP = @MaSP;
 END;
 GO
+
 
 ---------------------------------------------------------
 -- ========== SEARCH (tùy chọn, cho MVC lọc dữ liệu) ==========

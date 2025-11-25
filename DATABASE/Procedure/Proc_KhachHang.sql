@@ -29,10 +29,14 @@ BEGIN
     END;
 
     DECLARE @MaKH VARCHAR(10);
-    DECLARE @Count INT;
+    DECLARE @MaxID INT;
 
-    SELECT @Count = COUNT(*) + 1 FROM KhachHang;
-    SET @MaKH = 'KH' + RIGHT('00000000' + CAST(@Count AS VARCHAR(8)), 8);
+    -- Lấy số lớn nhất hiện có
+    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaKH, 3, LEN(MaKH)-2) AS INT)), 0)
+    FROM KhachHang;
+
+    -- Tăng lên 1
+    SET @MaKH = 'KH' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
     BEGIN TRY
         INSERT INTO KhachHang(MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH)
@@ -46,7 +50,6 @@ BEGIN
     END CATCH
 END;
 GO
-
 
 -- ============================
 -- UPDATE

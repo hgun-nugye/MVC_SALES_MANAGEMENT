@@ -28,10 +28,14 @@ BEGIN
     END;
 
     DECLARE @MaLoai VARCHAR(10);
-    DECLARE @Count INT;
+    DECLARE @MaxID INT;
 
-    SELECT @Count = COUNT(*) + 1 FROM LoaiSP;
-    SET @MaLoai = 'LSP' + RIGHT('0000000' + CAST(@Count AS VARCHAR(7)), 7);
+    -- Lấy số lớn nhất hiện có
+    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaLoai, 4, LEN(MaLoai)-3) AS INT)), 0)
+    FROM LoaiSP;
+
+    -- Tăng lên 1
+    SET @MaLoai = 'LSP' + RIGHT('0000000' + CAST(@MaxID + 1 AS VARCHAR(7)), 7);
 
     BEGIN TRY
         INSERT INTO LoaiSP(MaLoai, TenLoai, MaNhom)
@@ -45,7 +49,6 @@ BEGIN
     END CATCH
 END;
 GO
-
 
 -- ============================
 -- UPDATE

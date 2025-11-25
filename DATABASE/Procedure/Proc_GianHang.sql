@@ -16,6 +16,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Kiểm tra trùng tên hoặc số điện thoại
     IF EXISTS (SELECT 1 FROM GianHang WHERE TenGH = @TenGH)
     BEGIN
         RAISERROR(N'Tên gian hàng đã tồn tại!', 16, 1);
@@ -28,12 +29,20 @@ BEGIN
         RETURN;
     END;
 
-    DECLARE @Count INT = (SELECT COUNT(*) + 1 FROM GianHang);
-    DECLARE @MaGH VARCHAR(10) = 'GH' + RIGHT('00000000' + CAST(@Count AS VARCHAR(8)), 8);
+    DECLARE @MaGH VARCHAR(10);
+    DECLARE @MaxID INT;
+
+    -- Lấy số lớn nhất hiện có
+    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaGH, 3, LEN(MaGH)-2) AS INT)), 0)
+    FROM GianHang;
+
+    -- Tăng lên 1
+    SET @MaGH = 'GH' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
     BEGIN TRY
         INSERT INTO GianHang (MaGH, TenGH, MoTaGH, NgayTao, DienThoaiGH, EmailGH, DiaChiGH)
         VALUES (@MaGH, @TenGH, @MoTaGH, GETDATE(), @DienThoaiGH, @EmailGH, @DiaChiGH);
+
         PRINT N'Thêm gian hàng thành công!';
     END TRY
     BEGIN CATCH

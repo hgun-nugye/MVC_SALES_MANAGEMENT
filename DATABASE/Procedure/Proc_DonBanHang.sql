@@ -22,20 +22,21 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @MaDBH CHAR(11);
-    DECLARE @Count INT;
+    DECLARE @MaxNum INT;
     DECLARE @Prefix VARCHAR(8);
 
-    -- Tạo mã dạng: BYYMMDD####
+    -- Tạo prefix BYYMMDD (vd: B251119)
     SET @Prefix = 'B' +
                   RIGHT(CAST(YEAR(@NgayBH) AS VARCHAR(4)), 2) +
                   RIGHT('0' + CAST(MONTH(@NgayBH) AS VARCHAR(2)), 2) +
                   RIGHT('0' + CAST(DAY(@NgayBH) AS VARCHAR(2)), 2);
 
-    SELECT @Count = COUNT(*) + 1
+    -- Lấy số lớn nhất trong ngày và tăng lên 1
+    SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDBH,4) AS INT)),0)
     FROM DonBanHang
     WHERE CONVERT(DATE, NgayBH) = @NgayBH;
 
-    SET @MaDBH = @Prefix + RIGHT('0000' + CAST(@Count AS VARCHAR(4)), 4);
+    SET @MaDBH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
 
     -- Thêm đơn bán hàng
     INSERT INTO DonBanHang(MaDBH, NgayBH, MaKH)
@@ -48,7 +49,6 @@ BEGIN
 
 END;
 GO
-
 
 ---------------------------------------------------------
 -- ========== UPDATE ==========

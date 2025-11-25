@@ -14,6 +14,7 @@ CREATE OR ALTER PROC NhaCC_Insert
 AS
 BEGIN
     SET NOCOUNT ON;
+
     BEGIN TRY
         -- Kiểm tra trùng tên hoặc email hoặc số điện thoại
         IF EXISTS (SELECT 1 FROM NhaCC WHERE TenNCC = @TenNCC)
@@ -34,10 +35,14 @@ BEGIN
             RETURN;
         END
 
-        -- Sinh mã NCC tự động
+        -- Sinh mã NCC tự động dựa trên số lớn nhất
         DECLARE @MaNCC VARCHAR(10);
-        SELECT @MaNCC = 'NCC' + RIGHT('0000000' + CAST(ISNULL(COUNT(*) + 1, 1) AS VARCHAR(7)),7)
+        DECLARE @MaxID INT;
+
+        SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaNCC, 4, LEN(MaNCC)-3) AS INT)), 0)
         FROM NhaCC;
+
+        SET @MaNCC = 'NCC' + RIGHT('0000000' + CAST(@MaxID + 1 AS VARCHAR(7)), 7);
 
         -- Thêm dữ liệu
         INSERT INTO NhaCC(MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC)
@@ -46,10 +51,12 @@ BEGIN
         PRINT N'Thêm nhà cung cấp thành công.';
     END TRY
     BEGIN CATCH
-        RAISERROR(N'Lỗi khi thêm nhà cung cấp: %s', 16, 1);
+        DECLARE @Err NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(N'Lỗi khi thêm nhà cung cấp: %s', 16, 1, @Err);
     END CATCH
 END;
 GO
+
 
 -- ==========================================
 -- UPDATE: Cập nhật nhà cung cấp

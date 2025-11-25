@@ -20,10 +20,14 @@ BEGIN
     END;
 
     DECLARE @MaNhom VARCHAR(10);
-    DECLARE @Count INT;
+    DECLARE @MaxID INT;
 
-    SELECT @Count = COUNT(*) + 1 FROM NhomSP;
-    SET @MaNhom = 'NSP' + RIGHT('0000000' + CAST(@Count AS VARCHAR(7)), 7);
+    -- Lấy số lớn nhất hiện tại
+    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaNhom, 4, 7) AS INT)), 0)
+    FROM NhomSP;
+
+    -- Tăng lên 1
+    SET @MaNhom = 'NSP' + RIGHT('0000000' + CAST(@MaxID + 1 AS VARCHAR(7)), 7);
 
     BEGIN TRY
         INSERT INTO NhomSP (MaNhom, TenNhom)

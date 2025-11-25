@@ -27,10 +27,14 @@ BEGIN
         END
 
         DECLARE @MaKM VARCHAR(10);
-        DECLARE @Count INT;
+        DECLARE @MaxID INT;
 
-        SELECT @Count = COUNT(*) + 1 FROM KhuyenMai;
-        SET @MaKM = 'KM' + RIGHT('00000000' + CAST(@Count AS VARCHAR(8)), 8);
+        -- Lấy số lớn nhất hiện có
+        SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaKM, 3, LEN(MaKM)-2) AS INT)), 0)
+        FROM KhuyenMai;
+
+        -- Tăng lên 1
+        SET @MaKM = 'KM' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
         INSERT INTO KhuyenMai(MaKM, TenKM, MoTaKM, GiaTriKM, NgayBatDau, NgayKetThuc, DieuKienApDung, TrangThai)
         VALUES (@MaKM, @TenKM, @MoTaKM, @GiaTriKM, @NgayBatDau, @NgayKetThuc, @DieuKienApDung, @TrangThai);
@@ -44,7 +48,6 @@ BEGIN
     END CATCH
 END;
 GO
-
 
 -- =============================================
 -- ================ UPDATE =====================
