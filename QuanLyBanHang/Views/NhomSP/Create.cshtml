@@ -12,14 +12,14 @@
     <form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
 
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i> Tên Nhóm</label>
+            <label>Tên Nhóm</label>
             <input asp-for="TenNhom" class="form-control" />
         </div>
 
         <button type="submit" class="btn btn-success">
-            <i class="fa-solid fa-save"></i> Lưu
+            <i class="fa-solid fa-check"></i> Thêm mới
         </button>
-        <a asp-action="Index" class="btn btn-secondary">
+        <a asp-action="Create" asp-controller="LoaiSP" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </form>

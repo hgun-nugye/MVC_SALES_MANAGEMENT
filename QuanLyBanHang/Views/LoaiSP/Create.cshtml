@@ -9,29 +9,48 @@
         <i class="fa-solid fa-circle-plus"></i> Thêm Loại sản phẩm
     </h4>
 
-    <form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
+    <form asp-action="Create" method="post" class="border p-4 rounded-3 shadow-sm bg-white">
         @Html.AntiForgeryToken()
 
-        <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i> Tên Loại</label>
-            <input asp-for="TenLoai" class="form-control" />
+        <!-- Tên loại -->
+        <div class="mb-3 fw-bold">
+            <label class="form-label fw-semibold">
+                Tên Loại
+            </label>
+            <input asp-for="TenLoai" class="form-control" placeholder="Nhập tên loại sản phẩm..." />
+            <span asp-validation-for="TenLoai" class="text-danger"></span>
         </div>
 
-        <div class="form-group mb-3">
-            <label><i class="fa-solid fa-layer-group"></i> Nhóm sản phẩm</label>
-            <select asp-for="MaNhom" asp-items="ViewBag.MaNhomList" class="form-control">
-                <option value="">-- Chọn nhóm sản phẩm --</option>
-            </select>
+        <!-- Nhóm sản phẩm -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">
+                <i class="fa-solid fa-layer-group me-1"></i> Nhóm sản phẩm
+            </label>
+
+            <div class="input-group gap-2">
+                <select asp-for="MaNhom" asp-items="ViewBag.MaNhomList" class="form-select">
+                    <option value="">-- Chọn nhóm sản phẩm --</option>
+                </select>
+
+                <a href="@Url.Action("Create", "NhomSP")" class="btn btn-success rounded">
+                    <i class="fa-solid fa-circle-plus"></i>
+                </a>
+            </div>
+
             <span asp-validation-for="MaNhom" class="text-danger"></span>
         </div>
 
+        <!-- Buttons -->
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Thêm mới
+            </button>
 
-        <button type="submit" class="btn btn-success">
-            <i class="fa-solid fa-save"></i> Lưu
-        </button>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
     </form>
+
 
 </div>

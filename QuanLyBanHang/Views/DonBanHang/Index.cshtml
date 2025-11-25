@@ -58,25 +58,28 @@
         <!-- FILTER GROUP -->
         <div class="d-flex flex-wrap align-items-center gap-2">
 
-            <!-- THÁNG -->
-            <select name="month" id="monthSelect" class="form-select" style="width: 130px;">
-                <option value="">-- Tháng --</option>
-                @for (int i = 1; i <= 12; i++)
-                {
-                    @Html.Raw($"<option value='{i}' {(ViewBag.Month == i ? "selected" : "")}>Tháng {i}</option>")
-                }
-            </select>
+            <div class="d-flex align-items-center gap-2">
+                <label class="w-100 text-end opacity-50"> <i class="fa fa-filter me-2"></i>Filter:</label>
+                <!-- THÁNG -->
+                <select name="month" id="monthSelect" class="form-select" style="width: 130px;">
+                    <option value="">-- Tháng --</option>
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        @Html.Raw($"<option value='{i}' {(ViewBag.Month == i ? "selected" : "")}>Tháng {i}</option>")
+                    }
+                </select>
 
-            <!-- NĂM -->
-            <select name="year" id="yearSelect" class="form-select" style="width: 130px;">
-                <option value="">-- Năm --</option>
-                @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 10; y--)
-                {
-                    @Html.Raw($"<option value='{y}' {(ViewBag.Year == y ? "selected" : "")}>{y}</option>")
-                }
-            </select>
+                <!-- NĂM -->
+                <select name="year" id="yearSelect" class="form-select" style="width: 130px;">
+                    <option value="">-- Năm --</option>
+                    @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 10; y--)
+                    {
+                        @Html.Raw($"<option value='{y}' {(ViewBag.Year == y ? "selected" : "")}>{y}</option>")
+                    }
+                </select>
+            </div>           
 
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-success">
                 <i class="fa fa-filter"></i> Lọc
             </button>
 

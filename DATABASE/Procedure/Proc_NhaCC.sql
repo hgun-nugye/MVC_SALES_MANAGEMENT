@@ -163,29 +163,50 @@ BEGIN
 END;
 GO
 
--- ============================
--- SEARCH
--- ============================
-CREATE OR ALTER PROC NhaCC_Search
-(
-    @MaNCC VARCHAR(10) = NULL,
-    @TenNCC NVARCHAR(100) = NULL,
-    @DienThoaiNCC VARCHAR(15) = NULL,
-    @EmailNCC VARCHAR(100) = NULL,
-    @DiaChiNCC NVARCHAR(255) = NULL
-)
+-- Search & Filter
+CREATE OR ALTER PROCEDURE NhaCC_SearchFilter
+    @Search NVARCHAR(100) = NULL,   
+	@TinhFilter NVARCHAR(100) = NULL,    -- filter theo Tỉnh
+    @PageNumber INT = 1,
+    @PageSize INT = 10
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC
-    FROM NhaCC
-    WHERE 
-        (@MaNCC IS NULL OR MaNCC LIKE '%' + @MaNCC + '%') AND
-        (@TenNCC IS NULL OR TenNCC LIKE '%' + @TenNCC + '%') AND
-        (@DienThoaiNCC IS NULL OR DienThoaiNCC LIKE '%' + @DienThoaiNCC + '%') AND
-        (@EmailNCC IS NULL OR EmailNCC LIKE '%' + @EmailNCC + '%') AND
-        (@DiaChiNCC IS NULL OR DiaChiNCC LIKE '%' + @DiaChiNCC + '%')
-    ORDER BY TenNCC;
+    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
+
+    SELECT *
+    FROM NhaCC N
+    WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR N.MaNCC LIKE '%' + @Search + '%'
+            OR N.TenNCC LIKE '%' + @Search + '%'
+            OR N.EmailNCC LIKE '%' + @Search + '%')
+        AND (
+            @TinhFilter IS NULL 
+            OR N.DiaChiNCC LIKE '%' + @TinhFilter + '%'
+        )
+END;
+GO
+
+-- count
+CREATE OR ALTER PROC NhaCC_Count
+    @Search NVARCHAR(100) = NULL,   
+	@TinhFilter NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*)
+    FROM NhaCC N
+    WHERE
+        (@Search IS NULL OR @Search = '' 
+            OR N.MaNCC LIKE '%' + @Search + '%'
+            OR N.TenNCC LIKE '%' + @Search + '%'
+            OR N.EmailNCC LIKE '%' + @Search + '%')
+        AND (
+            @TinhFilter IS NULL 
+            OR N.DiaChiNCC LIKE '%' + @TinhFilter + '%'
+        )
 END;
 GO

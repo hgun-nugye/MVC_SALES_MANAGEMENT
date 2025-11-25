@@ -14,11 +14,11 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		
+
 		// READ - Danh sách nhóm sản phẩm 
 		public async Task<IActionResult> Index()
 		{
-			var dsNhomSP = await _context.NhomSP.FromSqlRaw("EXEC NhomSP_GetAll")
+			var dsNhomSP = await _context.NhomSP.FromSqlRaw("EXEC Nhom_GetAll")
 				.ToListAsync();
 
 			return View(dsNhomSP);
@@ -27,7 +27,7 @@ namespace QuanLyBanHang.Controllers
 		// DETAILS - Xem chi tiết
 		public async Task<IActionResult> Details(string id)
 		{
-			var tinh = (await _context.NhomSP.FromSqlInterpolated($"EXEC NhomSP_GetByID @MaNhom = {id}")
+			var tinh = (await _context.NhomSP.FromSqlInterpolated($"EXEC Nhom_GetByID @MaNhom = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
@@ -54,12 +54,11 @@ namespace QuanLyBanHang.Controllers
 				try
 				{
 					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-				EXEC NhomSP_Insert 
-					@TenNhom = {model.TenNhom}
-			");
+						EXEC Nhom_Insert @TenNhom = {model.TenNhom}
+						");
 
 					TempData["SuccessMessage"] = "Thêm nhóm sản phẩm thành công!";
-					return RedirectToAction(nameof(Index));
+					return RedirectToAction(nameof(Create));
 				}
 				catch (Exception ex)
 				{
@@ -73,7 +72,6 @@ namespace QuanLyBanHang.Controllers
 				TempData["ErrorMessage"] = "Dữ liệu không hợp lệ!";
 			}
 
-			// Không redirect nếu có lỗi — ở lại form
 			return View(model);
 		}
 
@@ -86,7 +84,7 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 
 			var tinh = (await _context.NhomSP
-				.FromSqlInterpolated($"EXEC NhomSP_GetByID @MaNhom = {id}")
+				.FromSqlInterpolated($"EXEC Nhom_GetByID @MaNhom = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
@@ -106,7 +104,7 @@ namespace QuanLyBanHang.Controllers
 				try
 				{
 					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-					EXEC NhomSP_Update 
+					EXEC Nhom_Update 
 						@MaNhom = {model.MaNhom},
 						@TenNhom = {model.TenNhom}
 				");
@@ -146,7 +144,7 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var tinh = (await _context.NhomSP.FromSqlInterpolated($"EXEC NhomSP_GetByID @MaNhom = {id}")
+			var tinh = (await _context.NhomSP.FromSqlInterpolated($"EXEC Nhom_GetByID @MaNhom = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
@@ -167,13 +165,13 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var tinh = (await _context.NhomSP.FromSqlInterpolated($"EXEC NhomSP_GetByID @MaNhom = {id}")
+			var tinh = (await _context.NhomSP.FromSqlInterpolated($"EXEC Nhom_GetByID @MaNhom = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
 			if (tinh != null)
 			{
-				await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC NhomSP_Delete @MaNhom = {id}");
+				await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC Nhom_Delete @MaNhom = {id}");
 				TempData["SuccessMessage"] = "Đã xóa nhóm sản phẩm thành công!";
 			}
 			else

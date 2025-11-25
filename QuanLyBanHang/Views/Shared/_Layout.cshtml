@@ -131,6 +131,14 @@
                 .table::-webkit-scrollbar-thumb:hover {
                     background-color: #28a745;
                 }
+
+        .search-wrapper i{
+            color: #198754 !important;
+        }
+
+        label{
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -140,7 +148,7 @@
     <div class="sidebar">
         <h4 class="pb-3 border-bottom"> <i class="fa-solid fa-folder"></i> Danh mục</h4>
 
-        <a asp-controller="NhaCC" asp-action="Index"
+        <a asp-controller="Home" asp-action="Index"
            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "") mb-3">
             <i class="fa-solid fa-bars-progress"></i> Dashboard
         </a>
@@ -165,10 +173,10 @@
             <i class="fa-solid fa-tags"></i> Loại Sản Phẩm
         </a>
 
-        <a asp-controller="NhomSP" asp-action="Index"
+        @* <a asp-controller="NhomSP" asp-action="Index"
            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhomSP" ? "active" : "") mb-3">
             <i class="fa-solid fa-layer-group"></i> Nhóm Sản Phẩm
-        </a>
+        </a> *@
 
         <a asp-controller="SanPham" asp-action="Index"
            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "") mb-3">

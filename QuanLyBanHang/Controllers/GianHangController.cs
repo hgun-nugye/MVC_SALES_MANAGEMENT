@@ -15,40 +15,38 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
+		public async Task<IActionResult> Index(string? search, string province, int pageNumber = 1, int pageSize = 10)
 		{
 			ViewBag.Search = search;
-			ViewBag.Month = month;
-			ViewBag.Year = year;
 			ViewBag.PageNumber = pageNumber;
 			ViewBag.PageSize = pageSize;
 
 			// Tham số cho SP lấy danh sách
 			var parameters = new[]
 			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value),
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),               
+				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province),
 				new SqlParameter("@PageNumber", pageNumber),
 				new SqlParameter("@PageSize", pageSize)
 			};
 
 			// Lấy danh sách gian hàng (chỉ các cột trong entity GianHang)
 			var model = await _context.GianHang
-				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @Month, @Year, @PageNumber, @PageSize", parameters)
+				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @DiaChiFilter, @PageNumber, @PageSize", parameters)
 				.ToListAsync();
+			ViewBag.SelectedProvince = province;
 
 			// Lấy tổng số bản ghi (1 row)
 			var countParams = new[]
 			{
 				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province)
+
 			};
 
 			var totalRecords = _context.GianHangCountDtos
-							.FromSqlRaw("EXEC GianHang_Count @Search, @Month, @Year", countParams)
-							.AsEnumerable()         
+							.FromSqlRaw("EXEC GianHang_Count @Search, @DiaChiFilter", countParams)
+							.AsEnumerable()
 							.Select(x => x.TotalRecords)
 							.FirstOrDefault();
 
@@ -222,17 +220,17 @@ namespace QuanLyBanHang.Controllers
 
 		// ============ SEARCH ============
 		[HttpGet]
-		public async Task<IActionResult> Search(string keyword, int? month, int? year)
+		public async Task<IActionResult> Search(string keyword, string? tinhFilter)
 		{
 			var parameters = new[]
 			{
 				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+				new SqlParameter("@TinhFilter", (object?)tinhFilter ?? DBNull.Value)
+
 			};
 
 			var data = await _context.GianHang
-				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @Month, @Year", parameters)
+				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @TinhFilter", parameters)
 				.ToListAsync();
 
 			return PartialView("GianHangTable", data);
@@ -243,7 +241,7 @@ namespace QuanLyBanHang.Controllers
 		public async Task<IActionResult> ClearFilter()
 		{
 			var data = await _context.GianHang
-				.FromSqlRaw("EXEC GianHang_SearchFilter @Search=NULL, @Month=NULL, @Year=NULL")
+				.FromSqlRaw("EXEC GianHang_SearchFilter @Search=NULL, @TinhFilter=NULL")
 				.ToListAsync();
 
 			return PartialView("GianHangTable", data);

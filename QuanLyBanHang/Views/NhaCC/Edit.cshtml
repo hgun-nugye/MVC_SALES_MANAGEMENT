@@ -11,24 +11,41 @@
 
     <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-hashtag"></i> Mã NCC</label>
+            <label>Mã NCC</label>
             <input asp-for="MaNCC" class="form-control" readonly />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-id-badge"></i> Tên NCC</label>
+            <label>Tên NCC</label>
             <input asp-for="TenNCC" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-phone"></i> Điện thoại</label>
+            <label>Điện thoại</label>
             <input asp-for="DienThoaiNCC" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-envelope"></i> Email</label>
+            <label>Email</label>
             <input asp-for="EmailNCC" class="form-control" />
         </div>
         <div class="form-group mb-3">
-            <label><i class="fa-solid fa-location-dot"></i> Địa chỉ</label>
-            <input asp-for="DiaChiNCC" class="form-control" />
+            <label>Địa chỉ</label>
+            <input asp-for="DiaChiNCC" class="form-control mb-2" readonly />
+
+            <!-- Input số nhà / đường -->
+            <input type="text" id="streetInput" class="form-control mb-2" placeholder="Số nhà, tên đường..." />
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label>Tỉnh/Thành phố</label>
+                    <select id="provinceSelect" class="form-select"></select>
+                </div>
+                <div class="col-md-4">
+                    <label>Quận/Huyện</label>
+                    <select id="districtSelect" class="form-select"></select>
+                </div>
+                <div class="col-md-4">
+                    <label>Xã/Phường</label>
+                    <select id="wardSelect" class="form-select"></select>
+                </div>
+            </div>
         </div>
 
         <button type="submit" class="btn btn-warning text-white">
@@ -40,3 +57,110 @@
     </form>
 
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let provincesData = [];
+            let oldAddress = '@Html.Raw(Model?.DiaChiNCC ?? "")'.trim();
+            let oldStreet = "", oldWard = "", oldDistrict = "", oldProvince = "";
+
+            // Tách address cũ (nếu Edit)
+            if(oldAddress){
+                const parts = oldAddress.split(',').map(x => x.trim());
+                if(parts.length === 4){
+                    oldStreet = parts[0];
+                    oldWard = parts[1];
+                    oldDistrict = parts[2];
+                    oldProvince = parts[3];
+                } else if(parts.length === 3){
+                    oldWard = parts[0];
+                    oldDistrict = parts[1];
+                    oldProvince = parts[2];
+                }
+            }
+
+            // Load provinces
+            $.getJSON('/Address/LoadAddress', function(data){
+                provincesData = data;
+                data.forEach(p => $('#provinceSelect').append(`<option value="${p.name}">${p.name}</option>`));
+
+                // Auto-fill dropdown + street nếu Edit
+                if(oldAddress){
+                    if(oldProvince) $('#provinceSelect').val(oldProvince).trigger('change');
+                    setTimeout(() => {
+                        if(oldDistrict) $('#districtSelect').val(oldDistrict).trigger('change');
+                        setTimeout(() => {
+                            if(oldWard) $('#wardSelect').val(oldWard);
+                            if(oldStreet) $('#streetInput').val(oldStreet);
+                        }, 200);
+                    }, 200);
+                }
+            });
+
+            // Khi chọn province
+            $('#provinceSelect').on('change', function(){
+                const province = $(this).val();
+                $('#districtSelect').html('<option value="">-- Chọn huyện --</option>');
+                $('#wardSelect').html('<option value="">-- Chọn xã --</option>');
+
+                const selectedProvince = provincesData.find(p => p.name === province);
+                if(selectedProvince){
+                    selectedProvince.districts.forEach(d =>
+                        $('#districtSelect').append(`<option value="${d.name}">${d.name}</option>`)
+                    );
+                }
+            });
+
+            // Khi chọn district
+            $('#districtSelect').on('change', function(){
+                const province = $('#provinceSelect').val();
+                const district = $(this).val();
+                $('#wardSelect').html('<option value="">-- Chọn xã --</option>');
+
+                const selectedProvince = provincesData.find(p => p.name === province);
+                if(selectedProvince){
+                    const selectedDistrict = selectedProvince.districts.find(d => d.name === district);
+                    if(selectedDistrict){
+                        selectedDistrict.wards.forEach(w =>
+                            $('#wardSelect').append(`<option value="${w.name}">${w.name}</option>`)
+                        );
+                    }
+                }
+            });
+
+            // Submit form
+            $('form').on('submit', function(){
+                const street = $('#streetInput').val().trim();
+                let province = $('#provinceSelect').val();
+                let district = $('#districtSelect').val();
+                let ward = $('#wardSelect').val();
+
+                // Nếu Edit: giữ nguyên cũ nếu dropdown trống
+                if(oldAddress){
+                    if(!province) province = oldProvince;
+                    if(!district) district = oldDistrict;
+                    if(!ward) ward = oldWard;
+                }
+
+                // Nếu Create: bắt buộc chọn đầy đủ dropdown
+                if(!oldAddress){
+                    if(!province || !district || !ward){
+                        alert("Vui lòng chọn đầy đủ Tỉnh / Huyện / Xã");
+                        return false;
+                    }
+                }
+
+                // Gộp địa chỉ
+                let fullAddress = "";
+                if(street){
+                    fullAddress = `${street}, ${ward}, ${district}, ${province}`;
+                } else {
+                    fullAddress = `${ward}, ${district}, ${province}`;
+                }
+
+                $('input[name="DiaChiNCC"]').val(fullAddress);
+            });
+        });
+    </script>
+}

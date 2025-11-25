@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
@@ -14,13 +15,46 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		// READ - Danh sách Nhà cung cấp
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string? search, string province, int pageNumber = 1, int pageSize = 10)
 		{
-			var dsNhaCC = await _context.NhaCC.FromSqlRaw("EXEC NhaCC_GetAll")
-				.ToListAsync();
+			ViewBag.Search = search;
+			ViewBag.PageNumber = pageNumber;
+			ViewBag.PageSize = pageSize;
 
-			return View(dsNhaCC);
+			// Tham số cho SP lấy danh sách
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province),
+				new SqlParameter("@PageNumber", pageNumber),
+				new SqlParameter("@PageSize", pageSize)
+			};
+
+			// Lấy danh sách nhà cung cấp (chỉ các cột trong entity NhaCC)
+			var model = await _context.NhaCC
+				.FromSqlRaw("EXEC NhaCC_SearchFilter @Search, @DiaChiFilter, @PageNumber, @PageSize", parameters)
+				.ToListAsync();
+			ViewBag.SelectedProvince = province;
+
+			// Lấy tổng số bản ghi (1 row)
+			var countParams = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province)
+
+			};
+
+			var totalRecords = _context.NhaCCCountDtos
+							.FromSqlRaw("EXEC NhaCC_Count @Search, @DiaChiFilter", countParams)
+							.AsEnumerable()
+							.Select(x => x.TotalRecords)
+							.FirstOrDefault();
+
+
+			ViewBag.TotalRecords = totalRecords;
+			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+			return View(model);
 		}
 
 		// DETAILS - Xem chi tiết
@@ -164,5 +198,35 @@ namespace QuanLyBanHang.Controllers
 
 			return RedirectToAction(nameof(Index));
 		}
+
+		// ============ SEARCH ============
+		[HttpGet]
+		public async Task<IActionResult> Search(string keyword, string? tinhFilter)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
+				new SqlParameter("@TinhFilter", (object?)tinhFilter ?? DBNull.Value)
+
+			};
+
+			var data = await _context.NhaCC
+				.FromSqlRaw("EXEC NhaCC_SearchFilter @Search, @TinhFilter", parameters)
+				.ToListAsync();
+
+			return PartialView("NhaCCTable", data);
+		}
+
+
+		// ============ RESET FILTER ============
+		public async Task<IActionResult> ClearFilter()
+		{
+			var data = await _context.NhaCC
+				.FromSqlRaw("EXEC NhaCC_SearchFilter @Search=NULL, @TinhFilter=NULL")
+				.ToListAsync();
+
+			return PartialView("NhaCCTable", data);
+		}
+
 	}
 }

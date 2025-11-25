@@ -153,8 +153,7 @@ GO
 -- Search & Filter
 CREATE OR ALTER PROCEDURE GianHang_SearchFilter
     @Search NVARCHAR(100) = NULL,
-    @Month INT = NULL,
-    @Year INT = NULL,
+	@TinhFilter NVARCHAR(100) = NULL, 
     @PageNumber INT = 1,
     @PageSize INT = 10
 AS
@@ -170,8 +169,10 @@ BEGIN
             OR G.MaGH LIKE '%' + @Search + '%'
             OR G.TenGH LIKE '%' + @Search + '%'
             OR G.EmailGH LIKE '%' + @Search + '%')
-        AND (@Month IS NULL OR MONTH(G.NgayTao) = @Month)
-        AND (@Year IS NULL OR YEAR(G.NgayTao) = @Year)
+         AND (
+            @TinhFilter IS NULL 
+            OR G.DiaChiGH LIKE '%' + @TinhFilter + '%'
+        )
     ORDER BY G.NgayTao ASC 
     OFFSET @StartRow ROWS
     FETCH NEXT @PageSize ROWS ONLY;
@@ -180,9 +181,9 @@ GO
 
 -- count
 CREATE OR ALTER PROC GianHang_Count
-    @Search NVARCHAR(100) = NULL,
-    @Month INT = NULL,
-    @Year INT = NULL
+    @Search NVARCHAR(100) = NULL,    
+	@TinhFilter NVARCHAR(100) = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -194,7 +195,9 @@ BEGIN
             OR G.MaGH LIKE '%' + @Search + '%'
             OR G.TenGH LIKE '%' + @Search + '%'
             OR G.EmailGH LIKE '%' + @Search + '%')
-        AND (@Month IS NULL OR MONTH(G.NgayTao) = @Month)
-        AND (@Year IS NULL OR YEAR(G.NgayTao) = @Year);
+       AND (
+            @TinhFilter IS NULL 
+            OR G.DiaChiGH LIKE '%' + @TinhFilter + '%'
+        )
 END;
 GO

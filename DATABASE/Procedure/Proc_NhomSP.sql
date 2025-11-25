@@ -147,8 +147,9 @@ GO
 -- ============================
 CREATE OR ALTER PROC Nhom_Search
 (
-    @MaNhom VARCHAR(10) = NULL,
-    @TenNhom NVARCHAR(100) = NULL
+     @Search NVARCHAR(100) = NULL,
+	 @PageNumber INT = 1,
+    @PageSize INT = 10
 )
 AS
 BEGIN
@@ -157,8 +158,29 @@ BEGIN
     SELECT *
     FROM NhomSP
     WHERE 
-        (@MaNhom IS NULL OR MaNhom LIKE '%' + @MaNhom + '%') AND
-        (@TenNhom IS NULL OR TenNhom LIKE '%' + @TenNhom + '%')
+       (@Search IS NULL OR @Search = '' 
+            OR MaNhom LIKE '%' + @Search + '%'
+            OR TenNhom LIKE '%' + @Search + '%')
     ORDER BY MaNhom;
+END;
+GO
+
+-- ============================
+-- SEARCH
+-- ============================
+CREATE OR ALTER PROC Nhom_Count
+(
+     @Search NVARCHAR(100) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*)
+    FROM NhomSP
+    WHERE 
+       (@Search IS NULL OR @Search = '' 
+            OR MaNhom LIKE '%' + @Search + '%'
+            OR TenNhom LIKE '%' + @Search + '%')
 END;
 GO

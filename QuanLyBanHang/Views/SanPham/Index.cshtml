@@ -49,7 +49,7 @@
 </style>
 
 <div class="container">
-    <h4 class="mb-3 text-primary">
+    <h4 class="mb-3 text-success">
         <i class="fa-solid fa-truck"></i> Danh sách Sản phẩm
     </h4>
 
@@ -61,19 +61,23 @@
         </div>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
-            @Html.DropDownList(
-            "status",
-                        (SelectList)ViewBag.StatusSelectList,
-                        "-- Trạng thái --",
-                        new { @class = "form-select", style = "width:130px;", id = "statusSelect" }
-                        )
+            <div class="d-flex align-items-center gap-2">
+                <label class="w-100 text-end opacity-50"> <i class="fa fa-filter me-2"></i>Filter:</label>
+                @Html.DropDownList(
+                "status",
+                                (SelectList)ViewBag.StatusSelectList,
+                                "-- Trạng thái --",
+                                new { @class = "form-select", style = "width:130px;", id = "statusSelect" }
+                                )
 
-            @Html.DropDownList(
-                        "type",
-                        (SelectList)ViewBag.LoaiSPSelectList,
-                        "-- Loại Sản phẩm --",
-                        new { @class = "form-select", style = "width:130px;", id = "typeSelect" }
-                        )
+                @Html.DropDownList(
+                                "type",
+                                (SelectList)ViewBag.LoaiSPSelectList,
+                                "-- Loại Sản phẩm --",
+                                new { @class = "form-select", style = "width:130px;", id = "typeSelect" }
+                                )
+
+            </div>            
 
             <button type="button" id="btnClearFilter" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Xóa</button>
             <a href="@Url.Action("Create", "SanPham")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Thêm</a>

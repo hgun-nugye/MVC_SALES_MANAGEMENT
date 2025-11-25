@@ -165,6 +165,7 @@ GO
 CREATE OR ALTER PROC Loai_Search
 (
      @Search NVARCHAR(100) = NULL,
+    @MaNhom VARCHAR(10) = NULL,	  
 	  @PageNumber INT = 1,
     @PageSize INT = 10
 	)
@@ -186,13 +187,16 @@ BEGIN
             OR L.MaNhom LIKE '%' + @Search + '%'
             OR N.TenNhom LIKE '%' + @Search + '%'
             OR L.TenLoai LIKE '%' + @Search + '%')
+		AND (@MaNhom IS NULL OR N.MaNhom=@MaNhom)
     ORDER BY L.MaLoai;
 END;
 GO
 
 -- count
 CREATE OR ALTER PROC Loai_Count
-     @Search NVARCHAR(100) = NULL
+     @Search NVARCHAR(100) = NULL,
+	 @MaNhom VARCHAR(10)
+
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -207,5 +211,6 @@ BEGIN
             OR L.MaNhom LIKE '%' + @Search + '%'
             OR N.TenNhom LIKE '%' + @Search + '%'
             OR L.TenLoai LIKE '%' + @Search + '%')
+		AND (@MaNhom IS NULL OR N.MaNhom=@MaNhom)
 END;
 GO

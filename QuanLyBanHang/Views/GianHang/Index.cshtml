@@ -35,7 +35,6 @@
             }
 
     .table {
-        display: block;
         overflow-x: auto;
         white-space: nowrap;
         width: 100%;
@@ -60,24 +59,14 @@
         </div>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <select name="month" id="monthSelect" class="form-select" style="width:130px;">
-                <option value="">-- Tháng --</option>
-                @for (int i = 1; i <= 12; i++)
-                {
-                   @Html.Raw($"<option value='{i}' {(ViewBag.Month == i ? "selected" : "")}>Tháng {i}</option>");
-                }
-            </select>
+                <!-- FILTER TỈNH -->
+                <div class="d-flex align-items-center gap-2">
+                    <label class="w-100 text-end opacity-50">Tỉnh/Thành phố</label>
+                    <select id="provinceFilter" name="province" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
 
-            <select name="year" id="yearSelect" class="form-select" style="width:130px;">
-                <option value="">-- Năm --</option>
-                @for (int y=DateTime.Now.Year; y>=DateTime.Now.Year-10; y--)
-                {
-                    @Html.Raw($"<option value='{y}' {(ViewBag.Year == y ? "selected" : "")}>Năm {y}</option>");
-
-                }
-            </select>
-
-            <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Lọc</button>
             <button type="button" id="btnClearFilter" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Xóa</button>
             <a href="@Url.Action("Create","GianHang")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Thêm</a>
         </div>
@@ -165,10 +154,16 @@
         }
 
     // khi thay đổi filter -> submit form
-    $("#searchBox, #monthSelect, #yearSelect").on("change keyup", debounce(function(){
+    $("#searchBox").on("change keyup", debounce(function(){
         $("#pageNumberInput").val(1);
         $("#filterForm").submit();
     }, 400));
+
+         // province vẫn submit ngay khi chọn
+            $("#provinceFilter").on("change", function () {
+                $("#pageNumberInput").val(1);
+                $("#filterForm").submit();
+            });
 
     // pageSize change
     $("#pageSizeSelect").on("change", function(){
@@ -186,11 +181,27 @@
     // clear filter
     $("#btnClearFilter").on("click", function(){
         $("#searchBox").val("");
-        $("#monthSelect").val("");
-        $("#yearSelect").val("");
+        $("#provinceFilter").val("");
         $("#pageSizeInput").val(10);
         $("#pageNumberInput").val(1);
         $("#filterForm").submit();
     });
+
+        // Load danh sách tỉnh từ API khi load trang
+            $(document).ready(function () {
+                $.getJSON("/Address/LoadProvinces", function (data) {
+                    data.forEach(p => {
+                        $("#provinceFilter").append(
+                            `<option value="${p.name}">${p.name}</option>`
+                        );
+                    });
+
+                    // Giữ selected province khi reload
+                var selected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SelectedProvince ?? ""));
+                if (selected) {
+                    $("#provinceFilter").val(selected);
+                }
+                });
+            });
 </script>
 }

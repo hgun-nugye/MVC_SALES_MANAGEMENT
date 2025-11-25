@@ -16,35 +16,40 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		public async Task<IActionResult> Index(string? search, int pageNumber = 1, int pageSize = 10)
+		public async Task<IActionResult> Index(string? search, string? group,int pageNumber = 1, int pageSize = 10)
 		{
 			// Lưu giá trị search và phân trang vào ViewBag
 			ViewBag.Search = search;
+			ViewBag.Group = group;
 			ViewBag.PageNumber = pageNumber;
 			ViewBag.PageSize = pageSize;
+
+			ViewBag.MaNhom = new SelectList(_context.NhomSP, "MaNhom", "TenNhom", string.IsNullOrEmpty(group) ? null : group);
 
 			// Tham số cho SP lấy danh sách
 			var parameters = new[]
 			{
 				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@MaNhom", (object?)group ?? DBNull.Value),
 				new SqlParameter("@PageNumber", pageNumber),
 				new SqlParameter("@PageSize", pageSize)
 			};
 
 			// Lấy danh sách LoaiSP theo stored procedure
 			var model = await _context.LoaiSP
-				.FromSqlRaw("EXEC Loai_Search @Search, @PageNumber, @PageSize", parameters)
+				.FromSqlRaw("EXEC Loai_Search @Search, @MaNhom, @PageNumber, @PageSize", parameters)
 				.ToListAsync();
 
 			// Lấy tổng số bản ghi
 			var countParams = new[]
 			{
 				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@MaNhom", (object?)group ?? DBNull.Value),
 			};
 
 			// Sử dụng FirstOrDefaultAsync để lấy tổng số bản ghi một cách async
 			var totalRecords = (await _context.LoaiSPCountDtos
-				.FromSqlRaw("EXEC Loai_Count @Search", parameters)
+				.FromSqlRaw("EXEC Loai_Count @Search, @MaNhom", countParams)
 				.ToListAsync())
 				.Select(x => x.TotalRecords)
 				.FirstOrDefault();
@@ -89,10 +94,10 @@ namespace QuanLyBanHang.Controllers
 				try
 				{
 					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-				EXEC Loai_Insert 
-					@TenLoai = {model.TenLoai},
-					@MaNhom = {model.MaNhom}
-			");
+						EXEC Loai_Insert 
+							@TenLoai = {model.TenLoai},
+							@MaNhom = {model.MaNhom}
+					");
 
 					TempData["SuccessMessage"] = "Thêm nhóm sản phẩm thành công!";
 					return RedirectToAction(nameof(Index));
