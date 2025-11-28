@@ -14,26 +14,20 @@
         width: 100%;
         max-width: 400px;
     }
-
-        .search-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #0d6efd;
-            pointer-events: none;
-        }
-
+    
         .search-wrapper input {
             padding-left: 38px !important;
             border-radius: 8px;
             background: #f8f9fa;
         }
 
-            .search-wrapper input:focus {
-                border-color: #0d6efd;
-                box-shadow: 0 0 0 3px rgba(13,110,253,0.25);
-            }
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
 
     .table {
         overflow-x: auto;
@@ -50,7 +44,7 @@
 
 <div class="container">
     <h4 class="mb-3 text-success">
-        <i class="fa-solid fa-truck"></i> Danh sách Sản phẩm
+        Danh sách Sản phẩm
     </h4>
 
     <!-- Filter Form -->
@@ -90,20 +84,16 @@
 
 
    <div class="table">
-        <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+        <table class="table align-middle text-center shadow-sm">
             <thead class="table-success">
                 <tr>
                     <th>Ảnh</th>
-                    <th>Mã SP</th>
                     <th>Tên SP</th>
                     <th>Đơn giá</th>
                     <th>Giá bán</th>
                     <th>Mô tả</th>
-                    <th>Loại SP</th>
                     <th>Gian hàng</th>
                     <th>Số lượng tồn</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody class="text-start">
@@ -206,6 +196,16 @@
             $("#pageSizeInput").val();
             $("#pageNumberInput").val(1);
             $("#filterForm").submit();
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
+            });
         });
     </script>
 }

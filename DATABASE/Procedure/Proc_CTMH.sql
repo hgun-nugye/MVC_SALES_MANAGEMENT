@@ -186,6 +186,5 @@ BEGIN
         AND (@TenSP IS NULL OR SP.TenSP LIKE '%' + @TenSP + '%')
         AND (@TuNgay IS NULL OR DMH.NgayMH >= @TuNgay)
         AND (@DenNgay IS NULL OR DMH.NgayMH <= @DenNgay)
-    ORDER BY DMH.NgayMH DESC;
 END;
 GO

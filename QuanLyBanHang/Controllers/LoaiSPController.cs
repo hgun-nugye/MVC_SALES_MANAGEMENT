@@ -36,7 +36,7 @@ namespace QuanLyBanHang.Controllers
 			};
 
 			// Lấy danh sách LoaiSP theo stored procedure
-			var model = await _context.LoaiSP
+			var model = await _context.LoaiSPDtos
 				.FromSqlRaw("EXEC Loai_Search @Search, @MaNhom, @PageNumber, @PageSize", parameters)
 				.ToListAsync();
 
@@ -66,7 +66,7 @@ namespace QuanLyBanHang.Controllers
 		// DETAILS - Xem chi tiết
 		public async Task<IActionResult> Details(string id)
 		{
-			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
+			var tinh = (await _context.LoaiSPDtos.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
@@ -127,7 +127,7 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var loai = (await _context.LoaiSP
+			var loai = (await _context.LoaiSPDtos
 				.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
@@ -146,7 +146,7 @@ namespace QuanLyBanHang.Controllers
 		// EDIT - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(LoaiSP model)
+		public async Task<IActionResult> Edit(LoaiSPDto model)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -194,7 +194,7 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
+			var tinh = (await _context.LoaiSPDtos.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
@@ -215,7 +215,7 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var tinh = (await _context.LoaiSP.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
+			var tinh = (await _context.LoaiSPDtos.FromSqlInterpolated($"EXEC Loai_GetByID @MaLoai = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 

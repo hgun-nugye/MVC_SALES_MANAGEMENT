@@ -48,7 +48,7 @@
 
 <div class="container">
     <h4 class="mb-4 text-success">
-        <i class="fa-solid fa-truck"></i> Danh sách Gian hàng
+        Danh sách Gian hàng
     </h4>
 
     <!-- Filter Form -->
@@ -78,17 +78,15 @@
 
     <!-- Table -->
     <div class="table">
-        <table class="table table-bordered table-hover align-middle text-center shadow-sm w-100">
+        <table class="table  table-hover align-middle text-center shadow-sm w-100">
             <thead class="table-success">
                 <tr>
                     <th>Mã GH</th>
                     <th>Tên GH</th>
                     <th>Mô tả</th>
-                    <th>Ngày tạo</th>
                     <th>Điện thoại</th>
                     <th>Email</th>
                     <th>Địa chỉ</th>
-                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -204,4 +202,14 @@
                 });
             });
 </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
+            });
+        });
+    </script>
 }

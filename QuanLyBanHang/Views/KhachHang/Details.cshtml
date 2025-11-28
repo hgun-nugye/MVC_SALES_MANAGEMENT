@@ -4,26 +4,29 @@
 }
 
 <div class="container">
-    <h4 class="text-info mb-3">
-        <i class="fa-solid fa-eye"></i> Chi tiết Khách hàng
+    <h4 class="text-success mb-3">
+        Chi tiết Khách hàng
     </h4>
 
     <div class="border p-4 rounded shadow-sm bg-light"">
-            <p><strong><i class="fa-solid fa-hashtag"></i> Mã KH:</strong> @Model.MaKH</p>
-            <p><strong><i class="fa-solid fa-id-badge"></i> Tên KH:</strong> @Model.TenKH</p>
-            <p><strong><i class="fa-solid fa-phone"></i> Điện thoại:</strong> @Model.DienThoaiKH</p>
-            <p><strong><i class="fa-solid fa-envelope"></i> Email:</strong> @Model.EmailKH</p>
-            <p><strong><i class="fa-solid fa-location-dot"></i> Địa chỉ:</strong> @Model.DiaChiKH</p>
+            <p><strong>Mã KH:</strong> @Model.MaKH</p>
+            <p><strong>Tên KH:</strong> @Model.TenKH</p>
+            <p><strong>Điện thoại:</strong> @Model.DienThoaiKH</p>
+            <p><strong>Email:</strong> @Model.EmailKH</p>
+            <p><strong>Địa chỉ:</strong> @Model.DiaChiKH</p>
     </div>
 
    <div class=" mt-4">
        
-        <a class="btn btn-warning text-white" href="@Url.Action("Edit", "KhachHang", new { id = Model.MaKH })">
+        <a class="btn btn-warning text-white me-2" href="@Url.Action("Edit", "KhachHang", new { id = Model.MaKH })">
             <i class="fa-solid fa-pen-to-square"></i> Sửa
+        </a>
+        <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "KhachHang", new { id = Model.MaKH })">
+            <i class="fa-solid fa-trash"></i> Xóa
         </a>
         <a asp-action="Index" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
    </div>
-
+    
 </div>

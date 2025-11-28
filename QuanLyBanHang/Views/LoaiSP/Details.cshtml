@@ -1,24 +1,26 @@
-﻿@model QuanLyBanHang.Models.LoaiSP
+﻿@model QuanLyBanHang.Models.LoaiSPDto
 @{
     ViewBag.Title = "Chi tiết Loại sản phẩm";
 }
 
 <div class="container">
-    <h4 class="text-info mb-3">
-        <i class="fa-solid fa-eye"></i> Chi tiết Loại sản phẩm
+    <h4 class="text-success mb-3">
+        Chi tiết Loại sản phẩm
     </h4>
 
     <div class="border p-4 rounded shadow-sm bg-light">
             <p><strong>Mã Loại sản phẩm:</strong> @Model.MaLoai</p>
             <p><strong>Tên Loại sản phẩm:</strong> @Model.TenLoai</p>
-            <p><strong>Mã Nhóm sản phẩm:</strong> @Model.MaNhom</p>
+            <p><strong>Nhóm sản phẩm:</strong> @Model.TenNhom</p>
     </div>
 
    <div class=" mt-4">
-        <a class="btn btn-warning text-white" href="@Url.Action("Edit", "LoaiSP", new { id = Model.MaLoai })">
+        <a class="btn btn-warning text-white me-2" href="@Url.Action("Edit", "LoaiSP", new { id = Model.MaLoai })">
             <i class="fa-solid fa-pen-to-square"></i> Sửa
         </a>
-
+        <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "LoaiSP", new { id = Model.MaLoai })">
+            <i class="fa-solid fa-trash"></i> Xóa
+        </a>
         <a asp-action="Index" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>

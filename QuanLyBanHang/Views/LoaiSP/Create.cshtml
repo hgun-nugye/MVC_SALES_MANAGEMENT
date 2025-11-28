@@ -6,7 +6,7 @@
 
 <div class="container">
     <h4 class="text-success mb-3">
-        <i class="fa-solid fa-circle-plus"></i> Thêm Loại sản phẩm
+        Thêm Loại sản phẩm
     </h4>
 
     <form asp-action="Create" method="post" class="border p-4 rounded-3 shadow-sm bg-white">
@@ -35,8 +35,8 @@
                 <a href="@Url.Action("Create", "NhomSP")" class="btn btn-success rounded">
                     <i class="fa-solid fa-circle-plus"></i>
                 </a>
-            </div>
 
+            </div>
             <span asp-validation-for="MaNhom" class="text-danger"></span>
         </div>       
     </form>
@@ -52,3 +52,5 @@
         </a>
     </div>
 </div>
+
+

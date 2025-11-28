@@ -11,24 +11,37 @@
         Bạn có chắc muốn xóa sản phẩm <strong>@Model.TenSP</strong> không?
     </div>
 
-    <div class="card shadow-sm p-3 mb-3">
-        <p><strong>Mã sản phẩm:</strong> @Model.MaSP</p>
-        <p><strong>Tên sản phẩm:</strong> @Model.TenSP</p>
-        <p><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</p>
-        <p><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</p>
-        <p><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
-        <p><strong>Trạng thái:</strong> @Model.TrangThai</p>
-        <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
-        <p><strong>Loại sản phẩm:</strong> @Model.TenLoai</p>
-        <p><strong>Nhà cung cấp:</strong> @Model.TenNCC</p>
-        <p><strong>Gian hàng:</strong> @Model.TenGH</p>
-
-        @if (!string.IsNullOrEmpty(Model.AnhMH))
-        {
-            <div class="mt-4">
-                <img src="@Url.Content(Model.AnhMH)" alt="@Model.TenSP" style="max-width:300px; height:auto; border-radius:8px; border:1px solid #ccc;" />
+    <div class="shadow-sm">
+        <div class="row">
+            <!-- Ảnh minh họa -->
+            <div class="col-md-5 text-center">
+                <img src="@Url.Content(Model.AnhMH)"
+                     alt="@Model.TenSP"
+                     class="img-fluid rounded border"
+                     style="max-height: 400px; object-fit: contain;" />
             </div>
-        }
+
+            <!-- Thông tin sản phẩm -->
+            <div class="col-md-7">
+                <div class="p-3">
+                    <h4 class="text-primary mb-3">@Model.TenSP</h4>
+                    <p><strong>Mã sản phẩm:</strong> @Model.MaSP</p>
+                    <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-2"><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</div>
+                        <div class="col-md-6 mb-2"><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</div>
+                        <div class="col-md-6 mb-2"><strong>Số lượng tồn:</strong> @Model.SoLuongTon</div>
+                        <div class="col-md-6 mb-2"><strong>Trạng thái:</strong> @Model.TrangThai</div>
+                        <div class="col-md-6 mb-2"><strong>Loại sản phẩm:</strong> @Model.TenLoai</div>
+                        <div class="col-md-6 mb-2"><strong>Nhà cung cấp:</strong> @Model.TenNCC</div>
+                        <div class="col-md-12 mb-2"><strong>Gian hàng:</strong> @Model.TenGH</div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post">

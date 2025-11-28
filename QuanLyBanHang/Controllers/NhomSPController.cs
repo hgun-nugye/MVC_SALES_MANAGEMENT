@@ -14,7 +14,6 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-
 		// READ - Danh sách nhóm sản phẩm 
 		public async Task<IActionResult> Index()
 		{

@@ -22,7 +22,7 @@ namespace QuanLyBanHang.Services
 		public DbSet<DonBanHang> DonBanHang { get; set; } = null!;
 		public DbSet<CTBH> CTBH { get; set; } = null!;
 		public DbSet<KhuyenMai> KhuyenMai { get; set; } = null!;
-		public DbSet<DanhGia> DanhGia { get; set; } = null!;
+		//public DbSet<DanhGia> DanhGia { get; set; } = null!;
 		public DbSet<TaiKhoan> TaiKhoan { get; set; } = null!;
 
 		public DbSet<DonMuaHangDetail> DonMuaHangDetail { get; set; } = null!;
@@ -30,6 +30,7 @@ namespace QuanLyBanHang.Services
 		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; }
 		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; }
 		public DbSet<SanPhamDto> SanPhamDtos { get; set; }
+		public DbSet<LoaiSPDto> LoaiSPDtos { get; set; }
 		public DbSet<DonBanHangCountDto> DonBanHangCountDtos { get; set; }
 		public DbSet<DonMuaHangCountDto> DonMuaHangCountDtos { get; set; }
 		public DbSet<GianHangCountDto> GianHangCountDtos { get; set; }
@@ -54,7 +55,7 @@ namespace QuanLyBanHang.Services
 			modelBuilder.Entity<CTMH>().HasKey(ct => new { ct.MaDMH, ct.MaSP });
 			modelBuilder.Entity<CTBH>().HasKey(ct => new { ct.MaDBH, ct.MaSP });
 			modelBuilder.Entity<KhuyenMai>().HasKey(km => km.MaKM);
-			modelBuilder.Entity<DanhGia>().HasKey(dg => dg.MaDG);
+			//modelBuilder.Entity<DanhGia>().HasKey(dg => dg.MaDG);
 			modelBuilder.Entity<TaiKhoan>().HasKey(tk => tk.TenUser);
 
 			modelBuilder.Entity<CTBHDetailDto>().HasNoKey();   // DTO không có khóa
@@ -130,17 +131,17 @@ namespace QuanLyBanHang.Services
 				.OnDelete(DeleteBehavior.Cascade);
 
 			// ======== Quan hệ: DanhGia → SanPham & KhachHang ========
-			modelBuilder.Entity<DanhGia>()
-				.HasOne(dg => dg.SanPham)
-				.WithMany()
-				.HasForeignKey(dg => dg.MaSP)
-				.OnDelete(DeleteBehavior.Cascade);
+			//modelBuilder.Entity<DanhGia>()
+			//	.HasOne(dg => dg.SanPham)
+			//	.WithMany()
+			//	.HasForeignKey(dg => dg.MaSP)
+			//	.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<DanhGia>()
-				.HasOne(dg => dg.KhachHang)
-				.WithMany()
-				.HasForeignKey(dg => dg.MaKH)
-				.OnDelete(DeleteBehavior.Cascade);
+			//modelBuilder.Entity<DanhGia>()
+			//	.HasOne(dg => dg.KhachHang)
+			//	.WithMany()
+			//	.HasForeignKey(dg => dg.MaKH)
+			//	.OnDelete(DeleteBehavior.Cascade);
 
 			// ======== Quan hệ: TaiKhoan → KhachHang (nếu có) ========
 			modelBuilder.Entity<TaiKhoan>()

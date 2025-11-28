@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.LoaiSP>
+﻿@model IEnumerable<QuanLyBanHang.Models.LoaiSPDto>
 
 @{
     ViewBag.Title = "Quản lý Loại sản phẩm";
@@ -22,7 +22,6 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: #0d6efd;
             pointer-events: none;
         }
 
@@ -31,11 +30,6 @@
             border-radius: 8px;
             background: #f8f9fa;
         }
-
-            .search-wrapper input:focus {
-                border-color: #0d6efd;
-                box-shadow: 0 0 0 3px rgba(13,110,253,0.25);
-            }
 
     .table {
         white-space: nowrap;
@@ -50,7 +44,7 @@
 
 <div class="container">
     <h4 class="mb-3 text-success">
-        <i class="fa-solid fa-truck"></i> Danh sách Loại sản phẩm
+        Danh sách Loại sản phẩm
     </h4>
 
     <!-- Filter Form -->
@@ -82,14 +76,13 @@
     </form>
 
 
-    <table class="table table-bordered table-hover align-middle text-center shadow-sm ">
+    <table class="table  table-hover align-middle shadow-sm ">
         <thead class="table-success">
             <tr>
                 <th>Mã Loại sản phẩm</th>
                 <th>Tên Loại sản phẩm</th>
                 <th>Mã Nhóm sản phẩm</th>
                 <th>Tên Nhóm sản phẩm</th>
-                <th><i class="fa-solid fa-gear"></i> Hành động</th>
             </tr>
         </thead>
         <tbody class="text-start">
@@ -190,6 +183,16 @@
             $("#pageSizeInput").val(10);
             $("#pageNumberInput").val(1);
             $("#filterForm").submit();
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
+            });
         });
     </script>
 }

@@ -51,7 +51,7 @@
 
 <div class="container">
     <h4 class="mb-3 text-success">
-        <i class="fa-solid fa-truck"></i> Danh sách Nhà Cung Cấp
+        Danh sách Nhà Cung Cấp
     </h4>
 
     <!-- Filter Form -->
@@ -79,15 +79,14 @@
         <input type="hidden" name="pageSize" id="pageSizeInput" value="@ViewBag.PageSize" />
     </form>
 
-    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
-        <thead class="table-success">
+    <table class="table  table-hover align-middle shadow-sm">
+        <thead class="table-success text-center">
             <tr>
                 <th>Mã NCC</th>
                 <th>Tên NCC</th>
                 <th>Điện thoại</th>
                 <th>Email</th>
                 <th>Địa chỉ</th>
-                <th>Hành động</th>
             </tr>
         </thead>
         <tbody>
@@ -206,5 +205,15 @@
                     }
                     });
                 });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
+            });
+        });
     </script>
 }

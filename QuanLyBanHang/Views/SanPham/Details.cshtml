@@ -5,8 +5,8 @@
 }
 
 <div class="container my-4">
-    <h3 class="text-info mb-4">
-        <i class="fa-solid fa-box"></i> Chi tiết Sản phẩm
+    <h3 class="text-success mb-4">
+        Chi tiết Sản phẩm
     </h3>
 
     <div class="shadow-sm">
@@ -46,8 +46,14 @@
         <a class="btn btn-warning me-2 text-white" href="@Url.Action("Edit", "SanPham", new { id = Model.MaSP })">
             <i class="fa-solid fa-pen-to-square text-white"></i> Sửa
         </a>
+
+        <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "SanPham", new { id = Model.MaSP })">
+            <i class="fa-solid fa-trash"></i> Xóa
+        </a>
+
         <a class="btn btn-secondary" href="@Url.Action("Index", "SanPham")">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
+
     </div>
 </div>

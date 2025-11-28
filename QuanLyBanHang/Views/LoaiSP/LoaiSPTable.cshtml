@@ -1,26 +1,16 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.LoaiSP>
+﻿@model IEnumerable<QuanLyBanHang.Models.LoaiSPDto>
 
 @if (Model != null && Model.Any())
 {
     @foreach (var item in Model)
     {
-        <tr>
+        <tr class="clickable-row" data-href="@Url.Action("Details", "LoaiSP", new { id = item.MaLoai })">
+
             <td>@item.MaLoai</td>
             <td>@item.TenLoai</td>
             <td>@item.MaNhom</td>
             <td>@item.TenNhom</td>
 
-            <td class="flex justify-content-between text-center">
-                <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "LoaiSP", new { id = item.MaLoai })">
-                    <i class="fa-solid fa-eye"></i> Chi tiết
-                </a>
-                <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "LoaiSP", new { id = item.MaLoai })">
-                    <i class="fa-solid fa-pen-to-square"></i> Sửa
-                </a>
-                <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "LoaiSP", new { id = item.MaLoai })">
-                    <i class="fa-solid fa-trash"></i> Xóa
-                </a>
-            </td>
         </tr>
     }
 }

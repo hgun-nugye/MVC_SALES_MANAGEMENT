@@ -4,11 +4,10 @@
 {
     @foreach (var sp in Model)
     {
-        <tr>
+        <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })">
             <td>
                 <img src="@Url.Content(sp.AnhMH)" alt="@sp.TenSP" width="60" height="60" style="object-fit:cover; border-radius:5px;">
             </td>
-            <td>@sp.MaSP</td>
             <td>@sp.TenSP</td>
             <td>@String.Format("{0:N0}", sp.DonGia)</td>
             <td>@String.Format("{0:N0}", sp.GiaBan)</td>
@@ -20,21 +19,9 @@
                 @moTaHienThi
             </td>
 
-            <td>@sp.TenLoai</td>
             <td>@sp.TenGH</td>
-            <td>@sp.SoLuongTon</td>
-            <td>@sp.TrangThai</td>
-            <td class="flex justify-content-between text-center">
-                <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })">
-                    <i class="fa-solid fa-eye"></i> Chi tiết
-                </a>
-                <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "SanPham", new { id = sp.MaSP })">
-                    <i class="fa-solid fa-pen-to-square"></i> Sửa
-                </a>
-                <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "SanPham", new { id = sp.MaSP })">
-                    <i class="fa-solid fa-trash"></i> Xóa
-                </a>
-            </td>
+            <td class="text-center">@sp.SoLuongTon</td>
+           
         </tr>
     }   
 }

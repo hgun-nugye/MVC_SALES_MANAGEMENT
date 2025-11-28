@@ -4,25 +4,15 @@
 {
     foreach (var item in Model)
     {
-        <tr>
+        <tr class="clickable-row" data-href="@Url.Action("Details", "GianHang", new { id = item.MaGH })">
+
             <td>@item.MaGH</td>
             <td>@item.TenGH</td>
             <td>@item.MoTaGH</td>
-            <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
             <td>@item.DienThoaiGH</td>
             <td>@item.EmailGH</td>
             <td>@item.DiaChiGH</td>
-            <td>
-                <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "GianHang", new { id = item.MaGH })">
-                    <i class="fa-solid fa-eye"></i> Chi tiết
-                </a>
-                <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "GianHang", new { id = item.MaGH })">
-                    <i class="fa-solid fa-pen-to-square"></i> Sửa
-                </a>
-                <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "GianHang", new { id = item.MaGH })">
-                    <i class="fa-solid fa-trash"></i> Xóa
-                </a>
-            </td>
+           
         </tr>
     }
 }

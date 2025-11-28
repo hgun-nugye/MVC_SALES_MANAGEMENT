@@ -40,7 +40,7 @@
 
 <div class="container">
     <h4 class="mb-5 text-success">
-        <i class="fa-solid fa-file-invoice-dollar pe-2"></i> Danh sách Đơn bán hàng
+        Danh sách Đơn bán hàng
     </h4>
 
     <!-- FORM LỌC -->
@@ -100,14 +100,13 @@
 
     <!-- TABLE -->
     <div id="tableContainer">
-        <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+        <table class="table  table-hover align-middle text-center shadow-sm">
             <thead class="table-success">
                 <tr>
                     <th>Mã Đơn</th>
                     <th>Ngày bán hàng</th>
                     <th>Mã KH</th>
                     <th>Tên KH</th>
-                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -205,6 +204,16 @@
             $("#pageSizeInput").val(10);
             $("#pageNumberInput").val(1);
             $("#filterForm").submit();
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
+            });
         });
     </script>
 }

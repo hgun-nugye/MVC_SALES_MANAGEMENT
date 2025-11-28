@@ -8,7 +8,7 @@ namespace QuanLyBanHang.Models
 		[Key]
 		public string? MaNhom { get; set; }
 
-		public string TenNhom { get; set; }
+		public string? TenNhom { get; set; }
 
 		public ICollection<LoaiSP>? LoaiSPs { get; set; }
 

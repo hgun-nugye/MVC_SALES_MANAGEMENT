@@ -1,12 +1,12 @@
-﻿@model QuanLyBanHang.Models.LoaiSP
+﻿@model QuanLyBanHang.Models.LoaiSPDto
 @{
     ViewBag.Title = "Sửa Loại sản phẩm";
 }
 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
 <div class=" container">
-    <h4 class="text-warning mb-3">
-        <i class="fa-solid fa-pen-to-square"></i> Sửa Thông Tin Loại sản phẩm
+    <h4 class="text-success mb-3">
+        Sửa Thông Tin Loại sản phẩm
     </h4>
 
     <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
@@ -26,7 +26,7 @@
             </label>
 
             <div class="input-group gap-2">
-                <select asp-for="MaNhom" asp-items="ViewBag.MaNhomList" class="form-select">
+                <select asp-for="MaNhom" asp-items="ViewBag.NhomSPList" class="form-select">
                     <option value="">-- Chọn nhóm sản phẩm --</option>
                 </select>
 
@@ -41,10 +41,10 @@
     </form>
 
     <div class="mt-4">
-        <button type="submit" class="btn btn-warning text-white">
+        <button type="submit" class="btn btn-warning text-white me-2">
             <i class="fa-solid fa-save"></i> Cập nhật
         </button>
-        <a asp-action="Index" class="btn btn-secondary">
+        <a asp-action="Details" asp-route-id="@Model.MaLoai" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </div>

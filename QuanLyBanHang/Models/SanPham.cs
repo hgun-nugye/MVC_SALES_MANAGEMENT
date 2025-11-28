@@ -46,14 +46,11 @@ namespace QuanLyBanHang.Models
 		public virtual ICollection<CTBH>? CTBHs { get; set; }
 
 		// ====== Các thuộc tính không ánh xạ (chỉ dùng hiển thị) ======
-		[NotMapped]
 		public string? TenGH { get; set; }
-		[NotMapped]
 		public string? TenLoai { get; set; }
-		[NotMapped]
 		public string? TenNCC { get; set; }
 
-		[NotMapped] 
+		[NotMapped]
 		public IFormFile? AnhFile { get; set; }
 	}
 

@@ -6,8 +6,8 @@
 
 <div class="container border p-4 rounded shadow-sm bg-light">
 
-    <h4 class="mb-3 text-warning">
-        <i class="fa-solid fa-pen-to-square"></i> Sửa Đơn bán hàng
+    <h4 class="mb-3 text-success">
+        Sửa Đơn bán hàng
     </h4>
 
     <form asp-action="Edit" method="post">
@@ -30,7 +30,7 @@
         <!-- BẢNG CHI TIẾT SẢN PHẨM -->
         <h4>Chi tiết sản phẩm</h4>
 
-        <table class="table table-bordered table-striped">
+        <table class="table  table-striped">
             <thead>
                 <tr class="table-warning">
                     <th>Sản phẩm</th>
@@ -62,7 +62,7 @@
             <i class="fa-solid fa-save"></i> Cập nhật
         </button>
 
-        <a asp-action="Index" class="btn btn-secondary">
+        <a asp-action="Details" asp-route-id="@Model.MaDBH" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
 

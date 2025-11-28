@@ -4,8 +4,8 @@
 }
 
 <div class="container">
-    <h4 class="text-info mb-3">
-        <i class="fa-solid fa-eye"></i> Chi tiết Nhà Cung Cấp
+    <h4 class="text-success mb-3">
+        Chi tiết Nhà Cung Cấp
     </h4>
 
     <div class="border p-4 rounded shadow-sm bg-light">
@@ -18,8 +18,11 @@
     </div>
 
     <div class="mt-4">
-        <a class="btn btn-warning text-white" href="@Url.Action("Edit", "NhaCC", new { id = Model.MaNCC })">
+        <a class="btn btn-warning text-white me-2" href="@Url.Action("Edit", "NhaCC", new { id = Model.MaNCC })">
             <i class="fa-solid fa-pen-to-square"></i> Sửa
+        </a>
+        <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "NhaCC", new { id = Model.MaNCC })">
+            <i class="fa-solid fa-trash"></i> Xóa
         </a>
         <a asp-action="Index" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại

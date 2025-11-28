@@ -27,6 +27,19 @@ namespace QuanLyBanHang.Models
 	}
 
 	[Keyless]
+	public class LoaiSPDto
+	{		
+		public string? MaLoai { get; set; } = null!;
+
+		public string? TenLoai { get; set; } = null!;
+
+		public string? MaNhom { get; set; } = null!;
+
+		public string? TenNhom { get; set; }
+
+	}
+
+	[Keyless]
 	public class LoaiSPCountDto
 	{
 		public int TotalRecords { get; set; }

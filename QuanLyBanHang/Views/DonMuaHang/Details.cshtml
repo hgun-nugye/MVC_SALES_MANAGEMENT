@@ -8,8 +8,8 @@
 }
 
 <div class="container">
-    <h4 class="mb-3 text-info">
-        <i class="fa-solid fa-eye"></i> Chi tiết Đơn mua hàng - Đơn @don?.MaDMH
+    <h4 class="mb-3 text-success">
+        Chi tiết Đơn mua hàng - Đơn @don?.MaDMH
     </h4>
 
     @if (don != null)
@@ -29,8 +29,8 @@
             <i class="fa-solid fa-boxes-stacked"></i> Danh sách sản phẩm mua
         </h4>
 
-        <table class="table table-bordered table-striped mt-4">
-            <thead class="table-light">
+        <table class="table mt-4">
+            <thead class="table-success">
                 <tr>
                     <th>Tên sản phẩm</th>
                     <th class="text-center">Số lượng mua</th>
@@ -65,7 +65,7 @@
                 }
         </tbody>
         <tfoot>
-            <tr class="table-secondary fw-bold">
+            <tr class="table-success fw-bold">
                 <td colspan="3" class="text-end">Tổng cộng:</td>
                 <td colspan="2" class="text-end">
                     @(
@@ -87,11 +87,19 @@
     <div class="mt-4">
         @if (don != null)
         {
-            <a href="@Url.Action("Edit", "DonMuaHang", new { id = don.MaDMH })" class="btn btn-warning text-white">
+            <a href="@Url.Action("Edit", "DonMuaHang", new { id = don.MaDMH })" class="btn btn-warning text-white me-2">
                 <i class="fa-solid fa-pen-to-square"></i> Sửa
             </a>
         }
-        <a href="@Url.Action("Index", "DonMuaHang")" class="btn btn-secondary">
+
+        @if (don != null)
+        {
+            <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "DonMuaHang", new { id = don.MaDMH })">
+                <i class="fa-solid fa-trash"></i> Xóa
+            </a>
+        }
+
+         <a asp-action="Index" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </div>
