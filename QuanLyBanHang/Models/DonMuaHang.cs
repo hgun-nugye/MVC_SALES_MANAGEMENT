@@ -7,7 +7,6 @@ namespace QuanLyBanHang.Models
 	public class DonMuaHang
 	{
 		[Key]
-		[StringLength(11)]
 		[Display(Name = "Mã đơn mua hàng")]
 		public string? MaDMH { get; set; }
 
@@ -16,7 +15,6 @@ namespace QuanLyBanHang.Models
 		[DataType(DataType.Date)]
 		public DateTime NgayMH { get; set; }
 
-		[StringLength(10)]
 		[Display(Name = "Mã nhà cung cấp")]
 		public string? MaNCC { get; set; }
 

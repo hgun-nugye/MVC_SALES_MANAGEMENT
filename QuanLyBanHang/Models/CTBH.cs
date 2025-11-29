@@ -8,12 +8,10 @@ namespace QuanLyBanHang.Models
 	public class CTBH
 	{
 		[Key, Column(Order = 0)]
-		[StringLength(11)]
 		[Display(Name = "Mã đơn bán hàng")]
 		public string? MaDBH { get; set; }
 
 		[Key, Column(Order = 1)]
-		[StringLength(10)]
 		[Display(Name = "Mã sản phẩm")]
 		public string? MaSP { get; set; }
 
@@ -27,7 +25,6 @@ namespace QuanLyBanHang.Models
 		[Column(TypeName = "money")]
 		public decimal DGB { get; set; }
 
-		// 🔗 Khóa ngoại đến SanPham
 		[ForeignKey("MaSP")]
 		public SanPham? SanPham { get; set; }
 

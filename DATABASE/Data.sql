@@ -116,34 +116,6 @@ EXEC CTBH_Insert 'B2510190002', 'SP00000005', 2, 180000;
 EXEC CTBH_Insert 'B2510200001', 'SP00000002', 1, 2000000;
 GO
 
----------------------------------------------------------
--- 11 Khuyến mãi
----------------------------------------------------------
-EXEC KhuyenMai_Insert N'Khuyến mãi hè 2025', 
-    N'Giảm 15% cho toàn bộ mỹ phẩm dưỡng da', 
-    15, '2025-06-01', '2025-06-15', N'Không áp dụng sản phẩm đã giảm giá', 1;
+-- TaiKhoan cho Login
 
-EXEC KhuyenMai_Insert N'MUA 2 TẶNG 1 Serum', 
-    N'Mua 2 serum bất kỳ tặng 1 mini size', 
-    0, '2025-07-01', '2025-07-10', N'Chỉ áp dụng nhóm Serum', 1;
-GO
-
----------------------------------------------------------
--- 12 Đánh giá sản phẩm
----------------------------------------------------------
-EXEC DanhGia_Insert 'SP00000001', 'KH00000001', 5, N'Kem dưỡng tuyệt vời, da mềm và mịn hơn.';
-EXEC DanhGia_Insert 'SP00000002', 'KH00000002', 4, N'Serum thấm nhanh, da sáng hơn sau 1 tuần.';
-EXEC DanhGia_Insert 'SP00000003', 'KH00000003', 5, N'Sữa rửa mặt dịu nhẹ, dùng hằng ngày rất ổn.';
-EXEC DanhGia_Insert 'SP00000005', 'KH00000001', 4, N'Nước tẩy trang làm sạch tốt, không cay mắt.';
-GO
-
----------------------------------------------------------
--- 13 Tài khoản (dùng procedure tương tự, giả sử đã có)
----------------------------------------------------------
-EXEC TaiKhoan_Insert 'admin', '123456', N'Admin', NULL;
-EXEC TaiKhoan_Insert 'nv01', '123456', N'Admin', NULL;
-EXEC TaiKhoan_Insert 'nv02', '123456', N'Admin', NULL;
-EXEC TaiKhoan_Insert 'kh01', '123456', N'KhachHang', 'KH00000001';
-EXEC TaiKhoan_Insert 'kh02', '123456', N'KhachHang', 'KH00000002';
-EXEC TaiKhoan_Insert 'kh03', '123456', N'KhachHang', 'KH00000003';
-GO
+EXEC TaiKhoan_Insert 'admin', '123456';

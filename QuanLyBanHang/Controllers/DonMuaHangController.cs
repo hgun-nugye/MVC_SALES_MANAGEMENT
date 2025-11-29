@@ -16,7 +16,6 @@ namespace QuanLyBanHang.Controllers
 		{
 			_context = context;
 		}
-
 		
 		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
 		{
@@ -312,7 +311,6 @@ namespace QuanLyBanHang.Controllers
 
 			return PartialView("DonMuaHangTable", data);
 		}
-
 
 		// ============ RESET FILTER ============
 		public async Task<IActionResult> ClearFilter()

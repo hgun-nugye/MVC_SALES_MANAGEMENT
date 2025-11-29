@@ -7,7 +7,6 @@ namespace QuanLyBanHang.Models
 	public class DonBanHang
 	{
 		[Key]
-		[StringLength(11)]
 		[Display(Name = "Mã đơn bán hàng")]
 		public string? MaDBH { get; set; }
 
@@ -16,11 +15,9 @@ namespace QuanLyBanHang.Models
 		[DataType(DataType.Date)]
 		public DateTime NgayBH { get; set; }
 
-		[StringLength(10)]
 		[Display(Name = "Mã khách hàng")]
 		public string? MaKH { get; set; }
 
-		[StringLength(50)]
 		[Display(Name = "Tên khách hàng")]
 		public string? TenKH { get; set; }
 

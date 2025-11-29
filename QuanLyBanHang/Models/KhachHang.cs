@@ -6,23 +6,18 @@ namespace QuanLyBanHang.Models
 	public class KhachHang
 	{
 		[Key]
-		[Display(Name = "Mã khách hàng")]
 		public required string MaKH { get; set; }
 
-		[Required, StringLength(50)]
-		[Display(Name = "Tên khách hàng")]
+		[Required]
 		public required string TenKH { get; set; }
 
-		[Required, StringLength(10)]
-		[Display(Name = "Điện thoại")]
+		[Required]
 		public required string DienThoaiKH { get; set; }
 
 		[EmailAddress]
-		[Display(Name = "Email")]
 		public required string EmailKH { get; set; }
 
-		[Required, StringLength(255)]
-		[Display(Name = "Địa chỉ")]
+		[Required]
 		public required string DiaChiKH { get; set; }
 	}
 

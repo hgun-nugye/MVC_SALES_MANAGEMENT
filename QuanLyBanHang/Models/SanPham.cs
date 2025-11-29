@@ -9,8 +9,7 @@ namespace QuanLyBanHang.Models
 		[Key]
 		public string? MaSP { get; set; }
 
-		[Required, StringLength(50)]
-		public string TenSP { get; set; }
+		public string? TenSP { get; set; }
 
 		[DataType(DataType.Currency)]
 		public decimal? DonGia { get; set; }
@@ -41,7 +40,6 @@ namespace QuanLyBanHang.Models
 		[ForeignKey(nameof(MaGH))]
 		public GianHang? GianHang { get; set; }
 
-		// Các tập hợp ngược
 		public virtual ICollection<CTMH>? CTMHs { get; set; }
 		public virtual ICollection<CTBH>? CTBHs { get; set; }
 

@@ -4,9 +4,7 @@ GO
 CREATE OR ALTER PROC TaiKhoan_Insert
 (
     @TenUser VARCHAR(50),
-    @MatKhau NVARCHAR(255),
-    @VaiTro NVARCHAR(20),
-    @MaKH VARCHAR(10) = NULL
+    @MatKhau NVARCHAR(255)
 )
 AS
 BEGIN
@@ -18,8 +16,8 @@ BEGIN
         RETURN;
     END;
 
-    INSERT INTO TaiKhoan (TenUser, MatKhau, VaiTro, MaKH, TrangThai)
-    VALUES (@TenUser, @MatKhau, @VaiTro, @MaKH, 1);
+    INSERT INTO TaiKhoan (TenUser, MatKhau)
+    VALUES (@TenUser, @MatKhau);
 END;
 GO
 
@@ -27,16 +25,12 @@ GO
 CREATE OR ALTER PROC TaiKhoan_Update
 (
     @TenUser VARCHAR(50),
-    @MatKhau NVARCHAR(255),
-    @VaiTro NVARCHAR(20),
-    @TrangThai BIT
+    @MatKhau NVARCHAR(255)
 )
 AS
 BEGIN
     UPDATE TaiKhoan
-    SET MatKhau = @MatKhau,
-        VaiTro = @VaiTro,
-        TrangThai = @TrangThai
+    SET MatKhau = @MatKhau
     WHERE TenUser = @TenUser;
 END;
 GO
@@ -81,30 +75,8 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT TenUser, VaiTro, TrangThai
+    SELECT TenUser
     FROM TaiKhoan
-    WHERE TenUser = @TenUser AND MatKhau = @MatKhau AND TrangThai = 1;
-END;
-GO
-
--- Search
-CREATE OR ALTER PROC TaiKhoan_Search
-(
-    @TenUser VARCHAR(50) = NULL,
-    @VaiTro NVARCHAR(20) = NULL,
-    @MaKH VARCHAR(10) = NULL,
-    @TrangThai BIT = NULL
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT *
-    FROM TaiKhoan
-    WHERE 
-        (@TenUser IS NULL OR TenUser LIKE '%' + @TenUser + '%') AND
-        (@VaiTro IS NULL OR VaiTro LIKE '%' + @VaiTro + '%') AND
-        (@MaKH IS NULL OR MaKH LIKE '%' + @MaKH + '%') AND
-        (@TrangThai IS NULL OR TrangThai = @TrangThai);
+    WHERE TenUser = @TenUser AND MatKhau = @MatKhau
 END;
 GO

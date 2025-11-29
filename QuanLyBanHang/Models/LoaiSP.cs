@@ -7,14 +7,11 @@ namespace QuanLyBanHang.Models
 	public class LoaiSP
 	{
 		[Key]
-		[StringLength(10)]
 		public string? MaLoai { get; set; } = null!;
 
-		[StringLength(50)]
 		public string? TenLoai { get; set; } = null!;
 
 		// Khóa ngoại đến NhomSP
-		[StringLength(10)]
 		public string? MaNhom { get; set; } = null!;
 
 		[NotMapped]

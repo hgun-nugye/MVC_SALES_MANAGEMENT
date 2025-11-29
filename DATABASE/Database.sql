@@ -144,49 +144,10 @@ CREATE TABLE CTBH(
 );
 GO
 
-/*====================================================
-=                     KHUYẾN MÃI                     =
-====================================================*/
-CREATE TABLE KhuyenMai (
-    MaKM VARCHAR(10) PRIMARY KEY,
-    TenKM NVARCHAR(100) NOT NULL,
-    MoTaKM NVARCHAR(MAX) NULL,
-    GiaTriKM DECIMAL(10,2) NOT NULL,
-    NgayBatDau DATETIME NOT NULL,
-    NgayKetThuc DATETIME NOT NULL,
-    DieuKienApDung NVARCHAR(255) NULL,
-    TrangThai BIT DEFAULT 1
-);
-GO
 
-/*====================================================
-=                  ĐÁNH GIÁ SẢN PHẨM                =
-====================================================*/
-CREATE TABLE DanhGia (
-    MaDG INT IDENTITY(1,1) PRIMARY KEY,
-    MaSP VARCHAR(10) NOT NULL,
-    MaKH VARCHAR(10) NOT NULL,
-    SoSao TINYINT CHECK (SoSao BETWEEN 1 AND 5),
-    NoiDung NVARCHAR(MAX) NULL,
-    NgayDG DATETIME DEFAULT GETDATE(),
-    CONSTRAINT FK_DanhGia_SanPham FOREIGN KEY (MaSP)
-        REFERENCES SanPham(MaSP) ON DELETE CASCADE,
-    CONSTRAINT FK_DanhGia_KhachHang FOREIGN KEY (MaKH)
-        REFERENCES KhachHang(MaKH) ON DELETE CASCADE
-);
-GO
-
-/*====================================================
-=                TÀI KHOẢN NGƯỜI DÙNG               =
-====================================================*/
+-- Table cho Login
 CREATE TABLE TaiKhoan (
     TenUser VARCHAR(50) PRIMARY KEY,
-    MatKhau NVARCHAR(255) NOT NULL,
-    VaiTro NVARCHAR(20) NOT NULL CHECK (VaiTro IN (N'Admin', N'KhachHang')),
-    TrangThai BIT DEFAULT 1,
-    NgayTao DATETIME DEFAULT GETDATE(),
-    MaKH VARCHAR(10) NULL,
-    CONSTRAINT FK_TaiKhoan_KhachHang FOREIGN KEY (MaKH)
-        REFERENCES KhachHang(MaKH)
+    MatKhau NVARCHAR(255) NOT NULL
 );
 GO
