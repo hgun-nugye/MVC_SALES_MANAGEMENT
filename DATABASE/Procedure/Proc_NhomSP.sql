@@ -1,10 +1,7 @@
 ﻿USE DB_QLBH;
 GO
 
--- ============================
--- INSERT
--- ============================
-CREATE OR ALTER PROC Nhom_Insert
+CREATE OR ALTER PROC NhomSP_Insert
 (
     @TenNhom NVARCHAR(100)
 )
@@ -42,11 +39,7 @@ BEGIN
 END;
 GO
 
-
--- ============================
--- UPDATE
--- ============================
-CREATE OR ALTER PROC Nhom_Update
+CREATE OR ALTER PROC NhomSP_Update
 (
     @MaNhom VARCHAR(10),
     @TenNhom NVARCHAR(100)
@@ -83,11 +76,7 @@ BEGIN
 END;
 GO
 
-
--- ============================
--- DELETE
--- ============================
-CREATE OR ALTER PROC Nhom_Delete
+CREATE OR ALTER PROC NhomSP_Delete
 (
     @MaNhom VARCHAR(10)
 )
@@ -112,11 +101,7 @@ BEGIN
 END;
 GO
 
-
--- ============================
--- GET ALL
--- ============================
-CREATE OR ALTER PROC Nhom_GetAll
+CREATE OR ALTER PROC NhomSP_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -124,11 +109,7 @@ BEGIN
 END;
 GO
 
-
--- ============================
--- GET BY ID
--- ============================
-CREATE OR ALTER PROC Nhom_GetByID
+CREATE OR ALTER PROC NhomSP_GetByID
 (
     @MaNhom VARCHAR(10)
 )
@@ -146,14 +127,9 @@ BEGIN
 END;
 GO
 
--- ============================
--- SEARCH
--- ============================
-CREATE OR ALTER PROC Nhom_Search
+CREATE OR ALTER PROC NhomSP_Search
 (
-     @Search NVARCHAR(100) = NULL,
-	 @PageNumber INT = 1,
-    @PageSize INT = 10
+     @Search NVARCHAR(100) = NULL
 )
 AS
 BEGIN
@@ -169,22 +145,3 @@ BEGIN
 END;
 GO
 
--- ============================
--- SEARCH
--- ============================
-CREATE OR ALTER PROC Nhom_Count
-(
-     @Search NVARCHAR(100) = NULL
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*)
-    FROM NhomSP
-    WHERE 
-       (@Search IS NULL OR @Search = '' 
-            OR MaNhom LIKE '%' + @Search + '%'
-            OR TenNhom LIKE '%' + @Search + '%')
-END;
-GO

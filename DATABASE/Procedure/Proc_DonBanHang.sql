@@ -117,9 +117,19 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT DBH.*, KH.TenKH
+   SELECT 
+        DBH.MaDBH,
+        DBH.NgayBH,
+        DBH.MaKH,
+        KH.TenKH,
+        CT.MaSP,
+        SP.TenSP,
+        CT.SLB,
+        CT.DGB
     FROM DonBanHang DBH
     JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
+    JOIN CTBH CT ON CT.MaDBH = DBH.MaDBH
+    JOIN SanPham SP ON SP.MaSP = CT.MaSP
     ORDER BY DBH.NgayBH DESC;
 END;
 GO
@@ -128,22 +138,6 @@ GO
 -- ========== GET BY ID ==========
 ---------------------------------------------------------
 CREATE OR ALTER PROC DonBanHang_GetByID
-(
-    @MaDBH CHAR(11)
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT DBH.*, KH.TenKH
-    FROM DonBanHang DBH
-    JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
-    WHERE DBH.MaDBH = @MaDBH;
-END;
-GO
-
--- Get by ID Detail
-CREATE OR ALTER PROC DonBanHang_GetById_Detail
 (
     @MaDBH CHAR(11)
 )
@@ -166,20 +160,14 @@ BEGIN
 END;
 GO
 
--- Search & Filter
-CREATE OR ALTER PROCEDURE DonBanHang_SearchFilter
+-- Search
+CREATE OR ALTER PROCEDURE DonBanHang_Search
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
-    @Year INT = NULL,
-    @PageNumber INT = 1,
-    @PageSize INT = 10
+    @Year INT = NULL
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
-
-    SELECT D.*, K.TenKH
+	SELECT D.*, K.TenKH
     FROM DonBanHang D
 	JOIN KhachHang K ON K.MaKH = D.MaKH
     WHERE
@@ -189,31 +177,5 @@ BEGIN
 			OR K.TenKH LIKE N'%' + @Search + '%'
         AND (@Month IS NULL OR MONTH(D.NgayBH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayBH) = @Year))
-    ORDER BY D.NgayBH DESC 
-    OFFSET @StartRow ROWS
-    FETCH NEXT @PageSize ROWS ONLY;
 END;
 GO
-
--- count
-CREATE OR ALTER PROC DonBanHang_Count
-    @Search NVARCHAR(100) = NULL,
-    @Month INT = NULL,
-    @Year INT = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*)
-   FROM DonBanHang D
-	JOIN KhachHang K ON K.MaKH = D.MaKH
-    WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR D.MaDBH LIKE '%' + @Search + '%'
-            OR D.MaKH LIKE '%' + @Search + '%'
-			OR K.TenKH LIKE N'%' + @Search + '%'
-        AND (@Month IS NULL OR MONTH(D.NgayBH) = @Month)
-        AND (@Year IS NULL OR YEAR(D.NgayBH) = @Year))
-END;
-GO
-

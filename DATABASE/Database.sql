@@ -3,33 +3,47 @@ GO
 USE DB_QLBH;
 GO
 
-/*====================================================
-=                   BẢNG NHÀ CUNG CẤP               =
-====================================================*/
+CREATE TABLE Tinh (
+    MaTinh SMALLINT PRIMARY KEY,
+	TenTinh NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE Xa (
+    MaXa SMALLINT PRIMARY KEY,
+	TenXa NVARCHAR(50) NOT NULL,
+	MaTinh SMALLINT NOT NULL,
+	CONSTRAINT FK_Xa_Tinh FOREIGN KEY (MaTinh)
+        REFERENCES Tinh(MaTinh) ON DELETE CASCADE
+);
+GO
+
 CREATE TABLE NhaCC (
     MaNCC VARCHAR(10) PRIMARY KEY,
     TenNCC NVARCHAR(100) NOT NULL,
     DienThoaiNCC VARCHAR(15) NOT NULL,
     EmailNCC VARCHAR(100) NULL,
-    DiaChiNCC NVARCHAR(255) NOT NULL
+    DiaChiNCC NVARCHAR(255) NOT NULL,
+	MaXa SMALLINT NOT NULL,
+	CONSTRAINT FK_Xa_NhaCC FOREIGN KEY (MaXa)
+        REFERENCES Xa(MaXa)
 );
 GO
 
-/*====================================================
-=                   BẢNG KHÁCH HÀNG                  =
-====================================================*/
 CREATE TABLE KhachHang(
     MaKH VARCHAR(10) PRIMARY KEY,
     TenKH NVARCHAR(50) NOT NULL,
+    AnhKH NVARCHAR(255) NOT NULL,
+
     DienThoaiKH VARCHAR(15) NOT NULL,
     EmailKH NVARCHAR(255) NOT NULL,
-    DiaChiKH NVARCHAR(255) NOT NULL
+    DiaChiKH NVARCHAR(255) NOT NULL,
+	MaXa SMALLINT NOT NULL,
+	CONSTRAINT FK_Xa_KhachHang FOREIGN KEY (MaXa)
+        REFERENCES Xa(MaXa)
 );
 GO
 
-/*====================================================
-=                     GIAN HÀNG                      =
-====================================================*/
 CREATE TABLE GianHang(
     MaGH VARCHAR(10) PRIMARY KEY,
     TenGH NVARCHAR(100) NOT NULL,
@@ -37,84 +51,76 @@ CREATE TABLE GianHang(
     NgayTao DATE DEFAULT GETDATE(),
     DienThoaiGH VARCHAR(15) NOT NULL,
     EmailGH VARCHAR(100) NULL,
-    DiaChiGH NVARCHAR(200) NOT NULL
+    DiaChiGH NVARCHAR(200) NOT NULL,
+	MaXa SMALLINT NOT NULL,
+	CONSTRAINT FK_Xa_GianHang FOREIGN KEY (MaXa)
+        REFERENCES Xa(MaXa)
 );
 GO
 
-/*====================================================
-=                 NHÓM SẢN PHẨM                      =
-====================================================*/
 CREATE TABLE NhomSP (
     MaNhom VARCHAR(10) PRIMARY KEY,
     TenNhom NVARCHAR(100) NOT NULL
 );
 GO
 
-/*====================================================
-=                 LOẠI SẢN PHẨM                      =
-====================================================*/
 CREATE TABLE LoaiSP(
     MaLoai VARCHAR(10) PRIMARY KEY,
     TenLoai NVARCHAR(50) NOT NULL,
     MaNhom VARCHAR(10) NOT NULL,
     CONSTRAINT FK_LoaiSP_NhomSP FOREIGN KEY (MaNhom)
-        REFERENCES NhomSP(MaNhom) ON DELETE CASCADE
+        REFERENCES NhomSP(MaNhom)
 );
 GO
 
-/*====================================================
-=                     SẢN PHẨM                       =
-=  Thêm khóa ngoại GianHang → SanPham (MaGH)        =
-====================================================*/
 CREATE TABLE SanPham(
     MaSP VARCHAR(10) PRIMARY KEY,
     TenSP NVARCHAR(50) NOT NULL,
     DonGia DECIMAL(18,2) NOT NULL,
     GiaBan DECIMAL(18,2) NOT NULL,
+
     MoTaSP NVARCHAR(MAX) NOT NULL,
     AnhMH NVARCHAR(255) NOT NULL,
+    ThanhPhan NVARCHAR(MAX) NOT NULL,
+    CongDung NVARCHAR(MAX) NOT NULL,
+    HDSD NVARCHAR(MAX) NOT NULL,
+    XuatXu NVARCHAR(MAX) NOT NULL,
+    BaoQuan NVARCHAR(MAX) NOT NULL,
+    
     TrangThai NVARCHAR(50) NOT NULL 
         CHECK (TrangThai IN (N'Còn Hàng', N'Hết Hàng', N'Cháy Hàng', N'Sắp Hết')),
     SoLuongTon INT NOT NULL,
+
     MaLoai VARCHAR(10) NOT NULL,
     MaNCC VARCHAR(10) NOT NULL,
     MaGH VARCHAR(10) NOT NULL,
     CONSTRAINT FK_SanPham_LoaiSP FOREIGN KEY (MaLoai)
-        REFERENCES LoaiSP(MaLoai) ON DELETE CASCADE,
+        REFERENCES LoaiSP(MaLoai),
     CONSTRAINT FK_SanPham_NhaCC FOREIGN KEY (MaNCC)
-        REFERENCES NhaCC(MaNCC) ON DELETE CASCADE,
+        REFERENCES NhaCC(MaNCC),
     CONSTRAINT FK_SanPham_GianHang FOREIGN KEY (MaGH)
-        REFERENCES GianHang(MaGH) ON DELETE CASCADE
+        REFERENCES GianHang(MaGH)
 );
 GO
 
-/*====================================================
-=                ĐƠN MUA HÀNG (Nhập hàng)           =
-====================================================*/
 CREATE TABLE DonMuaHang(
     MaDMH CHAR(11) PRIMARY KEY,
     NgayMH DATE NOT NULL,
     MaNCC VARCHAR(10) NOT NULL,
     CONSTRAINT FK_DonMuaHang_NhaCC FOREIGN KEY (MaNCC)
-        REFERENCES NhaCC(MaNCC) ON DELETE CASCADE
+        REFERENCES NhaCC(MaNCC)
 );
 GO
 
-/*====================================================
-=              ĐƠN BÁN HÀNG (Xuất hàng)              =
-====================================================*/
 CREATE TABLE DonBanHang(
     MaDBH CHAR(11) PRIMARY KEY,
     NgayBH DATE NOT NULL,
     MaKH VARCHAR(10) NOT NULL,
     CONSTRAINT FK_DonBanHang_KhachHang FOREIGN KEY (MaKH)
-        REFERENCES KhachHang(MaKH) ON DELETE CASCADE
+        REFERENCES KhachHang(MaKH)
 );
 GO
 
-/*====================================================
-=                 CHI TIẾT MUA HÀNG                  =
-====================================================*/
 CREATE TABLE CTMH(
     MaDMH CHAR(11) NOT NULL,
     MaSP VARCHAR(10) NOT NULL,
@@ -128,9 +134,6 @@ CREATE TABLE CTMH(
 );
 GO
 
-/*====================================================
-=                CHI TIẾT BÁN HÀNG                   =
-====================================================*/
 CREATE TABLE CTBH(
     MaDBH CHAR(11) NOT NULL,
     MaSP VARCHAR(10) NOT NULL,
@@ -140,10 +143,9 @@ CREATE TABLE CTBH(
     CONSTRAINT FK_CTBH_DonBanHang FOREIGN KEY (MaDBH)
         REFERENCES DonBanHang(MaDBH) ON DELETE CASCADE,
     CONSTRAINT FK_CTBH_SanPham FOREIGN KEY (MaSP)
-        REFERENCES SanPham(MaSP) ON DELETE CASCADE
+        REFERENCES SanPham(MaSP)
 );
 GO
-
 
 -- Table cho Login
 CREATE TABLE TaiKhoan (

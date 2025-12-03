@@ -10,7 +10,9 @@ CREATE OR ALTER PROC GianHang_Insert
     @MoTaGH NVARCHAR(255),
     @DienThoaiGH VARCHAR(15),
     @EmailGH NVARCHAR(100),
-    @DiaChiGH NVARCHAR(200)
+    @DiaChiGH NVARCHAR(200),
+	@MaXa SMALLINT
+
 )
 AS
 BEGIN
@@ -40,8 +42,8 @@ BEGIN
     SET @MaGH = 'GH' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
     BEGIN TRY
-        INSERT INTO GianHang (MaGH, TenGH, MoTaGH, NgayTao, DienThoaiGH, EmailGH, DiaChiGH)
-        VALUES (@MaGH, @TenGH, @MoTaGH, GETDATE(), @DienThoaiGH, @EmailGH, @DiaChiGH);
+        INSERT INTO GianHang (MaGH, TenGH, MoTaGH, NgayTao, DienThoaiGH, EmailGH, DiaChiGH, MaXa)
+        VALUES (@MaGH, @TenGH, @MoTaGH, GETDATE(), @DienThoaiGH, @EmailGH, @DiaChiGH, @MaXa);
 
         PRINT N'Thêm gian hàng thành công!';
     END TRY
@@ -62,7 +64,9 @@ CREATE OR ALTER PROC GianHang_Update
     @MoTaGH NVARCHAR(255),
     @DienThoaiGH VARCHAR(15),
     @EmailGH NVARCHAR(100),
-    @DiaChiGH NVARCHAR(200)
+    @DiaChiGH NVARCHAR(200),
+	@MaXa SMALLINT
+
 )
 AS
 BEGIN
@@ -93,7 +97,8 @@ BEGIN
             MoTaGH = @MoTaGH,
             DienThoaiGH = @DienThoaiGH,
             EmailGH = @EmailGH,
-            DiaChiGH = @DiaChiGH
+            DiaChiGH = @DiaChiGH,
+			MaXa = @MaXa
         WHERE MaGH = @MaGH;
 
         PRINT N'Cập nhật gian hàng thành công!';
@@ -140,7 +145,9 @@ CREATE OR ALTER PROC GianHang_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT * FROM GianHang
+    SELECT G.*, X.TenXa, T.TenTinh FROM GianHang G
+	JOIN Xa X ON X.MaXa = G.MaXa
+	JOIN Tinh T ON T.MaTinh = X.MaTinh
     ORDER BY TenGH ASC;
 END;
 GO
@@ -155,58 +162,32 @@ CREATE OR ALTER PROC GianHang_GetByID
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT * FROM GianHang WHERE MaGH = @MaGH;
+     SELECT G.*, X.TenXa, T.TenTinh FROM GianHang G
+	JOIN Xa X ON X.MaXa = G.MaXa
+	JOIN Tinh T ON T.MaTinh = X.MaTinh
+	WHERE MaGH = @MaGH;
 END;
 GO
 
 -- Search & Filter
-CREATE OR ALTER PROCEDURE GianHang_SearchFilter
+CREATE OR ALTER PROCEDURE GianHang_Search
     @Search NVARCHAR(100) = NULL,
-	@TinhFilter NVARCHAR(100) = NULL, 
-    @PageNumber INT = 1,
-    @PageSize INT = 10
+	@MaTinh SMALLINT
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
-
-    SELECT *
-    FROM GianHang G
+    SELECT G.*, X.TenXa, T.TenTinh FROM GianHang G
+	JOIN Xa X ON X.MaXa = G.MaXa
+	JOIN Tinh T ON T.MaTinh = X.MaTinh
     WHERE
         (@Search IS NULL OR @Search = '' 
             OR G.MaGH LIKE '%' + @Search + '%'
             OR G.TenGH LIKE '%' + @Search + '%'
             OR G.EmailGH LIKE '%' + @Search + '%')
          AND (
-            @TinhFilter IS NULL 
-            OR G.DiaChiGH LIKE '%' + @TinhFilter + '%'
+            @MaTinh IS NULL 
+            OR T.MaTinh LIKE '%' + @MaTinh + '%'
         )
-    ORDER BY G.NgayTao ASC 
-    OFFSET @StartRow ROWS
-    FETCH NEXT @PageSize ROWS ONLY;
+ 
 END;
 GO
 
--- count
-CREATE OR ALTER PROC GianHang_Count
-    @Search NVARCHAR(100) = NULL,    
-	@TinhFilter NVARCHAR(100) = NULL
-
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*)
-    FROM GianHang G
-    WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR G.MaGH LIKE '%' + @Search + '%'
-            OR G.TenGH LIKE '%' + @Search + '%'
-            OR G.EmailGH LIKE '%' + @Search + '%')
-       AND (
-            @TinhFilter IS NULL 
-            OR G.DiaChiGH LIKE '%' + @TinhFilter + '%'
-        )
-END;
-GO

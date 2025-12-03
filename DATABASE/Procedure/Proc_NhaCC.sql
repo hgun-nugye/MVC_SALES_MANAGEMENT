@@ -9,7 +9,9 @@ CREATE OR ALTER PROC NhaCC_Insert
     @TenNCC NVARCHAR(100),
     @DienThoaiNCC VARCHAR(15),
     @EmailNCC VARCHAR(100),
-    @DiaChiNCC NVARCHAR(255)
+    @DiaChiNCC NVARCHAR(255),
+    @MaXa SMALLINT
+	
 )
 AS
 BEGIN
@@ -45,8 +47,8 @@ BEGIN
         SET @MaNCC = 'NCC' + RIGHT('0000000' + CAST(@MaxID + 1 AS VARCHAR(7)), 7);
 
         -- Thêm dữ liệu
-        INSERT INTO NhaCC(MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC)
-        VALUES (@MaNCC, @TenNCC, @DienThoaiNCC, @EmailNCC, @DiaChiNCC);
+        INSERT INTO NhaCC(MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC, MaXa)
+        VALUES (@MaNCC, @TenNCC, @DienThoaiNCC, @EmailNCC, @DiaChiNCC, @MaXa);
 
         PRINT N'Thêm nhà cung cấp thành công.';
     END TRY
@@ -67,7 +69,9 @@ CREATE OR ALTER PROC NhaCC_Update
     @TenNCC NVARCHAR(100),
     @DienThoaiNCC VARCHAR(15),
     @EmailNCC VARCHAR(100),
-    @DiaChiNCC NVARCHAR(255)
+    @DiaChiNCC NVARCHAR(255),
+    @MaXa SMALLINT
+
 )
 AS
 BEGIN
@@ -104,7 +108,8 @@ BEGIN
         SET TenNCC = @TenNCC,
             DienThoaiNCC = @DienThoaiNCC,
             EmailNCC = @EmailNCC,
-            DiaChiNCC = @DiaChiNCC
+            DiaChiNCC = @DiaChiNCC,
+			MaXa = @MaXa
         WHERE MaNCC = @MaNCC;
 
         PRINT N'Cập nhật nhà cung cấp thành công.';
@@ -148,8 +153,12 @@ CREATE OR ALTER PROC NhaCC_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC
-    FROM NhaCC
+    SELECT N.*,X.TenXa, T.TenTinh
+    FROM NhaCC N
+	JOIN Xa X
+	ON X.MaXa= N.MaXa
+	JOIN Tinh T
+	ON T.MaTinh = X.MaTinh
     ORDER BY TenNCC;
 END;
 GO
@@ -164,56 +173,37 @@ CREATE OR ALTER PROC NhaCC_GetByID
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT MaNCC, TenNCC, DienThoaiNCC, EmailNCC, DiaChiNCC
-    FROM NhaCC
+   SELECT N.*,X.TenXa, T.TenTinh
+    FROM NhaCC N
+	JOIN Xa X
+	ON X.MaXa= N.MaXa
+	JOIN Tinh T
+	ON T.MaTinh = X.MaTinh
     WHERE MaNCC = @MaNCC;
 END;
 GO
 
--- Search & Filter
-CREATE OR ALTER PROCEDURE NhaCC_SearchFilter
+-- Search
+CREATE OR ALTER PROCEDURE NhaCC_Search
     @Search NVARCHAR(100) = NULL,   
-	@TinhFilter NVARCHAR(100) = NULL,    -- filter theo Tỉnh
-    @PageNumber INT = 1,
-    @PageSize INT = 10
+	@MaTinh SMALLINT = NULL
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
-
-    SELECT *
+    
+    SELECT N.*,X.TenXa, T.TenTinh
     FROM NhaCC N
+	JOIN Xa X
+	ON X.MaXa= N.MaXa
+	JOIN Tinh T
+	ON T.MaTinh = X.MaTinh
     WHERE
         (@Search IS NULL OR @Search = '' 
             OR N.MaNCC LIKE '%' + @Search + '%'
             OR N.TenNCC LIKE '%' + @Search + '%'
             OR N.EmailNCC LIKE '%' + @Search + '%')
         AND (
-            @TinhFilter IS NULL 
-            OR N.DiaChiNCC LIKE '%' + @TinhFilter + '%'
-        )
-END;
-GO
-
--- count
-CREATE OR ALTER PROC NhaCC_Count
-    @Search NVARCHAR(100) = NULL,   
-	@TinhFilter NVARCHAR(100) = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*)
-    FROM NhaCC N
-    WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR N.MaNCC LIKE '%' + @Search + '%'
-            OR N.TenNCC LIKE '%' + @Search + '%'
-            OR N.EmailNCC LIKE '%' + @Search + '%')
-        AND (
-            @TinhFilter IS NULL 
-            OR N.DiaChiNCC LIKE '%' + @TinhFilter + '%'
+            @MaTinh IS NULL 
+            OR T.TenTinh LIKE '%' + @MaTinh + '%'
         )
 END;
 GO

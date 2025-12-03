@@ -168,9 +168,7 @@ GO
 CREATE OR ALTER PROC Loai_Search
 (
      @Search NVARCHAR(100) = NULL,
-    @MaNhom VARCHAR(10) = NULL,	  
-	  @PageNumber INT = 1,
-    @PageSize INT = 10
+    @MaNhom VARCHAR(10) = NULL
 	)
 AS
 BEGIN
@@ -195,25 +193,3 @@ BEGIN
 END;
 GO
 
--- count
-CREATE OR ALTER PROC Loai_Count
-     @Search NVARCHAR(100) = NULL,
-	 @MaNhom VARCHAR(10)
-
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-      SELECT COUNT(*)
-    FROM LoaiSP L
-    JOIN NhomSP N ON L.MaNhom = N.MaNhom
-    
-      WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR L.MaLoai LIKE '%' + @Search + '%'
-            OR L.MaNhom LIKE '%' + @Search + '%'
-            OR N.TenNhom LIKE '%' + @Search + '%'
-            OR L.TenLoai LIKE '%' + @Search + '%')
-		AND (@MaNhom IS NULL OR N.MaNhom=@MaNhom)
-END;
-GO

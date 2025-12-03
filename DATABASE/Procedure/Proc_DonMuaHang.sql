@@ -47,7 +47,7 @@ BEGIN
     INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
     SELECT @MaDMH, MaSP, SLM, DGM
     FROM @ChiTiet;
-
+	
 END;
 GO
 
@@ -113,45 +113,30 @@ GO
 CREATE OR ALTER PROC DonMuaHang_GetAll
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    SELECT DMH.*, NCC.TenNCC
-    FROM DonMuaHang DMH
-    JOIN NhaCC NCC ON DMH.MaNCC = NCC.MaNCC
-    ORDER BY DMH.NgayMH DESC;
+    SELECT
+	D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, C.SLM, C.DGM,S.MaSP, S.TenSP FROM DonMuaHang D 
+		join NhaCC N ON N.MaNCC=D.MaNCC 
+		join CTMH C on C.MaDMH=D.MaDMH
+		join SanPham S on S.MaSP=C.MaSP
 END;
 GO
 
 ---------------------------------------------------------
 -- ========== GET BY ID ==========
 ---------------------------------------------------------
+
 CREATE OR ALTER PROC DonMuaHang_GetByID
-(
-    @MaDMH CHAR(11)
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT DMH.*, NCC.TenNCC
-    FROM DonMuaHang DMH
-    JOIN NhaCC NCC ON DMH.MaNCC = NCC.MaNCC
-    WHERE DMH.MaDMH = @MaDMH;
-END;
-GO
-
--- get By ID Detail
-CREATE OR ALTER PROC DonMuaHang_GetById_Detail 
 	@MaDMH CHAR(11)
-AS SELECT D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC AS TenNCC, C.SLM as SLM, C.DGM as DGM,S.MaSP, S.TenSP FROM DonMuaHang D 
+AS 
+SELECT D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, C.SLM, C.DGM,S.MaSP, S.TenSP FROM DonMuaHang D 
 		join NhaCC N ON N.MaNCC=D.MaNCC 
 		join CTMH C on C.MaDMH=D.MaDMH
 		join SanPham S on S.MaSP=C.MaSP
 		WHERE D.MaDMH=@MaDMH;
 GO
 
--- Search Filter
-CREATE OR ALTER PROC DonMuaHang_SearchFilter
+-- Search
+CREATE OR ALTER PROC DonMuaHang_Search
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
     @Year INT = NULL
@@ -179,19 +164,14 @@ BEGIN
 END;
 GO
 
--- Search & Filter
-CREATE OR ALTER PROCEDURE DonMuaHang_SearchFilter
+-- Search
+CREATE OR ALTER PROCEDURE DonMuaHang_Search
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
-    @Year INT = NULL,
-    @PageNumber INT = 1,
-    @PageSize INT = 10
+    @Year INT = NULL
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
-
+  
     SELECT D.*, N.TenNCC
     FROM DonMuaHang D
 	JOIN NhaCC N ON N.MaNCC=D.MaNCC
@@ -202,30 +182,6 @@ BEGIN
 			OR N.TenNCC LIKE N'%' + @Search + '%'
         AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year))
-    ORDER BY D.NgayMH DESC 
-    OFFSET @StartRow ROWS
-    FETCH NEXT @PageSize ROWS ONLY;
-END;
-GO
-
--- count
-CREATE OR ALTER PROC DonMuaHang_Count
-    @Search NVARCHAR(100) = NULL,
-    @Month INT = NULL,
-    @Year INT = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*)
-    FROM DonMuaHang D
-	JOIN NhaCC N ON N.MaNCC=D.MaNCC
-    WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR D.MaDMH LIKE '%' + @Search + '%'
-            OR N.MaNCC LIKE '%' + @Search + '%'
-			OR N.TenNCC LIKE N'%' + @Search + '%'
-        AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
-        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year));
+   
 END;
 GO

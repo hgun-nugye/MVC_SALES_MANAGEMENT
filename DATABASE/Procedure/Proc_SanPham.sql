@@ -1,18 +1,23 @@
 ﻿USE DB_QLBH;
 GO
 
----------------------------------------------------------
--- ========== INSERT ==========
----------------------------------------------------------
 CREATE OR ALTER PROC SanPham_Insert
 (
     @TenSP NVARCHAR(50),
-    @DonGia MONEY,
-    @GiaBan MONEY,
+    @DonGia DECIMAL(18,2),
+    @GiaBan DECIMAL(18,2),
     @MoTaSP NVARCHAR(MAX),
     @AnhMH NVARCHAR(255),
+
+    @ThanhPhan NVARCHAR(MAX),
+    @CongDung NVARCHAR(MAX),
+    @HDSD NVARCHAR(MAX),
+    @XuatXu NVARCHAR(MAX),
+    @BaoQuan NVARCHAR(MAX),
+
     @TrangThai NVARCHAR(50),
     @SoLuongTon INT,
+
     @MaLoai VARCHAR(10),
     @MaNCC VARCHAR(10),
     @MaGH VARCHAR(10)
@@ -24,28 +29,23 @@ BEGIN
     DECLARE @MaSP VARCHAR(10);
     DECLARE @MaxID INT;
 
-    -- Lấy số lớn nhất hiện có
     SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaSP, 3, LEN(MaSP)-2) AS INT)), 0)
     FROM SanPham;
 
-    -- Tăng lên 1
     SET @MaSP = 'SP' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
-    -- Kiểm tra trùng tên sản phẩm trong cùng gian hàng
     IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP AND MaGH = @MaGH)
     BEGIN
-        RAISERROR(N'Tên sản phẩm đã tồn tại!', 16, 1);
+        RAISERROR(N'Tên sản phẩm đã tồn tại trong gian hàng này!', 16, 1);
         RETURN;
     END;
 
-    -- Kiểm tra mã loại hợp lệ
     IF NOT EXISTS (SELECT 1 FROM LoaiSP WHERE MaLoai = @MaLoai)
     BEGIN
         RAISERROR(N'Mã loại không tồn tại!', 16, 1);
         RETURN;
     END;
 
-    -- Kiểm tra mã nhà cung cấp hợp lệ
     IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
     BEGIN
         RAISERROR(N'Mã nhà cung cấp không tồn tại!', 16, 1);
@@ -53,56 +53,65 @@ BEGIN
     END;
 
     BEGIN TRY
-        INSERT INTO SanPham(MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH, TrangThai, SoLuongTon, MaLoai, MaNCC, MaGH)
-        VALUES (@MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH);
+        INSERT INTO SanPham
+        (
+            MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH,
+            ThanhPhan, CongDung, HDSD, XuatXu, BaoQuan,
+            TrangThai, SoLuongTon, MaLoai, MaNCC, MaGH
+        )
+        VALUES
+        (
+            @MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH,
+            @ThanhPhan, @CongDung, @HDSD, @XuatXu, @BaoQuan,
+            @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH
+        );
 
         PRINT N'Thêm sản phẩm thành công!';
     END TRY
     BEGIN CATCH
-        DECLARE @Err NVARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR(N'Lỗi khi thêm sản phẩm: %s', 16, 1, @Err);
+        RAISERROR(N'Lỗi khi thêm sản phẩm: %s', 16, 1);
     END CATCH
 END;
 GO
 
-
----------------------------------------------------------
--- ========== UPDATE ==========
----------------------------------------------------------
 CREATE OR ALTER PROC SanPham_Update
 (
     @MaSP VARCHAR(10),
     @TenSP NVARCHAR(50),
-    @DonGia MONEY,
-    @GiaBan MONEY,
+    @DonGia DECIMAL(18,2),
+    @GiaBan DECIMAL(18,2),
     @MoTaSP NVARCHAR(MAX),
     @AnhMH NVARCHAR(255),
+
+    @ThanhPhan NVARCHAR(MAX),
+    @CongDung NVARCHAR(MAX),
+    @HDSD NVARCHAR(MAX),
+    @XuatXu NVARCHAR(MAX),
+    @BaoQuan NVARCHAR(MAX),
+
     @TrangThai NVARCHAR(50),
     @SoLuongTon INT,
+
     @MaLoai VARCHAR(10),
     @MaNCC VARCHAR(10),
-	@MaGH VARCHAR(10)
-
+    @MaGH VARCHAR(10)
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra mã sản phẩm
     IF NOT EXISTS (SELECT 1 FROM SanPham WHERE MaSP = @MaSP)
     BEGIN
         RAISERROR(N'Mã sản phẩm không tồn tại!', 16, 1);
         RETURN;
     END;
 
-    -- Kiểm tra mã loại hợp lệ
     IF NOT EXISTS (SELECT 1 FROM LoaiSP WHERE MaLoai = @MaLoai)
     BEGIN
         RAISERROR(N'Mã loại không tồn tại!', 16, 1);
         RETURN;
     END;
 
-    -- Kiểm tra mã nhà cung cấp hợp lệ
     IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
     BEGIN
         RAISERROR(N'Mã nhà cung cấp không tồn tại!', 16, 1);
@@ -110,23 +119,29 @@ BEGIN
     END;
 
     UPDATE SanPham
-    SET TenSP = @TenSP,
+    SET
+        TenSP = @TenSP,
         DonGia = @DonGia,
         GiaBan = @GiaBan,
         MoTaSP = @MoTaSP,
         AnhMH = @AnhMH,
+
+        ThanhPhan = @ThanhPhan,
+        CongDung = @CongDung,
+        HDSD = @HDSD,
+        XuatXu = @XuatXu,
+        BaoQuan = @BaoQuan,
+
         TrangThai = @TrangThai,
         SoLuongTon = @SoLuongTon,
+
         MaLoai = @MaLoai,
         MaNCC = @MaNCC,
-		MaGH = @MaGH
+        MaGH = @MaGH
     WHERE MaSP = @MaSP;
 END;
 GO
 
----------------------------------------------------------
--- ========== DELETE ==========
----------------------------------------------------------
 CREATE OR ALTER PROC SanPham_Delete
 (
     @MaSP VARCHAR(10)
@@ -145,25 +160,24 @@ BEGIN
 END;
 GO
 
----------------------------------------------------------
--- ========== GET ALL ==========
----------------------------------------------------------
 CREATE OR ALTER PROC SanPham_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
+    SELECT 
+        S.*,
+        L.TenLoai,
+        G.TenGH,
+        N.TenNCC
     FROM SanPham S
-	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
-	JOIN GianHang G ON G.MaGH=S.MaGH
-	JOIN NhaCC N ON N.MaNCC=S.MaNCC
+    JOIN LoaiSP L ON L.MaLoai = S.MaLoai
+    JOIN GianHang G ON G.MaGH = S.MaGH
+    JOIN NhaCC N ON N.MaNCC = S.MaNCC;
 END;
 GO
 
----------------------------------------------------------
--- ========== GET BY ID ==========
----------------------------------------------------------
+
 CREATE OR ALTER PROC SanPham_GetByID
 (
     @MaSP VARCHAR(10)
@@ -185,98 +199,33 @@ BEGIN
 END;
 GO
 
-
----------------------------------------------------------
--- ========== SEARCH (tùy chọn, cho MVC lọc dữ liệu) ==========
----------------------------------------------------------
-CREATE OR ALTER PROC SanPham_Search
-(
-    @Keyword NVARCHAR(100)
-)
+CREATE OR ALTER PROCEDURE SanPham_Search
+    @Search      NVARCHAR(100) = NULL,
+    @TrangThai   NVARCHAR(50)  = NULL,
+    @TenLoai     VARCHAR(10)   = NULL   
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
+    SELECT 
+        S.*, 
+        L.TenLoai, 
+        G.TenGH, 
+        N.TenNCC
     FROM SanPham S
-	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
-	JOIN GianHang G ON G.MaGH=S.MaGH
-	JOIN NhaCC N ON N.MaNCC=S.MaNCC
-    WHERE S.TenSP LIKE N'%' + @Keyword + '%'
-       OR L.TenLoai LIKE N'%' + @Keyword + '%'
-       OR N.TenNCC LIKE N'%' + @Keyword + '%';
-END;
-GO
-
--- Kiểm tra tồn tại
-CREATE OR ALTER PROC SanPham_Exists
-(
-    @MaSP VARCHAR(10)
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*) AS ExistsCount
-    FROM SanPham
-    WHERE MaSP = @MaSP;
-END;
-GO
-
--- Search & Filter
-CREATE OR ALTER PROCEDURE SanPham_SearchFilter
-    @Search NVARCHAR(100) = NULL,
-    @TrangThai NVARCHAR(50) = NULL,
-    @TenLoai VARCHAR(10) = NULL,
-    @PageNumber INT = 1,
-    @PageSize INT = 10
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
-
-    SELECT S.*, L.TenLoai, G.TenGH, N.TenNCC
-    FROM SanPham S
-	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
-	JOIN GianHang G ON G.MaGH=S.MaGH
-	JOIN NhaCC N ON N.MaNCC=S.MaNCC
-    WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR G.TenGH LIKE '%' + @Search + '%'
-            OR S.TenSP LIKE '%' + @Search + '%'
-            OR S.MaSP LIKE '%' + @Search + '%'
-            OR N.TenNCC LIKE '%' + @Search + '%'
-            OR L.TenLoai LIKE '%' + @Search + '%')
-        AND (@TrangThai IS NULL OR S.TrangThai=@TrangThai)
+        JOIN LoaiSP L   ON L.MaLoai = S.MaLoai
+        JOIN GianHang G ON G.MaGH   = S.MaGH
+        JOIN NhaCC N    ON N.MaNCC  = S.MaNCC
+    WHERE 
+        (
+            @Search IS NULL OR @Search = '' OR
+            G.TenGH   LIKE '%' + @Search + '%' OR
+            S.TenSP   LIKE '%' + @Search + '%' OR
+            S.MaSP    LIKE '%' + @Search + '%' OR
+            N.TenNCC  LIKE '%' + @Search + '%' OR
+            L.TenLoai LIKE '%' + @Search + '%'
+        )
+        AND (@TrangThai IS NULL OR S.TrangThai = @TrangThai)
         AND (@TenLoai IS NULL OR L.MaLoai = @TenLoai)
-    ORDER BY S.MaSP ASC 
-    OFFSET @StartRow ROWS
-    FETCH NEXT @PageSize ROWS ONLY;
-END;
-GO
-
--- count
-CREATE OR ALTER PROC SanPham_Count
-     @Search NVARCHAR(100) = NULL,
-    @TrangThai NVARCHAR(50) = NULL,
-    @TenLoai VARCHAR(10) = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*) AS TotalRecords
-    FROM SanPham S
-	JOIN LoaiSP L ON L.MaLoai=S.MaLoai
-	JOIN GianHang G ON G.MaGH=S.MaGH
-	JOIN NhaCC N ON N.MaNCC=S.MaNCC
-    WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR G.TenGH LIKE '%' + @Search + '%'
-            OR S.TenSP LIKE '%' + @Search + '%'
-            OR N.TenNCC LIKE '%' + @Search + '%'
-            OR L.TenLoai LIKE '%' + @Search + '%')
-        AND (@TrangThai IS NULL OR S.TrangThai=@TrangThai)
-        AND (@TenLoai IS NULL OR L.MaLoai = @TenLoai);
+    
 END;
 GO

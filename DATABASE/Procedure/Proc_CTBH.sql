@@ -15,19 +15,22 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra trùng sản phẩm trong cùng đơn
-    IF EXISTS (SELECT 1 FROM CTBH WHERE MaDBH = @MaDBH AND MaSP = @MaSP)
+    IF EXISTS (SELECT 1 FROM CTBH WHERE MaDBH=@MaDBH AND MaSP=@MaSP)
     BEGIN
-        RAISERROR(N'Sản phẩm đã tồn tại trong đơn hàng.', 16, 1);
+        RAISERROR(N'Sản phẩm đã tồn tại trong đơn hàng.',16,1);
         RETURN;
-    END;
+    END
 
-    -- Thêm chi tiết đơn hàng
-    INSERT INTO CTBH (MaDBH, MaSP, SLB, DGB)
-    VALUES (@MaDBH, @MaSP, @SLB, @DGB);
+    -- Thêm chi tiết đơn
+    INSERT INTO CTBH(MaDBH, MaSP, SLB, DGB)
+    VALUES(@MaDBH, @MaSP, @SLB, @DGB);
+
+    -- Trừ số lượng tồn
+    UPDATE SanPham
+    SET SoLuongTon = SoLuongTon - @SLB
+    WHERE MaSP=@MaSP;
 END;
 GO
-
 
 -- =========================================
 -- UPDATE
@@ -43,13 +46,29 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @OldSLB INT;
+
+    -- Lấy số lượng cũ
+    SELECT @OldSLB = SLB FROM CTBH
+    WHERE MaDBH=@MaDBH AND MaSP=@MaSP;
+
+    IF @OldSLB IS NULL
+    BEGIN
+        RAISERROR(N'Dòng chi tiết không tồn tại.',16,1);
+        RETURN;
+    END
+
+    -- Update chi tiết
     UPDATE CTBH
-    SET SLB = @SLB,
-        DGB = @DGB
-    WHERE MaDBH = @MaDBH AND MaSP = @MaSP;
+    SET SLB=@SLB, DGB=@DGB
+    WHERE MaDBH=@MaDBH AND MaSP=@MaSP;
+
+    -- Cập nhật tồn kho theo chênh lệch
+    UPDATE SanPham
+    SET SoLuongTon = SoLuongTon + (@OldSLB - @SLB)
+    WHERE MaSP=@MaSP;
 END;
 GO
-
 
 -- =========================================
 -- DELETE
@@ -63,11 +82,27 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DELETE FROM CTBH
-    WHERE MaDBH = @MaDBH AND MaSP = @MaSP;
+    DECLARE @OldSLB INT;
+
+    SELECT @OldSLB = SLB
+    FROM CTBH
+    WHERE MaDBH=@MaDBH AND MaSP=@MaSP;
+
+    IF @OldSLB IS NULL
+    BEGIN
+        RAISERROR(N'Dòng chi tiết không tồn tại.',16,1);
+        RETURN;
+    END
+
+    -- Xóa chi tiết
+    DELETE FROM CTBH WHERE MaDBH=@MaDBH AND MaSP=@MaSP;
+
+    -- Cộng lại tồn kho
+    UPDATE SanPham
+    SET SoLuongTon = SoLuongTon + @OldSLB
+    WHERE MaSP=@MaSP;
 END;
 GO
-
 
 -- =========================================
 -- GET ALL
@@ -94,16 +129,13 @@ BEGIN
 END;
 GO
 
--- Get All Detail
-CREATE OR ALTER PROC CTBH_GetAll_Detail AS SELECT C.*, S.TenSP FROM CTBH C JOIN SanPham S ON S.MaSP=C.MaSP;
-GO
-
 -- =========================================
 -- GET BY ID
 -- =========================================
 CREATE OR ALTER PROC CTBH_GetByID
 (
-    @MaDBH CHAR(11)
+    @MaDBH CHAR(11),
+    @MaSP VARCHAR(10)
 )
 AS
 BEGIN
@@ -123,52 +155,6 @@ BEGIN
     JOIN SanPham SP ON CT.MaSP = SP.MaSP
     JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
     JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
-    WHERE CT.MaDBH = @MaDBH;
-END;
-GO
-
--- Get By ID Detail
-CREATE OR ALTER PROC CTBH_GetById_Detail @MaDBH CHAR(11), @MaSP VARCHAR(10)
-AS SELECT C.*, S.TenSP FROM CTBH C JOIN SanPham S ON S.MaSP=C.MaSP WHERE C.MaDBH = @MaDBH AND C.MaSP = @MaSP;
-GO
-
--- =========================================
--- SEARCH
--- =========================================
-CREATE OR ALTER PROC CTBH_Search
-(
-    @MaDBH CHAR(11) = NULL,
-    @MaSP VARCHAR(10) = NULL,
-    @TenSP NVARCHAR(100) = NULL,
-    @TenKH NVARCHAR(100) = NULL,
-    @TuNgay DATE = NULL,
-    @DenNgay DATE = NULL
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT 
-        CT.MaDBH,
-        CT.MaSP,
-        SP.TenSP,
-        SP.GiaBan,
-        CT.SLB,
-        CT.DGB,
-        (CT.SLB * CT.DGB) AS ThanhTien,
-        DBH.NgayBH,
-        KH.TenKH
-    FROM CTBH CT
-    JOIN SanPham SP ON CT.MaSP = SP.MaSP
-    JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
-    JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
-    WHERE
-        (@MaDBH IS NULL OR CT.MaDBH = @MaDBH)
-        AND (@MaSP IS NULL OR CT.MaSP = @MaSP)
-        AND (@TenSP IS NULL OR SP.TenSP LIKE '%' + @TenSP + '%')
-        AND (@TenKH IS NULL OR KH.TenKH LIKE '%' + @TenKH + '%')
-        AND (@TuNgay IS NULL OR DBH.NgayBH >= @TuNgay)
-        AND (@DenNgay IS NULL OR DBH.NgayBH <= @DenNgay)
-    ORDER BY DBH.NgayBH DESC;
+    WHERE CT.MaDBH = @MaDBH AND CT.MaSP= @MaSP;
 END;
 GO

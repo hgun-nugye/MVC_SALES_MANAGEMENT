@@ -7,9 +7,11 @@ GO
 CREATE OR ALTER PROC KhachHang_Insert
 (
     @TenKH NVARCHAR(50),
+	@AnhKH NVARCHAR(255),
     @DienThoaiKH VARCHAR(10),
     @EmailKH NVARCHAR(255),
-    @DiaChiKH NVARCHAR(255)
+    @DiaChiKH NVARCHAR(255),
+    @MaXa SMALLINT
 )
 AS
 BEGIN
@@ -39,8 +41,8 @@ BEGIN
     SET @MaKH = 'KH' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
     BEGIN TRY
-        INSERT INTO KhachHang(MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH)
-        VALUES (@MaKH, @TenKH, @DienThoaiKH, @EmailKH, @DiaChiKH);
+        INSERT INTO KhachHang(MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH,MaXa, AnhKH)
+        VALUES (@MaKH, @TenKH, @DienThoaiKH, @EmailKH, @DiaChiKH,@MaXa, @AnhKH);
 
         PRINT N'Thêm khách hàng thành công!';
     END TRY
@@ -58,9 +60,11 @@ CREATE OR ALTER PROC KhachHang_Update
 (
     @MaKH VARCHAR(10),
     @TenKH NVARCHAR(50),
+	@AnhKH NVARCHAR(255),
     @DienThoaiKH VARCHAR(10),
     @EmailKH NVARCHAR(255),
-    @DiaChiKH NVARCHAR(255)
+    @DiaChiKH NVARCHAR(255),
+    @MaXa SMALLINT
 )
 AS
 BEGIN
@@ -88,9 +92,11 @@ BEGIN
     BEGIN TRY
         UPDATE KhachHang
         SET TenKH = @TenKH,
+			AnhKH = @AnhKH,
             DienThoaiKH = @DienThoaiKH,
             EmailKH = @EmailKH,
-            DiaChiKH = @DiaChiKH
+            DiaChiKH = @DiaChiKH,
+			MaXa = @MaXa
         WHERE MaKH = @MaKH;
 
         PRINT N'Cập nhật thông tin khách hàng thành công!';
@@ -101,7 +107,6 @@ BEGIN
     END CATCH
 END;
 GO
-
 
 -- ============================
 -- DELETE
@@ -153,115 +158,61 @@ CREATE OR ALTER PROC KhachHang_GetByID
 )
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    IF NOT EXISTS (SELECT 1 FROM KhachHang WHERE MaKH = @MaKH)
-    BEGIN
-        RAISERROR(N'Không tìm thấy khách hàng với mã này.', 16, 1);
-        RETURN;
-    END;
-
     SELECT * FROM KhachHang WHERE MaKH = @MaKH;
 END;
 GO
 
--- ============================
--- SEARCH
--- ============================
-CREATE OR ALTER PROC KhachHang_Search
-(
-    @Search NVARCHAR(200) = NULL       -- Từ khóa tìm kiếm (Tên, Email, SĐT, Địa chỉ)
-)
+CREATE OR ALTER PROC KhachHang_GetAllWithXa
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    SELECT 
-        MaKH,
-        TenKH,
-        DienThoaiKH,
-        EmailKH,
-        DiaChiKH
-    FROM KhachHang
-    WHERE
-        @Search IS NULL
-        OR TenKH LIKE '%' + @Search + '%'
-        OR EmailKH LIKE '%' + @Search + '%'
-        OR DienThoaiKH LIKE '%' + @Search + '%'
-        OR DiaChiKH LIKE '%' + @Search + '%'
-    ORDER BY TenKH ASC;
-END;
+    SELECT KH.MaKH, KH.TenKH, KH.DienThoaiKH, KH.EmailKH, KH.DiaChiKH, KH.AnhKH,
+           KH.MaXa,
+           X.TenXa,
+           T.TenTinh
+    FROM KhachHang KH
+    LEFT JOIN Xa X ON KH.MaXa = X.MaXa
+    LEFT JOIN Tinh T ON X.MaTinh = T.MaTinh
+    ORDER BY KH.MaKH
+END
 GO
 
--- Kiểm tra tồn tại
-CREATE OR ALTER PROC KhachHang_Exists
-(
-    @MaKH VARCHAR(10)
-)
+CREATE OR ALTER PROC KhachHang_GetbyIDWithXa
+	    @MaKH VARCHAR(10)
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*) AS ExistsCount
-    FROM KhachHang
-    WHERE MaKH = @MaKH;
-END;
+    SELECT KH.MaKH, KH.TenKH, KH.DienThoaiKH, KH.EmailKH, KH.DiaChiKH, KH.AnhKH,
+           KH.MaXa,
+           X.TenXa,
+           T.TenTinh
+    FROM KhachHang KH
+    LEFT JOIN Xa X ON KH.MaXa = X.MaXa
+    LEFT JOIN Tinh T ON X.MaTinh = T.MaTinh
+	WHERE KH.MaKH = @MaKH
+END
 GO
 
--- Search & Filter
-CREATE OR ALTER PROCEDURE KhachHang_SearchFilter
+-- Search
+CREATE OR ALTER PROCEDURE KhachHang_Search
     @Search NVARCHAR(200) = NULL,        
-    @TinhFilter NVARCHAR(100) = NULL,    -- filter theo Tỉnh
-    @PageNumber INT = 1,
-    @PageSize INT = 10
+    @MaTinh SMALLINT = NULL
 AS
-BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @StartRow INT = (@PageNumber - 1) * @PageSize;
-
+BEGIN    
     SELECT 
-        KH.*
-    FROM KhachHang KH
+        K.*, X.TenXa, T.TenTinh
+    FROM KhachHang K
+	JOIN Xa X ON X.MaXa = K.MaXa
+	JOIN Tinh T ON T.MaTinh = X.MaTinh
     WHERE
         (
             @Search IS NULL OR @Search = '' OR
-            KH.TenKH LIKE '%' + @Search + '%' OR
-            KH.EmailKH LIKE '%' + @Search + '%' OR
-            KH.DienThoaiKH LIKE '%' + @Search + '%'
+            K.TenKH LIKE '%' + @Search + '%' OR
+            K.EmailKH LIKE '%' + @Search + '%' OR
+            K.DienThoaiKH LIKE '%' + @Search + '%'
         )
         AND (
-            @TinhFilter IS NULL 
-            OR KH.DiaChiKH LIKE '%' + @TinhFilter + '%'
+            @MaTinh IS NULL 
+            OR T.MaTinh LIKE '%' + @MaTinh + '%'
         )
-       
-    ORDER BY KH.MaKH ASC
-    OFFSET @StartRow ROWS
-    FETCH NEXT @PageSize ROWS ONLY;
 END;
 GO
 
-
--- count
-CREATE OR ALTER PROC KhachHang_Count
-    @Search NVARCHAR(200) = NULL,
-    @TinhFilter NVARCHAR(100) = NULL    -- filter theo Tỉnh
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT COUNT(*)
-    FROM KhachHang KH
-     WHERE
-        (
-            @Search IS NULL OR @Search = '' OR
-            KH.TenKH LIKE '%' + @Search + '%' OR
-            KH.EmailKH LIKE '%' + @Search + '%' OR
-            KH.DienThoaiKH LIKE '%' + @Search + '%'
-        )
-        AND (
-            @TinhFilter IS NULL 
-            OR KH.DiaChiKH LIKE '%' + @TinhFilter + '%'
-        )
-END;
-GO
