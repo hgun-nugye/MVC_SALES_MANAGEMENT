@@ -21,14 +21,39 @@ namespace QuanLyBanHang.Services
 				.ToListAsync();
 		}
 
-		public async Task<List<DonBanHangDetail>> GetDetail(string id)
+		public async Task<DonBanHang?> GetByID(string id)
 		{
 			var param = new SqlParameter("@MaDBH", id);
-			return await _context.DonBanHangDetail
-				.FromSqlRaw("EXEC DonBanHang_GetById_Detail @MaDBH", param)
-				.ToListAsync();
+			return await _context.DonBanHang	
+				.FromSqlRaw("EXEC DonBanHang_GetByID @MaDBH", param)
+				.FirstOrDefaultAsync();
 		}
 
+		// Lấy chi tiết 1 chi tiết sản phẩm
+		public async Task<CTBH?> GetDetail(string MaDMH, string MaSP)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@MaDMH", MaDMH),
+				new SqlParameter("@MaSP", MaSP)
+			};
+
+			var data = await _context.CTBHDetailDtos
+				.FromSqlRaw("EXEC CTBH_GetByID @MaDBH, @MaSP", parameters)
+				.ToListAsync();
+
+			var model = data.FirstOrDefault();
+			if (model == null) return null;
+
+			return new CTBH
+			{
+				MaDBH = model.MaDBH,
+				MaSP = model.MaSP,
+				SLB = model.SLB,
+				DGB = model.DGB,
+				TenSP = model.TenSP
+			};
+		}
 		public async Task<bool> Create(DonBanHang model)
 		{
 			if (model.CTBHs == null || !model.CTBHs.Any())
@@ -60,7 +85,7 @@ namespace QuanLyBanHang.Services
 			return true;
 		}
 
-		public async Task Edit(DonBanHangEditCTBH model)
+		public async Task Update(DonBanHangEditCTBH model)
 		{
 			// Update header
 			await _context.Database.ExecuteSqlRawAsync(
@@ -114,7 +139,7 @@ namespace QuanLyBanHang.Services
 			return data;
 		}
 
-		public async Task<List<DonBanHang>> ClearAsync()
+		public async Task<List<DonBanHang>> Reset()
 		{
 			var data = await _context.DonBanHang
 				.FromSqlRaw("EXEC DonBanHang_Search @Search=NULL, @Month=NULL, @Year=NULL")

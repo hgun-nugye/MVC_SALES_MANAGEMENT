@@ -10,72 +10,34 @@ namespace QuanLyBanHang.Controllers
 {
 	public class DonBanHangController : Controller
 	{
+		private readonly DonBanHangService _dbhService;
 		private readonly AppDbContext _context;
 
-		public DonBanHangController(AppDbContext context)
+		public DonBanHangController(DonBanHangService service, AppDbContext context)
 		{
+			_dbhService = service;
 			_context = context;
 		}
-				
-		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
+
+		public async Task<IActionResult> Index(string? search, int? month, int? year)
 		{
 			ViewBag.Search = search;
 			ViewBag.Month = month;
 			ViewBag.Year = year;
-			ViewBag.PageNumber = pageNumber;
-			ViewBag.PageSize = pageSize;
 
-			// Tham số cho SP lấy danh sách
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value),
-				new SqlParameter("@PageNumber", pageNumber),
-				new SqlParameter("@PageSize", pageSize)
-			};
-
-			// Lấy danh sách đơn bán hàng (chỉ các cột trong entity DonBanHang)
-			var model = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year, @PageNumber, @PageSize", parameters)
-				.ToListAsync();
-
-			// Lấy tổng số bản ghi (1 row)
-			var countParams = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
-			};
-
-			var totalRecords = _context.DonBanHangCountDtos
-							.FromSqlRaw("EXEC DonBanHang_Count @Search, @Month, @Year", countParams)
-							.AsEnumerable()          
-							.Select(x => x.TotalRecords)
-							.FirstOrDefault();
-
-
-			ViewBag.TotalRecords = totalRecords;
-			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-
+			var model = await _dbhService.Search(search, month, year);
 			return View(model);
 		}
 
 
-		// ============ DETAILS ============
 		public async Task<IActionResult> Details(string id)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
 
-			var param = new SqlParameter("@MaDBH", id);
-			var result = await _context.DonBanHangDetail
-				.FromSqlRaw("EXEC DonBanHang_GetById_Detail @MaDBH", param)
-				.ToListAsync();
-
+			var result = await _dbhService.GetByID(id);
 			return View(result);
 		}
 
-		// ===================== CREATE (GET) =====================
 		public IActionResult Create()
 		{
 			ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH");
@@ -93,7 +55,6 @@ namespace QuanLyBanHang.Controllers
 			return View(model);
 		}
 
-		// ===================== CREATE (POST) =====================
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(DonBanHang model)
@@ -102,27 +63,7 @@ namespace QuanLyBanHang.Controllers
 			{
 				if (ModelState.IsValid && model.CTBHs != null && model.CTBHs.Any())
 				{
-					var table = new DataTable();
-					table.Columns.Add("MaSP", typeof(string));
-					table.Columns.Add("SLB", typeof(int));
-					table.Columns.Add("DGB", typeof(decimal));
-
-					foreach (var ct in model.CTBHs)
-					{
-						table.Rows.Add(ct.MaSP, ct.SLB, ct.DGB);
-					}
-
-					var parameters = new[]
-					{
-						new SqlParameter("@NgayBH", model.NgayBH),
-						new SqlParameter("@MaKH", model.MaKH),
-						new SqlParameter("@ChiTiet", table)
-						{
-							SqlDbType = SqlDbType.Structured,
-							TypeName = "dbo.CTBH_List"
-						}
-					};
-					await _context.Database.ExecuteSqlRawAsync("EXEC DonBanHang_Insert @NgayBH, @MaKH, @ChiTiet", parameters);
+					await _dbhService.Create(model);
 
 					TempData["SuccessMessage"] = $"Thêm đơn bán hàng thành công!";
 					return RedirectToAction(nameof(Index));
@@ -140,24 +81,19 @@ namespace QuanLyBanHang.Controllers
 			return View(model);
 		}
 
-		// ============ EDIT (GET) ============
 		public async Task<IActionResult> Edit(string id)
 		{
 			if (id == null) return NotFound();
 
-			var param = new SqlParameter("@MaDBH", id);
-			var data = await _context.Set<DonBanHangDetail>()
-				.FromSqlRaw("EXEC DonBanHang_GetById_Detail @MaDBH", param)
-				.ToListAsync();
-
-			if (!data.Any()) return NotFound();
+			var result = await _dbhService.GetByID(id);
+			if (result == null) return NotFound();
 
 			var ct = new DonBanHangEditCTBH
 			{
-				MaDBH = data[0].MaDBH!,
-				NgayBH = data[0].NgayBH,
-				MaKH = data[0].MaKH!,
-				ChiTiet = data
+				MaDBH = result.MaDBH!,
+				NgayBH = result.NgayBH,
+				MaKH = result.MaKH!,
+				ChiTiet = result.CTBHs!	
 			};
 
 			ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH", ct.MaKH);
@@ -165,7 +101,6 @@ namespace QuanLyBanHang.Controllers
 			return View(ct);
 		}
 
-		// ============ EDIT (POST) ============
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(DonBanHangEditCTBH model)
@@ -174,25 +109,19 @@ namespace QuanLyBanHang.Controllers
 			try
 			{
 
-				// Update header
-				await _context.Database.ExecuteSqlRawAsync(
-					"EXEC DonBanHang_Update  @MaDBH,@NgayBH, @MaKH",
-					new SqlParameter("@MaDBH", model.MaDBH),
-					new SqlParameter("@NgayBH", model.NgayBH),
-					new SqlParameter("@MaKH", model.MaKH)
-				);
+				await _dbhService.Update(model);
 
-				// Update each product
-				foreach (var ct in model.ChiTiet)
-				{
-					await _context.Database.ExecuteSqlRawAsync(
-						"EXEC CTBH_Update @MaDBH, @MaSP, @SLB, @DGB",
-						new SqlParameter("@MaDBH", model.MaDBH),
-						new SqlParameter("@MaSP", ct.MaSP),
-						new SqlParameter("@SLB", ct.SLB),
-						new SqlParameter("@DGB", ct.DGB)
-					);
-				}
+				//// Update each product
+				//foreach (var ct in model.ChiTiet)
+				//{
+				//	await _context.Database.ExecuteSqlRawAsync(
+				//		"EXEC CTBH_Update @MaDBH, @MaSP, @SLB, @DGB",
+				//		new SqlParameter("@MaDBH", model.MaDBH),
+				//		new SqlParameter("@MaSP", ct.MaSP),
+				//		new SqlParameter("@SLB", ct.SLB),
+				//		new SqlParameter("@DGB", ct.DGB)
+				//	);
+				//}
 
 				TempData["SuccessMessage"] = "Cập nhật đơn bán hàng thành công!";
 				return RedirectToAction(nameof(Index));
@@ -207,32 +136,24 @@ namespace QuanLyBanHang.Controllers
 
 		}
 
-		// ============ DELETE (GET) ============
 		public async Task<IActionResult> Delete(string id)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
 
-			var param = new SqlParameter("@MaDBH", id);
-			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_GetById_Detail @MaDBH", param)
-				.ToListAsync();
 
-			var dbh = data.FirstOrDefault();
+			var dbh = await _dbhService.GetByID(id);
 			if (dbh == null) return NotFound();
 
 			return View(dbh);
 		}
 
-		// ============ DELETE (POST) ============
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(string id)
 		{
 			try
 			{
-				var param = new SqlParameter("@MaDBH", id);
-				await _context.Database.ExecuteSqlRawAsync("EXEC DonBanHang_Delete @MaDBH", param);
-
+				await _dbhService.Delete(id);
 				TempData["SuccessMessage"] = "Xóa đơn bán hàng thành công!";
 			}
 			catch (Exception ex)
@@ -243,79 +164,37 @@ namespace QuanLyBanHang.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
-		// ============ DELETE DETAIL(GET) ============
 		[HttpGet]
 		public async Task<IActionResult> DeleteDetail(string maDBH, string maSP)
 		{
-			if (string.IsNullOrEmpty(maDBH) || string.IsNullOrEmpty(maSP))
-				return NotFound();
-
-			var parameters = new[]
-			{
-				new SqlParameter("@MaDBH", maDBH),
-				new SqlParameter("@MaSP", maSP)
-			};
-
-			// Lấy đúng 1 chi tiết bằng Proc
-			var data = await _context.CTBHDetailDtos
-				.FromSqlRaw("EXEC CTBH_GetById_Detail @MaDBH, @MaSP", parameters)
-				.ToListAsync();
-
-			var model = data.FirstOrDefault();
+			var model = await _dbhService.GetDetail(maDBH, maSP);
 			if (model == null) return NotFound();
-
-			// Chuyển DTO sang Model CTBH (View Xóa đang dùng CTBH)
-			var ctbh = new CTBH
-			{
-				MaDBH = model.MaDBH,
-				MaSP = model.MaSP,
-				SLB = model.SLB,
-				DGB = model.DGB,
-				TenSP = model.TenSP
-			};
-
-			return View("DeleteDetail", ctbh);
+			return View(model);
+			//return View("DeleteDetail", ctbh);
 		}
 
 
-		// ============ DELETE DETAIL(POST) ============
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteDetailConfirmed(string maDBH, string maSP)
 		{
 			try
 			{
-				await _context.Database.ExecuteSqlRawAsync(
-					"EXEC CTBH_Delete @MaDBH, @MaSP",
-					new SqlParameter("@MaDBH", maDBH),
-					new SqlParameter("@MaSP", maSP)
-				);
+				await _dbhService.DeleteDetail(maDBH, maSP);
 
 				TempData["SuccessMessage"] = "Xóa chi tiết sản phẩm thành công!";
 			}
-			catch (Exception ex)
-			{
+			catch (Exception ex) {
 				TempData["ErrorMessage"] = "Lỗi khi xóa: " + ex.Message;
 			}
 
-			return RedirectToAction("Details", "DonBanHang", new { id = maDBH });
+			return RedirectToAction("Details", new { id = maDBH });
 		}
 
-		// ============ SEARCH ============
 		[HttpGet]
 		public async Task<IActionResult> Search(string keyword, int? month, int? year)
 		{
-			var parameters = new[]
-			{
-		new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
-		new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-		new SqlParameter("@Year", (object?)year ?? DBNull.Value)
-	};
-
-			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year", parameters)
-				.ToListAsync();
-
+			var data= await _dbhService.Search(keyword, month, year);
 			return PartialView("DonBanHangTable", data);
 		}
 
@@ -323,9 +202,7 @@ namespace QuanLyBanHang.Controllers
 		// ============ RESET  ============
 		public async Task<IActionResult> Clear()
 		{
-			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_Search @Search=NULL, @Month=NULL, @Year=NULL")
-				.ToListAsync();
+			var data = await _dbhService.Reset();
 
 			return PartialView("DonBanHangTable", data);
 		}

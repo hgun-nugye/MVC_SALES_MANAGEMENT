@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb")));
-builder.Services.AddControllersWithViews(); // Do NOT disable endpoint routing
+builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<CTMHService>();
 builder.Services.AddScoped<CTBHService>();

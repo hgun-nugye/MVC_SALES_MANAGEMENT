@@ -21,6 +21,8 @@ namespace QuanLyBanHang.Models
 
 		public string DiaChiGH { get; set; } = null!;
 		public short MaXa { get; set; } 
+		public string? TenXa { get; set; }
+		public string? TenTinh { get; set; }
 
 		public ICollection<SanPham>? DsSanPham { get; set; }		
 	}

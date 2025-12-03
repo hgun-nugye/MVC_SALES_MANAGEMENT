@@ -4,7 +4,7 @@ GO
 -- ============================
 -- INSERT
 -- ============================
-CREATE OR ALTER PROC Loai_Insert
+CREATE OR ALTER PROC LoaiSP_Insert
 (
     @TenLoai NVARCHAR(50),
     @MaNhom VARCHAR(10)
@@ -53,7 +53,7 @@ GO
 -- ============================
 -- UPDATE
 -- ============================
-CREATE OR ALTER PROC Loai_Update
+CREATE OR ALTER PROC LoaiSP_Update
 (
     @MaLoai VARCHAR(10),
     @TenLoai NVARCHAR(50),
@@ -96,7 +96,7 @@ GO
 -- ============================
 -- DELETE
 -- ============================
-CREATE OR ALTER PROC Loai_Delete
+CREATE OR ALTER PROC LoaiSP_Delete
 (
     @MaLoai VARCHAR(10)
 )
@@ -125,7 +125,7 @@ GO
 -- ============================
 -- GET ALL
 -- ============================
-CREATE OR ALTER PROC Loai_GetAll
+CREATE OR ALTER PROC LoaiSP_GetAll
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -141,7 +141,7 @@ GO
 -- ============================
 -- GET BY ID
 -- ============================
-CREATE OR ALTER PROC Loai_GetByID
+CREATE OR ALTER PROC LoaiSP_GetByID
 (
     @MaLoai VARCHAR(10)
 )
@@ -165,7 +165,7 @@ GO
 -- ============================
 -- SEARCH
 -- ============================
-CREATE OR ALTER PROC Loai_Search
+CREATE OR ALTER PROC LoaiSP_Search
 (
      @Search NVARCHAR(100) = NULL,
     @MaNhom VARCHAR(10) = NULL

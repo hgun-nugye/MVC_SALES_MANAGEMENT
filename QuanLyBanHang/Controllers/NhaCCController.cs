@@ -22,7 +22,7 @@ namespace QuanLyBanHang.Controllers
 
 			var model = await _nhaCCService.GetList(search, province);
 
-			ViewBag.Provinces = await _tinhService.GetAllAsync();
+			ViewBag.Provinces = await _tinhService.GetAll();
 			return View(model);
 		}
 

@@ -7,18 +7,13 @@ namespace QuanLyBanHang.Models
 	public class DonBanHang
 	{
 		[Key]
-		[Display(Name = "Mã đơn bán hàng")]
 		public string? MaDBH { get; set; }
 
-		[Required(ErrorMessage = "Ngày bán hàng không được để trống")]
-		[Display(Name = "Ngày bán hàng")]
 		[DataType(DataType.Date)]
 		public DateTime NgayBH { get; set; }
 
-		[Display(Name = "Mã khách hàng")]
 		public string? MaKH { get; set; }
 
-		[Display(Name = "Tên khách hàng")]
 		public string? TenKH { get; set; }
 
 

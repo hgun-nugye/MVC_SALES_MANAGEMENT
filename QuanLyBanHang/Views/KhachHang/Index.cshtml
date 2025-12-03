@@ -2,11 +2,6 @@
 
 @{
     ViewBag.Title = "Quản lý Khách hàng";
-    int totalPages = ViewBag.TotalPages;
-    int currentPage = ViewBag.PageNumber;
-    int pageWindow = 5;
-    int startPage = Math.Max(1, currentPage - pageWindow);
-    int endPage = Math.Min(totalPages, currentPage + pageWindow);
 }
 <style>
     .search-wrapper {
@@ -20,7 +15,6 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: #0d6efd;
             pointer-events: none;
         }
 
@@ -68,10 +62,6 @@
             <a href="@Url.Action("Create", "KhachHang")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
 
         </div>
-
-        <!-- Hidden inputs giữ state -->
-        <input type="hidden" name="pageNumber" id="pageNumberInput" value="@currentPage" />
-        <input type="hidden" name="pageSize" id="pageSizeInput" value="@ViewBag.PageSize" />
     </form>
 
     <!-- TABLE -->
@@ -89,56 +79,6 @@
             @await Html.PartialAsync("KhachHangTable", Model)
         </tbody>
     </table>
-
-    <!-- Pagination + PageSize -->
-    <div class="d-flex justify-content-between align-items-center mt-4">
-
-        <!-- PageSize -->
-        <div class="d-flex align-items-center gap-2">
-            <label for="pageSizeSelect">Hiển thị:</label>
-            <select id="pageSizeSelect" class="form-select" style="width:120px;">
-                @foreach (int size in new int[] { 5, 10, 20, 50 })
-                {
-                    @Html.Raw($"<option value='{size}' {(ViewBag.PageSize == size ? "selected" : "")}>{size} /page</option>")
-                    ;
-                }
-            </select>
-        </div>
-
-        <!-- Pagination -->
-        <nav>
-            <ul class="pagination mb-0">
-                @if (currentPage > 1)
-                {
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(1); return false;">&laquo;</a></li>
-                }
-
-                @if (currentPage - pageWindow > 1)
-                {
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(1); return false;">1</a></li>
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                }
-
-                @for (int i = startPage; i <= endPage; i++)
-                {
-                    <li class="page-item @(currentPage == i ? "active bg-success" : "")">
-                        <a class="page-link @(currentPage == i ? "text-white" : "")" href="#" onclick="changePage(@i); return false;">@i</a>
-                    </li>
-                }
-
-                @if (currentPage + pageWindow < totalPages)
-                {
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(@totalPages); return false;">@totalPages</a></li>
-                }
-
-                @if (currentPage < totalPages)
-                {
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(@totalPages); return false;">&raquo;</a></li>
-                }
-            </ul>
-        </nav>
-    </div>
 </div>
 
 @section Scripts {
@@ -165,20 +105,6 @@
             $("#Form").submit();
         });
 
-
-        // pageSize change
-        $("#pageSizeSelect").on("change", function () {
-            $("#pageSizeInput").val($(this).val());
-            $("#pageNumberInput").val(1);
-            $("#Form").submit();
-        });
-
-        // pagination
-        function changePage(page) {
-            $("#pageNumberInput").val(page);
-            $("#Form").submit();
-        }
-
         // clear 
         $("#btnClear").on("click", function () {
             $("#searchBox").val("");
@@ -188,27 +114,6 @@
             $("#Form").submit();
         });
 
-        // Load danh sách tỉnh từ API khi load trang
-        $(document).ready(function () {
-            $.getJSON("/Address/LoadProvinces", function (data) {
-                data.forEach(p => {
-                    $("#province").append(
-                        `<option value="${p.name}">${p.name}</option>`
-                    );
-                });
-
-                // Giữ selected province khi reload
-            var selected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SelectedProvince ?? ""));
-            if (selected) {
-                $("#province").val(selected);
-            }
-            });
-        });
-
-
-    </script>
-
-    <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".clickable-row").forEach(row => {
                 row.addEventListener("click", function () {

@@ -13,6 +13,7 @@ namespace QuanLyBanHang.Controllers
 		public TinhController(TinhService tinhService, AppDbContext context)
 		{
 			_tinhService = tinhService;
+			_context = context;
 		}
 	
 		// READ - Danh sách Tỉnh 

@@ -146,10 +146,3 @@ CREATE TABLE CTBH(
         REFERENCES SanPham(MaSP)
 );
 GO
-
--- Table cho Login
-CREATE TABLE TaiKhoan (
-    TenUser VARCHAR(50) PRIMARY KEY,
-    MatKhau NVARCHAR(255) NOT NULL
-);
-GO

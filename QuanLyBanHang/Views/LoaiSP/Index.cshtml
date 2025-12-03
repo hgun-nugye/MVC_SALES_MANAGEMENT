@@ -2,12 +2,6 @@
 
 @{
     ViewBag.Title = "Quản lý Loại sản phẩm";
-
-    int totalPages = ViewBag.TotalPages;
-    int currentPage = ViewBag.PageNumber;
-    int pageWindow = 5; // số trang xung quanh current
-    int startPage = Math.Max(1, currentPage - pageWindow);
-    int endPage = Math.Min(totalPages, currentPage + pageWindow);
 }
 
 <style>
@@ -69,10 +63,6 @@
             <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
             <a href="@Url.Action("Create", "LoaiSP")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
         </div>
-
-        <!-- Hidden inputs giữ state -->
-        <input type="hidden" name="pageNumber" id="pageNumberInput" value="@currentPage" />
-        <input type="hidden" name="pageSize" id="pageSizeInput" value="@ViewBag.PageSize" />
     </form>
 
 
@@ -89,55 +79,6 @@
             @await Html.PartialAsync("LoaiSPTable", Model)
         </tbody>
     </table>
-
-
-    <!-- Pagination + PageSize -->
-    <div class="d-flex justify-content-between align-items-center mt-4">
-        <!-- PageSize bên trái -->
-        <div class="d-flex align-items-center gap-2">
-            <label for="pageSizeSelect">Hiển thị:</label>
-            <select id="pageSizeSelect" class="form-select" style="width:120px;">
-                @foreach (int size in new int[] { 5, 10, 20, 50 })
-                {
-                    @Html.Raw($"<option value='{size}' {(ViewBag.PageSize == size ? "selected" : "")}>{size} /page</option>")
-                }
-            </select>
-        </div>
-
-        <!-- Pagination numbers bên phải -->
-        <nav>
-            <ul class="pagination mb-0">
-                @if (currentPage > 1)
-                {
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(1); return false;">&laquo;</a></li>
-                }
-
-                @if (currentPage - pageWindow > 1)
-                {
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(1); return false;">1</a></li>
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                }
-
-                @for (int i = startPage; i <= endPage; i++)
-                {
-                    <li class="page-item @(currentPage == i ? "active bg-success" : "")">
-                        <a class="page-link @(currentPage == i ? "text-white" : "")" href="#" onclick="changePage(@i); return false;">@i</a>
-                    </li>
-                }
-
-                @if (currentPage + pageWindow < totalPages)
-                {
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(@totalPages); return false;">@totalPages</a></li>
-                }
-
-                @if (currentPage < totalPages)
-                {
-                    <li class="page-item"><a class="page-link" href="#" onclick="changePage(@totalPages); return false;">&raquo;</a></li>
-                }
-            </ul>
-        </nav>
-    </div>
 </div>
 
 @section Scripts {
@@ -152,7 +93,7 @@
                 };
             }
             // khi thay đổi  -> submit form
-        $("#searchBox").on("change keyup", debounce(function(){
+        $("#searchBox").on("change", debounce(function(){
             $("#pageNumberInput").val(1);
             $("#Form").submit();
         }, 400));
@@ -161,19 +102,6 @@
             $("#pageNumberInput").val(1);
             $("#Form").submit();
         });
-
-        // pageSize change
-        $("#pageSizeSelect").on("change", function(){
-            $("#pageSizeInput").val($(this).val());
-            $("#pageNumberInput").val(1);
-            $("#Form").submit();
-        });
-
-        // pagination
-        function changePage(page){
-            $("#pageNumberInput").val(page);
-            $("#Form").submit();
-        }
 
         // clear 
         $("#btnClear").on("click", function(){
@@ -184,9 +112,7 @@
             $("#pageNumberInput").val(1);
             $("#Form").submit();
         });
-    </script>
 
-    <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".clickable-row").forEach(row => {
                 row.addEventListener("click", function () {

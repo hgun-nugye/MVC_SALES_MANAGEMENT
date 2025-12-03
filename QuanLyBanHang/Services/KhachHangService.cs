@@ -81,8 +81,8 @@ namespace QuanLyBanHang.Services
 
 			if (oldKH == null)
 				throw new KeyNotFoundException("Khách hàng không tồn tại!");
-
-			string anhPath = oldKH.AnhKH;
+			
+				string anhPath = oldKH.AnhKH;
 
 			if (anhFile != null && anhFile.Length > 0)
 			{
