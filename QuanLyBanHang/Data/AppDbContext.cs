@@ -10,123 +10,53 @@ namespace QuanLyBanHang.Services
 		}
 
 		// ======== KHAI BÁO CÁC BẢNG ========
+		public DbSet<Tinh> Tinh { get; set; } = null!;
+		public DbSet<TinhService> TinhService { get; set; } = null!;
+
+		public DbSet<Xa> Xa { get; set; } = null!;
+		public DbSet<XaService> XaService { get; set; } = null!;
+
 		public DbSet<NhaCC> NhaCC { get; set; } = null!;
+		public DbSet<NhaCCService> NhaCCService { get; set; } = null!;
+
 		public DbSet<KhachHang> KhachHang { get; set; } = null!;
+		public DbSet<KhachHangService> KhachHangService { get; set; } = null!;
+		public DbSet<KhachHangDetailView> KhachHangDetailView { get; set; }
+
 		public DbSet<GianHang> GianHang { get; set; } = null!;
+		public DbSet<GianHangService> GianHangService { get; set; } = null!;
 
 		public DbSet<NhomSP> NhomSP { get; set; } = null!;
-		public DbSet<LoaiSP> LoaiSP { get; set; } = null!;
-		public DbSet<SanPham> SanPham { get; set; } = null!;
-		public DbSet<DonMuaHang> DonMuaHang { get; set; } = null!;
-		public DbSet<CTMH> CTMH { get; set; } = null!;
-		public DbSet<DonBanHang> DonBanHang { get; set; } = null!;
-		public DbSet<CTBH> CTBH { get; set; } = null!;
-		public DbSet<TaiKhoan> TaiKhoan { get; set; } = null!;
+		public DbSet<NhomSPService> NhomSPService { get; set; } = null!;
 
-		public DbSet<DonMuaHangDetail> DonMuaHangDetail { get; set; } = null!;
-		public DbSet<DonBanHangDetail> DonBanHangDetail { get; set; } = null!;
-		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; }
-		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; }
-		public DbSet<SanPhamDto> SanPhamDtos { get; set; }
+		public DbSet<LoaiSP> LoaiSP { get; set; } = null!;
+		public DbSet<LoaiSPService> LoaiSPService { get; set; } = null!;
 		public DbSet<LoaiSPDto> LoaiSPDtos { get; set; }
-		public DbSet<DonBanHangCountDto> DonBanHangCountDtos { get; set; }
-		public DbSet<DonMuaHangCountDto> DonMuaHangCountDtos { get; set; }
-		public DbSet<GianHangCountDto> GianHangCountDtos { get; set; }
-		public DbSet<KhachHangCountDto> KhachHangCountDtos { get; set; }
-		public DbSet<LoaiSPCountDto> LoaiSPCountDtos { get; set; }
-		public DbSet<NhomSPCountDto> NhomSPCountDtos { get; set; }
-		public DbSet<SanPhamCountDto> SanPhamCountDtos { get; set; }
-		public DbSet<NhaCCCountDto> NhaCCCountDtos { get; set; }
+
+		public DbSet<SanPham> SanPham { get; set; } = null!;
+		public DbSet<SanPhamService> SanPhamService { get; set; } = null!;
+		public DbSet<SanPhamDto> SanPhamDto { get; set; }
+
+		public DbSet<DonMuaHang> DonMuaHang { get; set; } = null!;
+		public DbSet<DonMuaHangDetail> DonMuaHangDetail { get; set; } = null!;
+		public DbSet<DonMuaHangService> DonMuaHangService { get; set; } = null!;
+
+		public DbSet<CTMH> CTMH { get; set; } = null!;
+		public DbSet<CTMHService> CTMHService { get; set; } = null!;
+		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; }
+
+		public DbSet<DonBanHang> DonBanHang { get; set; } = null!;
+		public DbSet<DonBanHangService> DonBanHangService { get; set; } = null!;
+		public DbSet<DonBanHangDetail> DonBanHangDetail { get; set; } = null!;
+
+		public DbSet<CTBH> CTBH { get; set; } = null!;
+		public DbSet<CTBHService> CTBHService { get; set; } = null!;
+		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; }
 
 		//Kiểm tra tồn tại 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			// ======== Khóa chính ========
-			modelBuilder.Entity<NhaCC>().HasKey(n => n.MaNCC);
-			modelBuilder.Entity<KhachHang>().HasKey(kh => kh.MaKH);
-			modelBuilder.Entity<GianHang>().HasKey(g => g.MaGH);
-			modelBuilder.Entity<NhomSP>().HasKey(nsp => nsp.MaNhom);
-			modelBuilder.Entity<LoaiSP>().HasKey(lsp => lsp.MaLoai);
-			modelBuilder.Entity<SanPham>().HasKey(sp => sp.MaSP);
-			modelBuilder.Entity<DonMuaHang>().HasKey(d => d.MaDMH);
-			modelBuilder.Entity<DonBanHang>().HasKey(d => d.MaDBH);
-			modelBuilder.Entity<CTMH>().HasKey(ct => new { ct.MaDMH, ct.MaSP });
-			modelBuilder.Entity<CTBH>().HasKey(ct => new { ct.MaDBH, ct.MaSP });
-			modelBuilder.Entity<TaiKhoan>().HasKey(tk => tk.TenUser);
 
-			modelBuilder.Entity<CTBHDetailDto>().HasNoKey();   // DTO không có khóa
-			modelBuilder.Entity<CTMHDetailDto>().HasNoKey();   // DTO không có khóa
-
-
-			// ======== Quan hệ: LoaiSP → NhomSP ========
-			modelBuilder.Entity<LoaiSP>()
-				.HasOne(lsp => lsp.NhomSP)
-				.WithMany(nsp => nsp.LoaiSPs)
-				.HasForeignKey(lsp => lsp.MaNhom)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			// ======== Quan hệ: SanPham → LoaiSP ========
-			modelBuilder.Entity<SanPham>()
-				.HasOne(sp => sp.LoaiSP)
-				.WithMany(lsp => lsp.SanPhams)
-				.HasForeignKey(sp => sp.MaLoai)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			// ======== Quan hệ: SanPham → NhaCC ========
-			modelBuilder.Entity<SanPham>()
-				.HasOne(sp => sp.NhaCC)
-				.WithMany(ncc => ncc.SanPhams)
-				.HasForeignKey(sp => sp.MaNCC)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			// ======== Khóa ngoại: SanPham → GianHang ========
-			modelBuilder.Entity<SanPham>()
-				.HasOne(sp => sp.GianHang)
-				.WithMany(g => g.DsSanPham)
-				.HasForeignKey(sp => sp.MaGH)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			// ======== Quan hệ: Đơn Mua Hàng → NhaCC ========
-			modelBuilder.Entity<DonMuaHang>()
-				.HasOne(d => d.NhaCC)
-				.WithMany()
-				.HasForeignKey(d => d.MaNCC)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			// ======== Quan hệ: Đơn Bán Hàng → Khách Hàng ========
-			modelBuilder.Entity<DonBanHang>()
-				.HasOne(d => d.KhachHang)
-				.WithMany()
-				.HasForeignKey(d => d.MaKH)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			// ======== Quan hệ: CTMH → DonMuaHang & SanPham ========
-			modelBuilder.Entity<CTMH>()
-				.HasOne(ct => ct.DonMuaHang)
-				.WithMany()
-				.HasForeignKey(ct => ct.MaDMH)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<CTMH>()
-				.HasOne(ct => ct.SanPham)
-				.WithMany()
-				.HasForeignKey(ct => ct.MaSP)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			//======== Quan hệ: CTBH → DonBanHang & SanPham ========
-			modelBuilder.Entity<CTBH>()
-				.HasOne(ct => ct.DonBanHang)
-				.WithMany()
-				.HasForeignKey(ct => ct.MaDBH)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<CTBH>()
-				.HasOne(ct => ct.SanPham)
-				.WithMany()
-				.HasForeignKey(ct => ct.MaSP)
-				.OnDelete(DeleteBehavior.Cascade);
-			
-			
 		}
 	}
 }

@@ -45,7 +45,7 @@
     </h4>
 
     <!-- FORM LỌC -->
-    <form id="filterForm" method="get"
+    <form id="Form" method="get"
           class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
 
         <!-- SEARCH BOX -->
@@ -56,11 +56,11 @@
                    placeholder="Tìm đơn hàng, nhà cung cấp, ngày mua...">
         </div>
 
-        <!-- FILTER GROUP -->
+        <!--  GROUP -->
         <div class="d-flex flex-wrap align-items-center gap-2">
 
             <div class="d-flex align-items-center gap-2">
-                <label class="w-100 text-end opacity-50"> <i class="fa fa-filter me-2"></i>Filter:</label>
+                <label class="w-100 text-end opacity-50"> <i class="fa fa- me-2"></i>:</label>
                 <!-- THÁNG -->
                 <select name="month" id="monthSelect" class="form-select" style="width: 130px;">
                     <option value="">-- Tháng --</option>
@@ -82,10 +82,10 @@
 
 
             <button type="submit" class="btn btn-success">
-                <i class="fa fa-filter"></i> Lọc
+                <i class="fa fa-"></i> Lọc
             </button>
 
-            <button type="button" id="btnClearFilter" class="btn btn-secondary">
+            <button type="button" id="btnClear" class="btn btn-secondary">
                 <i class="fa-solid fa-rotate-left"></i> Xóa
             </button>
 
@@ -178,33 +178,33 @@
                 };
             }
 
-        // khi thay đổi filter -> submit form
+        // khi thay đổi  -> submit form
         $("#searchBox, #monthSelect, #yearSelect").on("change keyup", debounce(function(){
             $("#pageNumberInput").val(1);
-            $("#filterForm").submit();
+            $("#Form").submit();
         }, 400));
 
         // pageSize change
         $("#pageSizeSelect").on("change", function(){
             $("#pageSizeInput").val($(this).val());
             $("#pageNumberInput").val(1);
-            $("#filterForm").submit();
+            $("#Form").submit();
         });
 
         // pagination
         function changePage(page){
             $("#pageNumberInput").val(page);
-            $("#filterForm").submit();
+            $("#Form").submit();
         }
 
-        // clear filter
-        $("#btnClearFilter").on("click", function(){
+        // clear 
+        $("#btnClear").on("click", function(){
             $("#searchBox").val("");
             $("#monthSelect").val("");
             $("#yearSelect").val("");
             $("#pageSizeInput").val(10);
             $("#pageNumberInput").val(1);
-            $("#filterForm").submit();
+            $("#Form").submit();
         });
     </script>
 

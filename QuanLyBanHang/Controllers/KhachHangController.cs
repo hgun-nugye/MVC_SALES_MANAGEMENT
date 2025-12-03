@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
 
@@ -9,162 +8,148 @@ namespace QuanLyBanHang.Controllers
 	public class KhachHangController : Controller
 	{
 		private readonly AppDbContext _context;
+		private readonly KhachHangService _khService;
+		private readonly XaService _xaService;
+		private readonly TinhService _tinhService;
 
-		public KhachHangController(AppDbContext context)
+		public KhachHangController(AppDbContext context, KhachHangService khService, XaService xaService, TinhService tinhService)
 		{
 			_context = context;
+			_khService = khService;
+			_xaService = xaService;
+			_tinhService = tinhService;
 		}
 
-		public async Task<IActionResult> Index(string search, string province, int pageNumber = 1, int pageSize = 10)
+		public async Task<IActionResult> Index()
 		{
-			ViewBag.Search = search;
-			ViewBag.PageNumber = pageNumber;
-			ViewBag.PageSize = pageSize;
+			var dsKhachHang = await _khService.GetAllWithXa();
 
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", string.IsNullOrEmpty(search) ? DBNull.Value : search),
-				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province),
-				new SqlParameter("@PageNumber", pageNumber),
-				new SqlParameter("@PageSize", pageSize)
-			};
-
-			var data = await _context.KhachHang
-				.FromSqlRaw("EXEC KhachHang_SearchFilter @Search, @DiaChiFilter, @PageNumber, @PageSize", parameters)
-				.ToListAsync();
-						
-			ViewBag.SelectedProvince = province;
-
-			// Lấy tổng số bản ghi (1 row)
-			var countParams = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@TinhFilter", (object?)province ?? DBNull.Value),
-			};
-			var totalRecords = _context.KhachHangCountDtos
-				.FromSqlRaw("EXEC KhachHang_Count @Search, @TinhFilter", countParams)
-				.AsEnumerable()
-				.Select(x => x.TotalRecords)
-				.FirstOrDefault();
-
-			ViewBag.TotalRecords = totalRecords;
-			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-			return View(data);
+			ViewBag.TinhList = await _tinhService.GetAll();
+			return View(dsKhachHang);
 		}
 
-
-		// DETAILS - Xem chi tiết
 		public async Task<IActionResult> Details(string id)
 		{
-			var kh = (await _context.KhachHang.FromSqlInterpolated($"EXEC KhachHang_GetByID @MaKH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
+			if (string.IsNullOrEmpty(id))
+				return BadRequest();
 
+			var kh = await _khService.GetByIDWithXa(id);
 			if (kh == null)
 				return NotFound();
 
 			return View(kh);
 		}
 
-		// CREATE - GET
 		[HttpGet]
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
+			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			ViewBag.Xa = new SelectList(Enumerable.Empty<object>(), "MaXa", "TenXa");
+			ViewData["MaXaSelected"] = null;
 			return View();
 		}
 
-		// CREATE - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(KhachHang model)
+		public async Task<IActionResult> Create(KhachHang model, short maTinh)
 		{
 			try
 			{
-				await _context.Database.ExecuteSqlInterpolatedAsync($@"
-					EXEC KhachHang_Insert 
-						@TenKH = {model.TenKH}, 
-						@DienThoaiKH = {model.DienThoaiKH}, 
-						@EmailKH = {model.EmailKH}, 
-						@DiaChiKH = {model.DiaChiKH}
-				");
+				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+				ViewData["MaXaSelected"] = model.MaXa;
 
-				TempData["SuccessMessage"] = "Thêm Khách hàng thành công!";
+				if (model.AnhFile == null)
+				{
+					TempData["ErrorMessage"] = "Vui lòng chọn ảnh minh họa!";
+					return View(model);
+				}
+
+				await _khService.Create(model, model.AnhFile);
+
+				TempData["SuccessMessage"] = "Thêm khách hàng thành công!";
 				return RedirectToAction(nameof(Index));
 			}
 			catch (Exception ex)
 			{
-				ModelState.AddModelError("", $"{ex.Message}");
-				TempData["ErrorMessage"] = "Lỗi: " + ex.Message;
+				TempData["ErrorMessage"] = ex.Message;
+				ModelState.AddModelError("", ex.Message);
+
+				// Nếu lỗi validation hoặc lỗi khác
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+				ViewData["MaXaSelected"] = model.MaXa;
+
 				return View(model);
 			}
 		}
 
-		// EDIT - GET
 		[HttpGet]
 		public async Task<IActionResult> Edit(string id)
 		{
-			if (string.IsNullOrEmpty(id))
-				return BadRequest();
+			if (string.IsNullOrEmpty(id)) return BadRequest();
 
-			var kh = (await _context.KhachHang
-				.FromSqlInterpolated($"EXEC KhachHang_GetByID @MaKH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
+			var kh = await _khService.GetByID(id);
+			if (kh == null) return NotFound();
 
-			if (kh == null)
-				return NotFound();
+			short maTinh = await _xaService.GetByIDWithTinh(kh.MaXa);
 
+			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+			var xaList = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", kh.MaXa);
+			ViewData["MaXaSelected"] = kh.MaXa;
 			return View(kh);
 		}
 
-		// EDIT - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(KhachHang model)
+		public async Task<IActionResult> Edit(KhachHang model, IFormFile? AnhFile)
 		{
-			if (ModelState.IsValid)
+			if (!ModelState.IsValid)
 			{
-				try
-				{
-					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC KhachHang_Update 
-                    @MaKH = {model.MaKH},
-                    @TenKH = {model.TenKH}, 
-                    @DienThoaiKH = {model.DienThoaiKH}, 
-                    @EmailKH = {model.EmailKH}, 
-                    @DiaChiKH = {model.DiaChiKH}
-            ");
-					TempData["SuccessMessage"] = "Cập nhật thành công!";
-					return RedirectToAction(nameof(Index));
-				}
-				catch (Exception ex)
-				{
-					ModelState.AddModelError("", ex.Message);
-				}
+				short maTinh = await _xaService.GetByIDWithTinh(model.MaXa);
+				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+				ViewData["MaXaSelected"] = model.MaXa;
+				return View(model);
 			}
-			return View(model);
+
+			try
+			{
+				await _khService.Update(model, AnhFile);
+				TempData["SuccessMessage"] = "Cập nhật thành công!";
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError("", ex.Message);
+				TempData["ErrorMessage"] = ex.Message;
+
+				short maTinh = await _xaService.GetByIDWithTinh(model.MaXa);
+				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+
+				return View(model);
+			}
 		}
 
-
-		// DELETE - GET
 		[HttpGet]
 		public async Task<IActionResult> Delete(string id)
 		{
-			if (string.IsNullOrEmpty(id))
-				return BadRequest();
+			if (string.IsNullOrEmpty(id)) return BadRequest();
 
-			var kh = (await _context.KhachHang.FromSqlInterpolated($"EXEC KhachHang_GetByID @MaKH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
-
-			if (kh == null)
-				return NotFound();
+			var kh = await _khService.GetByID(id);
+			if (kh == null) return NotFound();
 
 			return View(kh);
 		}
 
-		// DELETE - POST
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(string id)
@@ -175,17 +160,12 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			// Kiểm tra tồn tại
-			var kh = (await _context.KhachHang.FromSqlInterpolated($"EXEC KhachHang_GetByID @MaKH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
-
-			if (kh != null)
+			try
 			{
-				await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC KhachHang_Delete @MaKH = {id}");
+				await _khService.Delete(id);
 				TempData["SuccessMessage"] = "Đã xóa Khách hàng thành công!";
 			}
-			else
+			catch (KeyNotFoundException)
 			{
 				TempData["ErrorMessage"] = "Không tìm thấy Khách hàng cần xóa!";
 			}
@@ -193,32 +173,13 @@ namespace QuanLyBanHang.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
-		// ============ SEARCH ============
 		[HttpGet]
-		public async Task<IActionResult> Search(string search, string tinhFilter)
+		public async Task<IActionResult> GetXaByTinh(short maTinh)
 		{
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@TinhFilter", (object?)tinhFilter ?? DBNull.Value)
-			};
-
-			var data = await _context.KhachHang
-				.FromSqlRaw("EXEC KhachHang_SearchFilter @Search, @TinhFilter", parameters)
-				.ToListAsync();
-
-			return PartialView("KhachHangTable", data);
+			var xaList = await _xaService.GetByIDTinh(maTinh);
+			return Json(xaList);
 		}
 
 
-		// ============ RESET FILTER ============
-		public async Task<IActionResult> ClearFilter()
-		{
-			var data = await _context.KhachHang
-				.FromSqlRaw("EXEC KhachHang_SearchFilter @Search=NULL, @TinhFilter=NULL")
-				.ToListAsync();
-
-			return PartialView("KhachHangTable", data);
-		}
 	}
 }

@@ -20,15 +20,9 @@ namespace QuanLyBanHang.Models
 		public string? EmailGH { get; set; }
 
 		public string DiaChiGH { get; set; } = null!;
+		public short MaXa { get; set; } 
 
 		public ICollection<SanPham>? DsSanPham { get; set; }		
-	}
-
-	
-	[Keyless]
-	public class GianHangCountDto
-	{
-		public int TotalRecords { get; set; }
 	}
 
 }

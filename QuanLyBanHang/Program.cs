@@ -9,6 +9,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb")));
 builder.Services.AddControllersWithViews(); // Do NOT disable endpoint routing
 
+builder.Services.AddScoped<CTMHService>();
+builder.Services.AddScoped<CTBHService>();
+builder.Services.AddScoped<DonMuaHangService>();
+builder.Services.AddScoped<DonBanHangService>();
+builder.Services.AddScoped<GianHangService>();
+builder.Services.AddScoped<KhachHangService>();
+builder.Services.AddScoped<LoaiSPService>();
+builder.Services.AddScoped<NhaCCService>();
+builder.Services.AddScoped<NhomSPService>();
+builder.Services.AddScoped<SanPhamService>();
+builder.Services.AddScoped<TinhService>();
+builder.Services.AddScoped<XaService>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,6 +42,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
 	name: "default",
-	pattern: "{controller=Login}/{action=Index}/{id?}");
+	pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

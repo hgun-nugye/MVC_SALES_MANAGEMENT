@@ -16,14 +16,9 @@ namespace QuanLyBanHang.Models
 		public string? EmailNCC { get; set; }
 
 		public string? DiaChiNCC { get; set; }
+		public short? MaXa { get; set; }
 
 		public ICollection<SanPham>? SanPhams { get; set; }
 
-	}
-
-	[Keyless]
-	public class NhaCCCountDto
-	{
-		public int TotalRecords { get; set; }
 	}
 }

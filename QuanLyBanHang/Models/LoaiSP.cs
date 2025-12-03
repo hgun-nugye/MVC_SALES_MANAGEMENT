@@ -36,9 +36,4 @@ namespace QuanLyBanHang.Models
 
 	}
 
-	[Keyless]
-	public class LoaiSPCountDto
-	{
-		public int TotalRecords { get; set; }
-	}
 }

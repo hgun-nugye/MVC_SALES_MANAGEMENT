@@ -956,7 +956,7 @@ const Manipulator = {
     }
 
     const attributes = {};
-    Object.keys(element.dataset).filter(key => key.startsWith('bs')).forEach(key => {
+    Object.keys(element.dataset).(key => key.startsWith('bs')).forEach(key => {
       let pureKey = key.replace(/^bs/, '');
       pureKey = pureKey.charAt(0).toLowerCase() + pureKey.slice(1, pureKey.length);
       attributes[pureKey] = normalizeData(element.dataset[key]);
@@ -1002,7 +1002,7 @@ const SelectorEngine = {
   },
 
   children(element, selector) {
-    return [].concat(...element.children).filter(child => child.matches(selector));
+    return [].concat(...element.children).(child => child.matches(selector));
   },
 
   parents(element, selector) {
@@ -1050,7 +1050,7 @@ const SelectorEngine = {
 
   focusableChildren(element) {
     const focusables = ['a', 'button', 'input', 'textarea', 'select', 'details', '[tabindex]', '[contenteditable="true"]'].map(selector => `${selector}:not([tabindex^="-"])`).join(', ');
-    return this.find(focusables, element).filter(el => !isDisabled(el) && isVisible(el));
+    return this.find(focusables, element).(el => !isDisabled(el) && isVisible(el));
   }
 
 };
@@ -1655,9 +1655,9 @@ class Collapse extends BaseComponent {
     for (let i = 0, len = toggleList.length; i < len; i++) {
       const elem = toggleList[i];
       const selector = getSelectorFromElement(elem);
-      const filterElement = SelectorEngine.find(selector).filter(foundElem => foundElem === this._element);
+      const Element = SelectorEngine.find(selector).(foundElem => foundElem === this._element);
 
-      if (selector !== null && filterElement.length) {
+      if (selector !== null && Element.length) {
         this._selector = selector;
 
         this._triggerArray.push(elem);
@@ -1703,7 +1703,7 @@ class Collapse extends BaseComponent {
 
     if (this._config.parent) {
       const children = SelectorEngine.find(`.${CLASS_NAME_COLLAPSE} .${CLASS_NAME_COLLAPSE}`, this._config.parent);
-      actives = SelectorEngine.find(SELECTOR_ACTIVES, this._config.parent).filter(elem => !children.includes(elem)); // remove children if greater depth
+      actives = SelectorEngine.find(SELECTOR_ACTIVES, this._config.parent).(elem => !children.includes(elem)); // remove children if greater depth
     }
 
     const container = SelectorEngine.findOne(this._selector);
@@ -1841,7 +1841,7 @@ class Collapse extends BaseComponent {
     }
 
     const children = SelectorEngine.find(`.${CLASS_NAME_COLLAPSE} .${CLASS_NAME_COLLAPSE}`, this._config.parent);
-    SelectorEngine.find(SELECTOR_DATA_TOGGLE$4, this._config.parent).filter(elem => !children.includes(elem)).forEach(element => {
+    SelectorEngine.find(SELECTOR_DATA_TOGGLE$4, this._config.parent).(elem => !children.includes(elem)).forEach(element => {
       const selected = getElementFromSelector(element);
 
       if (selected) {
@@ -2119,7 +2119,7 @@ class Dropdown extends BaseComponent {
 
     if (typeof config.reference === 'object' && !isElement(config.reference) && typeof config.reference.getBoundingClientRect !== 'function') {
       // Popper virtual elements require a getBoundingClientRect method
-      throw new TypeError(`${NAME$9.toUpperCase()}: Option "reference" provided type "object" without a required "getBoundingClientRect" method.`);
+      throw new TypeError(`${NAME$9.toUpperCase()}: Option "reference" provided type "object" without a "getBoundingClientRect" method.`);
     }
 
     return config;
@@ -2231,7 +2231,7 @@ class Dropdown extends BaseComponent {
     key,
     target
   }) {
-    const items = SelectorEngine.find(SELECTOR_VISIBLE_ITEMS, this._menu).filter(isVisible);
+    const items = SelectorEngine.find(SELECTOR_VISIBLE_ITEMS, this._menu).(isVisible);
 
     if (!items.length) {
       return;
@@ -3422,7 +3422,7 @@ const allowedAttribute = (attr, allowedAttributeList) => {
     return true;
   }
 
-  const regExp = allowedAttributeList.filter(attrRegex => attrRegex instanceof RegExp); // Check if a regular expression validates the attribute.
+  const regExp = allowedAttributeList.(attrRegex => attrRegex instanceof RegExp); // Check if a regular expression validates the attribute.
 
   for (let i = 0, len = regExp.length; i < len; i++) {
     if (regExp[i].test(attrName)) {
@@ -4137,7 +4137,7 @@ class Tooltip extends BaseComponent {
         config[key] = this._config[key];
       }
     } // In the future can be replaced with:
-    // const keysWithDifferentValues = Object.entries(this._config).filter(entry => this.constructor.Default[entry[0]] !== this._config[entry[0]])
+    // const keysWithDifferentValues = Object.entries(this._config).(entry => this.constructor.Default[entry[0]] !== this._config[entry[0]])
     // `Object.fromEntries(keysWithDifferentValues)`
 
 
@@ -4403,7 +4403,7 @@ class ScrollSpy extends BaseComponent {
       }
 
       return null;
-    }).filter(item => item).sort((a, b) => a[0] - b[0]).forEach(item => {
+    }).(item => item).sort((a, b) => a[0] - b[0]).forEach(item => {
       this._offsets.push(item[0]);
 
       this._targets.push(item[1]);
@@ -4505,7 +4505,7 @@ class ScrollSpy extends BaseComponent {
   }
 
   _clear() {
-    SelectorEngine.find(SELECTOR_LINK_ITEMS, this._config.target).filter(node => node.classList.contains(CLASS_NAME_ACTIVE$1)).forEach(node => node.classList.remove(CLASS_NAME_ACTIVE$1));
+    SelectorEngine.find(SELECTOR_LINK_ITEMS, this._config.target).(node => node.classList.contains(CLASS_NAME_ACTIVE$1)).forEach(node => node.classList.remove(CLASS_NAME_ACTIVE$1));
   } // Static
 
 

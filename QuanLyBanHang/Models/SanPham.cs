@@ -16,10 +16,15 @@ namespace QuanLyBanHang.Models
 
 		[DataType(DataType.Currency)]
 		public decimal? GiaBan { get; set; }
-
-		public string MoTaSP { get; set; }
+	
+		public string? MoTaSP { get; set; }
 
 		public string? AnhMH { get; set; }
+		public string? ThanhPhan { get; set; }
+		public string? CongDung { get; set; }
+		public string? HDSD { get; set; }
+		public string? XuatXu { get; set; }
+		public string? BaoQuan { get; set; }
 
 		public string? TrangThai { get; set; }
 
@@ -43,9 +48,11 @@ namespace QuanLyBanHang.Models
 		public virtual ICollection<CTMH>? CTMHs { get; set; }
 		public virtual ICollection<CTBH>? CTBHs { get; set; }
 
-		// ====== Các thuộc tính không ánh xạ (chỉ dùng hiển thị) ======
+		[NotMapped]
 		public string? TenGH { get; set; }
+		[NotMapped]
 		public string? TenLoai { get; set; }
+		[NotMapped]
 		public string? TenNCC { get; set; }
 
 		[NotMapped]
@@ -56,7 +63,7 @@ namespace QuanLyBanHang.Models
 	public class SanPhamDto
 	{
 		public string? MaSP { get; set; }
-		public string TenSP { get; set; }
+		public string? TenSP { get; set; }
 		public decimal? DonGia { get; set; }
 		public decimal? GiaBan { get; set; }
 		public string? MoTaSP { get; set; }
@@ -72,10 +79,4 @@ namespace QuanLyBanHang.Models
 		public string? TenNCC { get; set; }
 	}
 
-
-	[Keyless]
-	public class SanPhamCountDto
-	{
-		public int TotalRecords { get; set; }
-	}
 }

@@ -1,0 +1,67 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.Tinh>
+
+@{
+    ViewBag.Title = "Quản lý Tỉnh";
+}
+<div class="container">
+    <h2 class="mb-3 text-success">
+        Danh sách Tỉnh
+    </h2>
+
+    <p>
+        <a href="@Url.Action("Create", "Tinh")" class="btn btn-success">
+            <i class="fa-solid fa-circle-plus"></i> Thêm Tỉnh
+        </a>
+    </p>
+
+    <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+        <thead class="table-success">
+            <tr>
+                <th class="w-25">Mã Tỉnh</th>
+                <th class="w-25">Tên Tỉnh</th>
+
+                <th class="w-50">Hành động</th>
+            </tr>
+        </thead>
+        <tbody class="text-start">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MaTinh</td>
+                    <td>@item.TenTinh</td>
+
+                    <td class="flex justify-content-between text-center">
+                        <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "Tinh", new { id = item.MaTinh })">
+                            <i class="fa-solid fa-eye"></i> Chi tiết
+                        </a>
+                        <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "Tinh", new { id = item.MaTinh })">
+                            <i class="fa-solid fa-pen-to-square"></i> Sửa
+                        </a>
+                        <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "Tinh", new { id = item.MaTinh })">
+                            <i class="fa-solid fa-trash"></i> Xóa
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    h2 i {
+        margin-right: 8px;
+    }
+
+    .btn i {
+        margin-right: 5px;
+    }
+
+    .table th {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5faff;
+        transition: 0.2s;
+    }
+</style>

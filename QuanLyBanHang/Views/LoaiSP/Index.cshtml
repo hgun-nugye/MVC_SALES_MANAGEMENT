@@ -47,8 +47,8 @@
         Danh sách Loại sản phẩm
     </h4>
 
-    <!-- Filter Form -->
-    <form id="filterForm" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+    <!--  Form -->
+    <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
         <div class="search-wrapper flex-grow-1">
             <i class="fa fa-search"></i>
             <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên loại sản phẩm">
@@ -56,7 +56,7 @@
 
         <div class="d-flex flex-wrap align-items-center gap-2">
             <div class="d-flex align-items-center gap-2">
-                <label class="w-100 text-end opacity-50"> <i class="fa fa-filter me-2"></i>Filter:</label>
+                <label class="w-100 text-end opacity-50"> <i class="fa fa- me-2"></i>:</label>
                 @Html.DropDownList(
                 "group",
                                 (SelectList)ViewBag.MaNhom,
@@ -66,7 +66,7 @@
 
             </div>
            
-            <button type="button" id="btnClearFilter" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
+            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
             <a href="@Url.Action("Create", "LoaiSP")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
         </div>
 
@@ -151,38 +151,38 @@
                     timer = setTimeout(() => fn.apply(context, args), delay);
                 };
             }
-            // khi thay đổi filter -> submit form
+            // khi thay đổi  -> submit form
         $("#searchBox").on("change keyup", debounce(function(){
             $("#pageNumberInput").val(1);
-            $("#filterForm").submit();
+            $("#Form").submit();
         }, 400));
 
          $("#groupSelect").on("change", function(){
             $("#pageNumberInput").val(1);
-            $("#filterForm").submit();
+            $("#Form").submit();
         });
 
         // pageSize change
         $("#pageSizeSelect").on("change", function(){
             $("#pageSizeInput").val($(this).val());
             $("#pageNumberInput").val(1);
-            $("#filterForm").submit();
+            $("#Form").submit();
         });
 
         // pagination
         function changePage(page){
             $("#pageNumberInput").val(page);
-            $("#filterForm").submit();
+            $("#Form").submit();
         }
 
-        // clear filter
-        $("#btnClearFilter").on("click", function(){
+        // clear 
+        $("#btnClear").on("click", function(){
             $("#searchBox").val("");
             $("#monthSelect").val("");
             $("#yearSelect").val("");
             $("#pageSizeInput").val(10);
             $("#pageNumberInput").val(1);
-            $("#filterForm").submit();
+            $("#Form").submit();
         });
     </script>
 

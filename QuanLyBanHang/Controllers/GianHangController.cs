@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
 
@@ -9,243 +8,173 @@ namespace QuanLyBanHang.Controllers
 	public class GianHangController : Controller
 	{
 		private readonly AppDbContext _context;
+		private readonly GianHangService _gianHangService;
+		private readonly XaService _xaService;
+		private readonly TinhService _tinhService;
 
-		public GianHangController(AppDbContext context)
+		public GianHangController(AppDbContext context, GianHangService gianHangService, XaService xaService, TinhService tinhService)
 		{
 			_context = context;
+			_gianHangService = gianHangService;
+			_xaService = xaService;
+			_tinhService = tinhService;
 		}
 
-		public async Task<IActionResult> Index(string? search, string province, int pageNumber = 1, int pageSize = 10)
+		public async Task<IActionResult> Index(string? search, string province)
 		{
 			ViewBag.Search = search;
-			ViewBag.PageNumber = pageNumber;
-			ViewBag.PageSize = pageSize;
-
-			// Tham số cho SP lấy danh sách
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),               
-				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province),
-				new SqlParameter("@PageNumber", pageNumber),
-				new SqlParameter("@PageSize", pageSize)
-			};
-
-			// Lấy danh sách gian hàng (chỉ các cột trong entity GianHang)
-			var model = await _context.GianHang
-				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @DiaChiFilter, @PageNumber, @PageSize", parameters)
-				.ToListAsync();
 			ViewBag.SelectedProvince = province;
 
-			// Lấy tổng số bản ghi (1 row)
-			var countParams = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@DiaChiFilter", string.IsNullOrEmpty(province) ? DBNull.Value : province)
+			var model = await _gianHangService.Search(search, province);
 
-			};
-
-			var totalRecords = _context.GianHangCountDtos
-							.FromSqlRaw("EXEC GianHang_Count @Search, @DiaChiFilter", countParams)
-							.AsEnumerable()
-							.Select(x => x.TotalRecords)
-							.FirstOrDefault();
-
-
-			ViewBag.TotalRecords = totalRecords;
-			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-
+			ViewBag.Provinces = await _tinhService.GetAll();
 			return View(model);
 		}
 
 
-		//  DETAILS 
 		public async Task<IActionResult> Details(string id)
 		{
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var gh = (await _context.GianHang
-				.FromSqlInterpolated($"EXEC GianHang_GetByID @MaGH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
-
+			var gh = await _gianHangService.GetById(id);
 			if (gh == null)
 				return NotFound();
 
 			return View(gh);
 		}
 
-		//  CREATE (GET) 
-		[HttpGet]
 		public IActionResult Create()
 		{
+			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			ViewBag.Xa = new SelectList(Enumerable.Empty<object>(), "MaXa", "TenXa");
+			ViewData["MaXaSelected"] = null;
 			return View();
 		}
 
-		//  CREATE (POST) 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(GianHang model)
+		public async Task<IActionResult> Create(GianHang model, short maTinh)
 		{
-			if (ModelState.IsValid)
-			{
-				try
-				{
-					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                        EXEC GianHang_Insert 
-                            @TenGH = {model.TenGH},
-                            @MoTaGH = {model.MoTaGH},
-                            @DienThoaiGH = {model.DienThoaiGH},
-                            @EmailGH = {model.EmailGH},
-                            @DiaChiGH = {model.DiaChiGH}
-                    ");
-
-					TempData["SuccessMessage"] = "Thêm gian hàng thành công!";
-					return RedirectToAction(nameof(Index));
-				}
-				catch (Exception ex)
-				{
-					ModelState.AddModelError("", ex.Message);
-					TempData["ErrorMessage"] = ex.Message;
-				}
-			}
-			else
+			if (!ModelState.IsValid)
 			{
 				TempData["ErrorMessage"] = "Dữ liệu không hợp lệ!";
+				return View(model);
 			}
 
-			return View(model);
+			try
+			{
+				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+				ViewData["MaXaSelected"] = model.MaXa;
+
+				await _gianHangService.Insert(model);
+				TempData["SuccessMessage"] = "Thêm gian hàng thành công!";
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = ex.Message;
+				return View(model);
+			}
 		}
 
-		//  EDIT (GET) 
-		[HttpGet]
+		// EDIT (GET)
 		public async Task<IActionResult> Edit(string id)
 		{
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var gh = (await _context.GianHang
-				.FromSqlInterpolated($"EXEC GianHang_GetByID @MaGH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
-
+			var gh = await _gianHangService.GetById(id);
 			if (gh == null)
 				return NotFound();
 
+			short maTinh = await _xaService.GetByIDWithTinh(gh.MaXa);
+
+			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+			var xaList = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", gh.MaXa);
+			ViewData["MaXaSelected"] = gh.MaXa;
 			return View(gh);
 		}
 
-		//  EDIT (POST) 
+		// EDIT (POST)
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(GianHang model)
 		{
-			if (ModelState.IsValid)
+			if (!ModelState.IsValid)
 			{
-				try
-				{
-					await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                        EXEC GianHang_Update 
-                            @MaGH = {model.MaGH},
-                            @TenGH = {model.TenGH},
-                            @MoTaGH = {model.MoTaGH},
-                            @DienThoaiGH = {model.DienThoaiGH},
-                            @EmailGH = {model.EmailGH},
-                            @DiaChiGH = {model.DiaChiGH}
-                    ");
+				short maTinh = await _xaService.GetByIDWithTinh(model.MaXa);
+				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
-					TempData["SuccessMessage"] = "Cập nhật gian hàng thành công!";
-					return RedirectToAction(nameof(Index));
-				}
-				catch (Exception ex)
-				{
-					ModelState.AddModelError("", ex.Message);
-					TempData["ErrorMessage"] = ex.Message;
-				}
-			}
-			else
-			{
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+				ViewData["MaXaSelected"] = model.MaXa;
+
 				TempData["ErrorMessage"] = "Dữ liệu không hợp lệ!";
+				return View(model);
 			}
 
-			return View(model);
+			try
+			{
+				await _gianHangService.Update(model);
+				TempData["SuccessMessage"] = "Cập nhật gian hàng thành công!";
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = ex.Message;
+				return View(model);
+			}
 		}
 
-		//  DELETE (GET) 
-		[HttpGet]
+		// DELETE (GET)
 		public async Task<IActionResult> Delete(string id)
 		{
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var gh = (await _context.GianHang
-				.FromSqlInterpolated($"EXEC GianHang_GetByID @MaGH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
-
+			var gh = await _gianHangService.GetById(id);
 			if (gh == null)
 				return NotFound();
 
 			return View(gh);
 		}
 
-		//  DELETE (POST) 
+		// DELETE (POST)
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(string id)
 		{
-			if (string.IsNullOrEmpty(id))
+			try
 			{
-				TempData["ErrorMessage"] = "ID không hợp lệ!";
-				return BadRequest();
-			}
-
-			var gh = (await _context.GianHang
-				.FromSqlInterpolated($"EXEC GianHang_GetByID @MaGH = {id}")
-				.ToListAsync())
-				.FirstOrDefault();
-
-			if (gh != null)
-			{
-				await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC GianHang_Delete @MaGH = {id}");
+				await _gianHangService.Delete(id);
 				TempData["SuccessMessage"] = "Xóa gian hàng thành công!";
 			}
-			else
+			catch
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy gian hàng cần xóa!";
+				TempData["ErrorMessage"] = "Không thể xóa gian hàng!";
 			}
 
 			return RedirectToAction(nameof(Index));
 		}
 
-		// ============ SEARCH ============
+		// SEARCH TABLE (AJAX)
 		[HttpGet]
-		public async Task<IActionResult> Search(string keyword, string? tinhFilter)
+		public async Task<IActionResult> Search(string? keyword, string? tinh)
 		{
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
-				new SqlParameter("@TinhFilter", (object?)tinhFilter ?? DBNull.Value)
-
-			};
-
-			var data = await _context.GianHang
-				.FromSqlRaw("EXEC GianHang_SearchFilter @Search, @TinhFilter", parameters)
-				.ToListAsync();
-
+			var data = await _gianHangService.Search(keyword, tinh);
 			return PartialView("GianHangTable", data);
 		}
 
-
-		// ============ RESET FILTER ============
-		public async Task<IActionResult> ClearFilter()
+		// RESET
+		public async Task<IActionResult> Clear()
 		{
-			var data = await _context.GianHang
-				.FromSqlRaw("EXEC GianHang_SearchFilter @Search=NULL, @TinhFilter=NULL")
-				.ToListAsync();
-
+			var data = await _gianHangService.Search(null, null);
 			return PartialView("GianHangTable", data);
 		}
-
 	}
 }

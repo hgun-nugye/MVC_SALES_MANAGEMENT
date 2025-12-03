@@ -42,16 +42,11 @@ namespace QuanLyBanHang.Models
 
 	public class DonMuaHangEditCTMH
 	{
-		public string MaDMH { get; set; }
+		public string? MaDMH { get; set; }
 		public DateTime NgayMH { get; set; }
-		public string MaNCC { get; set; }
+		public string? MaNCC { get; set; }
 
-		public List<DonMuaHangDetail> ChiTiet { get; set; } = new();
+		public List<CTMH> ChiTiet { get; set; } = new();
 	}
 
-	[Keyless]
-	public class DonMuaHangCountDto
-	{
-		public int TotalRecords { get; set; }
-	}
 }

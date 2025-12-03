@@ -37,7 +37,7 @@ namespace QuanLyBanHang.Controllers
 
 			// Lấy danh sách đơn bán hàng (chỉ các cột trong entity DonBanHang)
 			var model = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_SearchFilter @Search, @Month, @Year, @PageNumber, @PageSize", parameters)
+				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year, @PageNumber, @PageSize", parameters)
 				.ToListAsync();
 
 			// Lấy tổng số bản ghi (1 row)
@@ -313,18 +313,18 @@ namespace QuanLyBanHang.Controllers
 	};
 
 			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_SearchFilter @Search, @Month, @Year", parameters)
+				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year", parameters)
 				.ToListAsync();
 
 			return PartialView("DonBanHangTable", data);
 		}
 
 
-		// ============ RESET FILTER ============
-		public async Task<IActionResult> ClearFilter()
+		// ============ RESET  ============
+		public async Task<IActionResult> Clear()
 		{
 			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_SearchFilter @Search=NULL, @Month=NULL, @Year=NULL")
+				.FromSqlRaw("EXEC DonBanHang_Search @Search=NULL, @Month=NULL, @Year=NULL")
 				.ToListAsync();
 
 			return PartialView("DonBanHangTable", data);

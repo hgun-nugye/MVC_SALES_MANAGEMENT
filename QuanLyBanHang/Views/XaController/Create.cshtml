@@ -1,0 +1,34 @@
+﻿@model QuanLyBanHang.Models.Xa
+@{
+    ViewBag.Title = "Thêm Xã";
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<div class=" container">
+    <h2 class="text-success mb-3">
+        Thêm Xã
+    </h2>
+
+    <form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
+
+        <div class="form-group mb-3">
+            <label>Tên Xã</label>
+            <input asp-for="TenXa" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <label>Tên Tỉnh</label>
+            <select asp-for="MaTinh" asp-items="ViewBag.MaTinhList" class="form-control">
+                <option value="">-- Chọn tỉnh --</option>
+            </select>
+            <span asp-validation-for="MaTinh" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            <i class="fa-solid fa-save"></i> Lưu
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </form>
+
+</div>

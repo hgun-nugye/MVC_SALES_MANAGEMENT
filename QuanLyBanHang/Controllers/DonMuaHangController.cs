@@ -1,81 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
-using QuanLyBanHang.Services;
 using QuanLyBanHang.Models;
+using QuanLyBanHang.Services;
 
 namespace QuanLyBanHang.Controllers
 {
 	public class DonMuaHangController : Controller
 	{
+		private readonly DonMuaHangService _dmhService;
 		private readonly AppDbContext _context;
 
-		public DonMuaHangController(AppDbContext context)
+		public DonMuaHangController(DonMuaHangService service, AppDbContext context)
 		{
+			_dmhService = service;
 			_context = context;
 		}
-		
-		public async Task<IActionResult> Index(string? search, int? month, int? year, int pageNumber = 1, int pageSize = 10)
+
+		public async Task<IActionResult> Index(string? search, int? month, int? year)
 		{
 			ViewBag.Search = search;
 			ViewBag.Month = month;
 			ViewBag.Year = year;
-			ViewBag.PageNumber = pageNumber;
-			ViewBag.PageSize = pageSize;
 
-			// Tham số cho SP lấy danh sách
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value),
-				new SqlParameter("@PageNumber", pageNumber),
-				new SqlParameter("@PageSize", pageSize)
-			};
-
-			// Lấy danh sách đơn mua hàng (chỉ các cột trong entity DonMuaHang)
-			var model = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_SearchFilter @Search, @Month, @Year, @PageNumber, @PageSize", parameters)
-				.ToListAsync();
-
-			// Lấy tổng số bản ghi (1 row)
-			var countParams = new[]
-			{
-				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
-			};
-
-			var totalRecords = _context.DonMuaHangCountDtos
-							.FromSqlRaw("EXEC DonMuaHang_Count @Search, @Month, @Year", countParams)
-							.AsEnumerable()
-							.Select(x => x.TotalRecords)
-							.FirstOrDefault();
-
-
-			ViewBag.TotalRecords = totalRecords;
-			ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+			var model = await _dmhService.Search(search, month, year);
 
 			return View(model);
 		}
 
-
-		// ============ DETAILS ============
 		public async Task<IActionResult> Details(string id)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
 
-			var param = new SqlParameter("@MaDMH", id);
-			var result = await _context.DonMuaHangDetail
-				.FromSqlRaw("EXEC DonMuaHang_GetById_Detail @MaDMH", param)
-				.ToListAsync();
-
+			var result = await _dmhService.GetById(id);
 			return View(result);
 		}
 
-		// ============ CREATE (GET) ============
 		public IActionResult Create()
 		{
 			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC");
@@ -90,47 +49,26 @@ namespace QuanLyBanHang.Controllers
 			return View(model);
 		}
 
-		// ============ CREATE (POST) ============
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(DonMuaHang model)
 		{
-			try
+			if (ModelState.IsValid && model.CTMHs != null && model.CTMHs.Any())
 			{
-				if (ModelState.IsValid && model.CTMHs != null && model.CTMHs.Any())
+				try
 				{
-					var table = new DataTable();
-					table.Columns.Add("MaSP", typeof(string));
-					table.Columns.Add("SLM", typeof(int));
-					table.Columns.Add("DGM", typeof(decimal));
-
-					foreach (var ct in model.CTMHs)
-						table.Rows.Add(ct.MaSP, ct.SLM, ct.DGM);
-
-					var parameters = new[]
-					{
-						new SqlParameter("@NgayMH", model.NgayMH),
-						new SqlParameter("@MaNCC", model.MaNCC),
-						new SqlParameter("@ChiTiet", table)
-						{
-							SqlDbType = SqlDbType.Structured,
-							TypeName = "dbo.CTMH_List"
-						}
-					};
-
-					await _context.Database.ExecuteSqlRawAsync(
-						"EXEC DonMuaHang_Insert @NgayMH, @MaNCC, @ChiTiet", parameters
-					);
-
+					await _dmhService.Create(model);
 					TempData["SuccessMessage"] = "Thêm đơn mua hàng thành công!";
 					return RedirectToAction(nameof(Index));
 				}
-
-				TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ thông tin đơn hàng và chi tiết sản phẩm.";
+				catch (Exception ex)
+				{
+					TempData["ErrorMessage"] = ex.Message;
+				}
 			}
-			catch (Exception ex)
+			else
 			{
-				TempData["ErrorMessage"] = "Lỗi khi thêm đơn mua hàng: " + ex.Message;
+				TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ thông tin đơn hàng và chi tiết sản phẩm.";
 			}
 
 			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC", model.MaNCC);
@@ -138,31 +76,25 @@ namespace QuanLyBanHang.Controllers
 			return View(model);
 		}
 
-		// ============ EDIT (GET) ============
 		public async Task<IActionResult> Edit(string id)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
 
-			var param = new SqlParameter("@MaDMH", id);
-			var data = await _context.Set<DonMuaHangDetail>()
-				.FromSqlRaw("EXEC DonMuaHang_GetById_Detail @MaDMH", param)
-				.ToListAsync();
-
-			if (!data.Any()) return NotFound();
+			var data = await _dmhService.GetById(id);
+			if (data == null) return NotFound();
 
 			var ct = new DonMuaHangEditCTMH
 			{
-				MaDMH = data[0].MaDMH!,
-				NgayMH = data[0].NgayMH,
-				MaNCC = data[0].MaNCC!,
-				ChiTiet = data
+				MaDMH = data.MaDMH!,
+				NgayMH = data.NgayMH,
+				MaNCC = data.MaNCC!,
+				ChiTiet = data.CTMHs
 			};
 
 			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC", ct.MaNCC);
 			return View(ct);
 		}
 
-		// ============ EDIT (POST) ============
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(DonMuaHangEditCTMH model)
@@ -171,26 +103,7 @@ namespace QuanLyBanHang.Controllers
 
 			try
 			{
-				// Update header
-				await _context.Database.ExecuteSqlRawAsync(
-					"EXEC DonMuaHang_Update @MaDMH, @NgayMH, @MaNCC",
-					new SqlParameter("@MaDMH", model.MaDMH),
-					new SqlParameter("@NgayMH", model.NgayMH),
-					new SqlParameter("@MaNCC", model.MaNCC)
-				);
-
-				// Update each product
-				foreach (var ct in model.ChiTiet)
-				{
-					await _context.Database.ExecuteSqlRawAsync(
-						"EXEC CTMH_Update @MaDMH, @MaSP, @SLM, @DGM",
-						new SqlParameter("@MaDMH", model.MaDMH),
-						new SqlParameter("@MaSP", ct.MaSP),
-						new SqlParameter("@SLM", ct.SLM),
-						new SqlParameter("@DGM", ct.DGM)
-					);
-				}
-
+				await _dmhService.Update(model);
 				TempData["SuccessMessage"] = "Cập nhật đơn mua hàng thành công!";
 				return RedirectToAction(nameof(Index));
 			}
@@ -203,32 +116,23 @@ namespace QuanLyBanHang.Controllers
 			return View(model);
 		}
 
-		// ============ DELETE (GET) ============
 		public async Task<IActionResult> Delete(string id)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
 
-			var param = new SqlParameter("@MaDMH", id);
-			var data = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_GetById_Detail @MaDMH", param)
-				.ToListAsync();
+			var data = await _dmhService.GetById(id);
+			if (data == null) return NotFound();
 
-			var dmh = data.FirstOrDefault();
-			if (dmh == null) return NotFound();
-
-			return View(dmh);
+			return View(data);
 		}
 
-		// ============ DELETE (POST) ============
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(string id)
 		{
 			try
 			{
-				var param = new SqlParameter("@MaDMH", id);
-				await _context.Database.ExecuteSqlRawAsync("EXEC DonMuaHang_Delete @MaDMH", param);
-
+				await _dmhService.Delete(id);
 				TempData["SuccessMessage"] = "Xóa đơn mua hàng thành công!";
 			}
 			catch (Exception ex)
@@ -239,86 +143,43 @@ namespace QuanLyBanHang.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
-		// ============ DELETE DETAIL (GET) ============
+		
 		[HttpGet]
 		public async Task<IActionResult> DeleteDetail(string MaDMH, string maSP)
 		{
-			if (string.IsNullOrEmpty(MaDMH) || string.IsNullOrEmpty(maSP))
-				return NotFound();
-
-			var parameters = new[]
-			{
-				new SqlParameter("@MaDMH", MaDMH),
-				new SqlParameter("@MaSP", maSP)
-			};
-
-			var data = await _context.CTMHDetailDtos
-				.FromSqlRaw("EXEC CTMH_GetById_Detail @MaDMH, @MaSP", parameters)
-				.ToListAsync();
-
-			var model = data.FirstOrDefault();
+			var model = await _dmhService.GetDetail(MaDMH, maSP);
 			if (model == null) return NotFound();
-
-			var ctmh = new CTMH
-			{
-				MaDMH = model.MaDMH,
-				MaSP = model.MaSP,
-				SLM = model.SLM,
-				DGM = model.DGM,
-				TenSP = model.TenSP
-			};
-
-			return View("DeleteDetail", ctmh);
+			return View(model);
 		}
 
-		// ============ DELETE DETAIL (POST) ============
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteDetailConfirmed(string MaDMH, string maSP)
 		{
 			try
 			{
-				await _context.Database.ExecuteSqlRawAsync(
-					"EXEC CTMH_Delete @MaDMH, @MaSP",
-					new SqlParameter("@MaDMH", MaDMH),
-					new SqlParameter("@MaSP", maSP)
-				);
-
+				await _dmhService.DeleteDetail(MaDMH, maSP);
 				TempData["SuccessMessage"] = "Xóa chi tiết sản phẩm thành công!";
 			}
 			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Lỗi khi xóa: " + ex.Message;
+				TempData["ErrorMessage"] = ex.Message;
 			}
 
 			return RedirectToAction("Details", new { id = MaDMH });
 		}
 
-		// ============ SEARCH ============
+		
 		[HttpGet]
-		public async Task<IActionResult> Search(string keyword, int? month, int? year)
+		public async Task<IActionResult> Search(string? keyword, int? month, int? year)
 		{
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
-				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
-			};
-
-			var data = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_SearchFilter @Search, @Month, @Year", parameters)
-				.ToListAsync();
-
+			var data = await _dmhService.Search(keyword, month, year);
 			return PartialView("DonMuaHangTable", data);
 		}
 
-		// ============ RESET FILTER ============
-		public async Task<IActionResult> ClearFilter()
+		public async Task<IActionResult> Clear()
 		{
-			var data = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_SearchFilter @Search=NULL, @Month=NULL, @Year=NULL")
-				.ToListAsync();
-
+			var data = await _dmhService.Reset();
 			return PartialView("DonMuaHangTable", data);
 		}
 	}

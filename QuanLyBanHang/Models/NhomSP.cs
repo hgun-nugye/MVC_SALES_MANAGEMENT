@@ -13,10 +13,4 @@ namespace QuanLyBanHang.Models
 		public ICollection<LoaiSP>? LoaiSPs { get; set; }
 
 	}
-
-	[Keyless]
-	public class NhomSPCountDto
-	{
-		public int TotalRecords { get; set; }
-	}
 }

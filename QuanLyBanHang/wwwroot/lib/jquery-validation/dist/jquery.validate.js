@@ -144,7 +144,7 @@ $.extend( $.fn, {
 	rules: function( command, argument ) {
 		var element = this[ 0 ],
 			isContentEditable = typeof this.attr( "contenteditable" ) !== "undefined" && this.attr( "contenteditable" ) !== "false",
-			settings, staticRules, existingRules, data, param, filtered;
+			settings, staticRules, existingRules, data, param, ed;
 
 		// If nothing is selected, return empty object; can't chain anyway
 		if ( element == null ) {
@@ -180,12 +180,12 @@ $.extend( $.fn, {
 					delete staticRules[ element.name ];
 					return existingRules;
 				}
-				filtered = {};
+				ed = {};
 				$.each( argument.split( /\s/ ), function( index, method ) {
-					filtered[ method ] = existingRules[ method ];
+					ed[ method ] = existingRules[ method ];
 					delete existingRules[ method ];
 				} );
-				return filtered;
+				return ed;
 			}
 		}
 
@@ -198,11 +198,11 @@ $.extend( $.fn, {
 			$.validator.staticRules( element )
 		), element );
 
-		// Make sure required is at front
+		// Make sure is at front
 		if ( data.required ) {
 			param = data.required;
 			delete data.required;
-			data = $.extend( { required: param }, data );
+			data = $.extend( {: param }, data );
 		}
 
 		// Make sure remote is at back
@@ -369,7 +369,7 @@ $.extend( $.validator, {
 	},
 
 	messages: {
-		required: "This field is required.",
+		required: "This field is.",
 		remote: "Please fix this field.",
 		email: "Please enter a valid email address.",
 		url: "Please enter a valid URL.",
@@ -626,7 +626,7 @@ $.extend( $.validator, {
 			if ( this.settings.focusInvalid ) {
 				try {
 					$( this.findLastActive() || this.errorList.length && this.errorList[ 0 ].element || [] )
-					.filter( ":visible" )
+					.( ":visible" )
 					.trigger( "focus" )
 
 					// Manually trigger focusin event; without it, focusin handler isn't called, findLastActive won't have anything to find
@@ -654,7 +654,7 @@ $.extend( $.validator, {
 			.find( "input, select, textarea, [contenteditable]" )
 			.not( ":submit, :reset, :image, :disabled" )
 			.not( this.settings.ignore )
-			.filter( function() {
+			.( function() {
 				var name = this.name || $( this ).attr( "name" ); // For contenteditable
 				var isContentEditable = typeof $( this ).attr( "contenteditable" ) !== "undefined" && $( this ).attr( "contenteditable" ) !== "false";
 
@@ -722,7 +722,7 @@ $.extend( $.validator, {
 				val, idx;
 
 			if ( type === "radio" || type === "checkbox" ) {
-				return this.findByName( element.name ).filter( ":checked" ).val();
+				return this.findByName( element.name ).( ":checked" ).val();
 			} else if ( type === "number" && typeof element.validity !== "undefined" ) {
 				return element.validity.badInput ? "NaN" : $element.val();
 			}
@@ -1043,7 +1043,7 @@ $.extend( $.validator, {
 
 			return this
 				.errors()
-				.filter( selector );
+				.( selector );
 		},
 
 		// See https://api.jquery.com/category/selectors/, for CSS
@@ -1068,7 +1068,7 @@ $.extend( $.validator, {
 				element = this.findByName( element.name );
 			}
 
-			// Always apply ignore filter
+			// Always apply ignore 
 			return $( element ).not( this.settings.ignore )[ 0 ];
 		},
 
@@ -1086,7 +1086,7 @@ $.extend( $.validator, {
 				return $( "option:selected", element ).length;
 			case "input":
 				if ( this.checkable( element ) ) {
-					return this.findByName( element.name ).filter( ":checked" ).length;
+					return this.findByName( element.name ).( ":checked" ).length;
 				}
 			}
 			return value.length;
@@ -1185,7 +1185,7 @@ $.extend( $.validator, {
 	},
 
 	classRuleSettings: {
-		required: { required: true },
+		required: {: true },
 		email: { email: true },
 		url: { url: true },
 		date: { date: true },
@@ -1248,12 +1248,12 @@ $.extend( $.validator, {
 
 		for ( method in $.validator.methods ) {
 
-			// Support for <input required> in both html5 and older browsers
+			// Support for <input> in both html5 and older browsers
 			if ( method === "required" ) {
 				value = element.getAttribute( method );
 
-				// Some browsers return an empty string for the required attribute
-				// and non-HTML5 browsers might have required="" markup
+				// Some browsers return an empty string for the attribute
+				// and non-HTML5 browsers might have="" markup
 				if ( value === "" ) {
 					value = true;
 				}
@@ -1309,7 +1309,7 @@ $.extend( $.validator, {
 		// Handle dependency check
 		$.each( rules, function( prop, val ) {
 
-			// Ignore rule when param is explicitly false, eg. required:false
+			// Ignore rule when param is explicitly false, eg.:false
 			if ( val === false ) {
 				delete rules[ prop ];
 				return;
@@ -1629,9 +1629,9 @@ $.extend( $.validator, {
 var pendingRequests = {},
 	ajax;
 
-// Use a prefilter if available (1.5+)
-if ( $.ajaxPrefilter ) {
-	$.ajaxPrefilter( function( settings, _, xhr ) {
+// Use a pre if available (1.5+)
+if ( $.ajaxPre ) {
+	$.ajaxPre( function( settings, _, xhr ) {
 		var port = settings.port;
 		if ( settings.mode === "abort" ) {
 			if ( pendingRequests[ port ] ) {

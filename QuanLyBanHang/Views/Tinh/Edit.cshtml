@@ -1,0 +1,29 @@
+﻿@model QuanLyBanHang.Models.Tinh
+@{
+    ViewBag.Title = "Sửa Tỉnh";
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<div class="container ">
+    <h2 class="text-warning mb-3">
+        Sửa Thông Tin Tỉnh
+    </h2>
+
+    <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+        <div class="form-group mb-3">
+            <label> Mã Tỉnh</label>
+            <input asp-for="MaTinh" class="form-control" readonly />
+        </div>
+        <div class="form-group mb-3">
+            <label>Tên Tỉnh</label>
+            <input asp-for="TenTinh" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-warning text-white">
+            <i class="fa-solid fa-save"></i> Cập nhật
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </form>
+</div>

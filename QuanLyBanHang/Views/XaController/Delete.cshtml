@@ -1,0 +1,54 @@
+﻿@model QuanLyBanHang.Models.Xa
+
+@{
+    ViewBag.Title = "Xóa Xã ";
+}
+
+<div class="container">
+    <h2 class="text-danger mb-3">
+       Xóa Xã
+    </h2>
+
+    <div class="alert alert-warning shadow-sm">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Bạn có chắc muốn xóa xã <strong>@Model.TenXa</strong> không?
+    </div>
+
+    <div class="card p-3 shadow-sm">
+        <p><strong>Mã Xã:</strong> @Model.MaXa</p>
+        <p><strong>Xã:</strong> @Model.TenXa</p>
+        <p><strong>Tỉnh:</strong> @Model.TenTinh</p>
+    </div>
+
+    <form id="deleteForm" asp-action="Delete" method="post" class="mt-3">
+        <input type="hidden" asp-for="MaXa" />
+        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+            <i class="fa-solid fa-trash-can"></i> Xóa
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete() {
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: 'Bạn có chắc chắn muốn xóa nhà cung cấp này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+    </script>
+}
