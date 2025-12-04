@@ -203,7 +203,7 @@ BEGIN
             OR N.EmailNCC LIKE '%' + @Search + '%')
         AND (
             @MaTinh IS NULL 
-            OR T.TenTinh LIKE '%' + @MaTinh + '%'
+            OR T.MaTinh = @MaTinh
         )
 END;
 GO

@@ -5,21 +5,21 @@
 }
 
 <div class=" container">
-    <h2 class="text-danger mb-3">
+    <h4 class="text-danger mb-3">
         Xóa Tỉnh
-    </h2>
+    </h4>
 
     <div class="alert alert-warning shadow-sm">
         <i class="fa-solid fa-triangle-exclamation"></i>
         Bạn có chắc muốn xóa tỉnh <strong>@Model.TenTinh</strong> không?
     </div>
 
-    <div class="card p-3 shadow-sm">
+    <div class="border p-4 rounded shadow-sm bg-light">
         <p><strong>Mã Tỉnh:</strong> @Model.MaTinh</p>
         <p><strong>Tên Tỉnh:</strong> @Model.TenTinh</p>
     </div>
 
-    <form id="deleteForm" asp-action="Delete" method="post" class="mt-3">
+    <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
         <input type="hidden" asp-for="MaTinh" />
         <button type="button" class="btn btn-danger" onclick="confirmDelete()">
             <i class="fa-solid fa-trash-can"></i> Xóa

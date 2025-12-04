@@ -1,8 +1,7 @@
-﻿using QuanLyBanHang.Models;
-using QuanLyBanHang.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using QuanLyBanHang.Models;
+using QuanLyBanHang.Services;
 
 namespace QuanLyBanHang.Controllers
 {
@@ -10,18 +9,26 @@ namespace QuanLyBanHang.Controllers
 	{
 		private readonly AppDbContext _context;
 		private readonly XaService _xaService;
+		private readonly TinhService _tinhService;
 
-		public XaController(AppDbContext context, XaService xaService)
+		public XaController(AppDbContext context, XaService xaService, TinhService tinhService)
 		{
 			_context = context;
 			_xaService = xaService;
+			_tinhService = tinhService;
 		}
 
-		
+
 		//READ - Danh sách Xã
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string? search, string? tinh)
 		{
-			var dsXa = await _xaService.GetAllWithTinh();
+			ViewBag.Search = search;
+			ViewBag.Tinh = tinh;
+
+			var tinhList = await _tinhService.GetAll();
+			ViewBag.TinhList = new SelectList(tinhList, "MaTinh", "TenTinh");
+						
+			var dsXa = await _xaService.Search(search, tinh);
 
 			return View(dsXa);
 		}
@@ -59,7 +66,7 @@ namespace QuanLyBanHang.Controllers
 					TempData["SuccessMessage"] = "Thêm xã thành công!";
 					return RedirectToAction(nameof(Index));
 				}
-				
+
 				catch (Exception ex)
 				{
 					ModelState.AddModelError("", $"{ex.Message}");

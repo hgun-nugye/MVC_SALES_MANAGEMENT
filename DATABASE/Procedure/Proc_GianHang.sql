@@ -185,7 +185,8 @@ BEGIN
             OR G.EmailGH LIKE '%' + @Search + '%')
          AND (
             @MaTinh IS NULL 
-            OR T.MaTinh LIKE '%' + @MaTinh + '%'
+			OR T.MaTinh = @MaTinh
+
         )
  
 END;

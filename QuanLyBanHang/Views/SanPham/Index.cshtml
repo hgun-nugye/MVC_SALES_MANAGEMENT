@@ -109,12 +109,10 @@
 
         // khi thay đổi  -> submit form
                $("#searchBox").on("change", debounce(function(){
-            $("#pageNumberInput").val(1);
             $("#Form").submit();
         }, 400));
 
         $("#statusSelect, #typeSelect").on("change", function(){
-            $("#pageNumberInput").val(1);
             $("#Form").submit();
         });
 
@@ -123,10 +121,10 @@
             $("#searchBox").val("");
             $("#statusSelect").val("");
             $("#typeSelect").val("");
-            $("#pageSizeInput").val();
-            $("#pageNumberInput").val(1);
             $("#Form").submit();
         });
+</script>
+    <script>
 
         // clickable row
         document.addEventListener("DOMContentLoaded", function () {

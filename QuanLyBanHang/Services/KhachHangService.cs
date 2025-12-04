@@ -1,5 +1,6 @@
-﻿using QuanLyBanHang.Models;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using QuanLyBanHang.Models;
 
 namespace QuanLyBanHang.Services
 {
@@ -10,6 +11,22 @@ namespace QuanLyBanHang.Services
 		public KhachHangService(AppDbContext context)
 		{
 			_context = context;
+		}
+
+		public async Task<List<KhachHang>> Search(string? search, string? tinh)
+		{
+			SqlParameter pSearch = new("@Search", (object?)search ?? DBNull.Value);
+
+			SqlParameter pMaTinh;
+
+			if (short.TryParse(tinh, out short maTinh))
+				pMaTinh = new("@MaTinh", maTinh);
+			else
+				pMaTinh = new("@MaTinh", DBNull.Value);
+
+			return await _context.KhachHang
+				.FromSqlRaw("EXEC KhachHang_Search @Search, @MaTinh", pSearch, pMaTinh)
+				.ToListAsync();
 		}
 
 		// Get all KhachHang

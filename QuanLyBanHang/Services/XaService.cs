@@ -1,5 +1,6 @@
-﻿using QuanLyBanHang.Models;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using QuanLyBanHang.Models;
 
 namespace QuanLyBanHang.Services
 {
@@ -10,6 +11,27 @@ namespace QuanLyBanHang.Services
 		public XaService(AppDbContext context)
 		{
 			_context = context;
+		}
+
+		public async Task<List<Xa>> Search(string? search, string? tinh)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@MaTinh", (object?)tinh ?? DBNull.Value)
+			};
+
+			return await _context.Xa
+				.FromSqlRaw("EXEC Xa_Search @Search, @MaTinh", parameters)
+				.ToListAsync();
+		}
+
+
+		public async Task<List<Xa>> GetAll()
+		{
+			return await _context.Xa
+				.FromSqlRaw("EXEC Xa_GetAll")
+				.ToListAsync();
 		}
 
 		//READ - Danh sách Xã

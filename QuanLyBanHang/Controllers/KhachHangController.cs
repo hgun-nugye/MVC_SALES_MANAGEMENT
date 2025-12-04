@@ -20,11 +20,16 @@ namespace QuanLyBanHang.Controllers
 			_tinhService = tinhService;
 		}
 
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string? search, string? tinh)
 		{
-			var dsKhachHang = await _khService.GetAllWithXa();
 
-			ViewBag.TinhList = await _tinhService.GetAll();
+			ViewBag.Search = search;
+			ViewBag.Tinh = tinh;
+
+			var tinhList = await _tinhService.GetAll();
+			ViewBag.TinhList = new SelectList(tinhList, "MaTinh", "TenTinh");
+
+			var dsKhachHang = await _khService.Search(search, tinh);
 			return View(dsKhachHang);
 		}
 

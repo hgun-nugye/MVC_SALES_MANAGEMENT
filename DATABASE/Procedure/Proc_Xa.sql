@@ -126,6 +126,27 @@ BEGIN
 END;
 GO
 
+-- Search
+CREATE OR ALTER PROCEDURE Xa_Search
+    @Search NVARCHAR(200) = NULL,        
+    @MaTinh SMALLINT = NULL
+AS
+BEGIN    
+    SELECT 
+        X.*, T.TenTinh
+    FROM Xa X
+    JOIN Tinh T ON T.MaTinh = X.MaTinh
+    WHERE
+        (
+            @Search IS NULL OR @Search = '' OR
+            X.TenXa LIKE '%' + @Search + '%' 
+        )
+        AND (
+            @MaTinh IS NULL 
+            OR T.MaTinh = @MaTinh
+        )
+END;
+GO
 
 
 

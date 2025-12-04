@@ -96,13 +96,11 @@
 
     // khi thay đổi  -> submit form
     $("#searchBox").on("change", debounce(function(){
-        $("#pageNumberInput").val(1);
         $("#Form").submit();
     }, 400));
 
         // province vẫn submit ngay khi chọn
                 $("#province").on("change", function () {
-                    $("#pageNumberInput").val(1);
                     $("#Form").submit();
                 });         
 
@@ -111,17 +109,19 @@
     $("#btnClear").on("click", function(){
         $("#searchBox").val("");
         $("#province").val("");
-        $("#pageSizeInput").val(10);
-        $("#pageNumberInput").val(1);
         $("#Form").submit();
     });
 
-         document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".clickable-row").forEach(row => {
-                    row.addEventListener("click", function () {
-                        window.location = this.dataset.href;
-                    });
-                });
-            });
+    </script>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+               document.querySelectorAll(".clickable-row").forEach(row => {
+                   row.addEventListener("click", function () {
+                       window.location = this.dataset.href;
+                   });
+               });
+           });
     </script>
 }

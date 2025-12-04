@@ -94,12 +94,10 @@
             }
             // khi thay đổi  -> submit form
         $("#searchBox").on("change", debounce(function(){
-            $("#pageNumberInput").val(1);
             $("#Form").submit();
         }, 400));
 
          $("#groupSelect").on("change", function(){
-            $("#pageNumberInput").val(1);
             $("#Form").submit();
         });
 
@@ -108,11 +106,11 @@
             $("#searchBox").val("");
             $("#monthSelect").val("");
             $("#yearSelect").val("");
-            $("#pageSizeInput").val(10);
-            $("#pageNumberInput").val(1);
             $("#Form").submit();
         });
+        </script>
 
+        <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".clickable-row").forEach(row => {
                 row.addEventListener("click", function () {

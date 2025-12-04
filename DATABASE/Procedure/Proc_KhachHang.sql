@@ -211,7 +211,7 @@ BEGIN
         )
         AND (
             @MaTinh IS NULL 
-            OR T.MaTinh LIKE '%' + @MaTinh + '%'
+            OR T.MaTinh = @MaTinh
         )
 END;
 GO
