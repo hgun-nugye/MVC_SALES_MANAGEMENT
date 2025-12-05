@@ -18,18 +18,18 @@
         <p><strong>Mã Gian hàng:</strong> @Model.MaGH</p>
         <p><strong>Tên Gian hàng:</strong> @Model.TenGH</p>
         <p><strong>Mô tả:</strong> @Model.MoTaGH</p>
-        <p><strong>Ngày tạo:</strong> @Model.NgayTao</p>
+        <p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy")</p>
         <p><strong>Số điện thoại:</strong> @Model.DienThoaiGH</p>
         <p><strong>Email:</strong> @Model.EmailGH</p>
-        <p><strong>Địa chỉ:</strong> @Model.DiaChiGH</p>
+        <p><strong>Địa chỉ:</strong> @Model.DiaChiGH, @Model.TenXa, @Model.TenTinh</p>
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
         <input type="hidden" asp-for="MaGH" />
         <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-            <i class="fa-solid fa-trash-can"></i> Xóa
+            <i class="fa-solid fa-trash-can me-2"></i> Xóa
         </button>
-        <a asp-action="Index" class="btn btn-secondary">
+        <a asp-action="Details" asp-route-id="@Model.MaGH" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </form>

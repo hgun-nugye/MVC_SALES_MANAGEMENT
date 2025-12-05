@@ -129,9 +129,32 @@ BEGIN
 END;
 GO
 
--- =========================================
--- GET BY ID
--- =========================================
+CREATE OR ALTER PROC CTBH_GetByIDDBH
+(
+    @MaDBH CHAR(11)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        CT.MaDBH,
+        CT.MaSP,
+        SP.TenSP,
+        SP.GiaBan,
+        CT.SLB,
+        CT.DGB,
+        (CT.SLB * CT.DGB) AS ThanhTien,
+        DBH.NgayBH,
+        KH.TenKH
+    FROM CTBH CT
+    JOIN SanPham SP ON CT.MaSP = SP.MaSP
+    JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
+    JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
+    WHERE CT.MaDBH = @MaDBH;
+END;
+GO
+
 CREATE OR ALTER PROC CTBH_GetByID
 (
     @MaDBH CHAR(11),

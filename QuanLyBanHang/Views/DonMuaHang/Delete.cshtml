@@ -29,9 +29,9 @@
         <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
             <input type="hidden" asp-for="MaDMH" />
             <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fa-solid fa-trash-can"></i> Xóa
+                <i class="fa-solid fa-trash-can me-2"></i> Xóa
             </button>
-            <a asp-action="Index" class="btn btn-secondary">
+            <a asp-action="Details" asp-route-id="@Model.MaDMH" class="btn btn-secondary">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại
             </a>
         </form>

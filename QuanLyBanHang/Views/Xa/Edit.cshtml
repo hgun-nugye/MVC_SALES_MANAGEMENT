@@ -2,14 +2,15 @@
 @{
     ViewBag.Title = "Sửa Xã";
 }
-@Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
 <div class=" container">
-    <h4 class="text-warning mb-3">
+    <h4 class="text-success mb-3">
         Sửa Thông Tin Xã
     </h4>
 
     <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
         <div class="form-group mb-3">
             <label>Mã Xã</label>
             <input asp-for="MaXa" class="form-control" readonly />
@@ -25,14 +26,16 @@
                 <option value="">@Model.TenTinh</option>
             </select>
         </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-warning text-white">
+                <i class="fa-solid fa-save"></i> Cập nhật
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.MaXa" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
     </form>
 
-    <div class="mt-4 d-flex gap-2">
-        <button type="submit" class="btn btn-warning text-white">
-            <i class="fa-solid fa-save"></i> Cập nhật
-        </button>
-        <a asp-action="Details" asp-route-id="@Model.MaXa" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
-    </div>
+   
 </div>

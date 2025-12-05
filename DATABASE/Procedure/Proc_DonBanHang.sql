@@ -143,11 +143,14 @@ CREATE OR ALTER PROC DonBanHang_GetByID
 )
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         DBH.MaDBH,
         DBH.NgayBH,
         DBH.MaKH,
         KH.TenKH,
+		
         CT.MaSP,
         SP.TenSP,
         CT.SLB,
@@ -156,6 +159,8 @@ BEGIN
     JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
     JOIN CTBH CT ON CT.MaDBH = DBH.MaDBH
     JOIN SanPham SP ON SP.MaSP = CT.MaSP
+	JOIN Xa X ON X.MaXa = KH.MaXa
+	JOIN Tinh T ON T.MaTinh = X.MaTinh
     WHERE DBH.MaDBH = @MaDBH;
 END;
 GO
@@ -175,7 +180,8 @@ BEGIN
             OR D.MaDBH LIKE '%' + @Search + '%'
             OR D.MaKH LIKE '%' + @Search + '%'
 			OR K.TenKH LIKE N'%' + @Search + '%'
+			)
         AND (@Month IS NULL OR MONTH(D.NgayBH) = @Month)
-        AND (@Year IS NULL OR YEAR(D.NgayBH) = @Year))
+        AND (@Year IS NULL OR YEAR(D.NgayBH) = @Year)
 END;
 GO

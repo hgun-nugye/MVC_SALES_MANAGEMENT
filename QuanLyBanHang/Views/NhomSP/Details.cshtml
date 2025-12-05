@@ -7,15 +7,13 @@
         Chi tiết Nhóm sản phẩm
     </h4>
 
-    <div class="card shadow-sm border-info">
-        <div class="card-body">
+    <div class="border p-4 rounded shadow-sm bg-light">
             <p><strong>Mã Nhóm sản phẩm:</strong> @Model.MaNhom</p>
             <p><strong>Tên Nhóm sản phẩm:</strong> @Model.TenNhom</p>
-        </div>
     </div>
 
     <div class=" mt-4">
-        <a asp-action="Edit" asp-route-maNhom="@Model.MaNhom" class="btn btn-warning">
+        <a class="btn btn-warning text-white me-2" href="@Url.Action("Edit", "NhomSP", new { id = Model.MaNhom })">
             <i class="fa-solid fa-pen-to-square"></i> Sửa
         </a>
         <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "NhomSP", new { id = Model.MaNhom })">

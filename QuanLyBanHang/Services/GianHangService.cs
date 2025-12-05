@@ -60,12 +60,12 @@ namespace QuanLyBanHang.Services
 				$@"EXEC GianHang_Delete @MaGH = {id}");
 		}
 
-		public async Task<List<GianHang>> Search(string? keyword, string? province)
+		public async Task<List<GianHang>> Search(string? keyword, short? tinh)
 		{
 			var parameters = new[]
 			{
 				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
-				new SqlParameter("@MaTinh", (object?)province ?? DBNull.Value)
+				new SqlParameter("@MaTinh", (object?)tinh ?? DBNull.Value)
 			};
 
 			return await _context.GianHang

@@ -171,9 +171,9 @@ namespace QuanLyBanHang.Controllers
 
 		
 		[HttpGet]
-		public async Task<IActionResult> Search(string? keyword, int? month, int? year)
+		public async Task<IActionResult> Search(string? search, int? month, int? year)
 		{
-			var data = await _dmhService.Search(keyword, month, year);
+			var data = await _dmhService.Search(search, month, year);
 			return PartialView("DonMuaHangTable", data);
 		}
 

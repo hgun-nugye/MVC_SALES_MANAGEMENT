@@ -24,7 +24,7 @@ namespace QuanLyBanHang.Services
 			};
 
 			return await _context.SanPhamDto
-				.FromSqlRaw("EXEC SanPham_Search @Search, @TrangThai, @TenLoai, NULL, NULL", parameters)
+				.FromSqlRaw("EXEC SanPham_Search @Search, @TrangThai, @TenLoai", parameters)
 				.AsNoTracking()
 				.ToListAsync();
 		}

@@ -7,11 +7,13 @@ namespace QuanLyBanHang.Controllers
 {
 	public class LoaiSPController : Controller
 	{
-		private readonly LoaiSPService _service;
+		private readonly LoaiSPService _loaiService;
+		private readonly NhomSPService _nspService;
 
-		public LoaiSPController(LoaiSPService service)
+		public LoaiSPController(LoaiSPService service, NhomSPService nspService)
 		{
-			_service = service;
+			_loaiService = service;
+			_nspService = nspService;
 		}
 
 		public async Task<IActionResult> Index(string? search, string? group)
@@ -19,19 +21,17 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.Search = search;
 			ViewBag.Group = group;
 
-			// Dropdown nhóm sản phẩm
-			var groups = await _service.GetGroups();
+			var groups = await _nspService.GetAll();
 			ViewBag.MaNhom = new SelectList(groups, "MaNhom", "TenNhom", group);
 
-			// Dữ liệu chính
-			var model = await _service.Search(search, group);
+			var model = await _loaiService.Search(search, group);
 			
 			return View(model);
 		}
 
 		public async Task<IActionResult> Details(string id)
 		{
-			var tinh = await _service.GetById(id);
+			var tinh = await _loaiService.GetById(id);
 
 			if (tinh == null)
 				return NotFound();
@@ -43,7 +43,7 @@ namespace QuanLyBanHang.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
-			ViewBag.MaNhom = new SelectList(await _service.GetGroups(), "MaNhom", "TenNhom");
+			ViewBag.MaNhom = new SelectList(await _nspService.GetAll(), "MaNhom", "TenNhom");
 			return View();
 		}
 
@@ -53,13 +53,13 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				ViewBag.MaNhom = new SelectList(await _service.GetGroups(), "MaNhom", "TenNhom");
+				ViewBag.MaNhom = new SelectList(await _nspService.GetAll(), "MaNhom", "TenNhom");
 				return View(model);
 			}
 
 			try
 			{
-				await _service.Insert(model);
+				await _loaiService.Insert(model);
 				TempData["SuccessMessage"] = "Thêm loại sản phẩm thành công!";
 				return RedirectToAction(nameof(Index));
 			}
@@ -73,12 +73,12 @@ namespace QuanLyBanHang.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Edit(string id)
 		{
-			var loai = await _service.GetById(id);
+			var loai = await _loaiService.GetById(id);
 
 			if (loai == null)
 				return NotFound();
 
-			ViewBag.NhomSP = new SelectList(await _service.GetGroups(), "MaNhom", "TenNhom", loai.MaNhom);
+			ViewBag.MaNhom = new SelectList(await _nspService.GetAll(), "MaNhom", "TenNhom", loai.MaNhom);
 
 			return View(loai);
 		}
@@ -89,20 +89,20 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				ViewBag.NhomSP = new SelectList(await _service.GetGroups(), "MaNhom", "TenNhom", model.MaNhom);
+				ViewBag.MaNhom = new SelectList(await _nspService.GetAll(), "MaNhom", "TenNhom", model.MaNhom);
 				return View(model);
 			}
 
 			try
 			{
-				await _service.Update(model);
+				await _loaiService.Update(model);
 				TempData["SuccessMessage"] = "Cập nhật thành công!";
 				return RedirectToAction(nameof(Index));
 			}
 			catch (Exception ex)
 			{
 				TempData["ErrorMessage"] = ex.Message;
-				ViewBag.NhomSPList = new SelectList(await _service.GetGroups(), "MaNhom", "TenNhom", model.MaNhom);
+				ViewBag.NhomSPList = new SelectList(await _nspService.GetAll(), "MaNhom", "TenNhom", model.MaNhom);
 				return View(model);
 			}
 		}
@@ -110,7 +110,7 @@ namespace QuanLyBanHang.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Delete(string id)
 		{
-			var obj = await _service.GetById(id);
+			var obj = await _loaiService.GetById(id);
 
 			if (obj == null)
 				return NotFound();
@@ -124,12 +124,12 @@ namespace QuanLyBanHang.Controllers
 		{
 			try
 			{
-				await _service.Delete(id);
+				await _loaiService.Delete(id);
 				TempData["SuccessMessage"] = "Đã xóa loại sản phẩm thành công!";
 			}
 			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = ex.Message;
+				TempData["ErrorMessage"] = "Đã xảy ra lỗi khi xóa loại sản phẩm!";
 			}
 
 			return RedirectToAction(nameof(Index));

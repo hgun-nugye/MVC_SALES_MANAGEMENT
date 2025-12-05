@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
 {
@@ -18,8 +17,8 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã nhà cung cấp")]
 		public string? MaNCC { get; set; }
 
-		[ForeignKey("MaNCC")]
-		public virtual NhaCC? NhaCC { get; set; }
+		//[ForeignKey("MaNCC")]
+		//public virtual NhaCC? NhaCC { get; set; }
 
 		public virtual List<CTMH>? CTMHs { get; set; }
 

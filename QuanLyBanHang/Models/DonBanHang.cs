@@ -34,6 +34,11 @@ namespace QuanLyBanHang.Models
 		public string? TenSP { get; set; }
 		public int? SLB { get; set; }
 		public decimal? DGB { get; set; }
+		[NotMapped]
+		public string? TenTinh { get; set; }
+		[NotMapped]	
+		public string? TenXa { get; set; }
+
 	}
 
 	public class DonBanHangEditCTBH

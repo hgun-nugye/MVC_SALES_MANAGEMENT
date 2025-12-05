@@ -8,12 +8,30 @@
         Chi tiết Khách hàng
     </h4>
 
-    <div class="border p-4 rounded shadow-sm bg-light"">
-            <p><strong>Mã KH:</strong> @Model.MaKH</p>
-            <p><strong>Tên KH:</strong> @Model.TenKH</p>
-            <p><strong>Điện thoại:</strong> @Model.DienThoaiKH</p>
-            <p><strong>Email:</strong> @Model.EmailKH</p>
-            <p><strong>Địa chỉ:</strong> @Model.DiaChiKH</p>
+    <div class="border p-4 rounded shadow-sm bg-light">
+        <div class="row">
+            <!-- Ảnh minh họa -->
+            <div class="col-md-5 text-center">
+                <img src="@Url.Content("~/images/"+Model.AnhKH)"
+                     alt="@Model.AnhKH"
+                     class="img-fluid rounded"
+                     style="max-height: 400px; object-fit: contain;" />
+            </div>
+
+            <!-- Thông tin sản phẩm -->
+            <div class="col-md-7">
+                <div class="p-3">
+                    <h4 class="text-primary mb-3">@Model.TenKH</h4>
+                    <p><strong>Mã khách hàng:</strong> @Model.MaKH</p>
+
+                    <div class="row mt-3">
+                        <p><strong>Điện thoại:</strong> @Model.DienThoaiKH</p>
+                        <p><strong>Email:</strong> @Model.EmailKH</p>
+                        <p><strong>Địa chỉ:</strong> @Model.DiaChiKH, @Model.TenXa, @Model.TenTinh</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
    <div class=" mt-4">

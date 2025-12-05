@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
 {
@@ -16,8 +17,13 @@ namespace QuanLyBanHang.Models
 		public string? EmailNCC { get; set; }
 
 		public string? DiaChiNCC { get; set; }
-		public short? MaXa { get; set; }
-
+		public short MaXa { get; set; }
+		//[NotMapped]
+		public string? TenXa { get; set; }
+		[NotMapped]
+		public short? MaTinh { get; set; }
+		//[NotMapped]
+		public string? TenTinh { get; set; }	
 		public ICollection<SanPham>? SanPhams { get; set; }
 
 	}

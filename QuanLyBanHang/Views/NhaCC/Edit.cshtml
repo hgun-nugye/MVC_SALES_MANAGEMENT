@@ -2,7 +2,6 @@
 @{
     ViewBag.Title = "Sửa Nhà Cung Cấp";
 }
-@Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
 <div class="container">
     <h4 class="text-success mb-3">
@@ -10,6 +9,8 @@
     </h4>
 
     <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
         <div class="form-group mb-3">
             <label>Mã NCC</label>
             <input asp-for="MaNCC" class="form-control" readonly />
@@ -28,143 +29,76 @@
                 <input asp-for="EmailNCC" class="form-control" />
             </div>
        </div>
+        
         <div class="form-group mb-3">
             <label>Địa chỉ</label>
-            <input asp-for="DiaChiNCC" class="form-control mb-2" readonly />
-
-            <!-- Input số nhà / đường -->
-            <input type="text" id="streetInput" class="form-control mb-2" placeholder="Số nhà, tên đường..." />
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <label>Tỉnh/Thành phố</label>
-                    <select id="provinceSelect" class="form-select"></select>
-                </div>
-                <div class="col-md-4">
-                    <label>Quận/Huyện</label>
-                    <select id="districtSelect" class="form-select"></select>
-                </div>
-                <div class="col-md-4">
-                    <label>Xã/Phường</label>
-                    <select id="wardSelect" class="form-select"></select>
-                </div>
-            </div>
+            <input asp-for="DiaChiNCC" class="form-control mb-2" />
         </div>
+
+        <div class="form-group mb-3">
+            <label>Tỉnh</label>
+            <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.Tinh">
+                <option value="">@Model.TenTinh</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Xã</label>
+            <select id="MaXa" asp-for="MaXa" class="form-control" asp-items="@ViewBag.Xa">
+                <option value="">@Model.TenXa</option>
+            </select>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-warning text-white">
+                <i class="fa-solid fa-save"></i> Cập nhật
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.MaNCC" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+
     </form>
 
-    <div class="mt-4">
-        <button type="submit" class="btn btn-warning text-white">
-            <i class="fa-solid fa-save"></i> Cập nhật
-        </button>
-        <a asp-action="Details" asp-route-id="@Model.MaNCC" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
-    </div>
-
+    
 </div>
 
+
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-        $(document).ready(function () {
-            let provincesData = [];
-            let oldAddress = '@Html.Raw(Model?.DiaChiNCC ?? "")'.trim();
-            let oldStreet = "", oldWard = "", oldDistrict = "", oldProvince = "";
+        $(function () {
 
-            // Tách address cũ (nếu Edit)
-            if(oldAddress){
-                const parts = oldAddress.split(',').map(x => x.trim());
-                if(parts.length === 4){
-                    oldStreet = parts[0];
-                    oldWard = parts[1];
-                    oldDistrict = parts[2];
-                    oldProvince = parts[3];
-                } else if(parts.length === 3){
-                    oldWard = parts[0];
-                    oldDistrict = parts[1];
-                    oldProvince = parts[2];
+            // Khi chọn Tỉnh → load Xã
+            $('#MaTinh').change(function () {
+                var maTinh = $(this).val();
+
+                $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
+
+                if (maTinh) {
+                    $.getJSON('/KhachHang/GetXaByTinh', { maTinh: maTinh }, function (data) {
+
+                        var options = '<option value="">-- Chọn Xã --</option>';
+
+                        $.each(data, function (i, xa) {
+                            options += `<option value="${xa.maXa}">${xa.tenXa}</option>`;
+                        });
+
+                        $('#MaXa').html(options);
+                    });
                 }
+            });
+
+            // Khi load trang → Tự chọn lại Xã đúng với Model.MaXa
+            var selectedXa = "@Model.MaXa";
+            if ($('#MaTinh').val()) {
+                $('#MaTinh').trigger('change');
+
+                setTimeout(() => {
+                    $('#MaXa').val(selectedXa);
+                }, 300);
             }
-
-            // Load provinces
-            $.getJSON('/Address/LoadAddress', function(data){
-                provincesData = data;
-                data.forEach(p => $('#provinceSelect').append(`<option value="${p.name}">${p.name}</option>`));
-
-                // Auto-fill dropdown + street nếu Edit
-                if(oldAddress){
-                    if(oldProvince) $('#provinceSelect').val(oldProvince).trigger('change');
-                    setTimeout(() => {
-                        if(oldDistrict) $('#districtSelect').val(oldDistrict).trigger('change');
-                        setTimeout(() => {
-                            if(oldWard) $('#wardSelect').val(oldWard);
-                            if(oldStreet) $('#streetInput').val(oldStreet);
-                        }, 200);
-                    }, 200);
-                }
-            });
-
-            // Khi chọn province
-            $('#provinceSelect').on('change', function(){
-                const province = $(this).val();
-                $('#districtSelect').html('<option value="">-- Chọn huyện --</option>');
-                $('#wardSelect').html('<option value="">-- Chọn xã --</option>');
-
-                const selectedProvince = provincesData.find(p => p.name === province);
-                if(selectedProvince){
-                    selectedProvince.districts.forEach(d =>
-                        $('#districtSelect').append(`<option value="${d.name}">${d.name}</option>`)
-                    );
-                }
-            });
-
-            // Khi chọn district
-            $('#districtSelect').on('change', function(){
-                const province = $('#provinceSelect').val();
-                const district = $(this).val();
-                $('#wardSelect').html('<option value="">-- Chọn xã --</option>');
-
-                const selectedProvince = provincesData.find(p => p.name === province);
-                if(selectedProvince){
-                    const selectedDistrict = selectedProvince.districts.find(d => d.name === district);
-                    if(selectedDistrict){
-                        selectedDistrict.wards.forEach(w =>
-                            $('#wardSelect').append(`<option value="${w.name}">${w.name}</option>`)
-                        );
-                    }
-                }
-            });
-
-            // Submit form
-            $('form').on('submit', function(){
-                const street = $('#streetInput').val().trim();
-                let province = $('#provinceSelect').val();
-                let district = $('#districtSelect').val();
-                let ward = $('#wardSelect').val();
-
-                // Nếu Edit: giữ nguyên cũ nếu dropdown trống
-                if(oldAddress){
-                    if(!province) province = oldProvince;
-                    if(!district) district = oldDistrict;
-                    if(!ward) ward = oldWard;
-                }
-
-                // Nếu Create: bắt buộc chọn đầy đủ dropdown
-                if(!oldAddress){
-                    if(!province || !district || !ward){
-                        alert("Vui lòng chọn đầy đủ Tỉnh / Huyện / Xã");
-                        return false;
-                    }
-                }
-
-                // Gộp địa chỉ
-                let fullAddress = "";
-                if(street){
-                    fullAddress = `${street}, ${ward}, ${district}, ${province}`;
-                } else {
-                    fullAddress = `${ward}, ${district}, ${province}`;
-                }
-
-                $('input[name="DiaChiNCC"]').val(fullAddress);
-            });
         });
     </script>
 }

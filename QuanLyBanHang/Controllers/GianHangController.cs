@@ -20,14 +20,16 @@ namespace QuanLyBanHang.Controllers
 			_tinhService = tinhService;
 		}
 
-		public async Task<IActionResult> Index(string? search, string province)
+		public async Task<IActionResult> Index(string? search, short? tinh)
 		{
 			ViewBag.Search = search;
-			ViewBag.SelectedProvince = province;
+			ViewBag.SelectedTinh = tinh;
 
-			var model = await _gianHangService.Search(search, province);
+			var model = await _gianHangService.Search(search, tinh);
 
-			ViewBag.Provinces = await _tinhService.GetAll();
+			var tinhList = await _tinhService.GetAll();
+			ViewBag.TinhList = new SelectList(tinhList, "MaTinh", "TenTinh", tinh);
+
 			return View(model);
 		}
 
@@ -58,7 +60,11 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
+				ViewBag.Tinh = new SelectList(await _tinhService.GetAll(), "MaTinh", "TenTinh", maTinh);
+				ViewBag.Xa = new SelectList(await _xaService.GetByIDTinh(maTinh), "MaXa", "TenXa", model.MaXa);
+
 				TempData["ErrorMessage"] = "Dữ liệu không hợp lệ!";
+
 				return View(model);
 			}
 
@@ -162,19 +168,5 @@ namespace QuanLyBanHang.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
-		// SEARCH TABLE (AJAX)
-		[HttpGet]
-		public async Task<IActionResult> Search(string? keyword, string? tinh)
-		{
-			var data = await _gianHangService.Search(keyword, tinh);
-			return PartialView("GianHangTable", data);
-		}
-
-		// RESET
-		public async Task<IActionResult> Clear()
-		{
-			var data = await _gianHangService.Search(null, null);
-			return PartialView("GianHangTable", data);
-		}
 	}
 }

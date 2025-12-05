@@ -198,7 +198,7 @@ CREATE OR ALTER PROCEDURE KhachHang_Search
 AS
 BEGIN    
     SELECT 
-        K.*, X.TenXa, T.TenTinh
+        K.*,X.MaTinh, X.TenXa, T.TenTinh
     FROM KhachHang K
 	JOIN Xa X ON X.MaXa = K.MaXa
 	JOIN Tinh T ON T.MaTinh = X.MaTinh

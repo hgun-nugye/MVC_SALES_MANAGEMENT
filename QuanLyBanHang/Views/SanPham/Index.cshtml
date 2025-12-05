@@ -46,23 +46,22 @@
     <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
         <div class="search-wrapper flex-grow-1">
             <i class="fa fa-search"></i>
-            <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên, mã GH, email...">
+            <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên, mã sản phẩm...">
         </div>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <div class="d-flex align-items-center gap-2">
-                <label class="w-100 text-end opacity-50"> <i class="fa fa- me-2"></i>:</label>
+            <div class="d-flex align-items-center gap-2">   
                 @Html.DropDownList(
                 "status",
-                                (SelectList)ViewBag.StatusSelectList,
-                                "-- Trạng thái --",
-                                new { @class = "form-select", style = "width:130px;", id = "statusSelect" }
+                                (SelectList)ViewBag.TrangThai,
+                                "-- Status --",
+                                new { @class = "form-select", style = "width:150px;", id = "statusSelect" }
                                 )
 
                 @Html.DropDownList(
                                 "type",
-                                (SelectList)ViewBag.LoaiSPSelectList,
-                                "-- Loại Sản phẩm --",
+                                (SelectList)ViewBag.LoaiSP,
+                                "-- Type --",
                                 new { @class = "form-select", style = "width:130px;", id = "typeSelect" }
                                 )
 
@@ -88,7 +87,37 @@
                 </tr>
             </thead>
             <tbody class="text-start">
-                @await Html.PartialAsync("SanPhamTable", Model)
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var sp in Model)
+                    {
+                        <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })">
+                            <td>
+                                <img src="@Url.Content(sp.AnhMH)" alt="@sp.TenSP" width="60" height="60" style="object-fit:cover; border-radius:5px;">
+                            </td>
+                            <td>@sp.TenSP</td>
+                            <td>@String.Format("{0:N0}", sp.DonGia)</td>
+                            <td>@String.Format("{0:N0}", sp.GiaBan)</td>
+                            <td>
+                                @{
+                                    var moTa = sp.MoTaSP ?? "";
+                                    var moTaHienThi = moTa.Length > 50 ? moTa.Substring(0, 50) + "..." : moTa;
+                                }
+                                @moTaHienThi
+                            </td>
+
+                            <td>@sp.TenGH</td>
+                            <td class="text-center">@sp.SoLuongTon</td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted fst-italic">Không có sản phẩm nào.</td>
+                    </tr>
+                }
 
             </tbody>
         </table>

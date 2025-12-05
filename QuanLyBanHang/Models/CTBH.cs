@@ -21,7 +21,14 @@ namespace QuanLyBanHang.Models
 
 		[ForeignKey("MaDBH")]
 		public DonBanHang? DonBanHang { get; set; } = null;
+		[NotMapped]
 		public string? TenSP { get; set; }
+
+		[NotMapped]
+		public string? TenTinh { get; set; }
+		[NotMapped]
+		public string? TenXa { get; set; }
+
 
 	}
 
@@ -30,9 +37,16 @@ namespace QuanLyBanHang.Models
 	{
 		public string? MaDBH { get; set; }
 		public string? MaSP { get; set; }
+		public string? TenSP { get; set; }
+
+		public decimal? GiaBan { get; set; }
 		public int SLB { get; set; }
 		public decimal DGB { get; set; }
-		public string? TenSP { get; set; }
+
+		public decimal? ThanhTien { get; set; }
+
+		public DateTime NgayBH { get; set; }
+		public string? TenKH { get; set; }
 	}
 
 

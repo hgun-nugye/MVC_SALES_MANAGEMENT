@@ -120,11 +120,11 @@ namespace QuanLyBanHang.Services
 			};
 		}
 
-		public async Task<List<DonMuaHang>> Search(string? keyword, int? month, int? year)
+		public async Task<List<DonMuaHang>> Search(string? search, int? month, int? year)
 		{
 			var parameters = new[]
 			{
-				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
 				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
 				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
 			};

@@ -13,7 +13,7 @@ namespace QuanLyBanHang.Services
 			_context = context;
 		}
 
-		public async Task<List<KhachHang>> Search(string? search, string? tinh)
+		public async Task<List<KhachHangDetailView>> Search(string? search, string? tinh)
 		{
 			SqlParameter pSearch = new("@Search", (object?)search ?? DBNull.Value);
 
@@ -24,7 +24,7 @@ namespace QuanLyBanHang.Services
 			else
 				pMaTinh = new("@MaTinh", DBNull.Value);
 
-			return await _context.KhachHang
+			return await _context.KhachHangDetailView
 				.FromSqlRaw("EXEC KhachHang_Search @Search, @MaTinh", pSearch, pMaTinh)
 				.ToListAsync();
 		}
@@ -40,12 +40,14 @@ namespace QuanLyBanHang.Services
 		// Get KhachHang by ID
 		public async Task<KhachHang?> GetByID(string id)
 		{
-			return (await _context.KhachHang
+			var result = await _context.KhachHang
 				.FromSqlInterpolated($"EXEC KhachHang_GetByID @MaKH={id}")
 				.AsNoTracking()
-				.ToListAsync())
-				.FirstOrDefault();
+				.ToListAsync();
+
+			return result.SingleOrDefault();
 		}
+
 		public async Task<KhachHangDetailView?> GetByIDWithXa(string id)
 		{
 			return (await _context.KhachHangDetailView
@@ -91,38 +93,52 @@ namespace QuanLyBanHang.Services
 		public async Task<string> Update(KhachHang model, IFormFile? anhFile)
 		{
 			var oldKH = (await _context.KhachHang
-				.FromSqlInterpolated($"EXEC KhachHang_GetByID @MaKH={model.MaKH}")
+				.FromSqlInterpolated($"EXEC KhachHang_GetByID @MaKH = {model.MaKH}")
 				.AsNoTracking()
 				.ToListAsync())
-				.FirstOrDefault();
+				.SingleOrDefault();
 
 			if (oldKH == null)
 				throw new KeyNotFoundException("Khách hàng không tồn tại!");
-			
-				string anhPath = oldKH.AnhKH;
 
+			// Giữ ảnh cũ mặc định
+			string anhPath = oldKH.AnhKH;
+
+			// Có upload ảnh mới
 			if (anhFile != null && anhFile.Length > 0)
 			{
 				var fileName = Guid.NewGuid() + Path.GetExtension(anhFile.FileName);
-				var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", fileName);
+
+				var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+				if (!Directory.Exists(folder))
+					Directory.CreateDirectory(folder);
+
+				var savePath = Path.Combine(folder, fileName);
+
 				using var stream = new FileStream(savePath, FileMode.Create);
 				await anhFile.CopyToAsync(stream);
+
 				anhPath = fileName;
+
+				Console.WriteLine("FileName: " + anhPath);
+				Console.WriteLine("SavePath: " + savePath);
+
 			}
 
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC KhachHang_Update
-                    @MaKH = {model.MaKH},
-                    @TenKH = {model.TenKH},
-                    @DienThoaiKH = {model.DienThoaiKH},
-                    @EmailKH = {model.EmailKH},
-                    @DiaChiKH = {model.DiaChiKH},
-                    @AnhKH = {anhPath},
-                    @MaXa = {model.MaXa}
-            ");
+				EXEC KhachHang_Update
+					@MaKH = {model.MaKH},
+					@TenKH = {model.TenKH},
+					@DienThoaiKH = {model.DienThoaiKH},
+					@EmailKH = {model.EmailKH},
+					@DiaChiKH = {model.DiaChiKH},
+					@AnhKH = {anhPath},
+					@MaXa = {model.MaXa}
+			");
 
 			return anhPath;
 		}
+
 
 		// Delete KhachHang
 		public async Task Delete(string id)

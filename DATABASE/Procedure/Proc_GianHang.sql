@@ -169,13 +169,13 @@ BEGIN
 END;
 GO
 
--- Search & Filter
+-- Search 
 CREATE OR ALTER PROCEDURE GianHang_Search
     @Search NVARCHAR(100) = NULL,
 	@MaTinh SMALLINT
 AS
 BEGIN
-    SELECT G.*, X.TenXa, T.TenTinh FROM GianHang G
+    SELECT G.*, X.TenXa,T.MaTinh, T.TenTinh FROM GianHang G
 	JOIN Xa X ON X.MaXa = G.MaXa
 	JOIN Tinh T ON T.MaTinh = X.MaTinh
     WHERE

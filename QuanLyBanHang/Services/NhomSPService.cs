@@ -16,7 +16,7 @@ namespace QuanLyBanHang.Services
 		public async Task<List<NhomSP>> GetAll()
 		{
 			return await _context.NhomSP
-				.FromSqlRaw("EXEC Nhom_GetAll")
+				.FromSqlRaw("EXEC NhomSP_GetAll")
 				.ToListAsync();
 		}
 
@@ -24,7 +24,7 @@ namespace QuanLyBanHang.Services
 		public async Task<NhomSP?> GetById(string id)
 		{
 			return (await _context.NhomSP
-				.FromSqlInterpolated($"EXEC Nhom_GetByID @MaNhom = {id}")
+				.FromSqlInterpolated($"EXEC NhomSP_GetByID @MaNhom = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 		}
@@ -33,7 +33,7 @@ namespace QuanLyBanHang.Services
 		public async Task Insert(NhomSP model)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC Nhom_Insert 
+                EXEC NhomSP_Insert 
                     @TenNhom = {model.TenNhom}
             ");
 		}
@@ -42,7 +42,7 @@ namespace QuanLyBanHang.Services
 		public async Task Update(NhomSP model)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC Nhom_Update 
+                EXEC NhomSP_Update 
                     @MaNhom = {model.MaNhom},
                     @TenNhom = {model.TenNhom}
             ");
@@ -52,7 +52,7 @@ namespace QuanLyBanHang.Services
 		public async Task Delete(string id)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC Nhom_Delete @MaNhom = {id}
+                EXEC NhomSP_Delete @MaNhom = {id}
             ");
 		}
 	}

@@ -1,5 +1,6 @@
 ﻿using QuanLyBanHang.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace QuanLyBanHang.Services
 {
@@ -10,6 +11,15 @@ namespace QuanLyBanHang.Services
 		public TinhService(AppDbContext context)
 		{
 			_context = context;
+		}
+
+		public async Task<List<Tinh>> Search(string? search)
+		{
+			var parameter = new SqlParameter("@Search", (object?)search ?? DBNull.Value);
+
+			return await _context.Tinh
+				.FromSqlRaw("EXEC Tinh_Search @Search", parameter)
+				.ToListAsync();
 		}
 
 		// Lấy danh sách tất cả Tỉnh

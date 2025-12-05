@@ -17,18 +17,19 @@
 
     <div class="border p-4 rounded shadow-sm bg-light">
         <p><strong>Mã NCC:</strong> @Model.MaNCC</p>
+        <p><strong>Tên NCC:</strong> @Model.TenNCC</p>
         <p><strong>Điện thoại:</strong> @Model.DienThoaiNCC</p>
         <p><strong>Email:</strong> @Model.EmailNCC</p>
-        <p><strong>Số điện thoại:</strong> @Model.DienThoaiNCC</p>
-        <p><strong>Địa chỉ:</strong> @Model.DiaChiNCC</p>
+        <p><strong>Địa chỉ:</strong> @Model.DiaChiNCC, @Model.TenXa, @Model.TenTinh</p>
+
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
         <input type="hidden" asp-for="MaNCC" />
         <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-            <i class="fa-solid fa-trash-can"></i> Xóa
+            <i class="fa-solid fa-trash-can me-2"></i> Xóa
         </button>
-        <a asp-action="Index" class="btn btn-secondary">
+        <a asp-action="Details" asp-route-id="@Model.MaNCC" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </form>

@@ -98,15 +98,15 @@
                     @Html.ValidationMessageFor(m => m.MaGH, "", new { @class = "text-danger" })
                 </div>
             </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> Thêm mới
+                </button>
+                <a asp-action="Index" asp-controller="SanPham" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left-long"></i> Quay lại
+                </a>
+            </div>
        </div>
-
-        <div class="mt-4 d-flex gap-2">
-            <button type="submit" class="btn btn-success">
-                <i class="fa-solid fa-check"></i> Thêm mới
-            </button>
-            <a asp-action="Index" asp-controller="SanPham" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left-long"></i> Quay lại
-            </a>
-        </div>
+               
     }
 </div>

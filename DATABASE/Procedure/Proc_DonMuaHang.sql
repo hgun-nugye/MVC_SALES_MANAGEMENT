@@ -146,42 +146,20 @@ BEGIN
 
     SELECT D.*, N.TenNCC
     FROM DonMuaHang D
-    JOIN NhaCC N ON N.MaNCC= D.MaNCC
+    JOIN NhaCC N ON N.MaNCC = D.MaNCC
     WHERE
-        -- SEARCH
         (
-            @Search IS NULL OR @Search = '' 
-            OR D.MaDMH LIKE '%' + @Search + '%'
-            OR D.MaNCC LIKE '%' + @Search + '%'
-            OR N.TenNCC LIKE N'%' + @Search + '%'
-            OR CONVERT(VARCHAR(10), D.NgayMH, 103) LIKE '%' + @Search + '%'
+            @Search IS NULL 
+            OR @Search = '' 
+            OR (
+                D.MaDMH LIKE '%' + @Search + '%'
+                OR D.MaNCC LIKE '%' + @Search + '%'
+                OR N.TenNCC LIKE N'%' + @Search + '%'
+                OR CONVERT(VARCHAR(10), D.NgayMH, 103) LIKE '%' + @Search + '%'
+            )
         )
-        -- FILTER MONTH
         AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
-        -- FILTER YEAR
-        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year)
-    ORDER BY D.NgayMH DESC;
+        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year);
 END;
 GO
 
--- Search
-CREATE OR ALTER PROCEDURE DonMuaHang_Search
-    @Search NVARCHAR(100) = NULL,
-    @Month INT = NULL,
-    @Year INT = NULL
-AS
-BEGIN
-  
-    SELECT D.*, N.TenNCC
-    FROM DonMuaHang D
-	JOIN NhaCC N ON N.MaNCC=D.MaNCC
-    WHERE
-        (@Search IS NULL OR @Search = '' 
-            OR D.MaDMH LIKE '%' + @Search + '%'
-            OR N.MaNCC LIKE '%' + @Search + '%'
-			OR N.TenNCC LIKE N'%' + @Search + '%'
-        AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
-        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year))
-   
-END;
-GO

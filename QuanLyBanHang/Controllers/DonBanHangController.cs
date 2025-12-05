@@ -1,21 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
-using System.Data;
 
 namespace QuanLyBanHang.Controllers
 {
 	public class DonBanHangController : Controller
 	{
 		private readonly DonBanHangService _dbhService;
+		private readonly CTBHService _ctbhService;
 		private readonly AppDbContext _context;
 
-		public DonBanHangController(DonBanHangService service, AppDbContext context)
+		public DonBanHangController(DonBanHangService service, CTBHService ctbhService, AppDbContext context)
 		{
 			_dbhService = service;
+			_ctbhService = ctbhService;
 			_context = context;
 		}
 
@@ -80,26 +79,39 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP");
 			return View(model);
 		}
-
 		public async Task<IActionResult> Edit(string id)
 		{
 			if (id == null) return NotFound();
 
-			var result = await _dbhService.GetByID(id);
-			if (result == null) return NotFound();
+			var rows = await _dbhService.GetByID(id);
+			if (rows == null || !rows.Any()) return NotFound();
+
+			// Tách header từ dòng đầu tiên
+			var header = rows.First();
+
+			// Lấy chi tiết
+			var details = rows.Select(x => new CTBH
+			{
+				MaDBH = x.MaDBH!,
+				MaSP = x.MaSP!,
+				SLB = x.SLB ?? 0,
+				DGB = x.DGB ?? 0,
+				TenSP = x.TenSP
+			}).ToList();
 
 			var ct = new DonBanHangEditCTBH
 			{
-				MaDBH = result.MaDBH!,
-				NgayBH = result.NgayBH,
-				MaKH = result.MaKH!,
-				ChiTiet = result.CTBHs!	
+				MaDBH = header.MaDBH!,
+				NgayBH = header.NgayBH,
+				MaKH = header.MaKH!,
+				ChiTiet = details
 			};
 
 			ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH", ct.MaKH);
 
 			return View(ct);
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -184,28 +196,14 @@ namespace QuanLyBanHang.Controllers
 
 				TempData["SuccessMessage"] = "Xóa chi tiết sản phẩm thành công!";
 			}
-			catch (Exception ex) {
+			catch (Exception ex)
+			{
 				TempData["ErrorMessage"] = "Lỗi khi xóa: " + ex.Message;
 			}
 
 			return RedirectToAction("Details", new { id = maDBH });
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> Search(string keyword, int? month, int? year)
-		{
-			var data= await _dbhService.Search(keyword, month, year);
-			return PartialView("DonBanHangTable", data);
-		}
-
-
-		// ============ RESET  ============
-		public async Task<IActionResult> Clear()
-		{
-			var data = await _dbhService.Reset();
-
-			return PartialView("DonBanHangTable", data);
-		}
 	}
 }
 

@@ -14,12 +14,12 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Lấy danh sách + phân trang
-		public async Task<List<NhaCC>> GetList(string? search, string? province)
+		public async Task<List<NhaCC>> Search(string? search, short? province)
 		{
 			var parameters = new[]
 			{
 				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
-				new SqlParameter("@MaTinh", string.IsNullOrEmpty(province) ? DBNull.Value : province)
+				new SqlParameter("@MaTinh", (object?)province ?? DBNull.Value)
 			};
 
 			return await _context.NhaCC
@@ -69,26 +69,6 @@ namespace QuanLyBanHang.Services
 		public async Task Delete(string id)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC NhaCC_Delete @MaNCC = {id}");
-		}
-
-		public async Task<List<NhaCC>> Search(string keyword, string? province)
-		{
-			var parameters = new[]
-			{
-				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
-				new SqlParameter("@MaTinh", (object?)province ?? DBNull.Value)
-			};
-
-			return await _context.NhaCC
-				.FromSqlRaw("EXEC NhaCC_Search @Search, @MaTinh", parameters)
-				.ToListAsync();
-		}
-
-		public async Task<List<NhaCC>> Clear()
-		{
-			return await _context.NhaCC
-				.FromSqlRaw("EXEC NhaCC_Search @Search=NULL, @MaTinh=NULL")
-				.ToListAsync();
 		}
 
 	}

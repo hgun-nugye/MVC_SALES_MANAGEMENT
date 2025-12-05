@@ -190,7 +190,7 @@ CREATE OR ALTER PROCEDURE NhaCC_Search
 AS
 BEGIN
     
-    SELECT N.*,X.TenXa, T.TenTinh
+    SELECT N.*,X.TenXa, T.MaTinh, T.TenTinh
     FROM NhaCC N
 	JOIN Xa X
 	ON X.MaXa= N.MaXa

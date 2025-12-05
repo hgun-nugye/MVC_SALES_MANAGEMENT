@@ -6,22 +6,22 @@ namespace QuanLyBanHang.Controllers
 {
 	public class NhomSPController : Controller
 	{
-		private readonly NhomSPService _service;
+		private readonly NhomSPService _nspService;
 
 		public NhomSPController(NhomSPService service)
 		{
-			_service = service;
+			_nspService = service;
 		}
 
 		public async Task<IActionResult> Index()
 		{
-			var data = await _service.GetAll();
+			var data = await _nspService.GetAll();
 			return View(data);
 		}
 
 		public async Task<IActionResult> Details(string id)
 		{
-			var tinh = await _service.GetById(id);
+			var tinh = await _nspService.GetById(id);
 
 			if (tinh == null)
 				return NotFound();
@@ -45,7 +45,7 @@ namespace QuanLyBanHang.Controllers
 			{
 				try
 				{
-					await _service.Insert(model);
+					await _nspService.Insert(model);
 
 					TempData["SuccessMessage"] = "Thêm nhóm sản phẩm thành công!";
 					return RedirectToAction(nameof(Create));
@@ -64,7 +64,7 @@ namespace QuanLyBanHang.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Edit(string id)
 		{
-			var model = await _service.GetById(id);
+			var model = await _nspService.GetById(id);
 
 			if (model == null)
 				return NotFound();
@@ -81,7 +81,7 @@ namespace QuanLyBanHang.Controllers
 			{
 				try
 				{
-					await _service.Update(model);
+					await _nspService.Update(model);
 
 					TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
 					return RedirectToAction(nameof(Index));
@@ -99,7 +99,7 @@ namespace QuanLyBanHang.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Delete(string id)
 		{
-			var model = await _service.GetById(id);
+			var model = await _nspService.GetById(id);
 
 			if (model == null)
 				return NotFound();
@@ -114,7 +114,7 @@ namespace QuanLyBanHang.Controllers
 		{
 			try
 			{
-				await _service.Delete(id);
+				await _nspService.Delete(id);
 				TempData["SuccessMessage"] = "Đã xóa nhóm sản phẩm thành công!";
 			}
 			catch (Exception ex)

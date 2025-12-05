@@ -55,7 +55,6 @@
         .sidebar a {
                 display: flex;
                 align-items: center;
-                gap: 12px;
                 color: #198754;
                 padding: 14px 20px;
                 text-decoration: none;
@@ -202,15 +201,15 @@
 
         <a asp-controller="KhachHang" asp-action="Index"
            class="@(ctrl == "KhachHang" ? "active" : "") d-block mb-1" style="font-size: 20px">
-            <i class="fa-solid fa-users small me-2"></i> Khách Hàng
+            <i class="fa-solid fa-users small me-2"></i>Khách Hàng
         </a>
         <a asp-controller="GianHang" asp-action="Index"
            class="@(ctrl == "GianHang" ? "active" : "") d-block mb-1" style="font-size: 20px">
-            <i class="fa-solid fa-store small me-2"></i> Gian Hàng
+            <i class="fa-solid fa-store small me-2"></i>Gian Hàng
         </a>
         <a asp-controller="NhaCC" asp-action="Index"
            class="@(ctrl == "NhaCC" ? "active" : "") d-block mb-1" style="font-size: 20px">
-            <i class="fa-solid fa-truck-field small me-2"></i> Nhà Cung Cấp
+            <i class="fa-solid fa-truck-field small me-2"></i>Nhà Cung Cấp
         </a>
             
         @{

@@ -69,3 +69,20 @@ BEGIN
     DELETE FROM Tinh WHERE MaTinh = @MaTinh;
 END
 GO
+
+-- search
+CREATE OR ALTER PROCEDURE Tinh_Search
+    @Search      NVARCHAR(100) = NULL   
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT *
+        FROM Tinh
+    WHERE 
+        (
+            @Search IS NULL OR @Search = '' OR
+            Tinh.MaTinh   LIKE '%' + @Search + '%' OR
+            Tinh.TenTinh   LIKE '%' + @Search + '%'
+        )
+END;
+GO

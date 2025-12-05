@@ -3,6 +3,40 @@
 @{
     ViewBag.Title = "Quản lý Nhóm sản phẩm";
 }
+
+<style>
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+    }
+
+        .search-wrapper input {
+            padding-left: 38px !important;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+    .table {
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5faff;
+        transition: 0.2s;
+    }
+</style>
+
 <div class="container">
     <h4 class="mb-3 text-success">
         Danh sách Nhóm sản phẩm
@@ -27,31 +61,7 @@
         </tbody>
     </table>
 
-    <p>
-        <a asp-action="Index" asp-controller="LoaiSP" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
-    </p>
 </div>
-
-<style>
-    i {
-        margin-right: 8px;
-    }
-
-    .btn i {
-        margin-right: 5px;
-    }
-
-    .table th {
-        vertical-align: middle;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: #f5faff;
-        transition: 0.2s;
-    }
-</style>
 
  <script>
         document.addEventListener("DOMContentLoaded", function () {

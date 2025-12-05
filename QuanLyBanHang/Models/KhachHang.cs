@@ -19,6 +19,8 @@ namespace QuanLyBanHang.Models
 
 		public string? DiaChiKH { get; set; }
 		public short MaXa { get; set; }
+		[NotMapped]
+		public short MaTinh { get; set; }
 
 		[NotMapped]
 		public string? TenXa { get; set; }

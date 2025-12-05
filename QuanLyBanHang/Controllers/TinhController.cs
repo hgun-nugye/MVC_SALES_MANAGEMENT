@@ -17,9 +17,11 @@ namespace QuanLyBanHang.Controllers
 		}
 	
 		// READ - Danh sách Tỉnh 
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string? search)
 		{
-			var dsTinh = await _tinhService.GetAll();
+			ViewBag.Search = search;
+
+			var dsTinh = await _tinhService.Search(search);
 			return View(dsTinh);
 		}
 

@@ -20,7 +20,7 @@ namespace QuanLyBanHang.Controllers
 			_gianHangService = gianHangService;
 		}
 
-		public async Task<IActionResult> Index(string search, string status, string type)
+		public async Task<IActionResult> Index(string? search, string? status, string? type)
 		{
 			ViewBag.Search = search;
 			ViewBag.Status = status;
@@ -145,20 +145,6 @@ namespace QuanLyBanHang.Controllers
 			await _spService.Delete(id);
 			TempData["SuccessMessage"] = "Xóa sản phẩm thành công!";
 			return RedirectToAction(nameof(Index));
-		}
-
-		
-		[HttpGet]
-		public async Task<IActionResult> Search(string keyword, string status, string type)
-		{
-			var data = await _spService.GetAll(keyword, status, type);
-			return PartialView("SanPhamTable", data);
-		}
-
-		public async Task<IActionResult> Clear()
-		{
-			var data = await _spService.GetAll(null, null, null);
-			return PartialView("SanPhamTable", data);
 		}
 
 		// Load dropdowns

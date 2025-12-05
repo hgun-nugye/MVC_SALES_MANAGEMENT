@@ -21,20 +21,22 @@ namespace QuanLyBanHang.Services
 				.ToListAsync();
 		}
 
-		public async Task<DonBanHang?> GetByID(string id)
+		public async Task<List<DonBanHangDetail>> GetByID(string id)
 		{
 			var param = new SqlParameter("@MaDBH", id);
-			return await _context.DonBanHang	
+
+			return await _context.DonBanHangDetail
 				.FromSqlRaw("EXEC DonBanHang_GetByID @MaDBH", param)
-				.FirstOrDefaultAsync();
+				.ToListAsync();
 		}
 
+
 		// Lấy chi tiết 1 chi tiết sản phẩm
-		public async Task<CTBH?> GetDetail(string MaDMH, string MaSP)
+		public async Task<CTBH?> GetDetail(string MaDBH, string MaSP)
 		{
 			var parameters = new[]
 			{
-				new SqlParameter("@MaDMH", MaDMH),
+				new SqlParameter("@MaDBH", MaDBH),
 				new SqlParameter("@MaSP", MaSP)
 			};
 

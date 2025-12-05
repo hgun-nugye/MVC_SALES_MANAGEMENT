@@ -11,7 +11,7 @@
 
     <div class="alert alert-warning shadow-sm">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc muốn xóa xã <strong>@Model.TenXa</strong> không?
+        Bạn có chắc muốn xóa <strong>@Model.TenXa</strong> không?
     </div>
 
     <div class="border p-4 rounded shadow-sm bg-light">
@@ -23,9 +23,9 @@
     <form id="deleteForm" asp-action="Delete" method="post" class="mt-3">
         <input type="hidden" asp-for="MaXa" />
         <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-            <i class="fa-solid fa-trash-can"></i> Xóa
+            <i class="fa-solid fa-trash-can me-2"></i> Xóa
         </button>
-        <a asp-action="Index" class="btn btn-secondary">
+        <a asp-action="Details" asp-route-id="@Model.MaXa" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </form>

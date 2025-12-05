@@ -20,6 +20,20 @@ namespace QuanLyBanHang.Services
 				.ToListAsync();
 		}
 
+		public async Task<CTBH?> GetByIDDBH(string maDBH)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@MaDBH", maDBH)
+			};
+
+			var data = await _context.CTBH
+				.FromSqlRaw("EXEC CTBH_GetByID @MaDBH", parameters)
+				.ToListAsync();
+
+			return data.FirstOrDefault();
+		}
+
 		public async Task<CTBH?> GetByID(string maDBH, string maSP)
 		{
 			var parameters = new[]

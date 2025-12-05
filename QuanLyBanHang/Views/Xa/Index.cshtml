@@ -50,10 +50,10 @@
         </div>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <div class="d-flex align-items-center gap-2">
-                <label class="w-100 text-end opacity-50"> <i class="fa fa- me-2"></i>Tỉnh/Thành phố:</label>
+            <div class="d-flex align-items-center gap-2 w-50">
+                <label class="w-100 text-end opacity-50">Tỉnh/Thành phố:</label>
                  <select asp-items="ViewBag.TinhList" name="maTinh" class="form-control w-100" id="maTinhSelect">
-                <option value="">-- Chọn tỉnh --</option>
+                <option value="">-- Tỉnh --</option>
             </select>
             </div>
 
@@ -70,7 +70,6 @@
                     <th class="w-25">Tên Xã</th>
                     <th class="w-15">Mã Tỉnh</th>
                     <th class="w-25">Tên Tỉnh</th>
-                    <th class="w-20">Hành động</th>
                 </tr>
             </thead>
             <tbody class="text-start">
@@ -84,22 +83,10 @@
                         data-tentinh="@item.TenTinh">
 
 
-                        <td>@item.MaXa</td>
+                        <td class=" text-center">@item.MaXa</td>
                         <td>@item.TenXa</td>
-                        <td>@item.MaTinh</td>
+                        <td class=" text-center">@item.MaTinh</td>
                         <td>@item.TenTinh</td>
-
-                        <td class="flex justify-content-between text-center">
-                            <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "Xa", new { id = item.MaXa })">
-                                <i class="fa-solid fa-eye"></i> Chi tiết
-                            </a>
-                            <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "Xa", new { id = item.MaXa })">
-                                <i class="fa-solid fa-pen-to-square"></i> Sửa
-                            </a>
-                            <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "Xa", new { id = item.MaXa })">
-                                <i class="fa-solid fa-trash"></i> Xóa
-                            </a>
-                        </td>
                     </tr>
                 }
             </tbody>

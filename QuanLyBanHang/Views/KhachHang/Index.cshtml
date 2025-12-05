@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.KhachHang>
+﻿@model IEnumerable<QuanLyBanHang.Models.KhachHangDetailView>
 
 @{
     ViewBag.Title = "Quản lý Khách hàng";
@@ -50,7 +50,7 @@
 
             <div class="d-flex align-items-center gap-2">
                 <label class="w-100 text-end opacity-50">Tỉnh/Thành phố</label>
-                <select id="province" name="province" class="form-select">
+                <select asp-items="ViewBag.TinhList" id="tinh" name="tinh" class="form-select">
                     <option value="">-- Tất cả --</option>
                 </select>
             </div>               
@@ -76,7 +76,28 @@
             </tr>
         </thead>
         <tbody>
-            @await Html.PartialAsync("KhachHangTable", Model)
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr class="clickable-row" data-href="@Url.Action("Details", "KhachHang", new { id = item.MaKH })">
+
+                        <td>@item.MaKH</td>
+                        <td>@item.TenKH</td>
+                        <td>@item.DienThoaiKH</td>
+                        <td>@item.EmailKH</td>
+                        <td>@item.DiaChiKH, @item.TenXa, @item.TenTinh</td>
+
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted fst-italic">Không có khách hàng nào.</td>
+                </tr>
+            }
+
         </tbody>
     </table>
 </div>
@@ -94,19 +115,19 @@
         }
 
         // áp dụng cho searchBox
-        $("#searchBox").on("input", debounce(function() {
+        $("#searchBox").on("change", debounce(function() {
             $("#Form").submit();
         }, 400));
 
-        // province vẫn submit ngay khi chọn
-        $("#province").on("change", function () {
+        // tinh vẫn submit ngay khi chọn
+        $("#tinh").on("change", function () {
             $("#Form").submit();
         });
 
         // clear 
         $("#btnClear").on("click", function () {
             $("#searchBox").val("");
-            $("#province").val("");
+            $("#tinh").val("");
             $("#Form").submit();
         });
     </script>

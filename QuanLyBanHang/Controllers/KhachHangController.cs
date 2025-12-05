@@ -27,7 +27,7 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.Tinh = tinh;
 
 			var tinhList = await _tinhService.GetAll();
-			ViewBag.TinhList = new SelectList(tinhList, "MaTinh", "TenTinh");
+			ViewBag.TinhList = new SelectList(tinhList, "MaTinh", "TenTinh", tinh);
 
 			var dsKhachHang = await _khService.Search(search, tinh);
 			return View(dsKhachHang);
@@ -149,7 +149,7 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (string.IsNullOrEmpty(id)) return BadRequest();
 
-			var kh = await _khService.GetByID(id);
+			var kh = await _khService.GetByIDWithXa(id);
 			if (kh == null) return NotFound();
 
 			return View(kh);

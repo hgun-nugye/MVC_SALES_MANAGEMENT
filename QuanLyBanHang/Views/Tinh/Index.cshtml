@@ -50,9 +50,11 @@
             transform: translateY(-50%); color: #777;
         "></i>
 
-            <input id="searchBox" type="text" class="form-control"
+            <input id="searchBox" name="search" type="text" class="form-control"
+                   value="@ViewBag.Search"
                    placeholder="Tìm mã tỉnh, tên tỉnh..."
                    style="padding-left: 35px;">
+
         </div>
 
         <div class="d-flex flex-wrap align-items-center gap-2">           
@@ -68,8 +70,6 @@
                 <tr>
                     <th class="w-25">Mã Tỉnh</th>
                     <th class="w-25">Tên Tỉnh</th>
-
-                    <th class="w-50">Hành động</th>
                 </tr>
             </thead>
             <tbody class="text-start">
@@ -80,20 +80,8 @@
                         data-matinh="@item.MaTinh"
                         data-tentinh="@item.TenTinh">
 
-                        <td>@item.MaTinh</td>
-                        <td>@item.TenTinh</td>
-
-                        <td class="flex justify-content-between text-center">
-                            <a class="btn btn-info btn-sm text-white" href="@Url.Action("Details", "Tinh", new { id = item.MaTinh })">
-                                <i class="fa-solid fa-eye"></i> Chi tiết
-                            </a>
-                            <a class="btn btn-warning btn-sm text-white" href="@Url.Action("Edit", "Tinh", new { id = item.MaTinh })">
-                                <i class="fa-solid fa-pen-to-square"></i> Sửa
-                            </a>
-                            <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "Tinh", new { id = item.MaTinh })">
-                                <i class="fa-solid fa-trash"></i> Xóa
-                            </a>
-                        </td>
+                        <td class=" text-center">@item.MaTinh</td>
+                        <td class="text-center">@item.TenTinh</td>
                     </tr>
                 }
             </tbody>
@@ -101,40 +89,37 @@
     </div>
 </div>
 
-<script>
-    // --- Lọc realtime ---
-    function filterTinh() {
-        let search = document.getElementById("searchTinh").value.toLowerCase().trim();
+@section Scripts {
+    <script>
+        // debounce function
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(context, args), delay);
+            };
+        }
 
-        document.querySelectorAll("tbody tr").forEach(row => {
-            let maTinh = row.dataset.matinh.toLowerCase();
-            let tenTinh = row.dataset.tentinh.toLowerCase();
+        // áp dụng cho searchBox
+        $("#searchBox").on("change", debounce(function() {
+            $("#Form").submit();
+        }, 400));
 
-            let matchSearch =
-                maTinh.includes(search) ||
-                tenTinh.includes(search);
-
-            row.style.display = matchSearch ? "" : "none";
+        // clear
+        $("#btnClear").on("click", function () {
+            $("#searchBox").val("");
+            $("#Form").submit();
         });
-    }
+    </script>
 
-    // sự kiện nhập search
-    document.getElementById("searchTinh").addEventListener("input", filterTinh);
-
-     // --- Nút reset ---
-        document.getElementById("btnClear").addEventListener("click", function () {
-            document.getElementById("searchBox").value = "";
-            filterTable();
-        });    
-</script>
-
-<script>
-    // clickable row (giữ nguyên)
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".clickable-row").forEach(row => {
-            row.addEventListener("click", function () {
-                window.location = this.dataset.href;
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
             });
         });
-    });
-</script>
+    </script>
+}

@@ -51,7 +51,7 @@
                 <!--  TỈNH -->
                 <div class="d-flex align-items-center gap-2">
                     <label class="w-100 text-end opacity-50">Tỉnh/Thành phố</label>
-                    <select id="province" name="province" class="form-select">
+                    <select asp-items="ViewBag.TinhList" id="tinh" name="tinh" class="form-select">
                         <option value="">-- Tất cả --</option>
                     </select>
                 </div>
@@ -75,7 +75,29 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                @await Html.PartialAsync("GianHangTable", Model)
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr class="clickable-row" data-href="@Url.Action("Details", "GianHang", new { id = item.MaGH })">
+
+                            <td>@item.MaGH</td>
+                            <td>@item.TenGH</td>
+                            <td>@item.MoTaGH</td>
+                            <td>@item.DienThoaiGH</td>
+                            <td>@item.EmailGH</td>
+                            <td>@item.DiaChiGH, @item.TenXa, @item.TenTinh</td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted fst-italic">Không có gian hàng nào.</td>
+                    </tr>
+                }
+
             </tbody>
         </table>
     </div>
@@ -99,8 +121,8 @@
         $("#Form").submit();
     }, 400));
 
-        // province vẫn submit ngay khi chọn
-                $("#province").on("change", function () {
+        // tinh vẫn submit ngay khi chọn
+                $("#tinh").on("change", function () {
                     $("#Form").submit();
                 });         
 
@@ -108,7 +130,7 @@
     // clear 
     $("#btnClear").on("click", function(){
         $("#searchBox").val("");
-        $("#province").val("");
+        $("#tinh").val("");
         $("#Form").submit();
     });
 
