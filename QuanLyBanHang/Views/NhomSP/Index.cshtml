@@ -42,6 +42,19 @@
         Danh sách Nhóm sản phẩm
     </h4>    
 
+    <!--  Form -->
+    <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+        <div class="search-wrapper flex-grow-1">
+            <i class="fa fa-search"></i>
+            <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên loại sản phẩm">
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">           
+            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
+            <a href="@Url.Action("Create", "NHomSP")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
+        </div>
+    </form>
+
     <table class="table  table-hover align-middle text-center shadow-sm">
         <thead class="table-success">
             <tr>
@@ -53,8 +66,8 @@
             @foreach (var item in Model)
             {
                 <tr class="clickable-row" data-href="@Url.Action("Details", "NhomSP", new { id = item.MaNhom })">
-                    <td>@item.MaNhom</td>
-                    <td>@item.TenNhom</td>
+                    <td class="text-center">@item.MaNhom</td>
+                    <td class="text-center">@item.TenNhom</td>
                                         
                 </tr>
             }
@@ -63,7 +76,30 @@
 
 </div>
 
- <script>
+@section Scripts {
+    <script>
+                // debounce function
+            function debounce(fn, delay) {
+                let timer = null;
+                return function() {
+                    const context = this, args = arguments;
+                    clearTimeout(timer);
+                    timer = setTimeout(() => fn.apply(context, args), delay);
+                };
+            }
+            // khi thay đổi  -> submit form
+        $("#searchBox").on("change", debounce(function(){
+            $("#Form").submit();
+        }, 400));
+
+        // clear
+        $("#btnClear").on("click", function(){
+            $("#searchBox").val("");
+            $("#Form").submit();
+        });
+    </script>
+
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".clickable-row").forEach(row => {
                 row.addEventListener("click", function () {
@@ -72,3 +108,5 @@
             });
         });
     </script>
+}
+

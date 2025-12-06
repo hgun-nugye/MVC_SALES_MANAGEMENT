@@ -1,4 +1,4 @@
-﻿@model QuanLyBanHang.Models.DonMuaHang
+﻿@model List<QuanLyBanHang.Models.DonMuaHangDetail>
 
 @{
     ViewBag.Title = "Xóa Đơn mua hàng";
@@ -11,28 +11,28 @@
 
     <div class="alert alert-warning">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc chắn muốn xóa đơn mua hàng <strong>@Model.MaDMH</strong> không?
+        Bạn có chắc chắn muốn xóa đơn mua hàng <strong>@Model.First().MaDMH</strong> không?
     </div>
 
     <div class="card shadow-sm p-4">
         <dl class="row">
             <dt class="col-sm-3">Mã đơn mua hàng:</dt>
-            <dd class="col-sm-9">@Model.MaDMH</dd>
+            <dd class="col-sm-9">@Model.First().MaDMH</dd>
 
             <dt class="col-sm-3">Ngày mua hàng:</dt>
-            <dd class="col-sm-9">@Model.NgayMH.ToString("dd/MM/yyyy")</dd>
+            <dd class="col-sm-9">@Model.First().NgayMH.ToString("dd/MM/yyyy")</dd>
 
             <dt class="col-sm-3">Nhà cung cấp:</dt>
-            <dd class="col-sm-9">@Model.TenNCC</dd>
+            <dd class="col-sm-9">@Model.First().TenNCC</dd>
         </dl>
 
         <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
-            <input type="hidden" asp-for="MaDMH" />
-            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+            <input type="hidden" name="id" value="@Model.First().MaDMH" />
+            <button type="button" class="btn btn-danger me-2" onclick="confirmDelete()">
                 <i class="fa-solid fa-trash-can me-2"></i> Xóa
             </button>
-            <a asp-action="Details" asp-route-id="@Model.MaDMH" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            <a asp-action="Details" asp-route-id="@Model.First().MaDMH" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
             </a>
         </form>
     </div>

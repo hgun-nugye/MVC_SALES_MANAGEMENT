@@ -8,11 +8,15 @@ namespace QuanLyBanHang.Controllers
 	public class DonMuaHangController : Controller
 	{
 		private readonly DonMuaHangService _dmhService;
+		private readonly CTMHService _ctmhService;
+		private readonly SanPhamService _spService;
 		private readonly AppDbContext _context;
 
-		public DonMuaHangController(DonMuaHangService service, AppDbContext context)
+		public DonMuaHangController(DonMuaHangService service, CTMHService ctmhService, SanPhamService spService, AppDbContext context)
 		{
 			_dmhService = service;
+			_ctmhService = ctmhService;	
+			_spService = spService;
 			_context = context;
 		}
 
@@ -31,7 +35,7 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
 
-			var result = await _dmhService.GetById(id);
+			var result = await _dmhService.GetByID(id);
 			return View(result);
 		}
 
@@ -78,17 +82,30 @@ namespace QuanLyBanHang.Controllers
 
 		public async Task<IActionResult> Edit(string id)
 		{
-			if (string.IsNullOrEmpty(id)) return NotFound();
+			if (id == null) return NotFound();
 
-			var data = await _dmhService.GetById(id);
-			if (data == null) return NotFound();
+			var rows = await _dmhService.GetByID(id);
+			if (rows == null || !rows.Any()) return NotFound();
+
+			// Tách header từ dòng đầu tiên
+			var header = rows.First();
+
+			// Lấy chi tiết
+			var details = rows.Select(x => new CTMH
+			{
+				MaDMH = x.MaDMH!,
+				MaSP = x.MaSP!,
+				SLM = x.SLM ?? 0,
+				DGM = x.DGM ?? 0,
+				TenSP = x.TenSP
+			}).ToList();
 
 			var ct = new DonMuaHangEditCTMH
 			{
-				MaDMH = data.MaDMH!,
-				NgayMH = data.NgayMH,
-				MaNCC = data.MaNCC!,
-				ChiTiet = data.CTMHs
+				MaDMH = header.MaDMH!,
+				NgayMH = header.NgayMH,
+				MaNCC = header.MaNCC!,
+				ChiTiet = details
 			};
 
 			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC", ct.MaNCC);
@@ -100,12 +117,13 @@ namespace QuanLyBanHang.Controllers
 		public async Task<IActionResult> Edit(DonMuaHangEditCTMH model)
 		{
 			if (!ModelState.IsValid) return View(model);
-
 			try
 			{
+
 				await _dmhService.Update(model);
+
 				TempData["SuccessMessage"] = "Cập nhật đơn mua hàng thành công!";
-				return RedirectToAction(nameof(Index));
+				return RedirectToAction(nameof(Details), new { id = model.MaDMH });
 			}
 			catch (Exception ex)
 			{
@@ -114,14 +132,15 @@ namespace QuanLyBanHang.Controllers
 
 			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC", model.MaNCC);
 			return View(model);
+
 		}
 
 		public async Task<IActionResult> Delete(string id)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
 
-			var data = await _dmhService.GetById(id);
-			if (data == null) return NotFound();
+			var data = await _dmhService.GetByID(id);
+			if (data == null || !data.Any()) return NotFound();
 
 			return View(data);
 		}

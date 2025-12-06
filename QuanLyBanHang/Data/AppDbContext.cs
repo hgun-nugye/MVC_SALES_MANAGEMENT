@@ -15,6 +15,7 @@ namespace QuanLyBanHang.Services
 		public DbSet<Xa> Xa { get; set; } = null!;
 
 		public DbSet<NhaCC> NhaCC { get; set; } = null!;
+		public DbSet<NhaCCDetailView> NhaCCDetailView { get; set; } = null!;
 
 		public DbSet<KhachHang> KhachHang { get; set; } = null!;
 		public DbSet<KhachHangDetailView> KhachHangDetailView { get; set; }

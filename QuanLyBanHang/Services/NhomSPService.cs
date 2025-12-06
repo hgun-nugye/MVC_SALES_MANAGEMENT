@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 
 namespace QuanLyBanHang.Services
@@ -54,6 +55,15 @@ namespace QuanLyBanHang.Services
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC NhomSP_Delete @MaNhom = {id}
             ");
+		}
+
+		// Tìm kiếm nhóm sản phẩm
+		public async Task<List<NhomSP>> Search(string? search)
+		{
+			var parameter = new SqlParameter("@Search", (object?)search ?? DBNull.Value);
+			return await _context.NhomSP
+				.FromSqlRaw("EXEC NhomSP_Search @Search", parameter)
+				.ToListAsync();
 		}
 	}
 }

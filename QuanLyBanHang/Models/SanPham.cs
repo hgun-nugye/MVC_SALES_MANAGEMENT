@@ -68,12 +68,16 @@ namespace QuanLyBanHang.Models
 		public decimal? GiaBan { get; set; }
 		public string? MoTaSP { get; set; }
 		public string? AnhMH { get; set; }
+		public string? ThanhPhan { get; set; }
+		public string? CongDung { get; set; }
+		public string? HDSD { get; set; }
+		public string? XuatXu { get; set; }
+		public string? BaoQuan { get; set; }
 		public string? TrangThai { get; set; }
 		public int? SoLuongTon { get; set; }
 		public string? MaLoai { get; set; }
 		public string? MaGH { get; set; }
 		public string? MaNCC { get; set; }
-
 		public string? TenLoai { get; set; }
 		public string? TenGH { get; set; }
 		public string? TenNCC { get; set; }

@@ -174,6 +174,10 @@ namespace QuanLyBanHang.Controllers
 			{
 				TempData["ErrorMessage"] = "Không tìm thấy Khách hàng cần xóa!";
 			}
+			catch
+			{
+				TempData["ErrorMessage"] = $"Không thể xóa Khách hàng!";
+			}
 
 			return RedirectToAction(nameof(Index));
 		}

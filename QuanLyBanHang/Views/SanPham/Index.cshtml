@@ -92,8 +92,8 @@
                     @foreach (var sp in Model)
                     {
                         <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })">
-                            <td>
-                                <img src="@Url.Content(sp.AnhMH)" alt="@sp.TenSP" width="60" height="60" style="object-fit:cover; border-radius:5px;">
+                            <td class="text-center">
+                                <img src="@Url.Content("~/images/" + sp.AnhMH)" alt="@sp.TenSP" width="60" height="60" style="object-fit:cover; border-radius:5px;">
                             </td>
                             <td>@sp.TenSP</td>
                             <td>@String.Format("{0:N0}", sp.DonGia)</td>

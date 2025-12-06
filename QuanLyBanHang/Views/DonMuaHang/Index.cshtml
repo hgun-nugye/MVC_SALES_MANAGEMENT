@@ -53,7 +53,6 @@
         <div class="d-flex flex-wrap align-items-center gap-2">
 
             <div class="d-flex align-items-center gap-2">
-                <label class="w-100 text-end opacity-50"> <i class="fa fa-filter me-2"></i>Filter:</label>
                 <!-- THÁNG -->
                 <select name="month" id="monthSelect" class="form-select" style="width: 130px;">
                     <option value="">-- Tháng --</option>
@@ -73,12 +72,6 @@
                 </select>
             </div>
 
-
-            <button type="submit" class="btn btn-success">
-                <i class="fa fa-filter"></i>
-                Lọc
-            </button>
-
             <button type="button" id="btnClear" class="btn btn-secondary">
                 <i class="fa-solid fa-rotate-left"></i> Xóa
             </button>
@@ -93,7 +86,7 @@
     <!-- TABLE -->
     <div id="tableContainer">
         <table class="table  table-hover align-middle shadow-sm">
-            <thead class="table-success">
+            <thead class="table-success text-center">
                 <tr>
                     <th>Mã Đơn</th>
                     <th>Ngày mua</th>
@@ -108,10 +101,10 @@
                     {
                         <tr class="clickable-row" data-href="@Url.Action("Details", "DonMuaHang", new { id = item.MaDMH })">
 
-                            <td>@item.MaDMH</td>
-                            <td>@item.NgayMH.ToString("dd/MM/yyyy")</td>
-                            <td>@item.MaNCC</td>
-                            <td>@item.TenNCC</td>
+                            <td class="text-center">@item.MaDMH</td>
+                            <td class="text-center">@item.NgayMH.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">@item.MaNCC</td>
+                            <td class="text-center">@item.TenNCC</td>
 
                         </tr>
                     }

@@ -14,28 +14,34 @@
     <div class="shadow-sm">
         <div class="row">
             <!-- Ảnh minh họa -->
-            <div class="col-md-5 text-center">
-                <img src="@Url.Content(Model.AnhMH)"
+            <div class="col-md-5 text-center mt-4">
+                <img src="@Url.Content("~/images/" + Model.AnhMH)"
                      alt="@Model.TenSP"
-                     class="img-fluid rounded border"
+                     class="img-fluid rounded border mt-4"
                      style="max-height: 400px; object-fit: contain;" />
             </div>
 
             <!-- Thông tin sản phẩm -->
             <div class="col-md-7">
                 <div class="p-3">
-                    <h4 class="text-primary mb-3">@Model.TenSP</h4>
+                    <h4 class="text-success mb-3">@Model.TenSP</h4>
                     <p><strong>Mã sản phẩm:</strong> @Model.MaSP</p>
                     <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
+                    <p><strong>Thành phần:</strong> @Model.ThanhPhan</p>
+                    <p><strong>Công dụng:</strong> @Model.CongDung</p>
+                    <p><strong>Hướng dẫn sử dụng:</strong> @Model.HDSD</p>
+                    <p><strong>Bảo quản:</strong> @Model.BaoQuan</p>
 
                     <div class="row mt-3">
-                        <div class="col-md-6 mb-2"><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</div>
-                        <div class="col-md-6 mb-2"><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</div>
-                        <div class="col-md-6 mb-2"><strong>Số lượng tồn:</strong> @Model.SoLuongTon</div>
-                        <div class="col-md-6 mb-2"><strong>Trạng thái:</strong> @Model.TrangThai</div>
-                        <div class="col-md-6 mb-2"><strong>Loại sản phẩm:</strong> @Model.TenLoai</div>
-                        <div class="col-md-6 mb-2"><strong>Nhà cung cấp:</strong> @Model.TenNCC</div>
-                        <div class="col-md-12 mb-2"><strong>Gian hàng:</strong> @Model.TenGH</div>
+                        <p class="col-md-6"><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</p>
+                        <p class="col-md-6"><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</p>
+                        <p class="col-md-6"><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
+                        <p class="col-md-6"><strong>Trạng thái:</strong> @Model.TrangThai</p>
+                        <p class="col-md-6"><strong>Loại sản phẩm:</strong> @Model.TenLoai</p>
+                        <p class="col-md-6"><strong>Nhà cung cấp:</strong> @Model.TenNCC</p>
+                        <p class="col-md-6"><strong>Gian hàng:</strong> @Model.TenGH</p>
+                        <p class="col-md-6"><strong>Xuất xứ:</strong> @Model.XuatXu </p>
+
                     </div>
 
 

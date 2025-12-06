@@ -21,12 +21,40 @@ namespace QuanLyBanHang.Services
 				.ToListAsync();
 		}
 
-		public async Task<DonMuaHang?> GetById(string id)
+
+		// Lấy chi tiết 1 chi tiết sản phẩm
+		public async Task<CTMH?> GetDetail(string MaDMH, string MaSP)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@MaDMH", MaDMH),
+				new SqlParameter("@MaSP", MaSP)
+			};
+
+			var data = await _context.CTMHDetailDtos
+				.FromSqlRaw("EXEC CTMH_GetById_Detail @MaDMH, @MaSP", parameters)
+				.ToListAsync();
+
+			var model = data.FirstOrDefault();
+			if (model == null) return null;
+
+			return new CTMH
+			{
+				MaDMH = model.MaDMH,
+				MaSP = model.MaSP,
+				SLM = model.SLM,
+				DGM = model.DGM,
+				TenSP = model.TenSP
+			};
+		}
+
+		public async Task<List<DonMuaHangDetail>?> GetByID(string id)
 		{
 			var param = new SqlParameter("@MaDMH", id);
-			var result = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_GetById @MaDMH", param)
-				.FirstOrDefaultAsync();
+			var result = await _context.DonMuaHangDetail
+				.FromSqlRaw("EXEC DonMuaHang_GetByID @MaDMH", param)
+				.ToListAsync();
+
 			return result;
 		}
 
@@ -92,32 +120,6 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaDMH", MaDMH),
 				new SqlParameter("@MaSP", MaSP)
 			);
-		}
-
-		// Lấy chi tiết 1 chi tiết sản phẩm
-		public async Task<CTMH?> GetDetail(string MaDMH, string MaSP)
-		{
-			var parameters = new[]
-			{
-				new SqlParameter("@MaDMH", MaDMH),
-				new SqlParameter("@MaSP", MaSP)
-			};
-
-			var data = await _context.CTMHDetailDtos
-				.FromSqlRaw("EXEC CTMH_GetById_Detail @MaDMH, @MaSP", parameters)
-				.ToListAsync();
-
-			var model = data.FirstOrDefault();
-			if (model == null) return null;
-
-			return new CTMH
-			{
-				MaDMH = model.MaDMH,
-				MaSP = model.MaSP,
-				SLM = model.SLM,
-				DGM = model.DGM,
-				TenSP = model.TenSP
-			};
 		}
 
 		public async Task<List<DonMuaHang>> Search(string? search, int? month, int? year)

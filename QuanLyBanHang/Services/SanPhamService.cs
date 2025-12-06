@@ -14,7 +14,15 @@ namespace QuanLyBanHang.Services
 			_context = context;
 		}
 
-		public async Task<List<SanPhamDto>> GetAll(string? search, string? status, string? type)
+		public async Task<List<SanPhamDto>> GetAll()
+		{
+			return await _context.SanPhamDto
+				.FromSqlRaw("EXEC SanPham_GetAll")
+				.AsNoTracking()
+				.ToListAsync();
+		}
+
+		public async Task<List<SanPhamDto>> Search(string? search, string? status, string? type)
 		{
 			var parameters = new[]
 			{

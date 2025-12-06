@@ -115,7 +115,6 @@ namespace QuanLyBanHang.Controllers
 				return View(model);
 			}
 
-
 			try
 			{
 				await _nhaCCService.Update(model);
@@ -140,8 +139,19 @@ namespace QuanLyBanHang.Controllers
 		[HttpPost, ActionName("Delete")]
 		public async Task<IActionResult> DeleteConfirmed(string id)
 		{
-			await _nhaCCService.Delete(id);
-			TempData["SuccessMessage"] = "Đã xóa thành công!";
+			try
+			{
+				await _nhaCCService.Delete(id);
+				TempData["SuccessMessage"] = "Đã xóa thành công!";
+			}
+			catch (KeyNotFoundException)
+			{
+				TempData["ErrorMessage"] = "Không tìm thấy Nhà cung cấp cần xóa!";
+			}
+			catch
+			{
+				TempData["ErrorMessage"] = $"Không thể xóa Nhà cung cấp!";
+			}
 			return RedirectToAction(nameof(Index));
 		}
 	}

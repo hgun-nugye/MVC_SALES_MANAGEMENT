@@ -13,9 +13,11 @@ namespace QuanLyBanHang.Controllers
 			_nspService = service;
 		}
 
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string? search)
 		{
-			var data = await _nspService.GetAll();
+			ViewBag.Search = search;
+
+			var data = await _nspService.Search(search);
 			return View(data);
 		}
 
@@ -48,7 +50,7 @@ namespace QuanLyBanHang.Controllers
 					await _nspService.Insert(model);
 
 					TempData["SuccessMessage"] = "Thêm nhóm sản phẩm thành công!";
-					return RedirectToAction(nameof(Create));
+					return RedirectToAction(nameof(Index));
 				}
 				catch (Exception ex)
 				{
@@ -57,7 +59,7 @@ namespace QuanLyBanHang.Controllers
 				}
 			}
 
-			return View(model);
+			return View();
 		}
 
 		// EDIT GET
@@ -117,9 +119,9 @@ namespace QuanLyBanHang.Controllers
 				await _nspService.Delete(id);
 				TempData["SuccessMessage"] = "Đã xóa nhóm sản phẩm thành công!";
 			}
-			catch (Exception ex)
+			catch
 			{
-				TempData["ErrorMessage"] = ex.Message;
+				TempData["ErrorMessage"] = "Không thể xóa nhóm sản phẩm này!";
 			}
 
 			return RedirectToAction(nameof(Index));

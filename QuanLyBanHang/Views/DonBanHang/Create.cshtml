@@ -2,11 +2,9 @@
 
 @{
     ViewBag.Title = "Thêm Đơn bán hàng";
-    var spOptions = "";
-    foreach (var sp in ViewBag.MaSP as SelectList)
-    {
-        spOptions += $"<option value='{sp.Value}'>{sp.Text}</option>";
-    }
+
+    var spList = ViewBag.MaSP as IEnumerable<SelectListItem>;
+    var spOptionsHtml = string.Join("", spList.Select(sp => $"<option value='{sp.Value}'>{sp.Text}</option>"));
 }
 
 <div class="container border p-4 rounded shadow-sm bg-light">
@@ -33,59 +31,56 @@
 
         <h5 class="mt-4 mb-3"><i class="fa-solid fa-box"></i> Chi tiết sản phẩm</h5>
 
-        <table class="table  align-middle text-center" id="ctbhTable">
-            <thead class="table-light">
-                <tr>
-                    <th>Sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Đơn giá</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.CTBHs != null && Model.CTBHs.Count > 0)
-                {
-                    for (int i = 0; i < Model.CTBHs.Count; i++)
-                    {
-                        <tr>
-                            <td>
-                                <select name="CTBHs[@i].MaSP" class="form-select">
-                                    <option value="">-- Chọn sản phẩm --</option>
-                                    @foreach (var sp in ViewBag.MaSP)
-                                    {
-                                       @:<option value="@sp.Value" @(sp.Value == Model.CTBHs[i].MaSP ? "selected" : "")>@sp.Text</option>
-                                    }
-                                </select>
-                            </td>
-                            <td><input name="CTBHs[@i].SLB" class="form-control" type="number" min="1" value="@Model.CTBHs[i].SLB" /></td>
-                            <td><input name="CTBHs[@i].DGB" class="form-control" type="number" min="0" step="1000" value="@Model.CTBHs[i].DGB" /></td>
-                            <td>
-                                <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
+        <table class="table align-middle text-center" id="ctbhTable">
+    <thead class="table-light">
+        <tr>
+            <th>Sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.CTBHs != null && Model.CTBHs.Count > 0)
+        {
+                @for (int i = 0; i < Model.CTBHs.Count; i++)
                 {
                     <tr>
                         <td>
-                            <select name="CTBHs[0].MaSP" class="form-select">
-                                <option value="">-- Chọn sản phẩm --</option>
-                                @foreach (var sp in ViewBag.MaSP)
-                                {
-                                    <option value="@sp.Value">@sp.Text</option>
-                                }
-                            </select>
+                                <select asp-for="CTBHs[i].MaSP" class="form-select">
+                                    <option value="">-- Chọn sản phẩm --</option>
+                                    @foreach (var sp in spList)
+                                    {
+                                        <option value="@sp.Value">@sp.Text</option>
+                                    }
+                                </select>
                         </td>
-                        <td><input name="CTBHs[0].SLB" class="form-control" type="number" min="1" /></td>
-                        <td><input name="CTBHs[0].DGB" class="form-control" type="number" min="0" step="1000" /></td>
-                        <td>
-                            <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
-                        </td>
+                        <td><input name="CTBHs[@i].SLB" type="number" min="1" class="form-control" value="@Model.CTBHs[i].SLB" /></td>
+                        <td><input name="CTBHs[@i].DGB" type="number" min="0" step="1000" class="form-control" value="@Model.CTBHs[i].DGB" /></td>
+                        <td><button type="button" class="btn btn-danger removeRow">Xóa</button></td>
                     </tr>
                 }
-            </tbody>
-        </table>
+        }
+        else
+        {
+            <tr>
+                <td>
+                    <select name="CTBHs[0].MaSP" class="form-select">
+                        <option value="">-- Chọn sản phẩm --</option>
+                        @foreach (var sp in spList)
+                        {
+                            <option value="@sp.Value">@sp.Text</option>
+                        }
+                    </select>
+                </td>
+                <td><input name="CTBHs[0].SLB" class="form-control" type="number" min="1" /></td>
+                <td><input name="CTBHs[0].DGB" class="form-control" type="number" min="0" step="1000" /></td>
+                <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
 
         <button type="button" id="addRow" class="btn btn-success mb-3">
             <i class="fa-solid fa-plus"></i> Thêm dòng
@@ -110,7 +105,7 @@
             const tableBody = document.querySelector("#ctbhTable tbody");
             let index = tableBody.rows.length;
 
-            const spOptionsHtml = `@Html.Raw(spOptions)`;
+            const spOptionsHtml = `@Html.Raw(spOptionsHtml)`;
 
             addRowBtn.addEventListener("click", () => {
                 const newRow = document.createElement("tr");
@@ -122,10 +117,8 @@
                         </select>
                     </td>
                     <td><input name="CTBHs[${index}].SLB" type="number" min="1" class="form-control" /></td>
-                    <td><input name="CTBHs[${index}].DGB" type="number" step="1000" min="0" class="form-control" /></td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                    <td><input name="CTBHs[${index}].DGB" type="number" min="0" step="1000" class="form-control" /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
                 `;
                 tableBody.appendChild(newRow);
                 index++;

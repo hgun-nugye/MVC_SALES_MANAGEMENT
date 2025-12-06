@@ -29,7 +29,7 @@ namespace QuanLyBanHang.Controllers
 			// Load dropdown
 			await LoadDropdownsAsync(type, status);
 
-			var data = await _spService.GetAll(search, status, type);
+			var data = await _spService.Search(search, status, type);
 			return View(data);
 		}
 
@@ -142,9 +142,16 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(string id)
 		{
-			await _spService.Delete(id);
-			TempData["SuccessMessage"] = "Xóa sản phẩm thành công!";
-			return RedirectToAction(nameof(Index));
+			try
+			{
+				await _spService.Delete(id);
+				TempData["SuccessMessage"] = "Xóa sản phẩm thành công!";
+			}
+			catch
+			{
+				TempData["ErrorMessage"] = "Không thể xóa sản phẩm này!";
+			}
+				return RedirectToAction(nameof(Index));
 		}
 
 		// Load dropdowns

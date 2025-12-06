@@ -1,4 +1,4 @@
-﻿@model QuanLyBanHang.Models.SanPham
+﻿@model QuanLyBanHang.Models.SanPhamDto
 
 @{
     ViewBag.Title = "Sửa Sản phẩm";
@@ -10,13 +10,13 @@
     </h4>
 
     <!-- ======== Form sửa sản phẩm ======== -->
-    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="border p-4 rounded shadow-sm bg-light">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="">
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <input type="hidden" asp-for="MaSP" />
 
-        <div class="row g-3">
+        <div class="row g-3 border rounded shadow-sm bg-light p-4">
             <!-- Mã sản phẩm -->
             <div class="col-md-3">
                 <label class="form-label fw-bold">Mã SP</label>
@@ -24,10 +24,17 @@
             </div>
 
             <!-- Tên sản phẩm -->
-            <div class="col-md-9">
+            <div class="col-md-6">
                 <label class="form-label fw-bold">Tên SP</label>
                 <input asp-for="TenSP" class="form-control" />
                 <span asp-validation-for="TenSP" class="text-danger"></span>
+            </div>
+
+            <!-- Trạng thái -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Trạng thái</label>
+                <select asp-for="TrangThai" asp-items="ViewBag.TrangThai" class="form-select"></select>
+                <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>
 
             <!-- Đơn giá -->
@@ -51,11 +58,11 @@
                 <span asp-validation-for="SoLuongTon" class="text-danger"></span>
             </div>
 
-            <!-- Trạng thái -->
+            <!-- Xuất xứ -->
             <div class="col-md-3">
-                <label class="form-label fw-bold">Trạng thái</label>
-                <select asp-for="TrangThai" asp-items="ViewBag.TrangThai" class="form-select"></select>
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
+                <label class="form-label fw-bold">Xuất xứ</label>
+                <input asp-for="XuatXu" class="form-control" />
+                <span asp-validation-for="XuatXu" class="text-danger"></span>
             </div>
 
             <!-- Mô tả -->
@@ -65,8 +72,40 @@
                 <span asp-validation-for="MoTaSP" class="text-danger"></span>
             </div>
 
+            <!-- HDSD -->
+            <div class="col-12">
+                <label class="form-label fw-bold">HDSD</label>
+                <textarea asp-for="HDSD" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="HDSD" class="text-danger"></span>
+            </div>
+
             <div class="row mt-4">
-                <!-- Cột 1: 3 dropdown -->
+
+                <!-- Cột 1: 3 thông tin -->
+                <div class="col-md-6">
+                    <!-- Thành phần -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Thành phần</label>
+                        <input asp-for="ThanhPhan" class="form-control" />
+                        <span asp-validation-for="ThanhPhan" class="text-danger"></span>
+                    </div>
+
+                    <!-- Công dụng -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Công dụng</label>
+                        <input asp-for="CongDung" class="form-control" />
+                        <span asp-validation-for="CongDung" class="text-danger"></span>
+                    </div>
+
+                    <!-- Bảo quản -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Bảo quản</label>
+                        <input asp-for="BaoQuan" class="form-control" />
+                        <span asp-validation-for="BaoQuan" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Cột 2: 3 dropdown -->
                 <div class="col-md-6">
                     <!-- Nhà cung cấp -->
                     <div class="mb-3">
@@ -89,24 +128,22 @@
                         <span asp-validation-for="MaLoai" class="text-danger"></span>
                     </div>
                 </div>
-
-                <!-- Cột 2: Ảnh minh họa + chọn ảnh mới -->
-                <div class="col-md-6">
-                    @if (!string.IsNullOrEmpty(Model?.AnhMH))
-                    {
-                        <div class="mb-3">
-                            <strong>Ảnh hiện tại:</strong><br />
-                                <img src="@Url.Content(Model.AnhMH)" alt="@Model.TenSP" style="max-width:100%; height:auto; border-radius:8px;" />
-                        </div>
-                    }
-
+            </div>
+            
+            <div class="col-12">
+                @if (!string.IsNullOrEmpty(Model?.AnhMH))
+                {
                     <div class="mb-3">
-                        <label class="form-label">Chọn ảnh mới:</label>
-                        <input type="file" name="AnhFile" class="form-control" accept="image/*" />
+                        <strong>Ảnh hiện tại:</strong><br />
+                        <img src="@Url.Content(Model.AnhMH)" alt="@Model.TenSP" style="max-width:100%; height:auto; border-radius:8px;" />
                     </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label">Chọn ảnh mới:</label>
+                    <input type="file" name="AnhFile" class="form-control" accept="image/*" />
                 </div>
             </div>
-
 
         </div>
 

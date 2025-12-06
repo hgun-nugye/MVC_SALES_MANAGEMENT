@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
+using System.Threading.Tasks;
 
 namespace QuanLyBanHang.Controllers
 {
@@ -9,12 +10,14 @@ namespace QuanLyBanHang.Controllers
 	{
 		private readonly DonBanHangService _dbhService;
 		private readonly CTBHService _ctbhService;
+		private readonly SanPhamService _spService;
 		private readonly AppDbContext _context;
 
-		public DonBanHangController(DonBanHangService service, CTBHService ctbhService, AppDbContext context)
+		public DonBanHangController(DonBanHangService service, CTBHService ctbhService, SanPhamService spService, AppDbContext context)
 		{
 			_dbhService = service;
 			_ctbhService = ctbhService;
+			_spService = spService;
 			_context = context;
 		}
 
@@ -37,10 +40,10 @@ namespace QuanLyBanHang.Controllers
 			return View(result);
 		}
 
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
 			ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH");
-			ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP");
+			ViewBag.MaSP = new SelectList(await _spService.GetAll(), "MaSP", "TenSP");
 
 			var model = new DonBanHang
 			{
@@ -76,7 +79,7 @@ namespace QuanLyBanHang.Controllers
 			}
 
 			ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH", model.MaKH);
-			ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP");
+			ViewBag.MaSP = new SelectList(await _spService.GetAll(), "MaSP", "TenSP");
 			return View(model);
 		}
 		public async Task<IActionResult> Edit(string id)
@@ -123,20 +126,8 @@ namespace QuanLyBanHang.Controllers
 
 				await _dbhService.Update(model);
 
-				//// Update each product
-				//foreach (var ct in model.ChiTiet)
-				//{
-				//	await _context.Database.ExecuteSqlRawAsync(
-				//		"EXEC CTBH_Update @MaDBH, @MaSP, @SLB, @DGB",
-				//		new SqlParameter("@MaDBH", model.MaDBH),
-				//		new SqlParameter("@MaSP", ct.MaSP),
-				//		new SqlParameter("@SLB", ct.SLB),
-				//		new SqlParameter("@DGB", ct.DGB)
-				//	);
-				//}
-
 				TempData["SuccessMessage"] = "Cập nhật đơn bán hàng thành công!";
-				return RedirectToAction(nameof(Index));
+				return RedirectToAction(nameof(Details), new { id = model.MaDBH });
 			}
 			catch (Exception ex)
 			{
@@ -154,7 +145,7 @@ namespace QuanLyBanHang.Controllers
 
 
 			var dbh = await _dbhService.GetByID(id);
-			if (dbh == null) return NotFound();
+			if (dbh == null || !dbh.Any()) return NotFound();
 
 			return View(dbh);
 		}
@@ -182,7 +173,6 @@ namespace QuanLyBanHang.Controllers
 			var model = await _dbhService.GetDetail(maDBH, maSP);
 			if (model == null) return NotFound();
 			return View(model);
-			//return View("DeleteDetail", ctbh);
 		}
 
 

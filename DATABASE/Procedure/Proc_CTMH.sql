@@ -48,6 +48,7 @@ CREATE OR ALTER PROC CTMH_Update
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON; -- bắt buộc với transaction
 
     BEGIN TRY
         BEGIN TRAN;
@@ -61,29 +62,30 @@ BEGIN
         IF @OldSLM IS NULL
         BEGIN
             RAISERROR(N'Chi tiết không tồn tại.', 16, 1);
-            ROLLBACK TRAN;
-            RETURN;
         END
 
-        -- Cập nhật CTMH
+        -- Cập nhật chi tiết mua hàng
         UPDATE CTMH
         SET SLM = @SLM,
             DGM = @DGM
         WHERE MaDMH = @MaDMH AND MaSP = @MaSP;
 
-        -- cập nhật tồn kho theo chênh lệch
+        -- Cập nhật tồn kho theo chênh lệch nhập
         UPDATE SanPham
         SET SoLuongTon = SoLuongTon + (@SLM - @OldSLM)
         WHERE MaSP = @MaSP;
-		        
+
+        COMMIT TRAN;
     END TRY
     BEGIN CATCH
-        ROLLBACK TRAN;
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+
         DECLARE @Err NVARCHAR(4000) = ERROR_MESSAGE();
         RAISERROR(N'Lỗi cập nhật CTMH: %s', 16, 1, @Err);
-    END CATCH
+    END CATCH;
 END;
 GO
+
 
 -- =========================================
 -- DELETE

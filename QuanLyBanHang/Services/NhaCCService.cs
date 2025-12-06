@@ -33,9 +33,9 @@ namespace QuanLyBanHang.Services
 				.FromSqlRaw("EXEC NhaCC_GetAll")
 				.ToListAsync();
 		}
-		public async Task<NhaCC?> GetById(string id)
+		public async Task<NhaCCDetailView?> GetById(string id)
 		{
-			return (await _context.NhaCC
+			return (await _context.NhaCCDetailView
 				.FromSqlInterpolated($"EXEC NhaCC_GetByID @MaNCC = {id}")
 				.ToListAsync())
 				.FirstOrDefault();

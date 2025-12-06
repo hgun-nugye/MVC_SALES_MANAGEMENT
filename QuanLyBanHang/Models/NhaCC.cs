@@ -18,13 +18,26 @@ namespace QuanLyBanHang.Models
 
 		public string? DiaChiNCC { get; set; }
 		public short MaXa { get; set; }
-		//[NotMapped]
+		[NotMapped]
 		public string? TenXa { get; set; }
 		[NotMapped]
 		public short? MaTinh { get; set; }
-		//[NotMapped]
+		[NotMapped]
 		public string? TenTinh { get; set; }	
 		public ICollection<SanPham>? SanPhams { get; set; }
 
+	}
+
+	[Keyless]
+	public class NhaCCDetailView
+	{
+		public string? MaNCC { get; set; }
+		public string? TenNCC { get; set; }
+		public string? DienThoaiNCC { get; set; }
+		public string? EmailNCC { get; set; }
+		public string? DiaChiNCC { get; set; }
+		public short MaXa { get; set; }
+		public string? TenXa { get; set; }
+		public string? TenTinh { get; set; }
 	}
 }

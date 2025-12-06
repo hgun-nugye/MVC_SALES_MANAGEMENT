@@ -2,12 +2,17 @@
 
 @{
     ViewBag.Title = "Thêm Đơn mua hàng";
-    var spOptions = "";
-    foreach (var sp in ViewBag.MaSP as SelectList)
-    {
-        spOptions += $"<option value='{sp.Value}'>{sp.Text}</option>";
-    }
 
+    // Convert ViewBag.MaSP thành HTML option
+    var spOptions = "";
+    var spList = ViewBag.MaSP as IEnumerable<SelectListItem>;
+    if (spList != null)
+    {
+        foreach (var sp in spList)
+        {
+            spOptions += $"<option value='{sp.Value}'>{sp.Text}</option>";
+        }
+    }
 }
 
 <div class="container border p-4 rounded shadow-sm bg-light">
@@ -19,12 +24,14 @@
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
+        <!-- Ngày mua hàng -->
         <div class="mb-3">
             <label asp-for="NgayMH" class="form-label"></label>
             <input asp-for="NgayMH" class="form-control" type="date" readonly />
             <span asp-validation-for="NgayMH" class="text-danger"></span>
         </div>
 
+        <!-- Nhà cung cấp -->
         <div class="mb-3">
             <label asp-for="MaNCC" class="form-label"></label>
             <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select">
@@ -33,9 +40,9 @@
             <span asp-validation-for="MaNCC" class="text-danger"></span>
         </div>
 
+        <!-- Chi tiết sản phẩm -->
         <h5 class="mt-4 mb-3"><i class="fa-solid fa-box"></i> Chi tiết sản phẩm</h5>
-
-        <table class="table  align-middle text-center" id="ctmhTable">
+        <table class="table align-middle text-center" id="ctmhTable">
             <thead class="table-light">
                 <tr>
                     <th>Sản phẩm</th>
@@ -51,11 +58,10 @@
                     {
                         <tr>
                             <td>
-                                <select asp-for="CTMHs[@i].MaSP" asp-items="ViewBag.MaSP" class="form-select">
+                                <select name="CTMHs[0].MaSP" class="form-select">
                                     <option value="">-- Chọn sản phẩm --</option>
+                                    @Html.Raw(spOptions)
                                 </select>
-
-
                             </td>
                             <td><input name="CTMHs[@i].SLM" class="form-control" type="number" min="1" value="@Model.CTMHs[i].SLM" /></td>
                             <td><input name="CTMHs[@i].DGM" class="form-control" type="number" min="0" step="1000" value="@Model.CTMHs[i].DGM" /></td>
@@ -71,10 +77,7 @@
                         <td>
                             <select name="CTMHs[0].MaSP" class="form-select">
                                 <option value="">-- Chọn sản phẩm --</option>
-                                @foreach (var sp in ViewBag.MaSP)
-                                {
-                                    <option value="@sp.Value">@sp.Text</option>
-                                }
+                                @Html.Raw(spOptions)
                             </select>
                         </td>
                         <td><input name="CTMHs[0].SLM" class="form-control" type="number" min="1" /></td>
@@ -84,7 +87,7 @@
                         </td>
                     </tr>
                 }
-            </tbody>
+            </tbody>           
         </table>
 
         <button type="button" id="addRow" class="btn btn-success mb-3">
@@ -108,11 +111,31 @@
         document.addEventListener("DOMContentLoaded", function () {
             const addRowBtn = document.getElementById("addRow");
             const tableBody = document.querySelector("#ctmhTable tbody");
+            let index = tableBody.rows.length;
 
-            // Lấy sẵn option HTML
             const spOptionsHtml = `@Html.Raw(spOptions)`;
 
-            // Hàm reset index để model binder nhận đúng
+            // Thêm dòng mới
+            addRowBtn.addEventListener("click", () => {
+                const newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                    <td>
+                        <select name="CTMHs[${index}].MaSP" class="form-select">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            ${spOptionsHtml}
+                        </select>
+                    </td>
+                    <td><input type="number" name="CTMHs[${index}].SLM" min="1" class="form-control" /></td>
+                    <td><input type="number" name="CTMHs[${index}].DGM" min="0" step="1000" class="form-control" /></td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(newRow);
+                index++;
+            });
+
+            // Xóa dòng và reset index
             function resetIndices() {
                 const rows = tableBody.querySelectorAll("tr");
                 rows.forEach((row, i) => {
@@ -124,28 +147,9 @@
                         }
                     });
                 });
+                index = rows.length;
             }
 
-            // Thêm dòng mới
-            addRowBtn.addEventListener("click", () => {
-                const newRow = document.createElement("tr");
-                newRow.innerHTML = `
-                    <td>
-                        <select class="form-select" name="CTMHs[${tableBody.rows.length}].MaSP">
-                            <option value="">-- Chọn sản phẩm --</option>
-                            ${spOptionsHtml}
-                        </select>
-                    </td>
-                    <td><input type="number" name="CTMHs[${tableBody.rows.length}].SLM" min="1" class="form-control" /></td>
-                    <td><input type="number" name="CTMHs[${tableBody.rows.length}].DGM" min="0" step="1000" class="form-control" /></td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                `;
-                tableBody.appendChild(newRow);
-            });
-
-            // Xóa dòng và reset index
             tableBody.addEventListener("click", function (e) {
                 if (e.target.closest(".removeRow")) {
                     e.target.closest("tr").remove();
@@ -153,13 +157,10 @@
                 }
             });
 
-            // Nếu có dòng ban đầu, bỏ số 0 ở input trống (SLM/DGM)
+            // Xóa giá trị 0 trong input number
             tableBody.querySelectorAll("input[type='number']").forEach(input => {
-                if (!input.value || input.value === "0") {
-                    input.value = "";
-                }
+                if (!input.value || input.value === "0") input.value = "";
             });
         });
     </script>
 }
-
