@@ -168,7 +168,7 @@
             var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
         }
         <a asp-controller="Home" asp-action="Index"
-           class="@(ctrl == "Home" ? "active" : "") mb-2" style="font-size: 20px">
+           class="@(ctrl == "Home" ? "active" : "") mb-2" style="font-size: 18px">
             <i class="fa-solid fa-bars-progress me-2"></i>Dashboard
         </a>
 
@@ -178,7 +178,7 @@
         <div class="mb-2">
             <a class="d-flex justify-content-between align-items-center text-success"
                data-bs-toggle="collapse" href="#productMenu" role="button"
-               class="@((isProductOpen == "show") ? "active-dropdown" : "")" style="font-size: 20px">
+               class="@((isProductOpen == "show") ? "active-dropdown" : "")" style="font-size: 18px">
                 <span><i class="fa-solid fa-box-open me-2"></i>Hàng hóa</span>
                 <i class="fa-solid fa-chevron-down small"></i>
             </a>
@@ -200,15 +200,15 @@
         </div>
 
         <a asp-controller="KhachHang" asp-action="Index"
-           class="@(ctrl == "KhachHang" ? "active" : "") d-block mb-1" style="font-size: 20px">
+           class="@(ctrl == "KhachHang" ? "active" : "") d-block mb-1" style="font-size: 18px">
             <i class="fa-solid fa-users small me-2"></i>Khách Hàng
         </a>
         <a asp-controller="GianHang" asp-action="Index"
-           class="@(ctrl == "GianHang" ? "active" : "") d-block mb-1" style="font-size: 20px">
+           class="@(ctrl == "GianHang" ? "active" : "") d-block mb-1" style="font-size: 18px">
             <i class="fa-solid fa-store small me-2"></i>Gian Hàng
         </a>
         <a asp-controller="NhaCC" asp-action="Index"
-           class="@(ctrl == "NhaCC" ? "active" : "") d-block mb-1" style="font-size: 20px">
+           class="@(ctrl == "NhaCC" ? "active" : "") d-block mb-1" style="font-size: 18px">
             <i class="fa-solid fa-truck-field small me-2"></i>Nhà Cung Cấp
         </a>
             
@@ -218,7 +218,7 @@
         <div class="mb-2">
             <a class="d-flex justify-content-between align-items-center"
                data-bs-toggle="collapse" href="#orderMenu" role="button"
-               class="@((isOrderOpen == "show") ? "active-dropdown" : "")" style="font-size: 20px">
+               class="@((isOrderOpen == "show") ? "active-dropdown" : "")" style="font-size: 18px">
                 <span><i class="fa-solid fa-receipt me-2"></i>Giao dịch</span>
                 <i class="fa-solid fa-chevron-down small"></i>
             </a>
@@ -241,7 +241,7 @@
         <div class="mb-2">
             <a class="d-flex justify-content-between align-items-center"
                data-bs-toggle="collapse" href="#locationMenu" role="button"
-               class="@((isLocationOpen == "show") ? "active-dropdown" : "")" style="font-size: 20px">
+               class="@((isLocationOpen == "show") ? "active-dropdown" : "")" style="font-size: 18px">
                 <span><i class="fa-solid fa-globe"></i> Địa Lý</span>
                 <i class="fa-solid fa-chevron-down small"></i>
             </a>

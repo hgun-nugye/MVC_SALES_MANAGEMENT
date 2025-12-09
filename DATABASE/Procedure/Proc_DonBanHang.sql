@@ -25,30 +25,35 @@ BEGIN
     DECLARE @MaxNum INT;
     DECLARE @Prefix VARCHAR(8);
 
-    -- Tạo prefix BYYMMDD (vd: B251119)
+    -- Prefix BYYMMDD
     SET @Prefix = 'B' +
                   RIGHT(CAST(YEAR(@NgayBH) AS VARCHAR(4)), 2) +
                   RIGHT('0' + CAST(MONTH(@NgayBH) AS VARCHAR(2)), 2) +
                   RIGHT('0' + CAST(DAY(@NgayBH) AS VARCHAR(2)), 2);
 
-    -- Lấy số lớn nhất trong ngày và tăng lên 1
-    SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDBH,4) AS INT)),0)
+    SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDBH, 4) AS INT)), 0)
     FROM DonBanHang
     WHERE CONVERT(DATE, NgayBH) = @NgayBH;
 
     SET @MaDBH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
 
-    -- Thêm đơn bán hàng
+    -- Thêm đơn
     INSERT INTO DonBanHang(MaDBH, NgayBH, MaKH)
     VALUES (@MaDBH, @NgayBH, @MaKH);
 
-    -- Thêm chi tiết bán hàng
+    -- Thêm chi tiết
     INSERT INTO CTBH(MaDBH, MaSP, SLB, DGB)
     SELECT @MaDBH, MaSP, SLB, DGB
     FROM @ChiTiet;
 
+    UPDATE SP
+    SET SP.SoLuongTon = SP.SoLuongTon - CT.SLB
+    FROM SanPham SP
+    JOIN @ChiTiet CT ON CT.MaSP = SP.MaSP;
+
 END;
 GO
+
 
 ---------------------------------------------------------
 -- ========== UPDATE ==========
@@ -57,35 +62,60 @@ CREATE OR ALTER PROC DonBanHang_Update
 (
     @MaDBH CHAR(11),
     @NgayBH DATE,
-    @MaKH VARCHAR(10)
-   
+    @MaKH VARCHAR(10),
+    @ChiTiet CTBH_List READONLY
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra đơn hàng tồn tại
     IF NOT EXISTS (SELECT 1 FROM DonBanHang WHERE MaDBH = @MaDBH)
     BEGIN
         RAISERROR(N'Mã đơn bán hàng không tồn tại!', 16, 1);
         RETURN;
     END;
 
-    -- Kiểm tra khách hàng tồn tại
     IF NOT EXISTS (SELECT 1 FROM KhachHang WHERE MaKH = @MaKH)
     BEGIN
         RAISERROR(N'Mã khách hàng không tồn tại!', 16, 1);
         RETURN;
     END;
 
-    -- Cập nhật thông tin đơn
-    UPDATE DonBanHang
-    SET NgayBH = @NgayBH,
-        MaKH = @MaKH
-    WHERE MaDBH = @MaDBH;
-	
+    BEGIN TRY
+        BEGIN TRAN;
+
+        UPDATE SP
+        SET SP.SoLuongTon = SP.SoLuongTon + C.SLB
+        FROM SanPham SP
+        JOIN CTBH C ON C.MaSP = SP.MaSP
+        WHERE C.MaDBH = @MaDBH;
+
+        DELETE FROM CTBH WHERE MaDBH = @MaDBH;
+
+             INSERT INTO CTBH(MaDBH, MaSP, SLB, DGB)
+        SELECT @MaDBH, MaSP, SLB, DGB
+        FROM @ChiTiet;
+
+        UPDATE SP
+        SET SP.SoLuongTon = SP.SoLuongTon - CT.SLB
+        FROM SanPham SP
+        JOIN @ChiTiet CT ON CT.MaSP = SP.MaSP;
+
+        UPDATE DonBanHang
+        SET NgayBH = @NgayBH,
+            MaKH = @MaKH
+        WHERE MaDBH = @MaDBH;
+
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        DECLARE @Err NVARCHAR(2000) = ERROR_MESSAGE();
+        RAISERROR(@Err, 16, 1);
+    END CATCH;
 END;
 GO
+
 
 ---------------------------------------------------------
 -- ========== DELETE ==========
@@ -98,16 +128,34 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra tồn tại
     IF NOT EXISTS (SELECT 1 FROM DonBanHang WHERE MaDBH = @MaDBH)
     BEGIN
         RAISERROR(N'Mã đơn bán hàng không tồn tại!', 16, 1);
         RETURN;
     END;
 
-    DELETE FROM DonBanHang WHERE MaDBH = @MaDBH;
+    BEGIN TRY
+        BEGIN TRAN;
+        UPDATE SP
+        SET SP.SoLuongTon = SP.SoLuongTon + C.SLB
+        FROM SanPham SP
+        JOIN CTBH C ON C.MaSP = SP.MaSP
+        WHERE C.MaDBH = @MaDBH;
+
+        DELETE FROM CTBH WHERE MaDBH = @MaDBH;
+
+        DELETE FROM DonBanHang WHERE MaDBH = @MaDBH;
+
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        DECLARE @Err NVARCHAR(2000) = ERROR_MESSAGE();
+        RAISERROR(@Err, 16, 1);
+    END CATCH;
 END;
 GO
+
 
 ---------------------------------------------------------
 -- ========== GET ALL ==========

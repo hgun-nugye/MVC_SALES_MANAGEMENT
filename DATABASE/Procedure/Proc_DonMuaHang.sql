@@ -9,86 +9,113 @@ CREATE TYPE dbo.CTMH_List AS TABLE
 );
 GO
 
----------------------------------------------------------
--- ========== INSERT ==========
----------------------------------------------------------
 CREATE OR ALTER PROC DonMuaHang_Insert
 (
     @NgayMH DATE,
     @MaNCC VARCHAR(10),
+    @MaNV VARCHAR(10),
     @ChiTiet CTMH_List READONLY 
 )
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    DECLARE @MaDMH CHAR(11);
-    DECLARE @MaxNum INT;
-    DECLARE @Prefix VARCHAR(8);
+    BEGIN TRY
+        BEGIN TRAN;
 
-    -- Tạo prefix MYYMMDD (vd: M251119)
-    SET @Prefix = 'M' +
-                  RIGHT(CAST(YEAR(@NgayMH) AS VARCHAR(4)), 2) +
-                  RIGHT('0' + CAST(MONTH(@NgayMH) AS VARCHAR(2)), 2) +
-                  RIGHT('0' + CAST(DAY(@NgayMH) AS VARCHAR(2)), 2);
+        DECLARE @MaDMH CHAR(11);
+        DECLARE @MaxNum INT;
+        DECLARE @Prefix VARCHAR(8);
 
-    -- Lấy số lớn nhất trong ngày và tăng lên 1
-    SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDMH,4) AS INT)),0)
-    FROM DonMuaHang
-    WHERE CONVERT(DATE, NgayMH) = @NgayMH;
+        SET @Prefix = 'M' +
+                      RIGHT(CAST(YEAR(@NgayMH) AS VARCHAR(4)), 2) +
+                      RIGHT('0' + CAST(MONTH(@NgayMH) AS VARCHAR(2)), 2) +
+                      RIGHT('0' + CAST(DAY(@NgayMH) AS VARCHAR(2)), 2);
 
-    SET @MaDMH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
+        SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDMH,4) AS INT)),0)
+        FROM DonMuaHang
+        WHERE NgayMH = @NgayMH;
 
-    -- Thêm đơn mua hàng
-    INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC)
-    VALUES (@MaDMH, @NgayMH, @MaNCC);
+        SET @MaDMH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
 
-    -- Thêm chi tiết mua hàng từ danh sách truyền vào
-    INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
-    SELECT @MaDMH, MaSP, SLM, DGM
-    FROM @ChiTiet;
-	
+        INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC, MaNV)
+        VALUES (@MaDMH, @NgayMH, @MaNCC, @MaNV);
+
+        INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
+        SELECT @MaDMH, MaSP, SLM, DGM FROM @ChiTiet;
+
+        UPDATE SP
+        SET SP.SoLuongTon = SP.SoLuongTon + CT.SLM
+        FROM SanPham SP
+        JOIN @ChiTiet CT ON SP.MaSP = CT.MaSP;
+
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        THROW;
+    END CATCH;
 END;
 GO
 
 
----------------------------------------------------------
--- ========== UPDATE ==========
----------------------------------------------------------
 CREATE OR ALTER PROC DonMuaHang_Update
 (
     @MaDMH CHAR(11),
     @NgayMH DATE,
-    @MaNCC VARCHAR(10)
+    @MaNCC VARCHAR(10),
+    @MaNV VARCHAR(10),
+    @ChiTiet CTMH_List READONLY
 )
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    -- Kiểm tra mã đơn tồn tại
-    IF NOT EXISTS (SELECT 1 FROM DonMuaHang WHERE MaDMH = @MaDMH)
-    BEGIN
-        RAISERROR(N'Mã đơn mua hàng không tồn tại!', 16, 1);
-        RETURN;
-    END;
+    BEGIN TRY
+        BEGIN TRAN;
 
-    -- Kiểm tra NCC tồn tại
-    IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
-    BEGIN
-        RAISERROR(N'Mã nhà cung cấp không tồn tại!', 16, 1);
-        RETURN;
-    END;
+        IF NOT EXISTS (SELECT 1 FROM DonMuaHang WHERE MaDMH = @MaDMH)
+        BEGIN
+            RAISERROR(N'Mã đơn mua hàng không tồn tại!', 16, 1);
+            RETURN;
+        END;
 
-    UPDATE DonMuaHang
-    SET NgayMH = @NgayMH,
-        MaNCC = @MaNCC
-    WHERE MaDMH = @MaDMH;
+        UPDATE DonMuaHang
+        SET NgayMH = @NgayMH,
+            MaNCC = @MaNCC,
+            MaNV = @MaNV
+        WHERE MaDMH = @MaDMH;
+
+        -- Trừ tồn kho cũ
+        UPDATE SP
+        SET SP.SoLuongTon = SP.SoLuongTon - C.SLM
+        FROM SanPham SP
+        JOIN CTMH C ON SP.MaSP = C.MaSP
+        WHERE C.MaDMH = @MaDMH;
+
+        DELETE FROM CTMH WHERE MaDMH = @MaDMH;
+
+        -- Thêm lại chi tiết mới
+        INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
+        SELECT @MaDMH, MaSP, SLM, DGM FROM @ChiTiet;
+
+        -- Cộng tồn kho mới
+        UPDATE SP
+        SET SP.SoLuongTon = SP.SoLuongTon + CT.SLM
+        FROM SanPham SP
+        JOIN @ChiTiet CT ON SP.MaSP = CT.MaSP;
+
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        THROW;
+    END CATCH;
 END;
 GO
 
----------------------------------------------------------
--- ========== DELETE ==========
----------------------------------------------------------
 CREATE OR ALTER PROC DonMuaHang_Delete
 (
     @MaDMH CHAR(11)
@@ -96,70 +123,117 @@ CREATE OR ALTER PROC DonMuaHang_Delete
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    IF NOT EXISTS (SELECT 1 FROM DonMuaHang WHERE MaDMH = @MaDMH)
-    BEGIN
-        RAISERROR(N'Mã đơn mua hàng không tồn tại!', 16, 1);
-        RETURN;
-    END;
+    BEGIN TRY
+        BEGIN TRAN;
 
-    DELETE FROM DonMuaHang WHERE MaDMH = @MaDMH;
+        IF NOT EXISTS (SELECT 1 FROM DonMuaHang WHERE MaDMH = @MaDMH)
+        BEGIN
+            RAISERROR(N'Mã đơn mua hàng không tồn tại!', 16, 1);
+            RETURN;
+        END;
+
+        -- Trừ tồn kho
+        UPDATE SP
+        SET SP.SoLuongTon = SP.SoLuongTon - C.SLM
+        FROM SanPham SP
+        JOIN CTMH C ON C.MaSP = SP.MaSP
+        WHERE C.MaDMH = @MaDMH;
+
+        DELETE FROM CTMH WHERE MaDMH = @MaDMH;
+        DELETE FROM DonMuaHang WHERE MaDMH = @MaDMH;
+
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        THROW;
+    END CATCH;
 END;
 GO
 
----------------------------------------------------------
--- ========== GET ALL ==========
----------------------------------------------------------
 CREATE OR ALTER PROC DonMuaHang_GetAll
 AS
 BEGIN
-    SELECT
-	D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, C.SLM, C.DGM,S.MaSP, S.TenSP FROM DonMuaHang D 
-		join NhaCC N ON N.MaNCC=D.MaNCC 
-		join CTMH C on C.MaDMH=D.MaDMH
-		join SanPham S on S.MaSP=C.MaSP
+    SELECT 
+        D.MaDMH,
+        D.NgayMH,
+        D.MaNCC,
+        N.TenNCC,
+        D.MaNV,
+        NV.TenNV,
+        (
+            SELECT 
+                C.MaSP, S.TenSP, C.SLM, C.DGM
+            FROM CTMH C
+            JOIN SanPham S ON S.MaSP = C.MaSP
+            WHERE C.MaDMH = D.MaDMH
+            FOR JSON PATH
+        ) AS ChiTietJSON
+    FROM DonMuaHang D
+    JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    JOIN NhanVien NV ON NV.MaNV = D.MaNV
+    ORDER BY D.NgayMH DESC, D.MaDMH DESC;
 END;
 GO
 
----------------------------------------------------------
--- ========== GET BY ID ==========
----------------------------------------------------------
-
 CREATE OR ALTER PROC DonMuaHang_GetByID
-	@MaDMH CHAR(11)
-AS 
-SELECT D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, C.SLM, C.DGM,S.MaSP, S.TenSP FROM DonMuaHang D 
-		join NhaCC N ON N.MaNCC=D.MaNCC 
-		join CTMH C on C.MaDMH=D.MaDMH
-		join SanPham S on S.MaSP=C.MaSP
-		WHERE D.MaDMH=@MaDMH;
+(
+    @MaDMH CHAR(11)
+)
+AS
+BEGIN
+    SELECT 
+        D.MaDMH,
+        D.NgayMH,
+        D.MaNCC,
+        N.TenNCC,
+        D.MaNV,
+        NV.TenNV,
+        (
+            SELECT 
+                C.MaSP, S.TenSP, C.SLM, C.DGM
+            FROM CTMH C
+            JOIN SanPham S ON S.MaSP = C.MaSP
+            WHERE C.MaDMH = D.MaDMH
+            FOR JSON PATH
+        ) AS ChiTietJSON
+    FROM DonMuaHang D
+    JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    JOIN NhanVien NV ON NV.MaNV = D.MaNV
+    WHERE D.MaDMH = @MaDMH;
+END;
 GO
 
--- Search
 CREATE OR ALTER PROC DonMuaHang_Search
+(
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
     @Year INT = NULL
+)
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    SELECT D.*, N.TenNCC
+    SELECT 
+        D.MaDMH,
+        D.NgayMH,
+        D.MaNCC,
+        N.TenNCC,
+        D.MaNV,
+        NV.TenNV
     FROM DonMuaHang D
     JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    JOIN NhanVien NV ON NV.MaNV = D.MaNV
     WHERE
         (
-            @Search IS NULL 
-            OR @Search = '' 
-            OR (
-                D.MaDMH LIKE '%' + @Search + '%'
-                OR D.MaNCC LIKE '%' + @Search + '%'
-                OR N.TenNCC LIKE N'%' + @Search + '%'
-                OR CONVERT(VARCHAR(10), D.NgayMH, 103) LIKE '%' + @Search + '%'
-            )
+            @Search IS NULL OR @Search = '' OR
+            D.MaDMH LIKE '%' + @Search + '%' OR
+            N.TenNCC LIKE N'%' + @Search + '%' OR
+            D.MaNCC LIKE '%' + @Search + '%' OR
+            NV.TenNV LIKE N'%' + @Search + '%'
         )
         AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
-        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year);
+        AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year)
+    ORDER BY D.NgayMH DESC;
 END;
 GO
-

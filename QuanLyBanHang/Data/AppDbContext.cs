@@ -13,6 +13,9 @@ namespace QuanLyBanHang.Services
 		public DbSet<Tinh> Tinh { get; set; } = null!;
 
 		public DbSet<Xa> Xa { get; set; } = null!;
+		public DbSet<Nuoc> Nuoc { get; set; } = null!;
+		public DbSet<NuocDto> NuocDto { get; set; } = null!;
+		public DbSet<Hang> Hang { get; set; } = null!;
 
 		public DbSet<NhaCC> NhaCC { get; set; } = null!;
 		public DbSet<NhaCCDetailView> NhaCCDetailView { get; set; } = null!;
@@ -20,7 +23,7 @@ namespace QuanLyBanHang.Services
 		public DbSet<KhachHang> KhachHang { get; set; } = null!;
 		public DbSet<KhachHangDetailView> KhachHangDetailView { get; set; }
 
-		public DbSet<GianHang> GianHang { get; set; } = null!;
+		public DbSet<NhanVien> NhanVien { get; set; } = null!;
 
 		public DbSet<NhomSP> NhomSP { get; set; } = null!;
 

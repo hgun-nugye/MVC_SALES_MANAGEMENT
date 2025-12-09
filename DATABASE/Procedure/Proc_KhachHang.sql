@@ -11,7 +11,9 @@ CREATE OR ALTER PROC KhachHang_Insert
     @DienThoaiKH VARCHAR(10),
     @EmailKH NVARCHAR(255),
     @DiaChiKH NVARCHAR(255),
-    @MaXa SMALLINT
+    @MaXa SMALLINT,
+	@TenDNKH VARCHAR(50),
+	@MatKhauKH VARCHAR(255)
 )
 AS
 BEGIN
@@ -41,8 +43,8 @@ BEGIN
     SET @MaKH = 'KH' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
     BEGIN TRY
-        INSERT INTO KhachHang(MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH,MaXa, AnhKH)
-        VALUES (@MaKH, @TenKH, @DienThoaiKH, @EmailKH, @DiaChiKH,@MaXa, @AnhKH);
+        INSERT INTO KhachHang(MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH,MaXa, AnhKH, TenDNKH, MatKhauKH)
+        VALUES (@MaKH, @TenKH, @DienThoaiKH, @EmailKH, @DiaChiKH,@MaXa, @AnhKH, @TenDNKH, @MatKhauKH);
 
         PRINT N'Thêm khách hàng thành công!';
     END TRY
@@ -64,7 +66,9 @@ CREATE OR ALTER PROC KhachHang_Update
     @DienThoaiKH VARCHAR(10),
     @EmailKH NVARCHAR(255),
     @DiaChiKH NVARCHAR(255),
-    @MaXa SMALLINT
+    @MaXa SMALLINT,
+	@TenDNKH VARCHAR(50),
+	@MatKhauKH VARCHAR(255)
 )
 AS
 BEGIN
@@ -96,7 +100,9 @@ BEGIN
             DienThoaiKH = @DienThoaiKH,
             EmailKH = @EmailKH,
             DiaChiKH = @DiaChiKH,
-			MaXa = @MaXa
+			MaXa = @MaXa,
+			TenDNKH = @TenDNKH,
+			MatKhauKH = @MatKhauKH
         WHERE MaKH = @MaKH;
 
         PRINT N'Cập nhật thông tin khách hàng thành công!';
@@ -165,8 +171,7 @@ GO
 CREATE OR ALTER PROC KhachHang_GetAllWithXa
 AS
 BEGIN
-    SELECT KH.MaKH, KH.TenKH, KH.DienThoaiKH, KH.EmailKH, KH.DiaChiKH, KH.AnhKH,
-           KH.MaXa,
+    SELECT KH.*,
            X.TenXa,
            T.TenTinh
     FROM KhachHang KH
@@ -180,8 +185,7 @@ CREATE OR ALTER PROC KhachHang_GetbyIDWithXa
 	    @MaKH VARCHAR(10)
 AS
 BEGIN
-    SELECT KH.MaKH, KH.TenKH, KH.DienThoaiKH, KH.EmailKH, KH.DiaChiKH, KH.AnhKH,
-           KH.MaXa,
+    SELECT KH.*,
            X.TenXa,
            T.TenTinh
     FROM KhachHang KH

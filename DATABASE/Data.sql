@@ -26,6 +26,22 @@ INSERT INTO Xa (MaXa, TenXa, MaTinh) VALUES
 (901, N'Xã Long Thành', 9),
 (1001, N'Phường Thuận Hòa', 10);
 
+-- Nước 
+INSERT INTO Nuoc(MaNuoc, TenNuoc) VALUES
+('QG001', N'Hàn Quốc'),
+('QG002', N'Nhật Bản'),
+('QG003', N'Mỹ'),
+('QG004', N'Việt Nam'),
+('QG005', N'Thái Lan');
+
+-- Hãng
+INSERT INTO Hang(MaHang, TenHang, MaNuoc) VALUES
+('H0001', N'Innisfree', 'QG001'),
+('H0002', N'Shubi', 'QG002'),
+('H0003', N'Nature\''s Bounty', 'QG003'),
+('H0004', N'Sunhouse', 'QG004'),
+('H0005', N'Thailand Beauty', 'QG005');
+
 -- Nhà cung cấp 
 INSERT INTO NhaCC VALUES ('NCC0000001', N'AEON Vietnam', '02836208000', 'contact@aeon.com.vn', N'Số 10 Tràng Tiền', 401);
 INSERT INTO NhaCC VALUES ('NCC0000002', N'Co.opXtra', '02839999555', 'support@coopmart.vn', N'Xóm Chài 2', 501);
@@ -45,12 +61,6 @@ INSERT INTO KhachHang (MaKH, TenKH, AnhKH, DienThoaiKH, EmailKH, DiaChiKH, MaXa)
 ('KH00000009', N'Tống Văn I', '/images/customers/user9.jpg', '0931234567', 'i.tong@example.com', N'Ấp 4 Long Thành', 901),
 ('KH00000010', N'Huỳnh Thị K', '/images/customers/user10.jpg', '0912345678', 'k.huynh@example.com', N'15 Đặng Huy Trứ', 1001);
 
--- Gian hàng
-INSERT INTO GianHang(MaGH, TenGH, MoTaGH, DienThoaiGH, EmailGH, DiaChiGH, MaXa) VALUES
-('GH00000001', N'Gian Hàng Mỹ Phẩm', N'Mỹ phẩm cao cấp', '0909900001', 'mypham@example.com', N'12 Minh Khai', 101),
-('GH00000002', N'Gian Hàng Đồ Gia Dụng', N'Chuyên đồ gia dụng', '0909900002', 'giadung@example.com', N'22 Bách Khoa', 501),
-('GH00000003', N'Gian Hàng Dược Phẩm', N'Thuốc và TPCN', '0909900003', 'duocpham@example.com', N'35 Bến Nghé', 201);
-
 -- Nhóm SP 
 INSERT INTO NhomSP(MaNhom, TenNhom) VALUES
 ('N000000001', N'Mỹ phẩm'),
@@ -67,13 +77,12 @@ INSERT INTO LoaiSP(MaLoai, TenLoai, MaNhom) VALUES
 ('L000000006', N'Quạt', 'N000000003');
 
 -- Sản phẩm
-INSERT INTO SanPham(MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH, ThanhPhan, CongDung, HDSD, XuatXu, BaoQuan, TrangThai, SoLuongTon, MaLoai, MaNCC, MaGH)
+INSERT INTO SanPham(MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH, ThanhPhan, CongDung, HDSD, XuatXu, BaoQuan, TrangThai, SoLuongTon, MaLoai, MaHang)
 VALUES
-('SP00000001', N'Sữa rửa mặt A', 50000, 70000, N'Làm sạch da', '/img/sp1.jpg', N'Thảo mộc', N'Làm sạch', N'Dùng sáng/tối', N'Hàn Quốc', N'Nơi khô ráo', N'Còn Hàng', 120, 'L000000001', 'NCC0000001', 'GH00000001'),
-('SP00000002', N'Kem dưỡng ẩm B', 80000, 110000, N'Dưỡng ẩm da', '/img/sp2.jpg', N'Lô hội', N'Dưỡng ẩm', N'Dùng buổi tối', N'Nhật Bản', N'Nơi khô ráo', N'Còn Hàng', 90, 'L000000002', 'NCC0000001', 'GH00000001'),
-('SP00000003', N'Viên uống vitamin C', 60000, 85000, N'Tăng đề kháng', '/img/sp3.jpg', N'Vitamin C', N'Tăng sức đề kháng', N'Uống sau ăn', N'Mỹ', N'Trành ẩm', N'Còn Hàng', 150, 'L000000003', 'NCC0000003', 'GH00000003'),
-('SP00000004', N'Thuốc cảm cúm D', 30000, 45000, N'Giảm cảm cúm', '/img/sp4.jpg', N'Paracetamol', N'Giảm đau', N'Uống 2 viên/ngày', N'Việt Nam', N'Nhiệt độ thường', N'Còn Hàng', 70, 'L000000004', 'NCC0000003', 'GH00000003'),
-('SP00000005', N'Nồi cơm điện Sunhouse', 500000, 650000, N'Nồi cơm điện 1.8L', '/img/sp5.jpg', N'Inox', N'Nấu cơm', N'Cắm điện', N'Việt Nam', N'Nơi khô mát', N'Còn Hàng', 40, 'L000000005', 'NCC0000002', 'GH00000002');
+('SP00000001', N'Sữa rửa mặt Innisfree', 60000, 80000, N'Làm sạch da mụn', '/img/sp6.jpg', N'Thảo mộc tự nhiên', N'Làm sạch, ngừa mụn', N'Dùng sáng/tối', N'Hàn Quốc', N'Nơi khô ráo', N'Còn Hàng', 100, 'L000000001', 'H0001'),
+('SP00000002', N'Kem dưỡng Shubi', 90000, 120000, N'Dưỡng ẩm cho da nhạy cảm', '/img/sp7.jpg', N'Lô hội, Vitamin E', N'Dưỡng ẩm, làm mềm da', N'Dùng buổi tối', N'Nhật Bản', N'Nơi khô ráo', N'Còn Hàng', 50, 'L000000002', 'H0002'),
+('SP00000003', N'Viên uống Vitamin tổng hợp', 70000, 95000, N'Tăng cường sức khỏe', '/img/sp8.jpg', N'Vitamin C, D, E', N'Tăng sức đề kháng', N'Uống sau ăn', N'Mỹ', N'Tránh ẩm', N'Còn Hàng', 200, 'L000000003',  'H0003'),
+('SP00000004', N'Nồi cơm điện Sunhouse 1.5L', 450000, 600000, N'Nồi cơm điện 1.5L', '/img/sp9.jpg', N'Inox', N'Nấu cơm', N'Cắm điện', N'Việt Nam', N'Nơi khô mát', N'Còn Hàng', 30, 'L000000005', 'H0004');
 
 -- DMH 
 INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC) VALUES

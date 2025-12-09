@@ -19,8 +19,7 @@ CREATE OR ALTER PROC SanPham_Insert
     @SoLuongTon INT,
 
     @MaLoai VARCHAR(10),
-    @MaNCC VARCHAR(10),
-    @MaGH VARCHAR(10)
+    @MaHang CHAR(5)
 )
 AS
 BEGIN
@@ -33,22 +32,10 @@ BEGIN
     FROM SanPham;
 
     SET @MaSP = 'SP' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
-
-    IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP AND MaGH = @MaGH)
-    BEGIN
-        RAISERROR(N'Tên sản phẩm đã tồn tại trong gian hàng này!', 16, 1);
-        RETURN;
-    END;
-
+    
     IF NOT EXISTS (SELECT 1 FROM LoaiSP WHERE MaLoai = @MaLoai)
     BEGIN
         RAISERROR(N'Mã loại không tồn tại!', 16, 1);
-        RETURN;
-    END;
-
-    IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
-    BEGIN
-        RAISERROR(N'Mã nhà cung cấp không tồn tại!', 16, 1);
         RETURN;
     END;
 
@@ -57,13 +44,13 @@ BEGIN
         (
             MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH,
             ThanhPhan, CongDung, HDSD, XuatXu, BaoQuan,
-            TrangThai, SoLuongTon, MaLoai, MaNCC, MaGH
+            TrangThai, SoLuongTon, MaLoai, MaHang
         )
         VALUES
         (
             @MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH,
             @ThanhPhan, @CongDung, @HDSD, @XuatXu, @BaoQuan,
-            @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH
+            @TrangThai, @SoLuongTon, @MaLoai, @MaHang
         );
 
         PRINT N'Thêm sản phẩm thành công!';
@@ -93,8 +80,8 @@ CREATE OR ALTER PROC SanPham_Update
     @SoLuongTon INT,
 
     @MaLoai VARCHAR(10),
-    @MaNCC VARCHAR(10),
-    @MaGH VARCHAR(10)
+	@MaHang CHAR(5)
+
 )
 AS
 BEGIN
@@ -109,12 +96,6 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM LoaiSP WHERE MaLoai = @MaLoai)
     BEGIN
         RAISERROR(N'Mã loại không tồn tại!', 16, 1);
-        RETURN;
-    END;
-
-    IF NOT EXISTS (SELECT 1 FROM NhaCC WHERE MaNCC = @MaNCC)
-    BEGIN
-        RAISERROR(N'Mã nhà cung cấp không tồn tại!', 16, 1);
         RETURN;
     END;
 
@@ -136,8 +117,7 @@ BEGIN
         SoLuongTon = @SoLuongTon,
 
         MaLoai = @MaLoai,
-        MaNCC = @MaNCC,
-        MaGH = @MaGH
+		MaHang = @MaHang
     WHERE MaSP = @MaSP;
 END;
 GO
@@ -168,12 +148,10 @@ BEGIN
     SELECT 
         S.*,
         L.TenLoai,
-        G.TenGH,
-        N.TenNCC
+		H.TenHang
     FROM SanPham S
     JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-    JOIN GianHang G ON G.MaGH = S.MaGH
-    JOIN NhaCC N ON N.MaNCC = S.MaNCC;
+	JOIN Hang H ON H.MaHang = S.MaHang
 END;
 GO
 
@@ -187,15 +165,13 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        sp.*,
-        l.TenLoai,
-        n.TenNCC,
-        g.TenGH
-    FROM SanPham sp
-    LEFT JOIN LoaiSP l ON sp.MaLoai = l.MaLoai
-    LEFT JOIN NhaCC n ON sp.MaNCC = n.MaNCC
-    LEFT JOIN GianHang g ON sp.MaGH = g.MaGH
-    WHERE sp.MaSP = @MaSP;
+        S.*,
+        L.TenLoai,
+		H.TenHang
+    FROM SanPham S
+    JOIN LoaiSP L ON L.MaLoai = S.MaLoai
+	JOIN Hang H ON H.MaHang = S.MaHang
+    WHERE S.MaSP = @MaSP;
 END;
 GO
 
@@ -207,21 +183,18 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SELECT 
-        S.*, 
-        L.TenLoai, 
-        G.TenGH, 
-        N.TenNCC
+        S.*,
+        L.TenLoai,
+		H.TenHang
     FROM SanPham S
-        JOIN LoaiSP L   ON L.MaLoai = S.MaLoai
-        JOIN GianHang G ON G.MaGH   = S.MaGH
-        JOIN NhaCC N    ON N.MaNCC  = S.MaNCC
+    JOIN LoaiSP L ON L.MaLoai = S.MaLoai
+	JOIN Hang H ON H.MaHang = S.MaHang
     WHERE 
         (
             @Search IS NULL OR @Search = '' OR
-            G.TenGH   LIKE '%' + @Search + '%' OR
+            H.TenHang   LIKE '%' + @Search + '%' OR
             S.TenSP   LIKE '%' + @Search + '%' OR
             S.MaSP    LIKE '%' + @Search + '%' OR
-            N.TenNCC  LIKE '%' + @Search + '%' OR
             L.TenLoai LIKE '%' + @Search + '%'
         )
         AND (@TrangThai IS NULL OR S.TrangThai = @TrangThai)

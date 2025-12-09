@@ -1,9 +1,6 @@
 ﻿USE DB_QLBH;
 GO
 
--- ==========================================
--- INSERT: Thêm nhà cung cấp
--- ==========================================
 CREATE OR ALTER PROC NhaCC_Insert
 (
     @TenNCC NVARCHAR(100),
@@ -59,10 +56,6 @@ BEGIN
 END;
 GO
 
-
--- ==========================================
--- UPDATE: Cập nhật nhà cung cấp
--- ==========================================
 CREATE OR ALTER PROC NhaCC_Update
 (
     @MaNCC VARCHAR(10),
@@ -120,9 +113,6 @@ BEGIN
 END;
 GO
 
--- ==========================================
--- DELETE: Xóa nhà cung cấp
--- ==========================================
 CREATE OR ALTER PROC NhaCC_Delete
 (
     @MaNCC VARCHAR(10)
@@ -146,9 +136,6 @@ BEGIN
 END;
 GO
 
--- ==========================================
--- GET ALL: Lấy danh sách nhà cung cấp
--- ==========================================
 CREATE OR ALTER PROC NhaCC_GetAll
 AS
 BEGIN
@@ -163,9 +150,6 @@ BEGIN
 END;
 GO
 
--- ==========================================
--- GET BY ID: Lấy nhà cung cấp theo mã
--- ==========================================
 CREATE OR ALTER PROC NhaCC_GetByID
 (
     @MaNCC VARCHAR(10)

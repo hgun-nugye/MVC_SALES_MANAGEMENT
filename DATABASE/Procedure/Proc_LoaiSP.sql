@@ -1,9 +1,6 @@
 ﻿USE DB_QLBH;
 GO
 
--- ============================
--- INSERT
--- ============================
 CREATE OR ALTER PROC LoaiSP_Insert
 (
     @TenLoai NVARCHAR(50),
@@ -50,9 +47,6 @@ BEGIN
 END;
 GO
 
--- ============================
--- UPDATE
--- ============================
 CREATE OR ALTER PROC LoaiSP_Update
 (
     @MaLoai VARCHAR(10),

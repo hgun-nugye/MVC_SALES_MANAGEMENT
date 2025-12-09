@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
@@ -6,12 +7,17 @@ namespace QuanLyBanHang.Models
 	public class Tinh
 	{
 		[Key]
+		[Display(Name = "Mã tỉnh")]
 		public short MaTinh { get; set; }
 
-		[StringLength(90)]
+		[Required(ErrorMessage = "Tên tỉnh không được để trống")]
+		[StringLength(90, ErrorMessage = "Tên tỉnh không được quá 90 ký tự")]
+		[Display(Name = "Tên tỉnh")]
 		public string TenTinh { get; set; } = string.Empty;
 
+		// Quan hệ 1-n với Xa
 		[InverseProperty("Tinh")]
+		[Display(Name = "Danh sách xã")]
 		public ICollection<Xa> DsXa { get; set; } = new List<Xa>();
 	}
 }
