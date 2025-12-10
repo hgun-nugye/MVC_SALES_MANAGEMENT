@@ -9,12 +9,13 @@
         Sửa Thông Tin Sản phẩm
     </h4>
 
-    <!-- ======== Form sửa sản phẩm ======== -->
+    <!-- == Form sửa sản phẩm == -->
     <form asp-action="Edit" method="post" enctype="multipart/form-data" class="">
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <input type="hidden" asp-for="MaSP" />
+        <input type="hidden" asp-for="AnhMH" />
 
         <div class="row g-3 border rounded shadow-sm bg-light p-4">
             <!-- Mã sản phẩm -->
@@ -106,19 +107,14 @@
                 </div>
 
                 <!-- Cột 2: 3 dropdown -->
-                <div class="col-md-6">
-                    <!-- Nhà cung cấp -->
+                <div class="col-md-6">                   
+                    <!-- Hãng -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Nhà cung cấp</label>
-                        <select asp-for="MaNCC" asp-items="ViewBag.NhaCC" class="form-select"></select>
-                        <span asp-validation-for="MaNCC" class="text-danger"></span>
-                    </div>
-
-                    <!-- Gian hàng -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Gian hàng</label>
-                        <select asp-for="MaGH" asp-items="ViewBag.GianHang" class="form-select"></select>
-                        <span asp-validation-for="MaGH" class="text-danger"></span>
+                        <label asp-for="MaHang" class="form-label fw-bold"></label>
+                        <select asp-for="MaHang" asp-items="ViewBag.MaHang" class="form-select">
+                            <option value="">-- Chọn hãng --</option>
+                        </select>
+                        <span asp-validation-for="MaHang" class="text-danger"></span>
                     </div>
 
                     <!-- Loại sản phẩm -->
@@ -135,7 +131,7 @@
                 {
                     <div class="mb-3">
                         <strong>Ảnh hiện tại:</strong><br />
-                        <img src="@Url.Content(Model.AnhMH)" alt="@Model.TenSP" style="max-width:100%; height:auto; border-radius:8px;" />
+                        <img src="@Url.Content("~/images/" + Model.AnhMH)" alt="@Model.TenSP" style="max-width:100px; height:auto; border-radius:8px;" />
                     </div>
                 }
 

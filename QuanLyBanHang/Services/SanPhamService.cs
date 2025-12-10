@@ -48,22 +48,21 @@ namespace QuanLyBanHang.Services
 		public async Task Create(SanPham sp, string? filePath)
 		{
 			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC SanPham_Insert @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @XuatXu, @BaoQuan, @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH",
+				"EXEC SanPham_Insert @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @XuatXu, @BaoQuan, @TrangThai, @SoLuongTon, @MaLoai, @MaHang",
 				new SqlParameter("@TenSP", sp.TenSP),
 				new SqlParameter("@DonGia", sp.DonGia),
 				new SqlParameter("@GiaBan", sp.GiaBan),
-				new SqlParameter("@MoTaSP", sp.MoTaSP),
+				new SqlParameter("@MoTaSP", sp.MoTaSP ?? (object)DBNull.Value),
 				new SqlParameter("@AnhMH", filePath ?? (object)DBNull.Value),
-				new SqlParameter("@ThanhPhan", sp.ThanhPhan),
-				new SqlParameter("@CongDung", sp.CongDung),
-				new SqlParameter("@HDSD", sp.HDSD),
-				new SqlParameter("@XuatXu", sp.XuatXu),
-				new SqlParameter("@BaoQuan", sp.BaoQuan),
+				new SqlParameter("@ThanhPhan", sp.ThanhPhan ?? (object)DBNull.Value),
+				new SqlParameter("@CongDung", sp.CongDung ?? (object)DBNull.Value),
+				new SqlParameter("@HDSD", sp.HDSD ?? (object)DBNull.Value),
+				new SqlParameter("@XuatXu", sp.XuatXu ?? (object)DBNull.Value),
+				new SqlParameter("@BaoQuan", sp.BaoQuan ?? (object)DBNull.Value),
 				new SqlParameter("@TrangThai", sp.TrangThai),
 				new SqlParameter("@SoLuongTon", sp.SoLuongTon),
-				new SqlParameter("@MaLoai", sp.MaLoai ?? (object)DBNull.Value),
-				new SqlParameter("@MaNCC", sp.MaNCC ?? (object)DBNull.Value),
-				new SqlParameter("@MaGH", sp.MaGH ?? (object)DBNull.Value)
+				new SqlParameter("@MaLoai", sp.MaLoai),
+				new SqlParameter("@MaHang", sp.MaHang)
 			);
 		}
 
@@ -71,23 +70,22 @@ namespace QuanLyBanHang.Services
 		public async Task Update(SanPham sp, string? filePath)
 		{
 			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC SanPham_Update @MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @XuatXu, @BaoQuan, @TrangThai, @SoLuongTon, @MaLoai, @MaNCC, @MaGH",
+				"EXEC SanPham_Update @MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @XuatXu, @BaoQuan, @TrangThai, @SoLuongTon, @MaLoai, @MaHang",
 				new SqlParameter("@MaSP", sp.MaSP),
 				new SqlParameter("@TenSP", sp.TenSP),
 				new SqlParameter("@DonGia", sp.DonGia),
 				new SqlParameter("@GiaBan", sp.GiaBan),
-				new SqlParameter("@MoTaSP", sp.MoTaSP),
+				new SqlParameter("@MoTaSP", sp.MoTaSP ?? (object)DBNull.Value),
 				new SqlParameter("@AnhMH", filePath ?? (object)DBNull.Value),
-				new SqlParameter("@ThanhPhan", sp.ThanhPhan),
-				new SqlParameter("@CongDung", sp.CongDung),
-				new SqlParameter("@HDSD", sp.HDSD),
-				new SqlParameter("@XuatXu", sp.XuatXu),
-				new SqlParameter("@BaoQuan", sp.BaoQuan),
+				new SqlParameter("@ThanhPhan", sp.ThanhPhan ?? (object)DBNull.Value),
+				new SqlParameter("@CongDung", sp.CongDung ?? (object)DBNull.Value),
+				new SqlParameter("@HDSD", sp.HDSD ?? (object)DBNull.Value),
+				new SqlParameter("@XuatXu", sp.XuatXu ?? (object)DBNull.Value),
+				new SqlParameter("@BaoQuan", sp.BaoQuan ?? (object)DBNull.Value),
 				new SqlParameter("@TrangThai", sp.TrangThai),
 				new SqlParameter("@SoLuongTon", sp.SoLuongTon),
-				new SqlParameter("@MaLoai", sp.MaLoai ?? (object)DBNull.Value),
-				new SqlParameter("@MaNCC", sp.MaNCC ?? (object)DBNull.Value),
-				new SqlParameter("@MaGH", sp.MaGH ?? (object)DBNull.Value)
+				new SqlParameter("@MaLoai", sp.MaLoai),
+				new SqlParameter("@MaHang", sp.MaHang)
 			);
 		}
 

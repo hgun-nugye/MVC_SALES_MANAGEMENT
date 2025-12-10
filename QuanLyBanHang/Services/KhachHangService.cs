@@ -83,7 +83,9 @@ namespace QuanLyBanHang.Services
                     @EmailKH = {model.EmailKH},
                     @DiaChiKH = {model.DiaChiKH},
                     @AnhKH = {model.AnhKH},
-                    @MaXa = {model.MaXa}
+                    @MaXa = {model.MaXa},
+                    @TenDNKH = {model.TenDNKH},
+                    @MatKhauKH = {model.MatKhauKH}
             ");
 
 			return fileName;

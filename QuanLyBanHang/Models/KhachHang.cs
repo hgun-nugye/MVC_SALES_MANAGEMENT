@@ -42,9 +42,9 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã xã")]
 		public short MaXa { get; set; }
 
-		// ===========================
+		
 		//   Tên đăng nhập & mật khẩu
-		// ===========================
+		
 		[Required(ErrorMessage = "Tên đăng nhập không được để trống")]
 		[StringLength(50, ErrorMessage = "Tên đăng nhập không được quá 50 ký tự")]
 		[Display(Name = "Tên đăng nhập")]
@@ -54,9 +54,9 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mật khẩu")]
 		public string? MatKhauKH { get; set; }
 
-		// ===========================
+		
 		//   Thuộc tính hiển thị
-		// ===========================
+		
 		[NotMapped]
 		[Display(Name = "Tên xã")]
 		public string? TenXa { get; set; }
@@ -68,10 +68,9 @@ namespace QuanLyBanHang.Models
 		[NotMapped]
 		[Display(Name = "Ảnh upload")]
 		public IFormFile? AnhFile { get; set; }
-
-		// ===========================
+		
 		//   Quan hệ
-		// ===========================
+		
 		[ForeignKey("MaXa")]
 		[Display(Name = "Xã")]
 		public virtual Xa? Xa { get; set; }
@@ -101,11 +100,9 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Tên đăng nhập")]
 		public string? TenDNKH { get; set; }
 
-		[NotMapped]
 		[Display(Name = "Tên xã")]
 		public string? TenXa { get; set; }
 
-		[NotMapped]
 		[Display(Name = "Tên tỉnh")]
 		public string? TenTinh { get; set; }
 	}

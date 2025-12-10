@@ -42,14 +42,30 @@
             background: #fffffa;
             color: #198754;
             padding-top: 20px;
-            font-weight:bolder;
+            padding-bottom: 20px;
+            font-weight: bolder;
             position: fixed;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            scrollbar-color: #198754 #f0f0f0;
         }
-        
-        .sidebar {
-                margin-bottom: 20px;
-                font-weight: 700;
-                font-size: 30px;
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: #198754;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background-color: #157347;
         }
         
         .sidebar a {
@@ -89,6 +105,21 @@
                         color: #FFFFE0;
                     }
 
+        .menu-label {
+            color: #6c757d;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 20px 8px 20px;
+            margin-top: 8px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .menu-label:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
 
         .content {
             margin-left: 250px;
@@ -167,96 +198,75 @@
         @{
             var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
         }
+
+        <!-- Dashboard -->
         <a asp-controller="Home" asp-action="Index"
-           class="@(ctrl == "Home" ? "active" : "") mb-2" style="font-size: 18px">
+           class="@(ctrl == "Home" ? "active" : "")">
             <i class="fa-solid fa-bars-progress me-2"></i>Dashboard
         </a>
 
-        @{
-            var isProductOpen = (ctrl == "SanPham" || ctrl == "LoaiSP" || ctrl == "NhomSP") ? "show" : "";
-        }
-        <div class="mb-2">
-            <a class="d-flex justify-content-between align-items-center text-success"
-               data-bs-toggle="collapse" href="#productMenu" role="button"
-               class="@((isProductOpen == "show") ? "active-dropdown" : "")" style="font-size: 18px">
-                <span><i class="fa-solid fa-box-open me-2"></i>Hàng hóa</span>
-                <i class="fa-solid fa-chevron-down small"></i>
-            </a>
-
-            <div class="collapse @isProductOpen ps-3 mt-1 text-muted" id="productMenu">
-                <a asp-controller="SanPham" asp-action="Index"
-                   class="@(ctrl == "SanPham" ? "active" : "") d-block mb-1">
-                   Sản Phẩm
-                </a>
-                <a asp-controller="LoaiSP" asp-action="Index"
-                   class="@(ctrl == "LoaiSP" ? "active" : "") d-block mb-1">
-                    Loại Sản Phẩm
-                </a>
-                <a asp-controller="NhomSP" asp-action="Index"
-                   class="@(ctrl == "NhomSP" ? "active" : "") d-block mb-1">
-                   Nhóm Sản Phẩm
-                </a>
-            </div>
-        </div>
-
-        <a asp-controller="KhachHang" asp-action="Index"
-           class="@(ctrl == "KhachHang" ? "active" : "") d-block mb-1" style="font-size: 18px">
-            <i class="fa-solid fa-users small me-2"></i>Khách Hàng
+        <!-- Hàng hóa -->
+        <div class="menu-label">Hàng hóa</div>
+        <a asp-controller="SanPham" asp-action="Index"
+           class="@(ctrl == "SanPham" ? "active" : "")">
+            <i class="fa-solid fa-box me-2"></i>Sản Phẩm
         </a>
-        <a asp-controller="GianHang" asp-action="Index"
-           class="@(ctrl == "GianHang" ? "active" : "") d-block mb-1" style="font-size: 18px">
-            <i class="fa-solid fa-store small me-2"></i>Gian Hàng
+        <a asp-controller="LoaiSP" asp-action="Index"
+           class="@(ctrl == "LoaiSP" ? "active" : "")">
+            <i class="fa-solid fa-tags me-2"></i>Loại Sản Phẩm
+        </a>
+        <a asp-controller="NhomSP" asp-action="Index"
+           class="@(ctrl == "NhomSP" ? "active" : "")">
+            <i class="fa-solid fa-layer-group me-2"></i>Nhóm Sản Phẩm
+        </a>
+
+        <!-- Thông tin cơ bản -->
+        <div class="menu-label">Thông tin cơ bản</div>
+        <a asp-controller="Hang" asp-action="Index"
+           class="@(ctrl == "Hang" ? "active" : "")">
+            <i class="fa-solid fa-industry me-2"></i>Hãng
+        </a>
+        <a asp-controller="Nuoc" asp-action="Index"
+           class="@(ctrl == "Nuoc" ? "active" : "")">
+            <i class="fa-solid fa-flag me-2"></i>Nước
+        </a>
+
+        <!-- Khách hàng & Đối tác -->
+        <div class="menu-label">Khách hàng & Đối tác</div>
+        <a asp-controller="KhachHang" asp-action="Index"
+           class="@(ctrl == "KhachHang" ? "active" : "")">
+            <i class="fa-solid fa-users me-2"></i>Khách Hàng
         </a>
         <a asp-controller="NhaCC" asp-action="Index"
-           class="@(ctrl == "NhaCC" ? "active" : "") d-block mb-1" style="font-size: 18px">
-            <i class="fa-solid fa-truck-field small me-2"></i>Nhà Cung Cấp
+           class="@(ctrl == "NhaCC" ? "active" : "")">
+            <i class="fa-solid fa-truck me-2"></i>Nhà Cung Cấp
         </a>
-            
-        @{
-            var isOrderOpen = (ctrl == "DonBanHang" || ctrl == "DonMuaHang") ? "show" : "";
-        }
-        <div class="mb-2">
-            <a class="d-flex justify-content-between align-items-center"
-               data-bs-toggle="collapse" href="#orderMenu" role="button"
-               class="@((isOrderOpen == "show") ? "active-dropdown" : "")" style="font-size: 18px">
-                <span><i class="fa-solid fa-receipt me-2"></i>Giao dịch</span>
-                <i class="fa-solid fa-chevron-down small"></i>
-            </a>
+        <a asp-controller="NhanVien" asp-action="Index"
+           class="@(ctrl == "NhanVien" ? "active" : "")">
+            <i class="fa-solid fa-user-tie me-2"></i>Nhân Viên
+        </a>
 
-            <div class="collapse @isOrderOpen ps-3 mt-1 text-muted" id="orderMenu">
-                <a asp-controller="DonBanHang" asp-action="Index"
-                   class="@(ctrl == "DonBanHang" ? "active" : "") d-block mb-1">
-                    Đơn Bán Hàng
-                </a>
-                <a asp-controller="DonMuaHang" asp-action="Index"
-                   class="@(ctrl == "DonMuaHang" ? "active" : "") d-block mb-1">
-                   Đơn Mua Hàng
-                </a>
-            </div>
-        </div>
+        <!-- Giao dịch -->
+        <div class="menu-label">Giao dịch</div>
+        <a asp-controller="DonBanHang" asp-action="Index"
+           class="@(ctrl == "DonBanHang" ? "active" : "")">
+            <i class="fa-solid fa-shopping-cart me-2"></i>Đơn Bán Hàng
+        </a>
+        <a asp-controller="DonMuaHang" asp-action="Index"
+           class="@(ctrl == "DonMuaHang" ? "active" : "")">
+            <i class="fa-solid fa-shopping-bag me-2"></i>Đơn Mua Hàng
+        </a>
 
-        @{
-            var isLocationOpen = (ctrl == "Tinh" || ctrl == "Xa") ? "show" : "";
-        }
-        <div class="mb-2">
-            <a class="d-flex justify-content-between align-items-center"
-               data-bs-toggle="collapse" href="#locationMenu" role="button"
-               class="@((isLocationOpen == "show") ? "active-dropdown" : "")" style="font-size: 18px">
-                <span><i class="fa-solid fa-globe"></i> Địa Lý</span>
-                <i class="fa-solid fa-chevron-down small"></i>
-            </a>
-
-            <div class="collapse @isLocationOpen ps-3 mt-1 text-muted" id="locationMenu">
-                <a asp-controller="Tinh" asp-action="Index"
-                   class="@(ctrl == "Tinh" ? "active" : "") d-block mb-1">
-                    Tỉnh / Thành phố
-                </a>
-                <a asp-controller="Xa" asp-action="Index"
-                   class="@(ctrl == "Xa" ? "active" : "") d-block mb-1">
-                   Xã / Phường
-                </a>
-            </div>
-        </div>
+        <!-- Địa lý -->
+        <div class="menu-label">Địa lý</div>
+        <a asp-controller="Tinh" asp-action="Index"
+           class="@(ctrl == "Tinh" ? "active" : "")">
+            <i class="fa-solid fa-map me-2"></i>Tỉnh / Thành phố
+        </a>
+        <a asp-controller="Xa" asp-action="Index"
+           class="@(ctrl == "Xa" ? "active" : "")">
+            <i class="fa-solid fa-map-location-dot me-2"></i>Xã / Phường
+        </a>
     </div>
 
     <!-- CONTENT -->

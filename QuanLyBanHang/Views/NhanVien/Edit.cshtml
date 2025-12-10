@@ -1,0 +1,56 @@
+﻿@model QuanLyBanHang.Models.NhanVien
+@{
+    ViewBag.Title = "Sửa Nhân Viên";
+}
+
+<div class="container ">
+    <h4 class="text-success mb-3">
+        Sửa Thông Tin Nhân Viên
+    </h4>
+
+    <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group mb-3">
+            <label asp-for="MaNV" class="form-label"></label>
+            <input asp-for="MaNV" class="form-control" readonly />
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="TenNV" class="form-label"></label>
+            <input asp-for="TenNV" class="form-control" />
+            <span asp-validation-for="TenNV" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="VaiTro" class="form-label"></label>
+            <select asp-for="VaiTro" asp-items="ViewBag.VaiTro" class="form-select">
+                <option value="">-- Chọn vai trò --</option>
+            </select>
+            <span asp-validation-for="VaiTro" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="TenDNNV" class="form-label"></label>
+            <input asp-for="TenDNNV" class="form-control" />
+            <span asp-validation-for="TenDNNV" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="MatKhauNV" class="form-label"></label>
+            <input asp-for="MatKhauNV" type="password" class="form-control" />
+            <span asp-validation-for="MatKhauNV" class="text-danger"></span>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-warning text-white">
+                <i class="fa-solid fa-save"></i> Cập nhật
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </form>
+
+    
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

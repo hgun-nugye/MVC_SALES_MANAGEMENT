@@ -3,96 +3,372 @@
     ViewBag.Title = "Thêm Khách hàng";
 }
 
-<div class="container">
-    <h4 class="text-success mb-3">
-        Thêm Khách hàng
-    </h4>
+<style>
+    .form-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
 
-    <form asp-action="Create" method="post" enctype="multipart/form-data" class="border p-4 rounded shadow-sm bg-light">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
 
-        <div class="form-group mb-2">
-            <label>Tên KH</label>
-            <input asp-for="TenKH" class="form-control" />
-            <span asp-validation-for="TenKH" class="text-danger"></span>
+    .section-title {
+        color: #198754;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #198754;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: 1.2rem;
+    }
+
+    .form-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #198754;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .image-upload-area {
+        border: 2px dashed #198754;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .image-upload-area:hover {
+        background: #e8f5e9;
+        border-color: #157347;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-top: 1rem;
+        object-fit: cover;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25, 135, 84, 0.4);
+        background: linear-gradient(135deg, #157347 0%, #198754 100%);
+    }
+
+    .btn-cancel {
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .page-header h4 {
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control {
+        padding-left: 2.5rem;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-plus-circle"></i>
+            Thêm khách hàng mới
+        </h4>
+    </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger alert-dismissible fade show", role = "alert" })
+
+        <!-- Thông tin cơ bản -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-info-circle"></i>
+                Thông tin cơ bản
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="TenKH" class="form-label required-field">
+                        <i class="fa-solid fa-user"></i>
+                        Tên khách hàng
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input asp-for="TenKH" class="form-control" placeholder="Nhập tên khách hàng..." />
+                    </div>
+                    <span asp-validation-for="TenKH" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="DienThoaiKH" class="form-label required-field">
+                        <i class="fa-solid fa-phone"></i>
+                        Số điện thoại
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-mobile-alt"></i>
+                        <input asp-for="DienThoaiKH" class="form-control" placeholder="Nhập số điện thoại..." />
+                    </div>
+                    <span asp-validation-for="DienThoaiKH" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="EmailKH" class="form-label">
+                        <i class="fa-solid fa-envelope"></i>
+                        Email
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-at"></i>
+                        <input asp-for="EmailKH" type="email" class="form-control" placeholder="Nhập email..." />
+                    </div>
+                    <span asp-validation-for="EmailKH" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="TenDNKH" class="form-label">
+                        <i class="fa-solid fa-user-circle"></i>
+                        Tên đăng nhập
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input asp-for="TenDNKH" class="form-control" placeholder="Nhập tên đăng nhập..." />
+                    </div>
+                    @* <span asp-validation-for="TenDNKH" class="text-danger small mt-1"></span> *@
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MatKhauKH" class="form-label">
+                        <i class="fa-solid fa-user-circle"></i>
+                        Mật khẩu
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input asp-for="MatKhauKH" type="password" class="form-control" placeholder="Nhập mật khẩu đăng nhập..." />
+                    </div>
+                    @* <span asp-validation-for="TenDNKH" class="text-danger small mt-1"></span> *@
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="DiaChiKH" class="form-label required-field">
+                        <i class="fa-solid fa-map-marker-alt"></i>
+                        Địa chỉ
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <input asp-for="DiaChiKH" class="form-control" placeholder="Nhập địa chỉ..." />
+                    </div>
+                    <span asp-validation-for="DiaChiKH" class="text-danger small mt-1"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group mb-2">
-            <label>Điện thoại</label>
-            <input asp-for="DienThoaiKH" class="form-control" />
-            <span asp-validation-for="DienThoaiKH" class="text-danger"></span>
+        <!-- Địa chỉ -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-map"></i>
+                Địa chỉ
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fa-solid fa-city"></i>
+                        Tỉnh
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-map"></i>
+                        <select id="MaTinh" name="maTinh" asp-items="@ViewBag.Tinh" class="form-select">
+                            <option value="">-- Chọn Tỉnh --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MaXa" class="form-label required-field">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        Xã
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <select id="MaXa" asp-for="MaXa" asp-items="@ViewBag.Xa" class="form-select">
+                            <option value="">-- Chọn Xã --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaXa" class="text-danger small mt-1"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group mb-2">
-            <label>Email</label>
-            <input asp-for="EmailKH" class="form-control" />
-            <span asp-validation-for="EmailKH" class="text-danger"></span>
+        <!-- Ảnh khách hàng -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-image"></i>
+                Ảnh khách hàng
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="AnhFile" class="form-label">
+                        <i class="fa-solid fa-upload"></i>
+                        Chọn ảnh
+                    </label>
+                    <input type="file" asp-for="AnhFile" id="AnhFile" class="form-control" accept="image/*" onchange="previewImage(this)" />
+                    <small class="text-muted d-block mt-2">
+                        <i class="fa-solid fa-info-circle"></i>
+                        Chấp nhận định dạng: JPG, PNG, GIF. Kích thước tối đa: 5MB
+                    </small>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fa-solid fa-eye"></i>
+                        Xem trước
+                    </label>
+                    <div class="image-upload-area" id="imagePreviewArea">
+                        <i class="fa-solid fa-image fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">Ảnh sẽ hiển thị ở đây</p>
+                        <img id="imagePreview" class="image-preview d-none" alt="Preview" />
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group mb-2">
-            <label>Địa chỉ</label>
-            <input asp-for="DiaChiKH" class="form-control" />
-            <span asp-validation-for="DiaChiKH" class="text-danger"></span>
-        </div>
-
-        <div class="form-group mb-2">
-            <label>Tỉnh</label>
-            <select id="MaTinh" name="maTinh" asp-items="@ViewBag.Tinh" class="form-control">
-                <option value="">-- Chọn Tỉnh --</option>
-            </select>
-        </div>
-
-        <div class="form-group mb-2">
-            <label>Xã</label>
-            <select id="MaXa" asp-for="MaXa" asp-items="@ViewBag.Xa" class="form-control">
-                <option value="">-- Chọn Xã --</option>
-            </select>
-            <span asp-validation-for="MaXa" class="text-danger"></span>
-        </div>
-
-        <div class="form-group mb-2">
-            <label>Ảnh</label>
-            <input type="file" asp-for="AnhFile" class="form-control" />
-            <span asp-validation-for="AnhFile" class="text-danger"></span>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success">
-                <i class="fa-solid fa-check"></i> Thêm mới
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 justify-content-end mb-4">
+            <a asp-action="Index" class="btn btn-secondary btn-cancel">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
+            </a>
+            <button type="submit" class="btn btn-success btn-submit">
+                <i class="fa-solid fa-check me-2"></i>
+                Thêm khách hàng
             </button>
-            <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
         </div>
     </form>
-
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script>
-        $(function () {
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const previewArea = document.getElementById('imagePreviewArea');
+            const file = input.files[0];
 
-            // 1. Khi chọn Tỉnh → load danh sách Xã
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                    previewArea.querySelector('i').classList.add('d-none');
+                    previewArea.querySelector('p').classList.add('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.classList.add('d-none');
+                previewArea.querySelector('i').classList.remove('d-none');
+                previewArea.querySelector('p').classList.remove('d-none');
+            }
+        }
+
+        $(function () {
             $('#MaTinh').change(function () {
                 var maTinh = $(this).val();
                 var maXaSelected = '@ViewData["MaXaSelected"]';
 
-                // Xóa Xã cũ
                 $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
 
                 if (maTinh) {
                     $.getJSON('/KhachHang/GetXaByTinh', { maTinh: maTinh }, function (data) {
-
                         var options = '<option value="">-- Chọn Xã --</option>';
 
                         $.each(data, function (i, xa) {
-
-                            // Tự nhận dạng key JSON (MaXa hoặc maXa)
                             var maXa = xa.MaXa !== undefined ? xa.MaXa : xa.maXa;
                             var tenXa = xa.TenXa !== undefined ? xa.TenXa : xa.tenXa;
-
                             var selected = (maXa == maXaSelected) ? 'selected' : '';
-
                             options += `<option value="${maXa}" ${selected}>${tenXa}</option>`;
                         });
 
@@ -101,7 +377,6 @@
                 }
             });
 
-            // 2. Khi load lại trang (POST sai) → tự động load lại Xã đúng với Tỉnh đã chọn
             if ($('#MaTinh').val()) {
                 $('#MaTinh').trigger('change');
             }

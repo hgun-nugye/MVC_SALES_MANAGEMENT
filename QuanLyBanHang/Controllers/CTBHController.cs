@@ -33,7 +33,7 @@ namespace QuanLyBanHang.Controllers
 			return View(data);
 		}
 
-		// ================== EDIT ==================
+		//EDIT
 		public async Task<IActionResult> Edit(string maDBH, string maSP)
 		{
 			if (string.IsNullOrEmpty(maDBH) || string.IsNullOrEmpty(maSP))

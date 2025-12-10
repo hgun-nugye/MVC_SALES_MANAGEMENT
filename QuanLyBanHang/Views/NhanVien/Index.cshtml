@@ -1,0 +1,138 @@
+﻿@model IEnumerable<QuanLyBanHang.Models.NhanVien>
+
+@{
+    ViewBag.Title = "Quản lý Nhân Viên";
+}
+
+<style>
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+    }
+
+        .search-wrapper input {
+            padding-left: 38px !important;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+    .table {
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5faff;
+        transition: 0.2s;
+    }
+</style>
+
+<div class="container">
+    <h4 class="mb-3 text-success">
+        Danh sách Nhân Viên
+    </h4>
+
+    @* Form  *@
+    <form id="Form" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+              <div class="search-wrapper" style="max-width: 350px; position: relative;">
+            <i class="fa fa-search" style="
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%); color: #777;
+        "></i>
+
+            <input id="searchBox" name="search" type="text" class="form-control"
+                   value="@ViewBag.Search"
+                   placeholder="Tìm mã nhân viên, tên nhân viên..."
+                   style="padding-left: 35px;">
+
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">           
+            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
+            <a href="@Url.Action("Create", "NhanVien")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
+        </div>
+    </form>
+
+
+    <div class="table">
+        <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+            <thead class="table-success">
+                <tr>
+                    <th class="w-15">Mã NV</th>
+                    <th class="w-25">Tên Nhân Viên</th>
+                    <th class="w-15">Vai Trò</th>
+                    <th class="w-20">Tên Đăng Nhập</th>
+                </tr>
+            </thead>
+            <tbody class="text-start">
+                @if(Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr class="clickable-row"
+                            data-href="@Url.Action("Details", "NhanVien", new { id = item.MaNV })"
+                            data-manv="@item.MaNV"
+                            data-tennv="@item.TenNV">
+
+                            <td class="text-center">@item.MaNV</td>
+                            <td class="text-center">@item.TenNV</td>
+                            <td class="text-center">@item.VaiTro</td>
+                            <td class="text-center">@item.TenDNNV</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted fst-italic">Không có nhân viên nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // debounce function
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(context, args), delay);
+            };
+        }
+
+        // áp dụng cho searchBox
+        $("#searchBox").on("change", debounce(function() {
+            $("#Form").submit();
+        }, 400));
+
+        // clear
+        $("#btnClear").on("click", function () {
+            $("#searchBox").val("");
+            $("#Form").submit();
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
+            });
+        });
+    </script>
+}

@@ -101,3 +101,20 @@ BEGIN
 	SELECT * FROM NhanVien WHERE MaNV = @MaNV;
 END;
 GO
+
+-- Search
+CREATE OR ALTER PROCEDURE NhanVien_Search
+    @Search NVARCHAR(200) = NULL
+AS
+BEGIN    
+    SELECT n.*
+	FROM NhanVien n
+    WHERE
+        (
+            @Search IS NULL OR @Search = '' OR
+            n.TenNV LIKE '%' + @Search + '%' OR
+            n.TenDNNV LIKE '%' + @Search + '%' OR
+            n.VaiTro LIKE '%' + @Search + '%' 
+        )
+END;
+GO

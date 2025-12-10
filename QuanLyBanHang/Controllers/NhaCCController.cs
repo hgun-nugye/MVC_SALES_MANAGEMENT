@@ -54,6 +54,8 @@ namespace QuanLyBanHang.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(NhaCC model, short maTinh)
 		{
+			// Mã NCC sinh bởi DB/SP
+			ModelState.Remove("MaNCC");
 			if (!ModelState.IsValid)
 			{
 				ViewBag.Tinh = new SelectList(await _tinhService.GetAll(), "MaTinh", "TenTinh", maTinh);

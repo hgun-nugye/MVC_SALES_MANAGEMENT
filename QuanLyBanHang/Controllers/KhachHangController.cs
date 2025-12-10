@@ -60,6 +60,9 @@ namespace QuanLyBanHang.Controllers
 		{
 			try
 			{
+				// Mã khách hàng sinh bởi DB/SP
+				ModelState.Remove("MaKH");
+
 				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);

@@ -18,7 +18,7 @@ BEGIN
     END
 
     DECLARE @MaHang CHAR(5);
-    SELECT @MaHang = 'H' + RIGHT('000' + CAST(ISNULL(MAX(CAST(SUBSTRING(MaHang,2,3) AS INT)),0)+1 AS VARCHAR),3)
+    SELECT @MaHang = 'H' + RIGHT('0000' + CAST(ISNULL(MAX(CAST(SUBSTRING(MaHang,3,4) AS INT)),0)+1 AS VARCHAR),4)
     FROM Hang;
 
     INSERT INTO Hang(MaHang, TenHang, MaNuoc)
@@ -29,8 +29,8 @@ END;
 GO
 
 -- Lấy tất cả hãng
-CREATE OR ALTER PROC Hang_GetAll AS
-SELECT H.*, N.TenNuoc FROM Hang H JOIN Nuoc N ON H.MaNuoc=N.MaNuoc;
+CREATE OR ALTER PROC  Hang_GetAll AS
+SELECT H.*, N.TenNuoc FROM Hang H LEFT JOIN Nuoc N ON H.MaNuoc=N.MaNuoc;
 GO
 
 -- Lấy hãng theo ID
@@ -78,7 +78,7 @@ AS
 BEGIN    
     SELECT H.*, N.TenNuoc
 	FROM Hang H
-	JOIN Nuoc N ON H.MaHang = H.MaHang
+	JOIN Nuoc N ON H.MaNuoc = N.MaNuoc
     WHERE
         (
             @Search IS NULL OR @Search = '' OR

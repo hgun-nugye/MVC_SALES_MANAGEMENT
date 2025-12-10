@@ -12,41 +12,46 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group mb-3">
-            <label>Mã NCC</label>
+            <label asp-for="MaNCC" class="form-label"></label>
             <input asp-for="MaNCC" class="form-control" readonly />
         </div>
         <div class="form-group mb-3">
-            <label>Tên NCC</label>
+            <label asp-for="TenNCC" class="form-label"></label>
             <input asp-for="TenNCC" class="form-control" />
+            <span asp-validation-for="TenNCC" class="text-danger"></span>
         </div>
        <div class="row">
             <div class="form-group mb-3 col-md-6">
-                <label>Điện thoại</label>
+                <label asp-for="DienThoaiNCC" class="form-label"></label>
                 <input asp-for="DienThoaiNCC" class="form-control" />
+                <span asp-validation-for="DienThoaiNCC" class="text-danger"></span>
             </div>
             <div class="form-group mb-3 col-md-6">
-                <label>Email</label>
+                <label asp-for="EmailNCC" class="form-label"></label>
                 <input asp-for="EmailNCC" class="form-control" />
+                <span asp-validation-for="EmailNCC" class="text-danger"></span>
             </div>
        </div>
         
         <div class="form-group mb-3">
-            <label>Địa chỉ</label>
+            <label asp-for="DiaChiNCC" class="form-label"></label>
             <input asp-for="DiaChiNCC" class="form-control mb-2" />
+            <span asp-validation-for="DiaChiNCC" class="text-danger"></span>
         </div>
 
         <div class="form-group mb-3">
-            <label>Tỉnh</label>
+            <label class="form-label">Tỉnh</label>
             <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.Tinh">
                 <option value="">@Model.TenTinh</option>
             </select>
         </div>
 
         <div class="form-group mb-3">
-            <label>Xã</label>
+            <label asp-for="MaXa" class="form-label"></label>
             <select id="MaXa" asp-for="MaXa" class="form-control" asp-items="@ViewBag.Xa">
                 <option value="">@Model.TenXa</option>
             </select>
+            <span asp-validation-for="MaXa" class="text-danger"></span>
         </div>
 
         <div class="mt-4">

@@ -12,12 +12,13 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group mb-3">
-            <label>Mã Nhóm sản phẩm</label>
+            <label asp-for="MaNhom" class="form-label"></label>
             <input asp-for="MaNhom" class="form-control" readonly />
         </div>
         <div class="form-group mb-3">
-            <label>Tên Nhóm sản phẩm</label>
+            <label asp-for="TenNhom" class="form-label"></label>
             <input asp-for="TenNhom" class="form-control" />
+            <span asp-validation-for="TenNhom" class="text-danger"></span>
         </div>
     <div class="mt-4">
         <button type="submit" class="btn btn-warning text-white">

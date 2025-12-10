@@ -18,8 +18,8 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Tên Nước")]
 		public string TenNuoc { get; set; } = string.Empty;
 
-		[Display(Name = "Danh sách Hãng")]
-		public ICollection<Hang>? Hangs { get; set; }
+		//[Display(Name = "Danh sách Hãng")]
+		//public ICollection<Hang>? Hangs { get; set; }
 	}
 
 	[Keyless]

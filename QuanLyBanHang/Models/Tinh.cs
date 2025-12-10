@@ -16,8 +16,8 @@ namespace QuanLyBanHang.Models
 		public string TenTinh { get; set; } = string.Empty;
 
 		// Quan hệ 1-n với Xa
-		[InverseProperty("Tinh")]
-		[Display(Name = "Danh sách xã")]
-		public ICollection<Xa> DsXa { get; set; } = new List<Xa>();
+		//[InverseProperty("Tinh")]
+		//[Display(Name = "Danh sách xã")]
+		//public ICollection<Xa> DsXa { get; set; } = new List<Xa>();
 	}
 }

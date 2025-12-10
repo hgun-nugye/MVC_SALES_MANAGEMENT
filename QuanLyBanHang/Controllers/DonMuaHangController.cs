@@ -10,13 +10,23 @@ namespace QuanLyBanHang.Controllers
 		private readonly DonMuaHangService _dmhService;
 		private readonly CTMHService _ctmhService;
 		private readonly SanPhamService _spService;
+		private readonly NhaCCService _nhaCCService;
+		private readonly NhanVienService _nhanVienService;
 		private readonly AppDbContext _context;
 
-		public DonMuaHangController(DonMuaHangService service, CTMHService ctmhService, SanPhamService spService, AppDbContext context)
+		public DonMuaHangController(
+			DonMuaHangService service,
+			CTMHService ctmhService,
+			SanPhamService spService,
+			NhaCCService nhaCCService,
+			NhanVienService nhanVienService,
+			AppDbContext context)
 		{
 			_dmhService = service;
-			_ctmhService = ctmhService;	
+			_ctmhService = ctmhService;
 			_spService = spService;
+			_nhaCCService = nhaCCService;
+			_nhanVienService = nhanVienService;
 			_context = context;
 		}
 
@@ -39,10 +49,16 @@ namespace QuanLyBanHang.Controllers
 			return View(result);
 		}
 
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
-			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC");
-			ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP");
+			// Sử dụng service thay vì query trực tiếp từ context để tránh shadow property
+			var nhaCCList = await _nhaCCService.GetAll();
+			var nhanVienList = await _nhanVienService.GetAll();
+			var sanPhamList = await _spService.GetAll();
+
+			ViewBag.MaNCC = new SelectList(_context.NhaCC.ToList(), "MaNCC", "TenNCC");
+			ViewBag.MaNV = new SelectList(_context.NhanVien.ToList(), "MaNV", "TenNV");
+			ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
 
 			var model = new DonMuaHang
 			{
@@ -57,26 +73,40 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(DonMuaHang model)
 		{
-			if (ModelState.IsValid && model.CTMHs != null && model.CTMHs.Any())
+			// Bỏ qua validate MaDMH vì sẽ được sinh ở tầng DB / SP
+			ModelState.Remove("MaDMH");
+			if (model.CTMHs != null)
 			{
-				try
+				for (int i = 0; i < model.CTMHs.Count; i++)
 				{
-					await _dmhService.Create(model);
-					TempData["SuccessMessage"] = "Thêm đơn mua hàng thành công!";
-					return RedirectToAction(nameof(Index));
+					ModelState.Remove($"CTMHs[{i}].MaDMH");
 				}
-				catch (Exception ex)
-				{
-					TempData["ErrorMessage"] = ex.Message;
-				}
-			}
-			else
-			{
-				TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ thông tin đơn hàng và chi tiết sản phẩm.";
 			}
 
-			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC", model.MaNCC);
-			ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP");
+			if (!ModelState.IsValid || model.CTMHs == null || !model.CTMHs.Any())
+			{
+				TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ thông tin đơn mua hàng và chi tiết sản phẩm.";
+				// Đảm bảo có ít nhất một dòng chi tiết để view binding không lỗi
+				model.CTMHs ??= new List<CTMH>();
+				if (!model.CTMHs.Any())
+					model.CTMHs.Add(new CTMH());
+
+				await LoadDropdowns(model);
+				return View(model);
+			}
+
+			try
+			{
+				await _dmhService.Create(model);
+				TempData["SuccessMessage"] = "Thêm đơn mua hàng thành công!";
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = ex.Message;
+			}
+
+			await LoadDropdowns(model);
 			return View(model);
 		}
 
@@ -105,10 +135,15 @@ namespace QuanLyBanHang.Controllers
 				MaDMH = header.MaDMH!,
 				NgayMH = header.NgayMH,
 				MaNCC = header.MaNCC!,
+				MaNV = header.MaNV!,
 				ChiTiet = details
 			};
 
-			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC", ct.MaNCC);
+			var nhaCCList = await _nhaCCService.GetAll();
+			var nhanVienList = await _nhanVienService.GetAll();
+
+			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC", ct.MaNCC);
+			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV", ct.MaNV);
 			return View(ct);
 		}
 
@@ -130,7 +165,11 @@ namespace QuanLyBanHang.Controllers
 				TempData["ErrorMessage"] = ex.Message;
 			}
 
-			ViewBag.MaNCC = new SelectList(_context.NhaCC, "MaNCC", "TenNCC", model.MaNCC);
+			var nhaCCList = await _nhaCCService.GetAll();
+			var nhanVienList = await _nhanVienService.GetAll();
+
+			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC", model.MaNCC);
+			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV", model.MaNV);
 			return View(model);
 
 		}
@@ -162,7 +201,7 @@ namespace QuanLyBanHang.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
-		
+
 		[HttpGet]
 		public async Task<IActionResult> DeleteDetail(string MaDMH, string maSP)
 		{
@@ -188,7 +227,7 @@ namespace QuanLyBanHang.Controllers
 			return RedirectToAction("Details", new { id = MaDMH });
 		}
 
-		
+
 		[HttpGet]
 		public async Task<IActionResult> Search(string? search, int? month, int? year)
 		{
@@ -201,5 +240,33 @@ namespace QuanLyBanHang.Controllers
 			var data = await _dmhService.Reset();
 			return PartialView("DonMuaHangTable", data);
 		}
+
+		private async Task LoadDropdowns(DonMuaHang model)
+		{
+			// Đảm bảo danh sách chi tiết luôn có ít nhất 1 phần tử để view không bị null/index lỗi
+			model.CTMHs ??= new List<CTMH>();
+			if (!model.CTMHs.Any())
+				model.CTMHs.Add(new CTMH());
+
+			var nhaCCList = await _nhaCCService.GetAll();
+			var nhanVienList = await _nhanVienService.GetAll();
+			var sanPhamList = await _spService.GetAll();
+
+			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC", model.MaNCC);
+			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV", model.MaNV);
+			ViewBag.MaSP = new SelectList(sanPhamList, "MaSP", "TenSP");
+			//ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
+
+			// Gán dropdown cho từng dòng CTMH
+			for (int i = 0; i < model.CTMHs.Count; i++)
+			{
+				ViewData[$"MaSP_{i}"] = new SelectList(
+					sanPhamList,
+					"MaSP",
+					"TenSP",
+					model.CTMHs[i].MaSP);
+			}
+		}
+
 	}
 }

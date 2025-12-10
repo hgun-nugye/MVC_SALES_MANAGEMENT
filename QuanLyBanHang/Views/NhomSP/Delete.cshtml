@@ -15,8 +15,8 @@
     </div>
 
     <div class="border p-4 rounded shadow-sm bg-light">
-        <p><strong>Mã Nhóm sản phẩm:</strong> @Model.MaNhom</p>
-        <p><strong>Tên Nhóm sản phẩm:</strong> @Model.TenNhom</p>
+        <p><strong>@Html.DisplayNameFor(m => m.MaNhom):</strong> @Model.MaNhom</p>
+        <p><strong>@Html.DisplayNameFor(m => m.TenNhom):</strong> @Model.TenNhom</p>
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">

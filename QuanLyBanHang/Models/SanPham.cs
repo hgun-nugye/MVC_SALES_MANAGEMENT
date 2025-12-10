@@ -67,19 +67,19 @@ namespace QuanLyBanHang.Models
 		[Required(ErrorMessage = "Mã loại không được để trống")]
 		public string MaLoai { get; set; } = string.Empty;
 
-		[Display(Name = "Mã hàng")]
-		[Required(ErrorMessage = "Mã hàng không được để trống")]
+		[Display(Name = "Mã hãng")]
+		[Required(ErrorMessage = "Mã hãng không được để trống")]
 		public string MaHang { get; set; } = string.Empty;
 
 		// Quan hệ
-		[ForeignKey("MaLoai")]
-		public LoaiSP? LoaiSP { get; set; }
+		//[ForeignKey("MaLoai")]
+		//public LoaiSP? LoaiSP { get; set; }
 
-		[ForeignKey("MaHang")]
-		public Hang? Hang { get; set; }
+		//[ForeignKey("MaHang")]
+		//public Hang? Hang { get; set; }
 
-		public virtual ICollection<CTMH>? CTMHs { get; set; }
-		public virtual ICollection<CTBH>? CTBHs { get; set; }
+		//public virtual ICollection<CTMH>? CTMHs { get; set; }
+		//public virtual ICollection<CTBH>? CTBHs { get; set; }
 
 		// Thuộc tính hiển thị (NotMapped)
 		[NotMapped]

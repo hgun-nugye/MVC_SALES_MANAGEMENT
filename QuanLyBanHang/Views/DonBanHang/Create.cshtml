@@ -4,108 +4,321 @@
     ViewBag.Title = "Thêm Đơn bán hàng";
 
     var spList = ViewBag.MaSP as IEnumerable<SelectListItem>;
-    var spOptionsHtml = string.Join("", spList.Select(sp => $"<option value='{sp.Value}'>{sp.Text}</option>"));
 }
 
-<div class="container border p-4 rounded shadow-sm bg-light">
-    <h4 class="mb-3 text-success">
-        Thêm Đơn bán hàng
-    </h4>
+<style>
+    .form-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .section-title {
+        color: #198754;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #198754;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: 1.2rem;
+    }
+
+    .form-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #198754;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25, 135, 84, 0.4);
+        background: linear-gradient(135deg, #157347 0%, #198754 100%);
+    }
+
+    .btn-cancel {
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .page-header h4 {
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control {
+        padding-left: 2.5rem;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+    }
+
+    .table thead th {
+        border: none;
+        font-weight: 600;
+        padding: 1rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .btn-add-row {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-add-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4);
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-plus-circle"></i>
+            Thêm đơn bán hàng mới
+        </h4>
+    </div>
 
     <form asp-action="Create" method="post">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger alert-dismissible fade show", role = "alert" })
 
-        <div class="mb-3">
-            <label asp-for="NgayBH" class="form-label"></label>
-            <input asp-for="NgayBH" class="form-control" type="date" readonly />
-            <span asp-validation-for="NgayBH" class="text-danger"></span>
+        <!-- Thông tin đơn hàng -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-info-circle"></i>
+                Thông tin đơn hàng
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="NgayBH" class="form-label required-field">
+                        <i class="fa-solid fa-calendar"></i>
+                        Ngày bán hàng
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <input asp-for="NgayBH" class="form-control" type="date" readonly />
+                    </div>
+                    <span asp-validation-for="NgayBH" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MaKH" class="form-label required-field">
+                        <i class="fa-solid fa-user"></i>
+                        Khách hàng
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-users"></i>
+                        <select asp-for="MaKH" asp-items="ViewBag.MaKH" class="form-select">
+                            <option value="">-- Chọn khách hàng --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaKH" class="text-danger small mt-1"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label asp-for="MaKH" class="form-label"></label>
-            <select asp-for="MaKH" asp-items="ViewBag.MaKH" class="form-select">
-                <option value="">-- Chọn khách hàng --</option>
-            </select>
-            <span asp-validation-for="MaKH" class="text-danger"></span>
-        </div>
+        <!-- Chi tiết sản phẩm -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-box"></i>
+                Chi tiết sản phẩm
+            </div>
 
-        <h5 class="mt-4 mb-3"><i class="fa-solid fa-box"></i> Chi tiết sản phẩm</h5>
-
-        <table class="table align-middle text-center" id="ctbhTable">
-    <thead class="table-light">
-        <tr>
-            <th>Sản phẩm</th>
-            <th>Số lượng</th>
-            <th>Đơn giá</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.CTBHs != null && Model.CTBHs.Count > 0)
-        {
-                @for (int i = 0; i < Model.CTBHs.Count; i++)
+             <!-- TEMPLATE ẨN (SỬA LỖI CHÍNH) -->
+            <select id="spTemplate" class="d-none">
+                @foreach (var sp in spList)
                 {
-                    <tr>
-                        <td>
-                                <select asp-for="CTBHs[i].MaSP" class="form-select">
-                                    <option value="">-- Chọn sản phẩm --</option>
-                                    @foreach (var sp in spList)
-                                    {
-                                        <option value="@sp.Value">@sp.Text</option>
-                                    }
-                                </select>
-                        </td>
-                        <td><input name="CTBHs[@i].SLB" type="number" min="1" class="form-control" value="@Model.CTBHs[i].SLB" /></td>
-                        <td><input name="CTBHs[@i].DGB" type="number" min="0" step="1000" class="form-control" value="@Model.CTBHs[i].DGB" /></td>
-                        <td><button type="button" class="btn btn-danger removeRow">Xóa</button></td>
-                    </tr>
+                    <option value="@sp.Value">@sp.Text</option>
                 }
-        }
-        else
-        {
-            <tr>
-                <td>
-                    <select name="CTBHs[0].MaSP" class="form-select">
-                        <option value="">-- Chọn sản phẩm --</option>
-                        @foreach (var sp in spList)
+            </select>
+
+            <div class="table-responsive">
+                <table class="table align-middle text-center" id="ctbhTable">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.CTBHs != null && Model.CTBHs.Count > 0)
                         {
-                            <option value="@sp.Value">@sp.Text</option>
+                            @for (int i = 0; i < Model.CTBHs.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <select name="CTBHs[@i].MaSP" class="form-select">
+                                            <option value="">-- Chọn sản phẩm --</option>
+                                            @foreach (var sp in spList)
+                                            {
+                                                <option value="@sp.Value" selected="@(sp.Value == Model.CTBHs[i].MaSP)">
+                                                    @sp.Text
+                                                </option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td><input name="CTBHs[@i].SLB" type="number" min="1" class="form-control" value="@Model.CTBHs[i].SLB" /></td>
+                                    <td><input name="CTBHs[@i].DGB" type="number" min="0" step="1000" class="form-control" value="@Model.CTBHs[i].DGB" /></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
+                                </tr>
+                            }
                         }
-                    </select>
-                </td>
-                <td><input name="CTBHs[0].SLB" class="form-control" type="number" min="1" /></td>
-                <td><input name="CTBHs[0].DGB" class="form-control" type="number" min="0" step="1000" /></td>
-                <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-
-        <button type="button" id="addRow" class="btn btn-success mb-3">
-            <i class="fa-solid fa-plus"></i> Thêm dòng
-        </button>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success">
-                <i class="fa-solid fa-check"></i> Thêm mới
+                        else
+                        {
+                            <tr>
+                                <td>
+                                    <select name="CTBHs[0].MaSP" class="form-select">
+                                        <option value="">-- Chọn sản phẩm --</option>
+                                        @foreach (var sp in spList)
+                                        {
+                                            <option value="@sp.Value">@sp.Text</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td><input name="CTBHs[0].SLB" class="form-control" type="number" min="1" /></td>
+                                <td><input name="CTBHs[0].DGB" class="form-control" type="number" min="0" step="1000" /></td>
+                                <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" id="addRow" class="btn btn-success btn-add-row mt-3">
+                <i class="fa-solid fa-plus me-2"></i>Thêm dòng
             </button>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 justify-content-end mb-4">
+            <a asp-action="Index" class="btn btn-secondary btn-cancel">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
             </a>
+            <button type="submit" class="btn btn-success btn-submit">
+                <i class="fa-solid fa-check me-2"></i>
+                Thêm đơn bán hàng
+            </button>
         </div>
     </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             const addRowBtn = document.getElementById("addRow");
             const tableBody = document.querySelector("#ctbhTable tbody");
             let index = tableBody.rows.length;
 
-            const spOptionsHtml = `@Html.Raw(spOptionsHtml)`;
+            // --- Template sản phẩm đã FIX
+            const spOptionsHtml = document.getElementById("spTemplate").innerHTML;
 
             addRowBtn.addEventListener("click", () => {
                 const newRow = document.createElement("tr");
@@ -116,9 +329,20 @@
                             ${spOptionsHtml}
                         </select>
                     </td>
-                    <td><input name="CTBHs[${index}].SLB" type="number" min="1" class="form-control" /></td>
-                    <td><input name="CTBHs[${index}].DGB" type="number" min="0" step="1000" class="form-control" /></td>
-                    <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
+
+                    <td>
+                        <input name="CTBHs[${index}].SLB" type="number" min="1" class="form-control" />
+                    </td>
+
+                    <td>
+                        <input name="CTBHs[${index}].DGB" type="number" min="0" step="1000" class="form-control" />
+                    </td>
+
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm removeRow">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
                 `;
                 tableBody.appendChild(newRow);
                 index++;

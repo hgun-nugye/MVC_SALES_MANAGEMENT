@@ -17,12 +17,12 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã tỉnh")]
 		public short MaTinh { get; set; }
 
-		[NotMapped]
+		//[NotMapped]
 		[Display(Name = "Tên tỉnh")]
 		public string? TenTinh { get; set; }
 
-		[ForeignKey("MaTinh")]
-		[Display(Name = "Tỉnh")]
-		public Tinh? Tinh { get; set; }
+		//[ForeignKey("MaTinh")]
+		//[Display(Name = "Tỉnh")]
+		//public Tinh? Tinh { get; set; }
 	}
 }

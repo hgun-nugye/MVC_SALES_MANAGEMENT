@@ -17,13 +17,25 @@
 
         <!-- THÔNG TIN ĐƠN -->
         <div class="mb-3">
-            <label class="form-label fw-bold">Ngày Mua hàng </label>
+            <label asp-for="NgayMH" class="form-label fw-bold"></label>
             <input asp-for="NgayMH" type="date" class="form-control" />
+            <span asp-validation-for="NgayMH" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-bold">Nhà cung cấp</label>
-            <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select"></select>
+            <label asp-for="MaNCC" class="form-label fw-bold"></label>
+            <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select">
+                <option value="">-- Chọn nhà cung cấp --</option>
+            </select>
+            <span asp-validation-for="MaNCC" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="MaNV" class="form-label fw-bold"></label>
+            <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
+                <option value="">-- Chọn nhân viên --</option>
+            </select>
+            <span asp-validation-for="MaNV" class="text-danger"></span>
         </div>
 
         <hr />

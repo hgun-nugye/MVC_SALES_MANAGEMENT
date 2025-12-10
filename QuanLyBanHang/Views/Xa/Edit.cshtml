@@ -12,19 +12,21 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group mb-3">
-            <label>Mã Xã</label>
+            <label asp-for="MaXa" class="form-label"></label>
             <input asp-for="MaXa" class="form-control" readonly />
         </div>
         <div class="form-group mb-3">
-            <label>Tên Xã</label>
+            <label asp-for="TenXa" class="form-label"></label>
             <input asp-for="TenXa" class="form-control" />
+            <span asp-validation-for="TenXa" class="text-danger"></span>
         </div>
       
         <div class="form-group mb-3">
-            <label>Tỉnh</label>
+            <label asp-for="MaTinh" class="form-label"></label>
             <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.MaTinhList">
                 <option value="">@Model.TenTinh</option>
             </select>
+            <span asp-validation-for="MaTinh" class="text-danger"></span>
         </div>
 
         <div class="mt-4 d-flex gap-2">

@@ -48,18 +48,24 @@ INSERT INTO NhaCC VALUES ('NCC0000002', N'Co.opXtra', '02839999555', 'support@co
 INSERT INTO NhaCC VALUES ('NCC0000003', N'Pharmacity', '18006821', 'support@pharmacity.vn', N'15 Đặng Huy Trứ', 601);
 INSERT INTO NhaCC VALUES ('NCC0000004', N'Boshop Vietnam', '02873007300', 'cskh@boshop.vn', N'18 Trần Phú', 701);
 
+-- Nhân viên
+INSERT INTO NhanVien(MaNV, TenNV, VaiTro, TenDNNV, MatKhauNV) VALUES
+('NV00000001', N'Nguyễn Quản Trị', N'Quản Trị', 'admin', '123456'),
+('NV00000002', N'Trần Nhân Viên', N'Nhân Viên', 'nhanvien1', '123456'),
+('NV00000003', N'Lê Quản Lý', N'Quản Lý', 'quanly1', '123456');
+
 -- Khách hàng
-INSERT INTO KhachHang (MaKH, TenKH, AnhKH, DienThoaiKH, EmailKH, DiaChiKH, MaXa) VALUES
-('KH00000001', N'Nguyễn Văn A', '/images/customers/user1.jpg', '0901111222', 'a.nguyen@example.com', N'Số 10 Tràng Tiền', 101),
-('KH00000002', N'Trần Thị B', '/images/customers/user2.jpg', '0902222333', 'b.tran@example.com', N'25 Lê Lợi', 201),
-('KH00000003', N'Lê Văn C', '/images/customers/user3.jpg', '0903333444', 'c.le@example.com', N'123 Nguyễn Văn Linh', 301),
-('KH00000004', N'Phạm Thị D', '/images/customers/user4.jpg', '0904444555', 'd.pham@example.com', N'18 Trần Phú', 401),
-('KH00000005', N'Hoàng Minh E', '/images/customers/user5.jpg', '0905555666', 'e.hoang@example.com', N'7 Nguyễn Trãi', 501),
-('KH00000006', N'Võ Thị F', '/images/customers/user6.jpg', '0906666777', 'f.vo@example.com', N'Xóm Chài 2', 601),
-('KH00000007', N'Đỗ Văn G', '/images/customers/user7.jpg', '0907777888', 'g.do@example.com', N'20 Đinh Tiên Hoàng', 701),
-('KH00000008', N'Bùi Thị H', '/images/customers/user8.jpg', '0908888999', 'h.bui@example.com', N'Khu 3, Thủ Dầu Một', 801),
-('KH00000009', N'Tống Văn I', '/images/customers/user9.jpg', '0931234567', 'i.tong@example.com', N'Ấp 4 Long Thành', 901),
-('KH00000010', N'Huỳnh Thị K', '/images/customers/user10.jpg', '0912345678', 'k.huynh@example.com', N'15 Đặng Huy Trứ', 1001);
+INSERT INTO KhachHang (MaKH, TenKH, AnhKH, DienThoaiKH, EmailKH, DiaChiKH, MaXa, TenDNKH, MatKhauKH) VALUES
+('KH00000001', N'Nguyễn Văn A', '/images/customers/user1.jpg', '0901111222', 'a.nguyen@example.com', N'Số 10 Tràng Tiền', 101, 'avan','123456'),
+('KH00000002', N'Trần Thị B', '/images/customers/user2.jpg', '0902222333', 'b.tran@example.com', N'25 Lê Lợi', 201, NULL, NULL),
+('KH00000003', N'Lê Văn C', '/images/customers/user3.jpg', '0903333444', 'c.le@example.com', N'123 Nguyễn Văn Linh', 301, NULL, NULL),
+('KH00000004', N'Phạm Thị D', '/images/customers/user4.jpg', '0904444555', 'd.pham@example.com', N'18 Trần Phú', 401, NULL, NULL),
+('KH00000005', N'Hoàng Minh E', '/images/customers/user5.jpg', '0905555666', 'e.hoang@example.com', N'7 Nguyễn Trãi', 501, NULL, NULL),
+('KH00000006', N'Võ Thị F', '/images/customers/user6.jpg', '0906666777', 'f.vo@example.com', N'Xóm Chài 2', 601, NULL, NULL),
+('KH00000007', N'Đỗ Văn G', '/images/customers/user7.jpg', '0907777888', 'g.do@example.com', N'20 Đinh Tiên Hoàng', 701, 'gdovan','123'),
+('KH00000008', N'Bùi Thị H', '/images/customers/user8.jpg', '0908888999', 'h.bui@example.com', N'Khu 3, Thủ Dầu Một', 801, NULL, NULL),
+('KH00000009', N'Tống Văn I', '/images/customers/user9.jpg', '0931234567', 'i.tong@example.com', N'Ấp 4 Long Thành', 901, NULL, NULL),
+('KH00000010', N'Huỳnh Thị K', '/images/customers/user10.jpg', '0912345678', 'k.huynh@example.com', N'15 Đặng Huy Trứ', 1001, NULL, NULL);
 
 -- Nhóm SP 
 INSERT INTO NhomSP(MaNhom, TenNhom) VALUES
@@ -85,10 +91,10 @@ VALUES
 ('SP00000004', N'Nồi cơm điện Sunhouse 1.5L', 450000, 600000, N'Nồi cơm điện 1.5L', '/img/sp9.jpg', N'Inox', N'Nấu cơm', N'Cắm điện', N'Việt Nam', N'Nơi khô mát', N'Còn Hàng', 30, 'L000000005', 'H0004');
 
 -- DMH 
-INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC) VALUES
-('M2411010001', '2024-11-01', 'NCC0000001'),
-('M2411050001', '2024-11-05', 'NCC0000003');
-
+INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC, MaNV) VALUES
+('M2411010001', '2024-11-01', 'NCC0000001', 'NV00000002'),
+('M2411050001', '2024-11-05', 'NCC0000003', 'NV00000003');
+	
 -- CTMH
 INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM) VALUES
 ('M2411010001', 'SP00000001', 100, 48000),

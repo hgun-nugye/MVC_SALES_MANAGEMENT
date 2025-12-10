@@ -22,12 +22,12 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã Nước")]
 		public string MaNuoc { get; set; } = string.Empty;
 
-		[NotMapped]
+		//[NotMapped]
 		[Display(Name = "Tên Nước")]
 		public string? TenNuoc { get; set; }
 
-		[ForeignKey("MaNuoc")]
-		[Display(Name = "Nước Sản Xuất")]
-		public virtual Nuoc? Nuoc { get; set; }
+		//[ForeignKey("MaNuoc")]
+		//[Display(Name = "Nước Sản Xuất")]
+		//public virtual Nuoc? Nuoc { get; set; }
 	}
 }

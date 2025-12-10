@@ -14,7 +14,7 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Lấy danh sách + phân trang
-		public async Task<List<NhaCC>> Search(string? search, short? province)
+		public async Task<List<NhaCCDetailView>> Search(string? search, short? province)
 		{
 			var parameters = new[]
 			{
@@ -22,7 +22,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaTinh", (object?)province ?? DBNull.Value)
 			};
 
-			return await _context.NhaCC
+			return await _context.NhaCCDetailView
 				.FromSqlRaw("EXEC NhaCC_Search @Search, @MaTinh", parameters)
 				.ToListAsync();
 		}

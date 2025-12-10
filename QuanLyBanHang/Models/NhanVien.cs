@@ -36,6 +36,6 @@ namespace QuanLyBanHang.Models
 		public string MatKhauNV { get; set; } = string.Empty;
 
 		// Quan hệ: Danh sách đơn mua hàng do nhân viên thực hiện
-		public virtual List<DonMuaHang>? DonMuaHangs { get; set; }
+		//public virtual List<DonMuaHang>? DonMuaHangs { get; set; }
 	}
 }

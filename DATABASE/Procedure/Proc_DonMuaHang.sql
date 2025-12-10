@@ -191,17 +191,15 @@ BEGIN
         N.TenNCC,
         D.MaNV,
         NV.TenNV,
-        (
-            SELECT 
-                C.MaSP, S.TenSP, C.SLM, C.DGM
-            FROM CTMH C
-            JOIN SanPham S ON S.MaSP = C.MaSP
-            WHERE C.MaDMH = D.MaDMH
-            FOR JSON PATH
-        ) AS ChiTietJSON
+		S.MaSP,
+		S.TenSP,
+		C.DGM,
+		C.SLM
     FROM DonMuaHang D
-    JOIN NhaCC N ON N.MaNCC = D.MaNCC
-    JOIN NhanVien NV ON NV.MaNV = D.MaNV
+	LEFT JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    LEFT JOIN NhanVien NV ON NV.MaNV = D.MaNV
+	LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
+	LEFT JOIN SanPham S ON S.MaSP = C.MaSP
     WHERE D.MaDMH = @MaDMH;
 END;
 GO
@@ -220,10 +218,16 @@ BEGIN
         D.MaNCC,
         N.TenNCC,
         D.MaNV,
-        NV.TenNV
+        NV.TenNV,
+		S.MaSP,
+		S.TenSP,
+		C.DGM,
+		C.SLM
     FROM DonMuaHang D
-    JOIN NhaCC N ON N.MaNCC = D.MaNCC
-    JOIN NhanVien NV ON NV.MaNV = D.MaNV
+	LEFT JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    LEFT JOIN NhanVien NV ON NV.MaNV = D.MaNV
+	LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
+	LEFT JOIN SanPham S ON S.MaSP = C.MaSP
     WHERE
         (
             @Search IS NULL OR @Search = '' OR

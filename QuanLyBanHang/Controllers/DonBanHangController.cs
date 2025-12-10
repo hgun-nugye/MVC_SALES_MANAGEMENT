@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
 using System.Threading.Tasks;
@@ -40,22 +41,48 @@ namespace QuanLyBanHang.Controllers
 			return View(result);
 		}
 
-		public async Task<IActionResult> Create()
+		//public async Task<IActionResult> Create()
+		//{
+		//	ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH");
+		//	ViewBag.MaSP = new SelectList(await _spService.GetAll(), "MaSP", "TenSP");
+
+		//	var model = new DonBanHang
+		//	{
+		//		NgayBH = DateTime.Today,
+		//		CTBHs = new List<CTBH>
+		//		{
+		//			new CTBH()
+		//		}
+		//	};
+
+		//	return View(model);
+		//}
+
+		public IActionResult Create()
 		{
-			ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH");
-			ViewBag.MaSP = new SelectList(await _spService.GetAll(), "MaSP", "TenSP");
-
-			var model = new DonBanHang
-			{
-				NgayBH = DateTime.Today,
-				CTBHs = new List<CTBH>
+			var sp = _context.SanPham
+				.Select(x => new SelectListItem
 				{
-					new CTBH()
-				}
-			};
+					Value = x.MaSP ?? "",
+					Text = x.TenSP ?? ""
+				})
+				.ToList();
 
-			return View(model);
+			ViewBag.MaSP = sp ?? new List<SelectListItem>();
+
+			var kh = _context.KhachHang
+				.Select(x => new SelectListItem
+				{
+					Value = x.MaKH ?? "",
+					Text = x.TenKH ?? ""
+				})
+				.ToList();
+
+			ViewBag.MaKH = kh ?? new List<SelectListItem>();
+
+			return View(new DonBanHang());
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -63,6 +90,43 @@ namespace QuanLyBanHang.Controllers
 		{
 			try
 			{
+				// XÓA DÒNG TRỐNG
+				model.CTBHs = model.CTBHs
+					.Where(x => !string.IsNullOrEmpty(x.MaSP))
+					.ToList();
+
+				// GÁN GIÁ TRỊ HỢP LỆ
+				foreach (var ct in model.CTBHs)
+				{
+					ct.SLB ??= 1;
+					ct.DGB ??= 0;
+				}
+
+				// Kiểm tra tồn kho
+				var selectedIds = model.CTBHs
+					.Select(x => x.MaSP!)
+					.Distinct()
+					.ToList();
+
+				var stockLookup = selectedIds.Any()
+					? await _context.SanPham
+						.Where(x => selectedIds.Contains(x.MaSP))
+						.ToDictionaryAsync(x => x.MaSP, x => x.SoLuongTon)
+					: new Dictionary<string, int>();
+
+				for (int i = 0; i < model.CTBHs.Count; i++)
+				{
+					var ct = model.CTBHs[i];
+					if (!string.IsNullOrEmpty(ct.MaSP) && stockLookup.TryGetValue(ct.MaSP, out var ton))
+					{
+						var slb = ct.SLB ?? 0;
+						if (slb > ton)
+						{
+							ModelState.AddModelError($"CTBHs[{i}].SLB", $"Số lượng bán ({slb}) vượt tồn kho ({ton}).");
+						}
+					}
+				}
+
 				if (ModelState.IsValid && model.CTBHs != null && model.CTBHs.Any())
 				{
 					await _dbhService.Create(model);
@@ -120,9 +184,45 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(DonBanHangEditCTBH model)
 		{
-			if (!ModelState.IsValid) return View(model);
 			try
 			{
+				// Gán giá trị mặc định
+				foreach (var ct in model.ChiTiet)
+				{
+					ct.SLB ??= 1;
+					ct.DGB ??= 0;
+				}
+
+				// Kiểm tra tồn kho
+				var selectedIds = model.ChiTiet
+					.Select(x => x.MaSP!)
+					.Distinct()
+					.ToList();
+
+				var stockLookup = selectedIds.Any()
+					? await _context.SanPham
+						.Where(x => selectedIds.Contains(x.MaSP))
+						.ToDictionaryAsync(x => x.MaSP, x => x.SoLuongTon)
+					: new Dictionary<string, int>();
+
+				for (int i = 0; i < model.ChiTiet.Count; i++)
+				{
+					var ct = model.ChiTiet[i];
+					if (!string.IsNullOrEmpty(ct.MaSP) && stockLookup.TryGetValue(ct.MaSP, out var ton))
+					{
+						var slb = ct.SLB ?? 0;
+						if (slb > ton)
+						{
+							ModelState.AddModelError($"ChiTiet[{i}].SLB", $"Số lượng bán ({slb}) vượt tồn kho ({ton}).");
+						}
+					}
+				}
+
+				if (!ModelState.IsValid)
+				{
+					ViewBag.MaKH = new SelectList(_context.KhachHang, "MaKH", "TenKH", model.MaKH);
+					return View(model);
+				}
 
 				await _dbhService.Update(model);
 

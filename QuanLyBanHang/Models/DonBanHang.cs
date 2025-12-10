@@ -7,50 +7,47 @@ namespace QuanLyBanHang.Models
 	[Table("DonBanHang")]
 	public class DonBanHang
 	{
-		// ================
+		
 		//  KHÓA CHÍNH
-		// ================
+		
 		[Key]
-		[Required]
+		//[Required]
 		[StringLength(11, ErrorMessage = "Mã đơn bán hàng tối đa 11 ký tự.")]
 		[Display(Name = "Mã Đơn Bán Hàng")]
 		public string MaDBH { get; set; } = string.Empty;
 
-		// ================
+		
 		//  NGÀY BÁN
-		// ================
+		
 		[Required(ErrorMessage = "Ngày bán hàng không được để trống.")]
 		[DataType(DataType.Date)]
 		[Display(Name = "Ngày Bán Hàng")]
-		public DateTime NgayBH { get; set; }
+		public DateTime NgayBH { get; set; } = DateTime.Now;
 
-		// ================
+		
 		//  KHÁCH HÀNG
-		// ================
+		
 		[Required(ErrorMessage = "Mã khách hàng không được để trống.")]
 		[StringLength(10)]
 		[Display(Name = "Mã Khách Hàng")]
 		public string MaKH { get; set; } = string.Empty;
 
 		// Tên khách hàng chỉ hiển thị, không map DB
-		[NotMapped]
+		//[NotMapped]
 		[Display(Name = "Tên Khách Hàng")]
 		public string? TenKH { get; set; }
 
-		[ForeignKey("MaKH")]
-		[Display(Name = "Khách Hàng")]
-		public virtual KhachHang? KhachHang { get; set; }
+		//[ForeignKey("MaKH")]
+		//[Display(Name = "Khách Hàng")]
+		//public virtual KhachHang? KhachHang { get; set; }
 
-		// =================
 		//  CHI TIẾT BÁN
-		// =================
 		[Display(Name = "Chi Tiết Bán Hàng")]
 		public virtual List<CTBH>? CTBHs { get; set; } = new();
+
 	}
 
-	// ===============================
 	// DTO hiển thị chi tiết đơn bán
-	// ===============================
 	[Keyless]
 	public class DonBanHangDetail
 	{
@@ -91,17 +88,15 @@ namespace QuanLyBanHang.Models
 		public decimal? ThanhTien => SLB * DGB;
 	}
 
-	// ===============================
 	// Model chỉnh sửa đơn bán
-	// ===============================
 	public class DonBanHangEditCTBH
 	{
-		[Required]
+		//[Required]
 		[StringLength(11)]
 		[Display(Name = "Mã Đơn Bán Hàng")]
 		public string MaDBH { get; set; } = string.Empty;
 
-		[Required]
+		//[Required]
 		[Display(Name = "Ngày Bán Hàng")]
 		public DateTime NgayBH { get; set; }
 

@@ -49,8 +49,8 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Tên Tỉnh")]
 		public string? TenTinh { get; set; }
 
-		[Display(Name = "Danh Sách Sản Phẩm")]
-		public ICollection<SanPham>? SanPhams { get; set; }
+		//[Display(Name = "Danh Sách Sản Phẩm")]
+		//public ICollection<SanPham>? SanPhams { get; set; }
 	}
 
 	[Keyless]

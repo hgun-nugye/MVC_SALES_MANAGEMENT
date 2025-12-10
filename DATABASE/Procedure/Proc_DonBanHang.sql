@@ -220,9 +220,11 @@ CREATE OR ALTER PROCEDURE DonBanHang_Search
     @Year INT = NULL
 AS
 BEGIN
-	SELECT D.*, K.TenKH
+	SELECT D.*, K.TenKH, C.SLB, C.DGB, C.MaSP, S.TenSP
     FROM DonBanHang D
-	JOIN KhachHang K ON K.MaKH = D.MaKH
+	LEFT JOIN KhachHang K ON K.MaKH = D.MaKH
+	LEFT JOIN CTBH C ON C.MaDBH = D.MaDBH
+	LEFT JOIN SanPham S ON S.MaSP = C.MaSP
     WHERE
         (@Search IS NULL OR @Search = '' 
             OR D.MaDBH LIKE '%' + @Search + '%'

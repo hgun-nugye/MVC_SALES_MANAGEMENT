@@ -15,7 +15,7 @@ namespace QuanLyBanHang.Services
 
 		public async Task<List<CTBHDetailDto>> GetAll()
 		{
-			return await _context.Set<CTBHDetailDto>()
+			return await _context.CTBHDetailDtos
 				.FromSqlRaw("EXEC CTBH_GetAll")
 				.ToListAsync();
 		}
@@ -57,7 +57,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaSP", maSP)
 			};
 
-			var data = await _context.Set<CTBHDetailDto>()
+			var data = await _context.CTBHDetailDtos
 				.FromSqlRaw("EXEC CTBH_GetByID @MaDBH, @MaSP", parameters)
 				.ToListAsync();
 

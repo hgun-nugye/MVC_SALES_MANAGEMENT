@@ -18,11 +18,10 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Ngày Mua Hàng")]
 		public DateTime NgayMH { get; set; }
 
-		[Required(ErrorMessage = "Mã nhà cung cấp không được để trống.")]
+		//[Required(ErrorMessage = "Mã nhà cung cấp không được để trống.")]
 		[StringLength(10, ErrorMessage = "Mã nhà cung cấp tối đa 10 ký tự.")]
 		[Display(Name = "Mã Nhà Cung Cấp")]
-		public string MaNCC { get; set; } = string.Empty;
-
+		public string? MaNCC { get; set; } 
 		[NotMapped]
 		[Display(Name = "Tên Nhà Cung Cấp")]
 		public string? TenNCC { get; set; }
@@ -30,19 +29,11 @@ namespace QuanLyBanHang.Models
 		[Required(ErrorMessage = "Mã nhân viên không được để trống.")]
 		[StringLength(10, ErrorMessage = "Mã nhân viên tối đa 10 ký tự.")]
 		[Display(Name = "Mã Nhân Viên")]
-		public string MaNV { get; set; } = string.Empty;
+		public string? MaNV { get; set; }
 
 		[NotMapped]
 		[Display(Name = "Tên Nhân Viên")]
 		public string? TenNV { get; set; }
-
-		[ForeignKey("MaNCC")]
-		[Display(Name = "Nhà Cung Cấp")]
-		public virtual NhaCC? NhaCC { get; set; }
-
-		[ForeignKey("MaNV")]
-		[Display(Name = "Nhân Viên")]
-		public virtual NhanVien? NhanVien { get; set; }
 
 		[Display(Name = "Chi Tiết Mua Hàng")]
 		public virtual List<CTMH>? CTMHs { get; set; }

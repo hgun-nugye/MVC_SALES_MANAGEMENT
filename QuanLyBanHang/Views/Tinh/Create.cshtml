@@ -3,24 +3,180 @@
     ViewBag.Title = "Thêm Tỉnh";
 }
 
-<div class="container">
-    <h4 class="text-success mb-3">
-        Thêm Tỉnh
-    </h4>
+<style>
+    .form-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
 
-    <form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
 
-        <div class="form-group mb-3">
-            <label>Tên Tinh</label>
-            <input asp-for="TenTinh" class="form-control" />
+    .section-title {
+        color: #198754;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #198754;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: 1.2rem;
+    }
+
+    .form-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #198754;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25, 135, 84, 0.4);
+        background: linear-gradient(135deg, #157347 0%, #198754 100%);
+    }
+
+    .btn-cancel {
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .page-header h4 {
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control {
+        padding-left: 2.5rem;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-plus-circle"></i>
+            Thêm tỉnh mới
+        </h4>
+    </div>
+
+    <form asp-action="Create" method="post">
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger alert-dismissible fade show", role = "alert" })
+
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-info-circle"></i>
+                Thông tin tỉnh
+            </div>
+            <div class="row g-4">
+                <div class="col-12">
+                    <label asp-for="TenTinh" class="form-label required-field">
+                        <i class="fa-solid fa-map"></i>
+                        Tên tỉnh
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-city"></i>
+                        <input asp-for="TenTinh" class="form-control" placeholder="Nhập tên tỉnh..." />
+                    </div>
+                    <span asp-validation-for="TenTinh" class="text-danger small mt-1"></span>
+                </div>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-success">
-            <i class="fa-solid fa-save"></i> Lưu
-        </button>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 justify-content-end mb-4">
+            <a asp-action="Index" class="btn btn-secondary btn-cancel">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
+            </a>
+            <button type="submit" class="btn btn-success btn-submit">
+                <i class="fa-solid fa-check me-2"></i>
+                Thêm tỉnh
+            </button>
+        </div>
     </form>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

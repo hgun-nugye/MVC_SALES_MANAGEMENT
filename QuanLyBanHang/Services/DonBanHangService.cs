@@ -14,9 +14,9 @@ namespace QuanLyBanHang.Services
 			_context = context;
 		}
 
-		public async Task<List<DonBanHang>> GetAll()
+		public async Task<List<DonBanHangDetail>> GetAll()
 		{
-			return await _context.DonBanHang
+			return await _context.DonBanHangDetail
 				.FromSqlRaw("EXEC DonBanHang_GetAll")
 				.ToListAsync();
 		}
@@ -125,7 +125,7 @@ namespace QuanLyBanHang.Services
 			);
 		}
 
-		public async Task<List<DonBanHang>> Search(string? keyword, int? month, int? year)
+		public async Task<List<DonBanHangDetail>> Search(string? keyword, int? month, int? year)
 		{
 			var parameters = new[]
 			{
@@ -134,7 +134,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
 			};
 
-			var data = await _context.DonBanHang
+			var data = await _context.DonBanHangDetail
 				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year", parameters)
 				.ToListAsync();
 

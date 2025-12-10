@@ -68,30 +68,32 @@ namespace QuanLyBanHang.Services
 			foreach (var ct in model.CTMHs!)
 				table.Rows.Add(ct.MaSP, ct.SLM, ct.DGM);
 
-			var parameters = new[]
+		var parameters = new[]
+		{
+			new SqlParameter("@NgayMH", model.NgayMH),
+			new SqlParameter("@MaNCC", model.MaNCC),
+			new SqlParameter("@MaNV", model.MaNV),
+			new SqlParameter("@ChiTiet", table)
 			{
-				new SqlParameter("@NgayMH", model.NgayMH),
-				new SqlParameter("@MaNCC", model.MaNCC),
-				new SqlParameter("@ChiTiet", table)
-				{
-					SqlDbType = SqlDbType.Structured,
-					TypeName = "dbo.CTMH_List"
-				}
-			};
+				SqlDbType = SqlDbType.Structured,
+				TypeName = "dbo.CTMH_List"
+			}
+		};
 
-			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC DonMuaHang_Insert @NgayMH, @MaNCC, @ChiTiet", parameters
-			);
+		await _context.Database.ExecuteSqlRawAsync(
+			"EXEC DonMuaHang_Insert @NgayMH, @MaNCC, @MaNV, @ChiTiet", parameters
+		);
 		}
 
 		public async Task Update(DonMuaHangEditCTMH model)
 		{
-			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC DonMuaHang_Update @MaDMH, @NgayMH, @MaNCC",
-				new SqlParameter("@MaDMH", model.MaDMH),
-				new SqlParameter("@NgayMH", model.NgayMH),
-				new SqlParameter("@MaNCC", model.MaNCC)
-			);
+		await _context.Database.ExecuteSqlRawAsync(
+			"EXEC DonMuaHang_Update @MaDMH, @NgayMH, @MaNCC, @MaNV",
+			new SqlParameter("@MaDMH", model.MaDMH),
+			new SqlParameter("@NgayMH", model.NgayMH),
+			new SqlParameter("@MaNCC", model.MaNCC),
+			new SqlParameter("@MaNV", model.MaNV)
+		);
 
 			foreach (var ct in model.ChiTiet)
 			{
@@ -122,7 +124,7 @@ namespace QuanLyBanHang.Services
 			);
 		}
 
-		public async Task<List<DonMuaHang>> Search(string? search, int? month, int? year)
+		public async Task<List<DonMuaHangDetail>> Search(string? search, int? month, int? year)
 		{
 			var parameters = new[]
 			{
@@ -131,7 +133,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
 			};
 
-			return await _context.DonMuaHang
+			return await _context.DonMuaHangDetail
 				.FromSqlRaw("EXEC DonMuaHang_Search @Search, @Month, @Year", parameters)
 				.ToListAsync();
 		}

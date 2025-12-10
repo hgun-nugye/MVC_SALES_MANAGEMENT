@@ -3,7 +3,13 @@
 @{
     ViewBag.Title = "Thêm Đơn mua hàng";
 
-    // Convert ViewBag.MaSP thành HTML option
+    // Đảm bảo danh sách chi tiết không null để tránh lỗi dynamic indexing
+    var details = Model?.CTMHs ?? new List<QuanLyBanHang.Models.CTMH>();
+    if (details.Count == 0)
+    {
+        details.Add(new QuanLyBanHang.Models.CTMH());
+    }
+
     var spOptions = "";
     var spList = ViewBag.MaSP as IEnumerable<SelectListItem>;
     if (spList != null)
@@ -13,94 +19,316 @@
             spOptions += $"<option value='{sp.Value}'>{sp.Text}</option>";
         }
     }
+    var list = ViewBag.MaSP as SelectList;
 }
 
-<div class="container border p-4 rounded shadow-sm bg-light">
-    <h4 class="mb-3 text-success">
-        Thêm Đơn mua hàng
-    </h4>
+<style>
+    .form-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .section-title {
+        color: #198754;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #198754;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: 1.2rem;
+    }
+
+    .form-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #198754;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25, 135, 84, 0.4);
+        background: linear-gradient(135deg, #157347 0%, #198754 100%);
+    }
+
+    .btn-cancel {
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .page-header h4 {
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control {
+        padding-left: 2.5rem;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+    }
+
+    .table thead th {
+        border: none;
+        font-weight: 600;
+        padding: 1rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .btn-add-row {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-add-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4);
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-plus-circle"></i>
+            Thêm đơn mua hàng mới
+        </h4>
+    </div>
 
     <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger alert-dismissible fade show", role = "alert" })
 
-        <!-- Ngày mua hàng -->
-        <div class="mb-3">
-            <label asp-for="NgayMH" class="form-label"></label>
-            <input asp-for="NgayMH" class="form-control" type="date" readonly />
-            <span asp-validation-for="NgayMH" class="text-danger"></span>
-        </div>
+        <!-- Thông tin đơn hàng -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-info-circle"></i>
+                Thông tin đơn hàng
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <label asp-for="NgayMH" class="form-label required-field">
+                        <i class="fa-solid fa-calendar"></i>
+                        Ngày mua hàng
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <input asp-for="NgayMH" class="form-control" type="date" readonly />
+                    </div>
+                    <span asp-validation-for="NgayMH" class="text-danger small mt-1"></span>
+                </div>
 
-        <!-- Nhà cung cấp -->
-        <div class="mb-3">
-            <label asp-for="MaNCC" class="form-label"></label>
-            <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select">
-                <option value="">-- Chọn nhà cung cấp --</option>
-            </select>
-            <span asp-validation-for="MaNCC" class="text-danger"></span>
+                <div class="col-md-4">
+                    <label asp-for="MaNCC" class="form-label required-field">
+                        <i class="fa-solid fa-truck"></i>
+                        Nhà cung cấp
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-building"></i>
+                        <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select">
+                            <option value="">-- Chọn nhà cung cấp --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaNCC" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="MaNV" class="form-label required-field">
+                        <i class="fa-solid fa-user-tie"></i>
+                        Nhân viên
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
+                            <option value="">-- Chọn nhân viên --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaNV" class="text-danger small mt-1"></span>
+                </div>
+            </div>
         </div>
 
         <!-- Chi tiết sản phẩm -->
-        <h5 class="mt-4 mb-3"><i class="fa-solid fa-box"></i> Chi tiết sản phẩm</h5>
-        <table class="table align-middle text-center" id="ctmhTable">
-            <thead class="table-light">
-                <tr>
-                    <th>Sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Đơn giá</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.CTMHs != null && Model.CTMHs.Count > 0)
-                {
-                    for (int i = 0; i < Model.CTMHs.Count; i++)
-                    {
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-box"></i>
+                Chi tiết sản phẩm
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle text-center" id="ctmhTable">
+                    <thead>
                         <tr>
-                            <td>
-                                <select name="CTMHs[0].MaSP" class="form-select">
-                                    <option value="">-- Chọn sản phẩm --</option>
-                                    @Html.Raw(spOptions)
-                                </select>
-                            </td>
-                            <td><input name="CTMHs[@i].SLM" class="form-control" type="number" min="1" value="@Model.CTMHs[i].SLM" /></td>
-                            <td><input name="CTMHs[@i].DGM" class="form-control" type="number" min="0" step="1000" value="@Model.CTMHs[i].DGM" /></td>
-                            <td>
-                                <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
-                            </td>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Hành động</th>
                         </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td>
-                            <select name="CTMHs[0].MaSP" class="form-select">
-                                <option value="">-- Chọn sản phẩm --</option>
-                                @Html.Raw(spOptions)
-                            </select>
-                        </td>
-                        <td><input name="CTMHs[0].SLM" class="form-control" type="number" min="1" /></td>
-                        <td><input name="CTMHs[0].DGM" class="form-control" type="number" min="0" step="1000" /></td>
-                        <td>
-                            <button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                }
-            </tbody>           
-        </table>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < details.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <select asp-for="CTMHs[@i].MaSP" asp-items="ViewBag.MaSP" class="form-select">
+                                        <option value="">-- Chọn sản phẩm --</option>
+                                    </select>
 
-        <button type="button" id="addRow" class="btn btn-success mb-3">
-            <i class="fa-solid fa-plus"></i> Thêm dòng
-        </button>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success">
-                <i class="fa-solid fa-check"></i> Thêm mới
+
+                                  @*   <select name="CTMHs[@i].MaSP" class="form-select">
+                                        <option value="">-- Chọn sản phẩm --</option>
+
+                                        @if (list != null)
+                                        {
+                                            foreach (var sp in list)
+                                            {
+                                                <option value="@sp.Value" selected="@(sp.Value == details[i].MaSP)">
+                                                    @sp.Text
+                                                </option>
+                                            }
+                                        }
+                                    </select> *@
+
+                                </td>
+
+                                <td>
+                                    <input name="CTMHs[@i].SLM" class="form-control" type="number"
+                                           min="1" value="@details[i].SLM" />
+                                </td>
+
+                                <td>
+                                    <input name="CTMHs[@i].DGM" class="form-control" type="number"
+                                           min="0" step="1000" value="@details[i].DGM" />
+                                </td>
+
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm removeRow">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" id="addRow" class="btn btn-success btn-add-row mt-3">
+                <i class="fa-solid fa-plus me-2"></i>Thêm dòng
             </button>
-            <a asp-action="Index" asp-controller="DonMuaHang" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 justify-content-end mb-4">
+            <a asp-action="Index" asp-controller="DonMuaHang" class="btn btn-secondary btn-cancel">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
             </a>
+            <button type="submit" class="btn btn-success btn-submit">
+                <i class="fa-solid fa-check me-2"></i>
+                Thêm đơn mua hàng
+            </button>
         </div>
     </form>
 </div>

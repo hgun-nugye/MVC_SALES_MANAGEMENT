@@ -13,7 +13,6 @@ builder.Services.AddScoped<CTMHService>();
 builder.Services.AddScoped<CTBHService>();
 builder.Services.AddScoped<DonMuaHangService>();
 builder.Services.AddScoped<DonBanHangService>();
-builder.Services.AddScoped<GianHangService>();
 builder.Services.AddScoped<KhachHangService>();
 builder.Services.AddScoped<LoaiSPService>();
 builder.Services.AddScoped<NhaCCService>();
@@ -21,7 +20,10 @@ builder.Services.AddScoped<NhomSPService>();
 builder.Services.AddScoped<SanPhamService>();
 builder.Services.AddScoped<TinhService>();
 builder.Services.AddScoped<XaService>();
-
+builder.Services.AddScoped<NuocService>();
+builder.Services.AddScoped<HangService>();
+builder.Services.AddScoped<NuocService>();
+builder.Services.AddScoped<NhanVienService>();
 
 var app = builder.Build();
 

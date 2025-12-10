@@ -18,8 +18,8 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Tên Nhóm Sản Phẩm")]
 		public string TenNhom { get; set; } = string.Empty;
 
-		[Display(Name = "Danh Sách Loại Sản Phẩm")]
-		public ICollection<LoaiSP>? LoaiSPs { get; set; }
+		//[Display(Name = "Danh Sách Loại Sản Phẩm")]
+		//public ICollection<LoaiSP>? LoaiSPs { get; set; }
 	}
 
 	[Keyless]

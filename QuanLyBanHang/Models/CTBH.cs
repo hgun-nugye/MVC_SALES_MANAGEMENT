@@ -7,49 +7,47 @@ namespace QuanLyBanHang.Models
 	[Table("CTBH")]
 	public class CTBH
 	{
-		// ======================
-		// KHÓA CHÍNH GHÉP
-		// ======================
+		
 		[Key, Column(Order = 0)]
-		[Required(ErrorMessage = "Mã đơn bán hàng không được để trống.")]
+		//[Required(ErrorMessage = "Mã đơn bán hàng không được để trống.")]
 		[StringLength(11, ErrorMessage = "Mã đơn bán hàng tối đa 11 ký tự.")]
 		[Display(Name = "Mã Đơn Bán Hàng")]
-		public string MaDBH { get; set; } = string.Empty;
+		public string? MaDBH { get; set; } = string.Empty;
 
 		[Key, Column(Order = 1)]
-		[Required(ErrorMessage = "Mã sản phẩm không được để trống.")]
+		//[Required(ErrorMessage = "Mã sản phẩm không được để trống.")]
 		[StringLength(10, ErrorMessage = "Mã sản phẩm tối đa 10 ký tự.")]
 		[Display(Name = "Mã Sản Phẩm")]
-		public string MaSP { get; set; } = string.Empty;
+		public string? MaSP { get; set; } = string.Empty;
 
-		// ======================
+		
 		// THUỘC TÍNH
-		// ======================
-		[Required(ErrorMessage = "Số lượng bán không được để trống.")]
+		
+		//[Required(ErrorMessage = "Số lượng bán không được để trống.")]
 		[Range(1, int.MaxValue, ErrorMessage = "Số lượng bán phải lớn hơn 0.")]
 		[Display(Name = "Số Lượng Bán")]
-		public int SLB { get; set; }
+		public int? SLB { get; set; }
 
-		[Required(ErrorMessage = "Đơn giá bán không được để trống.")]
+		//[Required(ErrorMessage = "Đơn giá bán không được để trống.")]
 		[Range(0, double.MaxValue, ErrorMessage = "Đơn giá bán phải >= 0.")]
 		[Column(TypeName = "decimal(18,2)")]
 		[Display(Name = "Đơn Giá Bán")]
-		public decimal DGB { get; set; }
+		public decimal? DGB { get; set; }
 
-		// ======================
+		
 		// QUAN HỆ
-		// ======================
-		[ForeignKey("MaSP")]
-		[Display(Name = "Sản Phẩm")]
-		public virtual SanPham? SanPham { get; set; }
+		
+		//[ForeignKey("MaSP")]
+		//[Display(Name = "Sản Phẩm")]
+		//public virtual SanPham? SanPham { get; set; }
 
-		[ForeignKey("MaDBH")]
-		[Display(Name = "Đơn Bán Hàng")]
-		public virtual DonBanHang? DonBanHang { get; set; }
+		//[ForeignKey("MaDBH")]
+		//[Display(Name = "Đơn Bán Hàng")]
+		//public virtual DonBanHang? DonBanHang { get; set; }
 
-		// ======================
+		
 		// THUỘC TÍNH HIỂN THỊ (không lưu DB)
-		// ======================
+		
 		[NotMapped]
 		[Display(Name = "Tên Sản Phẩm")]
 		public string? TenSP { get; set; }
@@ -59,9 +57,9 @@ namespace QuanLyBanHang.Models
 		public decimal? ThanhTien => SLB * DGB;
 	}
 
-	// ======================
+	
 	// DTO chi tiết CTBH
-	// ======================
+	
 	[Keyless]
 	public class CTBHDetailDto
 	{
