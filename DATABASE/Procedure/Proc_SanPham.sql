@@ -4,7 +4,6 @@ GO
 CREATE OR ALTER PROC SanPham_Insert
 (
     @TenSP NVARCHAR(50),
-    @DonGia DECIMAL(18,2),
     @GiaBan DECIMAL(18,2),
     @MoTaSP NVARCHAR(MAX),
     @AnhMH NVARCHAR(255),
@@ -12,12 +11,10 @@ CREATE OR ALTER PROC SanPham_Insert
     @ThanhPhan NVARCHAR(MAX),
     @CongDung NVARCHAR(MAX),
     @HDSD NVARCHAR(MAX),
-    @XuatXu NVARCHAR(MAX),
-    @BaoQuan NVARCHAR(MAX),
+    @HDBaoQuan NVARCHAR(MAX),
+    @TrongLuong DECIMAL(5,2),
 
-    @TrangThai NVARCHAR(50),
-    @SoLuongTon INT,
-
+    @MaTT CHAR(3),
     @MaLoai VARCHAR(10),
     @MaHang CHAR(5)
 )
@@ -25,39 +22,34 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @MaSP VARCHAR(10);
-    DECLARE @MaxID INT;
-
-    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaSP, 3, LEN(MaSP)-2) AS INT)), 0)
-    FROM SanPham;
-
-    SET @MaSP = 'SP' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
-    
-    IF NOT EXISTS (SELECT 1 FROM LoaiSP WHERE MaLoai = @MaLoai)
+	IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP)
     BEGIN
-        RAISERROR(N'Mã loại không tồn tại!', 16, 1);
+        RAISERROR(N'Sản phẩm đã tồn tại.', 16, 1);
         RETURN;
     END;
 
-    BEGIN TRY
-        INSERT INTO SanPham
-        (
-            MaSP, TenSP, DonGia, GiaBan, MoTaSP, AnhMH,
-            ThanhPhan, CongDung, HDSD, XuatXu, BaoQuan,
-            TrangThai, SoLuongTon, MaLoai, MaHang
-        )
-        VALUES
-        (
-            @MaSP, @TenSP, @DonGia, @GiaBan, @MoTaSP, @AnhMH,
-            @ThanhPhan, @CongDung, @HDSD, @XuatXu, @BaoQuan,
-            @TrangThai, @SoLuongTon, @MaLoai, @MaHang
-        );
+    DECLARE @MaSP VARCHAR(10);
+    DECLARE @MaxID INT;
 
-        PRINT N'Thêm sản phẩm thành công!';
-    END TRY
-    BEGIN CATCH
-        RAISERROR(N'Lỗi khi thêm sản phẩm: %s', 16, 1);
-    END CATCH
+    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaSP, 3, 8) AS INT)), 0)
+    FROM SanPham;
+
+    SET @MaSP = 'SP' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
+
+    INSERT INTO SanPham
+    (
+        MaSP, TenSP, GiaBan, MoTaSP, AnhMH,
+        ThanhPhan, CongDung, HDSD, HDBaoQuan, TrongLuong,
+        MaTT, MaLoai, MaHang
+    )
+    VALUES
+    (
+        @MaSP, @TenSP, @GiaBan, @MoTaSP, @AnhMH,
+        @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong,
+        @MaTT, @MaLoai, @MaHang
+    );
+
+    PRINT N'Thêm sản phẩm thành công!';
 END;
 GO
 
@@ -65,7 +57,6 @@ CREATE OR ALTER PROC SanPham_Update
 (
     @MaSP VARCHAR(10),
     @TenSP NVARCHAR(50),
-    @DonGia DECIMAL(18,2),
     @GiaBan DECIMAL(18,2),
     @MoTaSP NVARCHAR(MAX),
     @AnhMH NVARCHAR(255),
@@ -73,15 +64,12 @@ CREATE OR ALTER PROC SanPham_Update
     @ThanhPhan NVARCHAR(MAX),
     @CongDung NVARCHAR(MAX),
     @HDSD NVARCHAR(MAX),
-    @XuatXu NVARCHAR(MAX),
-    @BaoQuan NVARCHAR(MAX),
+    @HDBaoQuan NVARCHAR(MAX),
+    @TrongLuong DECIMAL(5,2),
 
-    @TrangThai NVARCHAR(50),
-    @SoLuongTon INT,
-
+    @MaTT CHAR(3),
     @MaLoai VARCHAR(10),
-	@MaHang CHAR(5)
-
+    @MaHang CHAR(5)
 )
 AS
 BEGIN
@@ -93,16 +81,15 @@ BEGIN
         RETURN;
     END;
 
-    IF NOT EXISTS (SELECT 1 FROM LoaiSP WHERE MaLoai = @MaLoai)
+	IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP and MaSP<>@MaSP)
     BEGIN
-        RAISERROR(N'Mã loại không tồn tại!', 16, 1);
+        RAISERROR(N'Sản phẩm đã tồn tại.', 16, 1);
         RETURN;
     END;
 
     UPDATE SanPham
     SET
         TenSP = @TenSP,
-        DonGia = @DonGia,
         GiaBan = @GiaBan,
         MoTaSP = @MoTaSP,
         AnhMH = @AnhMH,
@@ -110,15 +97,15 @@ BEGIN
         ThanhPhan = @ThanhPhan,
         CongDung = @CongDung,
         HDSD = @HDSD,
-        XuatXu = @XuatXu,
-        BaoQuan = @BaoQuan,
+        HDBaoQuan = @HDBaoQuan,
+        TrongLuong = @TrongLuong,
 
-        TrangThai = @TrangThai,
-        SoLuongTon = @SoLuongTon,
-
+        MaTT = @MaTT,
         MaLoai = @MaLoai,
-		MaHang = @MaHang
+        MaHang = @MaHang
     WHERE MaSP = @MaSP;
+
+    PRINT N'Cập nhật sản phẩm thành công!';
 END;
 GO
 
@@ -137,6 +124,7 @@ BEGIN
     END;
 
     DELETE FROM SanPham WHERE MaSP = @MaSP;
+    PRINT N'Xóa sản phẩm thành công!';
 END;
 GO
 
@@ -146,15 +134,38 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        S.*,
+        S.MaSP,
+        S.TenSP,
+        S.GiaBan,
+        S.MoTaSP,
+        S.AnhMH,
+        S.ThanhPhan,
+        S.CongDung,
+        S.HDSD,
+        S.HDBaoQuan,
+        S.TrongLuong,
+
         L.TenLoai,
-		H.TenHang
+        H.TenHang,
+        TT.TenTT,
+
+        -- TỒN KHO
+        ISNULL(SUM(CMH.SLM), 0) - ISNULL(SUM(CBH.SLB), 0) AS SoLuongTon
+
     FROM SanPham S
     JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-	JOIN Hang H ON H.MaHang = S.MaHang
+    JOIN Hang H ON H.MaHang = S.MaHang
+    JOIN TrangThai TT ON TT.MaTT = S.MaTT
+
+    LEFT JOIN CTMH CMH ON CMH.MaSP = S.MaSP
+    LEFT JOIN CTBH CBH ON CBH.MaSP = S.MaSP
+
+    GROUP BY 
+        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
+        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+        L.TenLoai, H.TenHang, TT.TenTT;
 END;
 GO
-
 
 CREATE OR ALTER PROC SanPham_GetByID
 (
@@ -165,40 +176,89 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        S.*,
+        S.MaSP,
+        S.TenSP,
+        S.GiaBan,
+        S.MoTaSP,
+        S.AnhMH,
+        S.ThanhPhan,
+        S.CongDung,
+        S.HDSD,
+        S.HDBaoQuan,
+        S.TrongLuong,
+
         L.TenLoai,
-		H.TenHang
+        H.TenHang,
+        TT.TenTT,
+
+        ISNULL(SUM(CMH.SLM), 0) - ISNULL(SUM(CBH.SLB), 0) AS SoLuongTon
+
     FROM SanPham S
     JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-	JOIN Hang H ON H.MaHang = S.MaHang
-    WHERE S.MaSP = @MaSP;
+    JOIN Hang H ON H.MaHang = S.MaHang
+    JOIN TrangThai TT ON TT.MaTT = S.MaTT
+
+    LEFT JOIN CTMH CMH ON CMH.MaSP = S.MaSP
+    LEFT JOIN CTBH CBH ON CBH.MaSP = S.MaSP
+
+    WHERE S.MaSP = @MaSP
+
+    GROUP BY 
+        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
+        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+        L.TenLoai, H.TenHang, TT.TenTT;
 END;
 GO
 
-CREATE OR ALTER PROCEDURE SanPham_Search
-    @Search      NVARCHAR(100) = NULL,
-    @TrangThai   NVARCHAR(50)  = NULL,
-    @TenLoai     VARCHAR(10)   = NULL   
+CREATE OR ALTER PROC SanPham_Search
+(
+    @Search NVARCHAR(100) = NULL,
+    @MaTT   CHAR(3) = NULL,
+    @MaLoai VARCHAR(10) = NULL
+)
 AS
 BEGIN
     SET NOCOUNT ON;
+
     SELECT 
-        S.*,
+        S.MaSP,
+        S.TenSP,
+        S.GiaBan,
+        S.MoTaSP,
+        S.AnhMH,
+        S.ThanhPhan,
+        S.CongDung,
+        S.HDSD,
+        S.HDBaoQuan,
+        S.TrongLuong,
+
         L.TenLoai,
-		H.TenHang
+        H.TenHang,
+        TT.TenTT,
+
+        ISNULL(SUM(CMH.SLM), 0) - ISNULL(SUM(CBH.SLB), 0) AS SoLuongTon
+
     FROM SanPham S
     JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-	JOIN Hang H ON H.MaHang = S.MaHang
-    WHERE 
+    JOIN Hang H ON H.MaHang = S.MaHang
+    JOIN TrangThai TT ON TT.MaTT = S.MaTT
+
+    LEFT JOIN CTMH CMH ON CMH.MaSP = S.MaSP
+    LEFT JOIN CTBH CBH ON CBH.MaSP = S.MaSP
+
+    WHERE
         (
             @Search IS NULL OR @Search = '' OR
-            H.TenHang   LIKE '%' + @Search + '%' OR
-            S.TenSP   LIKE '%' + @Search + '%' OR
-            S.MaSP    LIKE '%' + @Search + '%' OR
+            S.TenSP LIKE '%' + @Search + '%' OR
+            H.TenHang LIKE '%' + @Search + '%' OR
             L.TenLoai LIKE '%' + @Search + '%'
         )
-        AND (@TrangThai IS NULL OR S.TrangThai = @TrangThai)
-        AND (@TenLoai IS NULL OR L.MaLoai = @TenLoai)
-    
+        AND (@MaTT IS NULL OR S.MaTT = @MaTT)
+        AND (@MaLoai IS NULL OR S.MaLoai = @MaLoai)
+
+    GROUP BY 
+        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
+        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+        L.TenLoai, H.TenHang, TT.TenTT;
 END;
 GO

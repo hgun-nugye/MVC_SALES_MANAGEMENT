@@ -1,9 +1,6 @@
 ﻿USE DB_QLBH;
 GO
 
--- =========================================
--- INSERT
--- =========================================
 CREATE OR ALTER PROC CTBH_Insert
 (
     @MaDBH CHAR(11),
@@ -24,17 +21,9 @@ BEGIN
     -- Thêm chi tiết đơn
     INSERT INTO CTBH(MaDBH, MaSP, SLB, DGB)
     VALUES(@MaDBH, @MaSP, @SLB, @DGB);
-
-    -- Trừ số lượng tồn
-    UPDATE SanPham
-    SET SoLuongTon = SoLuongTon - @SLB
-    WHERE MaSP=@MaSP;
 END;
 GO
 
--- =========================================
--- UPDATE
--- =========================================
 CREATE OR ALTER PROC CTBH_Update
 (
     @MaDBH CHAR(11),
@@ -62,17 +51,9 @@ BEGIN
     UPDATE CTBH
     SET SLB=@SLB, DGB=@DGB
     WHERE MaDBH=@MaDBH AND MaSP=@MaSP;
-
-    -- Cập nhật tồn kho theo chênh lệch
-    UPDATE SanPham
-    SET SoLuongTon = SoLuongTon + (@OldSLB - @SLB)
-    WHERE MaSP=@MaSP;
 END;
 GO
 
--- =========================================
--- DELETE
--- =========================================
 CREATE OR ALTER PROC CTBH_Delete
 (
     @MaDBH CHAR(11),
@@ -96,17 +77,9 @@ BEGIN
 
     -- Xóa chi tiết
     DELETE FROM CTBH WHERE MaDBH=@MaDBH AND MaSP=@MaSP;
-
-    -- Cộng lại tồn kho
-    UPDATE SanPham
-    SET SoLuongTon = SoLuongTon + @OldSLB
-    WHERE MaSP=@MaSP;
 END;
 GO
 
--- =========================================
--- GET ALL
--- =========================================
 CREATE OR ALTER PROC CTBH_GetAll
 AS
 BEGIN

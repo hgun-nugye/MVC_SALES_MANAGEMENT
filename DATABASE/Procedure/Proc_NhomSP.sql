@@ -3,28 +3,19 @@ GO
 
 CREATE OR ALTER PROC NhomSP_Insert
 (
+    @MaNhom VARCHAR(10),
     @TenNhom NVARCHAR(100)
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra trùng tên nhóm
-    IF EXISTS (SELECT 1 FROM NhomSP WHERE TenNhom = @TenNhom)
+    -- Kiểm tra trùng 
+    IF EXISTS (SELECT 1 FROM NhomSP WHERE TenNhom = @TenNhom OR MaNhom = @MaNhom)
     BEGIN
-        RAISERROR(N'Tên nhóm sản phẩm đã tồn tại.', 16, 1);
+        RAISERROR(N'Nhóm sản phẩm đã tồn tại.', 16, 1);
         RETURN;
     END;
-
-    DECLARE @MaNhom VARCHAR(10);
-    DECLARE @MaxID INT;
-
-    -- Lấy số lớn nhất hiện tại
-    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaNhom, 4, 7) AS INT)), 0)
-    FROM NhomSP;
-
-    -- Tăng lên 1
-    SET @MaNhom = 'NSP' + RIGHT('0000000' + CAST(@MaxID + 1 AS VARCHAR(7)), 7);
 
     BEGIN TRY
         INSERT INTO NhomSP (MaNhom, TenNhom)

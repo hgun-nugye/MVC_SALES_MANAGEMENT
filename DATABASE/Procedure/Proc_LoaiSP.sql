@@ -3,6 +3,7 @@ GO
 
 CREATE OR ALTER PROC LoaiSP_Insert
 (
+    @MaLoai VARCHAR(10),
     @TenLoai NVARCHAR(50),
     @MaNhom VARCHAR(10)
 )
@@ -10,40 +11,17 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra trùng tên loại trong cùng nhóm
-    IF EXISTS (SELECT 1 FROM LoaiSP WHERE TenLoai = @TenLoai AND MaNhom = @MaNhom)
+    -- Kiểm tra trùng
+    IF EXISTS (SELECT 1 FROM LoaiSP WHERE TenLoai = @TenLoai AND MaNhom = @MaNhom OR MaLoai = @MaLoai)
     BEGIN
-        RAISERROR(N'Tên loại sản phẩm đã tồn tại trong nhóm này.', 16, 1);
+        RAISERROR(N'Loại sản phẩm đã tồn tại!', 16, 1);
         RETURN;
     END;
-
-    -- Kiểm tra nhóm tồn tại
-    IF NOT EXISTS (SELECT 1 FROM NhomSP WHERE MaNhom = @MaNhom)
-    BEGIN
-        RAISERROR(N'Mã nhóm sản phẩm không tồn tại.', 16, 1);
-        RETURN;
-    END;
-
-    DECLARE @MaLoai VARCHAR(10);
-    DECLARE @MaxID INT;
-
-    -- Lấy số lớn nhất hiện có
-    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaLoai, 4, LEN(MaLoai)-3) AS INT)), 0)
-    FROM LoaiSP;
-
-    -- Tăng lên 1
-    SET @MaLoai = 'LSP' + RIGHT('0000000' + CAST(@MaxID + 1 AS VARCHAR(7)), 7);
-
-    BEGIN TRY
+	   
         INSERT INTO LoaiSP(MaLoai, TenLoai, MaNhom)
         VALUES (@MaLoai, @TenLoai, @MaNhom);
 
-        PRINT N'Thêm loại sản phẩm thành công!';
-    END TRY
-    BEGIN CATCH
-        DECLARE @Err NVARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR(N'Lỗi khi thêm loại sản phẩm: %s', 16, 1, @Err);
-    END CATCH
+        PRINT N'Thêm loại sản phẩm thành công!';    
 END;
 GO
 

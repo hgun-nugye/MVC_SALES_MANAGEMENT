@@ -1,9 +1,6 @@
 ﻿USE DB_QLBH;
 GO
 
--- =========================================
--- INSERT
--- =========================================
 CREATE OR ALTER PROC CTMH_Insert
 (
     @MaDMH CHAR(11),
@@ -24,20 +21,10 @@ BEGIN
 
     -- Thêm chi tiết đơn mua
     INSERT INTO CTMH (MaDMH, MaSP, SLM, DGM)
-    VALUES (@MaDMH, @MaSP, @SLM, @DGM);
-
-	-- update số lượng tồn sp 
-	UPDATE SanPham
-        SET SoLuongTon = SoLuongTon + @SLM
-        WHERE MaSP = @MaSP;
-
+    VALUES (@MaDMH, @MaSP, @SLM, @DGM);	
 END;
 GO
 
-
--- =========================================
--- UPDATE
--- =========================================
 CREATE OR ALTER PROC CTMH_Update
 (
     @MaDMH CHAR(11),
@@ -48,7 +35,7 @@ CREATE OR ALTER PROC CTMH_Update
 AS
 BEGIN
     SET NOCOUNT ON;
-    SET XACT_ABORT ON; -- bắt buộc với transaction
+    SET XACT_ABORT ON; 
 
     BEGIN TRY
         BEGIN TRAN;
@@ -68,13 +55,7 @@ BEGIN
         UPDATE CTMH
         SET SLM = @SLM,
             DGM = @DGM
-        WHERE MaDMH = @MaDMH AND MaSP = @MaSP;
-
-        -- Cập nhật tồn kho theo chênh lệch nhập
-        UPDATE SanPham
-        SET SoLuongTon = SoLuongTon + (@SLM - @OldSLM)
-        WHERE MaSP = @MaSP;
-
+        WHERE MaDMH = @MaDMH AND MaSP = @MaSP;      
         COMMIT TRAN;
     END TRY
     BEGIN CATCH
@@ -86,10 +67,6 @@ BEGIN
 END;
 GO
 
-
--- =========================================
--- DELETE
--- =========================================
 CREATE OR ALTER PROC CTMH_Delete
 (
     @MaDMH CHAR(11),
@@ -104,8 +81,6 @@ BEGIN
 
         DECLARE @SLM INT;
         SELECT @SLM = SLM FROM CTMH WHERE MaDMH = @MaDMH AND MaSP = @MaSP;
-
-        -- Nếu không có record → return
         IF @SLM IS NULL
         BEGIN
             RAISERROR(N'Chi tiết đơn mua không tồn tại.', 16, 1);
@@ -115,12 +90,6 @@ BEGIN
 
         -- Xóa
         DELETE FROM CTMH WHERE MaDMH = @MaDMH AND MaSP = @MaSP;
-
-        -- Trừ tồn kho
-        UPDATE SanPham
-        SET SoLuongTon = SoLuongTon - @SLM
-        WHERE MaSP = @MaSP;
-
         COMMIT TRAN;
     END TRY
     BEGIN CATCH
@@ -131,10 +100,6 @@ BEGIN
 END;
 GO
 
-
--- =========================================
--- GET ALL
--- =========================================
 CREATE OR ALTER PROC CTMH_GetAll
 AS
 BEGIN
@@ -144,7 +109,7 @@ BEGIN
         CT.MaDMH,
         CT.MaSP,
         SP.TenSP,
-        SP.DonGia,
+		SP.GiaBan,
         CT.SLM,
         CT.DGM,
         (CT.SLM * CT.DGM) AS ThanhTien,
@@ -157,10 +122,6 @@ BEGIN
 END;
 GO
 
-
--- =========================================
--- GET BY ID
--- =========================================
 CREATE OR ALTER PROC CTMH_GetByID
 (
     @MaDMH CHAR(11),
@@ -174,7 +135,7 @@ BEGIN
         CT.MaDMH,
         CT.MaSP,
         SP.TenSP,
-        SP.DonGia,
+        SP.GiaBan,
         CT.SLM,
         CT.DGM,
         (CT.SLM * CT.DGM) AS ThanhTien,

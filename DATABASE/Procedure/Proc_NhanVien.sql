@@ -1,120 +1,234 @@
 ﻿USE DB_QLBH;
 GO
+
 CREATE OR ALTER PROC NhanVien_Insert
 (
-	@TenNV NVARCHAR(100),
-	@VaiTro NVARCHAR(50),
-	@TenDNNV VARCHAR(50),
-	@MatKhauNV VARCHAR(255)
+    @CCCD VARCHAR(12),
+    @TenNV NVARCHAR(100),
+    @GioiTinh BIT,
+    @NgaySinh DATE,
+    @SDT VARCHAR(10),
+    @Email VARCHAR(50),
+    @DiaChiNV NVARCHAR(255),
+    @MaXa SMALLINT,
+
+    @TenDNNV VARCHAR(50),
+    @MatKhauNV VARCHAR(255),
+
+    @MaVT CHAR(5)   -- VAI TRÒ
 )
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	IF EXISTS (SELECT 1 FROM NhanVien WHERE TenDNNV = @TenDNNV)
-	BEGIN
-		RAISERROR(N'Tên đăng nhập đã tồn tại.', 16, 1);
-		RETURN;
-	END;
+    -- Check username
+    IF EXISTS (SELECT 1 FROM NhanVien WHERE TenDNNV = @TenDNNV)
+    BEGIN
+        RAISERROR(N'Tên đăng nhập đã tồn tại!', 16, 1);
+        RETURN;
+    END;
 
-	DECLARE @MaNV VARCHAR(10);
-	DECLARE @MaxID INT;
+	 IF EXISTS (SELECT 1 FROM NhanVien WHERE CCCD = @CCCD)
+    BEGIN
+        RAISERROR(N'Nhân viên đã tồn tại!', 16, 1);
+        RETURN;
+    END;
 
-	SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaNV, 3, LEN(MaNV)-2) AS INT)), 0)
-	FROM NhanVien;
+    DECLARE @MaNV VARCHAR(10);
+    DECLARE @MaxID INT;
 
-	SET @MaNV = 'NV' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
+    SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaNV, 3, 8) AS INT)), 0)
+    FROM NhanVien;
 
-	INSERT INTO NhanVien(MaNV, TenNV, VaiTro, TenDNNV, MatKhauNV)
-	VALUES (@MaNV, @TenNV, @VaiTro, @TenDNNV, @MatKhauNV);
+    SET @MaNV = 'NV' + RIGHT('00000000' + CAST(@MaxID + 1 AS VARCHAR(8)), 8);
 
-	PRINT N'Thêm nhân viên thành công!';
+    BEGIN TRAN;
+
+    INSERT INTO NhanVien
+    (
+        MaNV, CCCD, TenNV, GioiTinh, NgaySinh,
+        SDT, Email, DiaChiNV, MaXa,
+        TenDNNV, MatKhauNV
+    )
+    VALUES
+    (
+        @MaNV, @CCCD, @TenNV, @GioiTinh, @NgaySinh,
+        @SDT, @Email, @DiaChiNV, @MaXa,
+        @TenDNNV, @MatKhauNV
+    );
+
+    INSERT INTO PhanQuyen(MaVT, MaNV)
+    VALUES (@MaVT, @MaNV);
+
+    COMMIT;
+
+    PRINT N'Thêm nhân viên thành công!';
 END;
 GO
 
 CREATE OR ALTER PROC NhanVien_Update
 (
-	@MaNV VARCHAR(10),
-	@TenNV NVARCHAR(100),
-	@VaiTro NVARCHAR(50),
-	@TenDNNV VARCHAR(50),
-	@MatKhauNV VARCHAR(255)
+    @MaNV VARCHAR(10),
+	@CCCD VARCHAR(12),
+    @TenNV NVARCHAR(100),
+    @GioiTinh BIT,
+    @NgaySinh DATE,
+    @SDT VARCHAR(10),
+    @Email VARCHAR(50),
+    @DiaChiNV NVARCHAR(255),
+    @MaXa SMALLINT,
+
+    @TenDNNV VARCHAR(50),
+    @MatKhauNV VARCHAR(255),
+
+    @MaVT CHAR(5)
 )
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
+	   
+    IF EXISTS (
+        SELECT 1 FROM NhanVien
+        WHERE TenDNNV = @TenDNNV AND MaNV <> @MaNV			
+    )
+    BEGIN
+        RAISERROR(N'Tên đăng nhập đã được sử dụng!', 16, 1);
+        RETURN;
+    END;
 
-	IF NOT EXISTS (SELECT 1 FROM NhanVien WHERE MaNV = @MaNV)
-	BEGIN
-		RAISERROR(N'Không tìm thấy nhân viên.', 16, 1);
-		RETURN;
-	END;
+	IF EXISTS (
+        SELECT 1 FROM NhanVien
+        WHERE CCCD = @CCCD AND MaNV <> @MaNV
+    )
+    BEGIN
+        RAISERROR(N'Nhân viên đã được sử dụng!', 16, 1);
+        RETURN;
+    END;
 
-	IF EXISTS (SELECT 1 FROM NhanVien WHERE TenDNNV = @TenDNNV AND MaNV <> @MaNV)
-	BEGIN
-		RAISERROR(N'Tên đăng nhập đã được sử dụng.', 16, 1);
-		RETURN;
-	END;
+    BEGIN TRAN;
 
-	UPDATE NhanVien
-	SET TenNV = @TenNV,
-		VaiTro = @VaiTro,
-		TenDNNV = @TenDNNV,
-		MatKhauNV = @MatKhauNV
-	WHERE MaNV = @MaNV;
+    UPDATE NhanVien
+    SET
+		CCCD = @CCCD,
+        TenNV = @TenNV,
+        GioiTinh = @GioiTinh,
+        NgaySinh = @NgaySinh,
+        SDT = @SDT,
+        Email = @Email,
+        DiaChiNV = @DiaChiNV,
+        MaXa = @MaXa,
+        TenDNNV = @TenDNNV,
+        MatKhauNV = @MatKhauNV
+    WHERE MaNV = @MaNV;
 
-	PRINT N'Cập nhật nhân viên thành công!';
+    -- Update vai trò
+    DELETE FROM PhanQuyen WHERE MaNV = @MaNV;
+
+    INSERT INTO PhanQuyen(MaVT, MaNV)
+    VALUES (@MaVT, @MaNV);
+
+    COMMIT;
+
+    PRINT N'Cập nhật nhân viên thành công!';
 END;
 GO
 
 CREATE OR ALTER PROC NhanVien_Delete
 (
-	@MaNV VARCHAR(10)
+    @MaNV VARCHAR(10)
 )
 AS
 BEGIN
-	IF NOT EXISTS (SELECT 1 FROM NhanVien WHERE MaNV = @MaNV)
-	BEGIN
-		RAISERROR(N'Không tìm thấy nhân viên.', 16, 1);
-		RETURN;
-	END;
+    SET NOCOUNT ON;
 
-	DELETE FROM NhanVien WHERE MaNV = @MaNV;
+    IF NOT EXISTS (SELECT 1 FROM NhanVien WHERE MaNV = @MaNV)
+    BEGIN
+        RAISERROR(N'Không tìm thấy nhân viên!', 16, 1);
+        RETURN;
+    END;
 
-	PRINT N'Xóa nhân viên thành công!';
+    BEGIN TRAN;
+    DELETE FROM PhanQuyen WHERE MaNV = @MaNV;
+    DELETE FROM NhanVien WHERE MaNV = @MaNV;
+    COMMIT;
+
+    PRINT N'Xóa nhân viên thành công!';
 END;
 GO
 
 CREATE OR ALTER PROC NhanVien_GetAll
 AS
 BEGIN
-	SELECT * FROM NhanVien ORDER BY MaNV;
+    SET NOCOUNT ON;
+
+    SELECT 
+        nv.MaNV,
+        nv.TenNV,
+        nv.GioiTinh,
+        nv.NgaySinh,
+        nv.SDT,
+        nv.Email,
+        nv.NgayLam,
+        vt.TenVT,
+        x.TenXa,
+        t.TenTinh
+    FROM NhanVien nv
+    JOIN PhanQuyen pq ON pq.MaNV = nv.MaNV
+    JOIN VaiTro vt ON vt.MaVT = pq.MaVT
+    JOIN Xa x ON x.MaXa = nv.MaXa
+    JOIN Tinh t ON t.MaTinh = x.MaTinh
+    ORDER BY nv.MaNV;
 END;
 GO
+
 
 CREATE OR ALTER PROC NhanVien_GetByID
 (
-	@MaNV VARCHAR(10)
+    @MaNV VARCHAR(10)
 )
 AS
 BEGIN
-	SELECT * FROM NhanVien WHERE MaNV = @MaNV;
+    SET NOCOUNT ON;
+
+    SELECT 
+        nv.*,
+        vt.MaVT,
+        vt.TenVT,
+        x.TenXa,
+        t.TenTinh
+    FROM NhanVien nv
+    JOIN PhanQuyen pq ON pq.MaNV = nv.MaNV
+    JOIN VaiTro vt ON vt.MaVT = pq.MaVT
+    JOIN Xa x ON x.MaXa = nv.MaXa
+    JOIN Tinh t ON t.MaTinh = x.MaTinh
+    WHERE nv.MaNV = @MaNV;
 END;
 GO
 
+
 -- Search
-CREATE OR ALTER PROCEDURE NhanVien_Search
+CREATE OR ALTER PROC NhanVien_Search
+(
     @Search NVARCHAR(200) = NULL
+)
 AS
-BEGIN    
-    SELECT n.*
-	FROM NhanVien n
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        nv.MaNV,
+        nv.TenNV,
+        nv.SDT,
+        nv.Email,
+        vt.TenVT
+    FROM NhanVien nv
+    JOIN PhanQuyen pq ON pq.MaNV = nv.MaNV
+    JOIN VaiTro vt ON vt.MaVT = pq.MaVT
     WHERE
-        (
-            @Search IS NULL OR @Search = '' OR
-            n.TenNV LIKE '%' + @Search + '%' OR
-            n.TenDNNV LIKE '%' + @Search + '%' OR
-            n.VaiTro LIKE '%' + @Search + '%' 
-        )
+        @Search IS NULL OR @Search = '' OR
+        nv.TenNV LIKE '%' + @Search + '%' OR
+        nv.TenDNNV LIKE '%' + @Search + '%' OR
+        nv.SDT LIKE '%' + @Search + '%' OR
+        vt.TenVT LIKE '%' + @Search + '%';
 END;
 GO

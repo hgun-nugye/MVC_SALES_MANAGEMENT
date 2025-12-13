@@ -16,11 +16,9 @@ BEGIN
         RETURN;
     END;
 
-    -- Sinh mã tự động tăng (SMALLINT)
     DECLARE @MaTinh SMALLINT;
     SELECT @MaTinh = ISNULL(MAX(MaTinh), 0) + 1 FROM Tinh;
 
-    -- Thêm dữ liệu
     INSERT INTO Tinh (MaTinh, TenTinh)
     VALUES (@MaTinh, @TenTinh);
 END;

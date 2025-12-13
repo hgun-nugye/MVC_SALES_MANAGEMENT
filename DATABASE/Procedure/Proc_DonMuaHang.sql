@@ -1,7 +1,7 @@
 ﻿USE DB_QLBH;
 GO
 
-CREATE TYPE dbo.CTMH_List AS TABLE
+CREATE TYPE CTMH_List AS TABLE
 (
     MaSP VARCHAR(10),
     SLM INT,
@@ -14,7 +14,7 @@ CREATE OR ALTER PROC DonMuaHang_Insert
     @NgayMH DATE,
     @MaNCC VARCHAR(10),
     @MaNV VARCHAR(10),
-    @ChiTiet CTMH_List READONLY 
+    @ChiTiet CTMH_List READONLY
 )
 AS
 BEGIN
@@ -28,10 +28,10 @@ BEGIN
         DECLARE @MaxNum INT;
         DECLARE @Prefix VARCHAR(8);
 
-        SET @Prefix = 'M' +
-                      RIGHT(CAST(YEAR(@NgayMH) AS VARCHAR(4)), 2) +
-                      RIGHT('0' + CAST(MONTH(@NgayMH) AS VARCHAR(2)), 2) +
-                      RIGHT('0' + CAST(DAY(@NgayMH) AS VARCHAR(2)), 2);
+        -- Tạo mã đơn: MYYMMDDxxxx
+        SET @Prefix = 'M' + RIGHT(CAST(YEAR(@NgayMH) AS VARCHAR(4)), 2)
+                         + RIGHT('0' + CAST(MONTH(@NgayMH) AS VARCHAR(2)), 2)
+                         + RIGHT('0' + CAST(DAY(@NgayMH) AS VARCHAR(2)), 2);
 
         SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDMH,4) AS INT)),0)
         FROM DonMuaHang
@@ -39,23 +39,21 @@ BEGIN
 
         SET @MaDMH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
 
+        -- Thêm đơn mua hàng
         INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC, MaNV)
         VALUES (@MaDMH, @NgayMH, @MaNCC, @MaNV);
 
+        -- Thêm chi tiết
         INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
-        SELECT @MaDMH, MaSP, SLM, DGM FROM @ChiTiet;
-
-        UPDATE SP
-        SET SP.SoLuongTon = SP.SoLuongTon + CT.SLM
-        FROM SanPham SP
-        JOIN @ChiTiet CT ON SP.MaSP = CT.MaSP;
+        SELECT @MaDMH, MaSP, SLM, DGM
+        FROM @ChiTiet;
 
         COMMIT TRAN;
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRAN;
         THROW;
-    END CATCH;
+    END CATCH
 END;
 GO
 
@@ -88,31 +86,19 @@ BEGIN
             MaNV = @MaNV
         WHERE MaDMH = @MaDMH;
 
-        -- Trừ tồn kho cũ
-        UPDATE SP
-        SET SP.SoLuongTon = SP.SoLuongTon - C.SLM
-        FROM SanPham SP
-        JOIN CTMH C ON SP.MaSP = C.MaSP
-        WHERE C.MaDMH = @MaDMH;
-
+        -- Xóa chi tiết cũ
         DELETE FROM CTMH WHERE MaDMH = @MaDMH;
 
-        -- Thêm lại chi tiết mới
+        -- Thêm chi tiết mới
         INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
         SELECT @MaDMH, MaSP, SLM, DGM FROM @ChiTiet;
-
-        -- Cộng tồn kho mới
-        UPDATE SP
-        SET SP.SoLuongTon = SP.SoLuongTon + CT.SLM
-        FROM SanPham SP
-        JOIN @ChiTiet CT ON SP.MaSP = CT.MaSP;
 
         COMMIT TRAN;
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRAN;
         THROW;
-    END CATCH;
+    END CATCH
 END;
 GO
 
@@ -134,13 +120,6 @@ BEGIN
             RETURN;
         END;
 
-        -- Trừ tồn kho
-        UPDATE SP
-        SET SP.SoLuongTon = SP.SoLuongTon - C.SLM
-        FROM SanPham SP
-        JOIN CTMH C ON C.MaSP = SP.MaSP
-        WHERE C.MaDMH = @MaDMH;
-
         DELETE FROM CTMH WHERE MaDMH = @MaDMH;
         DELETE FROM DonMuaHang WHERE MaDMH = @MaDMH;
 
@@ -149,13 +128,15 @@ BEGIN
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRAN;
         THROW;
-    END CATCH;
+    END CATCH
 END;
 GO
 
 CREATE OR ALTER PROC DonMuaHang_GetAll
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         D.MaDMH,
         D.NgayMH,
@@ -191,15 +172,15 @@ BEGIN
         N.TenNCC,
         D.MaNV,
         NV.TenNV,
-		S.MaSP,
-		S.TenSP,
-		C.DGM,
-		C.SLM
+        S.MaSP,
+        S.TenSP,
+        C.DGM,
+        C.SLM
     FROM DonMuaHang D
-	LEFT JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    LEFT JOIN NhaCC N ON N.MaNCC = D.MaNCC
     LEFT JOIN NhanVien NV ON NV.MaNV = D.MaNV
-	LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
-	LEFT JOIN SanPham S ON S.MaSP = C.MaSP
+    LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
+    LEFT JOIN SanPham S ON S.MaSP = C.MaSP
     WHERE D.MaDMH = @MaDMH;
 END;
 GO
@@ -219,15 +200,15 @@ BEGIN
         N.TenNCC,
         D.MaNV,
         NV.TenNV,
-		S.MaSP,
-		S.TenSP,
-		C.DGM,
-		C.SLM
+        S.MaSP,
+        S.TenSP,
+        C.DGM,
+        C.SLM
     FROM DonMuaHang D
-	LEFT JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    LEFT JOIN NhaCC N ON N.MaNCC = D.MaNCC
     LEFT JOIN NhanVien NV ON NV.MaNV = D.MaNV
-	LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
-	LEFT JOIN SanPham S ON S.MaSP = C.MaSP
+    LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
+    LEFT JOIN SanPham S ON S.MaSP = C.MaSP
     WHERE
         (
             @Search IS NULL OR @Search = '' OR

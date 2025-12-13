@@ -52,14 +52,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra mã xã có tồn tại chưa
-    IF NOT EXISTS (SELECT 1 FROM Xa WHERE MaXa = @MaXa)
-    BEGIN
-        RAISERROR(N'Không tìm thấy mã xã để cập nhật.', 16, 1);
-        RETURN;
-    END;
-
-    -- Kiểm tra trùng tên xã trong cùng tỉnh, trừ chính nó
+    -- Kiểm tra trùng tên xã trong cùng tỉnh
     IF EXISTS (
         SELECT 1 
         FROM Xa 
@@ -72,7 +65,6 @@ BEGIN
         RETURN;
     END;
 
-    -- Cập nhật dữ liệu
     UPDATE Xa
     SET TenXa = @TenXa,
         MaTinh = @MaTinh

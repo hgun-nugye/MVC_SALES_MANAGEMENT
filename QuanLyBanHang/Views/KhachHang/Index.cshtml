@@ -82,7 +82,10 @@
                 {
                     <tr class="clickable-row" data-href="@Url.Action("Details", "KhachHang", new { id = item.MaKH })">
 
-                        <td>@item.MaKH</td>
+                        <td>
+                            <img src="@(string.IsNullOrEmpty(item.AnhKH) ? "~/images/default-user.png" :item.AnhKH )" class="avatar me-2" />
+                            @item.MaKH
+                        </td>
                         <td>@item.TenKH</td>
                         <td>@item.DienThoaiKH</td>
                         <td>@item.EmailKH</td>

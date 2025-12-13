@@ -54,12 +54,6 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF NOT EXISTS(SELECT 1 FROM Hang WHERE MaHang=@MaHang)
-    BEGIN
-        RAISERROR(N'Không tìm thấy hãng để cập nhật.',16,1);
-        RETURN;
-    END
-
     IF EXISTS(SELECT 1 FROM Hang WHERE TenHang=@TenHang AND MaNuoc=@MaNuoc AND MaHang<>@MaHang)
     BEGIN
         RAISERROR(N'Tên hãng đã tồn tại trong nước này.',16,1);
