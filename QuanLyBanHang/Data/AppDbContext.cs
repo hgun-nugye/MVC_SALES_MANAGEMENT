@@ -13,20 +13,23 @@ namespace QuanLyBanHang.Services
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			base.OnConfiguring(optionsBuilder);
-			// Tắt lazy loading để tránh tự động load navigation properties
-			//optionsBuilder.UseLazyLoadingProxies(false);
 		}
 
 		// ========== TABLES (ENTITY thật) ==========
 		public DbSet<Tinh> Tinh { get; set; } = null!;
 		public DbSet<Xa> Xa { get; set; } = null!;
 		public DbSet<Nuoc> Nuoc { get; set; } = null!;
-		public DbSet<Hang> Hang { get; set; } = null!;
+		public DbSet<HangSX> Hang { get; set; } = null!;
 		public DbSet<NhaCC> NhaCC { get; set; } = null!;
 		public DbSet<KhachHang> KhachHang { get; set; } = null!;
+		public DbSet<VaiTro> VaiTro { get; set; } = null!;
 		public DbSet<NhanVien> NhanVien { get; set; } = null!;
+		public DbSet<PhanQuyen> PhanQuyen { get; set; } = null!;
 		public DbSet<NhomSP> NhomSP { get; set; } = null!;
 		public DbSet<LoaiSP> LoaiSP { get; set; } = null!;
+		public DbSet<TrangThai> TrangThai { get; set; } = null!;
+		public DbSet<TrangThaiBH> TrangThaiBH { get; set; } = null!;
+		public DbSet<TrangThaiMH> TrangThaiMH { get; set; } = null!;
 		public DbSet<SanPham> SanPham { get; set; } = null!;
 		public DbSet<DonMuaHang> DonMuaHang { get; set; } = null!;
 		public DbSet<DonMuaHangDetail> DonMuaHangDetail { get; set; } = null!;
@@ -35,17 +38,19 @@ namespace QuanLyBanHang.Services
 		public DbSet<DonBanHangDetail> DonBanHangDetail { get; set; } = null!;
 		public DbSet<CTBH> CTBH { get; set; } = null!;
 
-		// ========== DTOs (Keyless entities cho stored procedures) ==========
 		public DbSet<NuocDto> NuocDto { get; set; } = null!;
 		public DbSet<NhomSPDto> NhomSPDto { get; set; } = null!;
 		public DbSet<LoaiSPDto> LoaiSPDtos { get; set; } = null!;
 		public DbSet<SanPhamDto> SanPhamDto { get; set; } = null!;
 		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; } = null!;
 		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; } = null!;
+		public DbSet<XaDTO> XaDTO { get; set; } = null!;
 
-		// ========== SQL VIEW (nếu có) ==========
+
+		// ========== SQL VIEW ==========
 		public DbSet<NhaCCDetailView> NhaCCDetailView { get; set; } = null!;
 		public DbSet<KhachHangDetailView> KhachHangDetailView { get; set; } = null!;
+		public DbSet<NhanVienDetailView> NhanVienDetailView { get; set; } = null!;
 
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,6 +64,9 @@ namespace QuanLyBanHang.Services
 			modelBuilder.Entity<CTBH>()
 				.HasKey(ct => new { ct.MaDBH, ct.MaSP });
 
+			modelBuilder.Entity<PhanQuyen>()
+				.HasKey(pq => new { pq.MaVT, pq.MaNV });
+
 			// ====== DTOs: Keyless entities (cho stored procedures) ======
 			modelBuilder.Entity<NuocDto>().HasNoKey();
 			modelBuilder.Entity<NhomSPDto>().HasNoKey();
@@ -67,14 +75,18 @@ namespace QuanLyBanHang.Services
 			modelBuilder.Entity<CTMHDetailDto>().HasNoKey();
 			modelBuilder.Entity<CTBHDetailDto>().HasNoKey();
 
-			// ====== SQL VIEW: No Key + tên view ======
-			modelBuilder.Entity<NhaCCDetailView>()
-				.HasNoKey()
-				.ToView("NhaCCDetailView");
+			//// ====== SQL VIEW: No Key + tên view ======
+			//modelBuilder.Entity<NhaCCDetailView>()
+			//	.HasNoKey()
+			//	.ToView("NhaCCDetailView");
 
-			modelBuilder.Entity<KhachHangDetailView>()
-				.HasNoKey()
-				.ToView("KhachHangDetailView");
+			//modelBuilder.Entity<KhachHangDetailView>()
+			//	.HasNoKey()
+			//	.ToView("KhachHangDetailView");
+
+			//modelBuilder.Entity<XaDetail>()
+			//	.HasNoKey()
+			//	.ToView("XaDetail");
 
 			//// ====== DonBanHangDetail là View/ResultSet không có khóa ======
 			//modelBuilder.Entity<DonBanHangDetail>(entity =>
@@ -103,24 +115,24 @@ namespace QuanLyBanHang.Services
 			//{
 			//	entity.Ignore(e => e.TenNCC);
 			//	entity.Ignore(e => e.TenNV);
-				
-				//// Cấu hình foreign key rõ ràng để tránh shadow property
-				//// Không sử dụng navigation property, chỉ dùng foreign key
-				//entity.HasOne(e => e.NhaCC)
-				//	.WithMany()
-				//	.HasForeignKey(e => e.MaNCC)
-				//	.OnDelete(DeleteBehavior.NoAction)
-				//	.IsRequired(false);
-				
-				//entity.HasOne(e => e.NhanVien)
-				//	.WithMany()
-				//	.HasForeignKey(e => e.MaNV)
-				//	.OnDelete(DeleteBehavior.NoAction)
-				//	.IsRequired(false);
-				
-				// Tắt auto-include cho navigation properties
-				//entity.Navigation(e => e.NhaCC).AutoInclude = false;
-				//entity.Navigation(e => e.NhanVien).AutoInclude = false;
+
+			//// Cấu hình foreign key rõ ràng để tránh shadow property
+			//// Không sử dụng navigation property, chỉ dùng foreign key
+			//entity.HasOne(e => e.NhaCC)
+			//	.WithMany()
+			//	.HasForeignKey(e => e.MaNCC)
+			//	.OnDelete(DeleteBehavior.NoAction)
+			//	.IsRequired(false);
+
+			//entity.HasOne(e => e.NhanVien)
+			//	.WithMany()
+			//	.HasForeignKey(e => e.MaNV)
+			//	.OnDelete(DeleteBehavior.NoAction)
+			//	.IsRequired(false);
+
+			// Tắt auto-include cho navigation properties
+			//entity.Navigation(e => e.NhaCC).AutoInclude = false;
+			//entity.Navigation(e => e.NhanVien).AutoInclude = false;
 			//});
 
 			// ====== NhaCC: cấu hình để tránh shadow property khi query ======

@@ -1,0 +1,77 @@
+@model QuanLyBanHang.Models.PhanQuyen
+@{
+    ViewBag.Title = "Thêm Phân quyền";
+}
+
+<div class="container">
+    <h4 class="text-success mb-3">
+        Thêm Phân quyền
+    </h4>
+
+    <form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fa-solid fa-triangle-exclamation"></i> Lỗi xác thực:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fa-solid fa-exclamation-circle"></i> Lỗi:</strong> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="MaVT" class="form-label required-field">
+                    <i class="fa-solid fa-user-tag"></i>
+                    @Html.DisplayNameFor(m => m.MaVT)
+                </label>
+                <select asp-for="MaVT" asp-items="ViewBag.MaVT" class="form-select">
+                    <option value="">-- Chọn vai trò --</option>
+                </select>
+                <span asp-validation-for="MaVT" class="text-danger small mt-1 d-block"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="MaNV" class="form-label required-field">
+                    <i class="fa-solid fa-user"></i>
+                    @Html.DisplayNameFor(m => m.MaNV)
+                </label>
+                <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
+                    <option value="">-- Chọn nhân viên --</option>
+                </select>
+                <span asp-validation-for="MaNV" class="text-danger small mt-1 d-block"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2 justify-content-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Thêm mới
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

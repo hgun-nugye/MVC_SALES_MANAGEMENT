@@ -1,32 +1,33 @@
-@model QuanLyBanHang.Models.Hang
+@model QuanLyBanHang.Models.PhanQuyen
 
 @{
-    ViewBag.Title = "Xóa Hãng ";
+    ViewBag.Title = "Xóa Phân quyền";
 }
 
-<div class=" container">
+<div class="container">
     <h4 class="text-danger mb-3">
-        Xóa Hãng
+        Xóa Phân quyền
     </h4>
 
     <div class="alert alert-warning shadow-sm">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc muốn xóa <strong>@Model.TenHang</strong> không?
+        Bạn có chắc muốn xóa phân quyền <strong>@(Model.VaiTro?.TenVT ?? Model.MaVT)</strong> của nhân viên <strong>@(Model.NhanVien?.TenNV ?? Model.MaNV)</strong> không?
     </div>
 
     <div class="border p-4 rounded shadow-sm bg-light">
-        <p><strong>@Html.DisplayNameFor(m => m.MaHang):</strong> @Model.MaHang</p>
-        <p><strong>@Html.DisplayNameFor(m => m.TenHang):</strong> @Model.TenHang</p>
-        <p><strong>@Html.DisplayNameFor(m => m.MaNuoc):</strong> @Model.MaNuoc</p>
-        <p><strong>@Html.DisplayNameFor(m => m.TenNuoc):</strong> @Model.TenNuoc</p>
+        <p><strong>@Html.DisplayNameFor(m => m.MaVT):</strong> @Model.MaVT</p>
+        <p><strong>Tên vai trò:</strong> @(Model.VaiTro?.TenVT ?? "")</p>
+        <p><strong>@Html.DisplayNameFor(m => m.MaNV):</strong> @Model.MaNV</p>
+        <p><strong>Tên nhân viên:</strong> @(Model.NhanVien?.TenNV ?? "")</p>
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
-        <input type="hidden" asp-for="MaHang" />
+        <input type="hidden" asp-for="MaVT" />
+        <input type="hidden" asp-for="MaNV" />
         <button type="button" class="btn btn-danger" onclick="confirmDelete()">
             <i class="fa-solid fa-trash-can me-2"></i> Xóa
         </button>
-        <a asp-action="Details" asp-route-id="@Model.MaHang" class="btn btn-secondary">
+        <a asp-action="Details" asp-route-maVT="@Model.MaVT" asp-route-maNV="@Model.MaNV" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </form>
@@ -38,7 +39,7 @@
         function confirmDelete() {
             Swal.fire({
                 title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa hãng này?',
+                text: 'Bạn có chắc chắn muốn xóa phân quyền này?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Xóa',
@@ -53,3 +54,4 @@
         }
     </script>
 }
+

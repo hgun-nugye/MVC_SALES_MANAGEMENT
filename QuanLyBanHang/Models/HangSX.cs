@@ -3,19 +3,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
 {
-	[Table("Hang")]
-	public class Hang
+	[Table("HangSX")]
+	public class HangSX
 	{
 		[Key]
 		[Required(ErrorMessage = "Mã hãng không được để trống.")]
 		[StringLength(5, ErrorMessage = "Mã hãng tối đa 5 ký tự.")]
 		[Display(Name = "Mã Hãng")]
-		public string MaHang { get; set; } = string.Empty;
+		public string MaHangSX { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Tên hãng không được để trống.")]
 		[StringLength(100, ErrorMessage = "Tên hãng tối đa 100 ký tự.")]
 		[Display(Name = "Tên Hãng")]
-		public string TenHang { get; set; } = string.Empty;
+		public string TenHangSX { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Mã nước không được để trống.")]
 		[StringLength(5, ErrorMessage = "Mã nước tối đa 5 ký tự.")]

@@ -4,57 +4,57 @@ using Microsoft.Data.SqlClient;
 
 namespace QuanLyBanHang.Services
 {
-	public class HangService
+	public class HangSXService
 	{
 		private readonly AppDbContext _context;
 
-		public HangService(AppDbContext context)
+		public HangSXService(AppDbContext context)
 		{
 			_context = context;
 		}
 
-		public async Task<List<Hang>> Search(string? search)
+		public async Task<List<HangSX>> Search(string? search)
 		{
 			var parameter = new SqlParameter("@Search", (object?)search ?? DBNull.Value);
 
 			return await _context.Hang
-				.FromSqlRaw("EXEC Hang_Search @Search", parameter)
+				.FromSqlRaw("EXEC HangSX_Search @Search", parameter)
 				.ToListAsync();
 		}
 
 		// Lấy danh sách tất cả Hãng
-		public async Task<List<Hang>> GetAll()
+		public async Task<List<HangSX>> GetAll()
 		{
 			return await _context.Hang
-				.FromSqlRaw("EXEC Hang_GetAll")
+				.FromSqlRaw("EXEC HangSX_GetAll")
 				.ToListAsync();
 		}
 
 		// Lấy Hãng theo ID
-		public async Task<Hang?> GetByID(string id)
+		public async Task<HangSX?> GetByID(string id)
 		{
 			return (await _context.Hang
-				.FromSqlInterpolated($"EXEC Hang_GetByID @MaHang = {id}")
+				.FromSqlInterpolated($"EXEC HangSX_GetByID @MaHangSX = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 		}
 
 		// Thêm Hãng
-		public async Task Create(Hang model)
+		public async Task Create(HangSX model)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC Hang_Insert 
-                    @TenHang = {model.TenHang},
+                EXEC HangSX_Insert 
+                    @TenHangSX = {model.TenHangSX},
                     @MaNuoc = {model.MaNuoc}");
 		}
 
 		// Cập nhật Hãng
-		public async Task Update(Hang model)
+		public async Task Update(HangSX model)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC Hang_Update 
-                    @MaHang = {model.MaHang},
-                    @TenHang = {model.TenHang},
+                EXEC HangSX_Update 
+                    @MaHangSX = {model.MaHangSX},
+                    @TenHangSX = {model.TenHangSX},
                     @MaNuoc = {model.MaNuoc}");
 		}
 
@@ -62,7 +62,7 @@ namespace QuanLyBanHang.Services
 		public async Task Delete(string id)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC Hang_Delete @MaHang = {id}");
+                EXEC HangSX_Delete @MaHangSX = {id}");
 		}
 	}
 }

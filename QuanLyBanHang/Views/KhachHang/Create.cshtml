@@ -211,6 +211,19 @@
                 </div>
 
                 <div class="col-md-6">
+                    <label asp-for="GioiTinh" class="form-label">
+                        <i class="fa-solid fa-venus-mars"></i>
+                        Giới tính
+                    </label>
+                    <select asp-for="GioiTinh" class="form-select">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="true">Nam</option>
+                        <option value="false">Nữ</option>
+                    </select>
+                    <span asp-validation-for="GioiTinh" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
                     <label asp-for="TenDNKH" class="form-label">
                         <i class="fa-solid fa-user-circle"></i>
                         Tên đăng nhập

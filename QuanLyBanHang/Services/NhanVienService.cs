@@ -13,11 +13,11 @@ namespace QuanLyBanHang.Services
 			_context = context;
 		}
 
-		public async Task<List<NhanVien>> Search(string? search)
+		public async Task<List<NhanVienDetailView>> Search(string? search)
 		{
 			var parameter = new SqlParameter("@Search", (object?)search ?? DBNull.Value);
 
-			return await _context.NhanVien
+			return await _context.NhanVienDetailView
 				.FromSqlRaw("EXEC NhanVien_Search @Search", parameter)
 				.ToListAsync();
 		}
@@ -31,7 +31,16 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Lấy Nhân Viên theo ID
-		public async Task<NhanVien?> GetByID(string id)
+		public async Task<NhanVienDetailView?> GetByID(string id)
+		{
+			return (await _context.NhanVienDetailView
+				.FromSqlInterpolated($"EXEC NhanVien_GetByID @MaNV = {id}")
+				.ToListAsync())
+				.FirstOrDefault();
+		}
+
+		// Lấy Nhân Viên theo ID
+		public async Task<NhanVien?> GetByIDEdit(string id)
 		{
 			return (await _context.NhanVien
 				.FromSqlInterpolated($"EXEC NhanVien_GetByID @MaNV = {id}")
@@ -40,26 +49,40 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Thêm Nhân Viên
-		public async Task Create(NhanVien model)
+		public async Task Create(NhanVien model, string maVT)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC NhanVien_Insert 
+                    @CCCD = {model.CCCD},
                     @TenNV = {model.TenNV},
-                    @VaiTro = {model.VaiTro},
+                    @GioiTinh = {model.GioiTinh},
+                    @NgaySinh = {model.NgaySinh},
+                    @SDT = {model.SDT},
+                    @Email = {model.Email},
+                    @DiaChiNV = {model.DiaChiNV},
+                    @MaXa = {model.MaXa},
                     @TenDNNV = {model.TenDNNV},
-                    @MatKhauNV = {model.MatKhauNV}");
+                    @MatKhauNV = {model.MatKhauNV},
+                    @MaVT = {maVT}");
 		}
 
 		// Cập nhật Nhân Viên
-		public async Task Update(NhanVien model)
+		public async Task Update(NhanVien model, string maVT)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC NhanVien_Update 
                     @MaNV = {model.MaNV},
+                    @CCCD = {model.CCCD},
                     @TenNV = {model.TenNV},
-                    @VaiTro = {model.VaiTro},
+                    @GioiTinh = {model.GioiTinh},
+                    @NgaySinh = {model.NgaySinh},
+                    @SDT = {model.SDT},
+                    @Email = {model.Email},
+                    @DiaChiNV = {model.DiaChiNV},
+                    @MaXa = {model.MaXa},
                     @TenDNNV = {model.TenDNNV},
-                    @MatKhauNV = {model.MatKhauNV}");
+                    @MatKhauNV = {model.MatKhauNV},
+                    @MaVT = {maVT}");
 		}
 
 		// Xóa Nhân Viên

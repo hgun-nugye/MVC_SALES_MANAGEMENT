@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyBanHang.Controllers
 {
-	public class HangController : Controller
+	public class HangSXController : Controller
 	{
-		private readonly HangService _hangService;
+		private readonly HangSXService _hangService;
 		private readonly NuocService _nuocService;
 		private readonly AppDbContext _context;
 
-		public HangController(HangService hangService, NuocService nuocService, AppDbContext context)
+		public HangSXController(HangSXService hangService, NuocService nuocService, AppDbContext context)
 		{
 			_hangService = hangService;
 			_nuocService = nuocService;
@@ -51,10 +51,10 @@ namespace QuanLyBanHang.Controllers
 		// CREATE - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(Hang model)
+		public async Task<IActionResult> Create(HangSX model)
 		{
 			// Mã hãng được sinh ở DB/SP
-			ModelState.Remove("MaHang");
+			ModelState.Remove("MaHangSX");
 			if (ModelState.IsValid)
 			{
 				try
@@ -98,7 +98,7 @@ namespace QuanLyBanHang.Controllers
 		// EDIT - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(Hang model)
+		public async Task<IActionResult> Edit(HangSX model)
 		{
 			if (ModelState.IsValid)
 			{

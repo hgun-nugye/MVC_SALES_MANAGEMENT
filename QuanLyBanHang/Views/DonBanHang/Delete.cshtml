@@ -2,34 +2,172 @@
 
 @{
     ViewBag.Title = "Xóa Đơn bán hàng";
+    var header = Model.FirstOrDefault();
+    bool isCustomer = ViewBag.IsCustomer == true;
 }
 
-<div class="container border p-4 rounded shadow-sm bg-light">
+<style>
+    .delete-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+    }
 
-    <h4 class="mb-3 text-danger">
-       Xóa Đơn bán hàng
-    </h4>
+    .page-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
 
-    <div class="alert alert-warning">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc muốn xóa đơn bán hàng <strong>@Model.First().MaDBH</strong> không?
+    .detail-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px dotted #dee2e6;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .table-detail {
+        margin-top: 1.5rem;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-trash-can"></i>
+            Xóa Đơn bán hàng
+        </h4>
     </div>
 
-    <dl class="row">
-        <dt class="col-sm-3">Ngày bán hàng</dt>
-        <dd class="col-sm-9">@Model.First().NgayBH.ToString("dd/MM/yyyy")</dd>
+    @if (isCustomer)
+    {
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            Bạn không có quyền xóa đơn bán hàng. Vui lòng liên hệ nhân viên để được hỗ trợ.
+        </div>
 
-        <dt class="col-sm-3">Khách hàng</dt>
-        <dd class="col-sm-9">@Model.First().TenKH</dd>
-    </dl>
-    <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
-        <input type="hidden" name="id" value="@Model.First().MaDBH" />
-        <button type="button" class="btn btn-danger me-2" onclick="confirmDelete()">
-            <i class="fa-solid fa-trash-can me-2"></i> Xóa
-        </button>
         <a asp-action="Index" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
         </a>
+    }
+    else if (header != null)
+    {
+        <div class="alert alert-warning shadow-sm">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <strong>Cảnh báo:</strong> Bạn có chắc muốn xóa đơn bán hàng <strong>@header.MaDBH</strong> không? Hành động này không thể hoàn tác!
+        </div>
+
+        <div class="delete-card">
+            <h5 class="mb-3 text-primary">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                Thông tin đơn hàng
+            </h5>
+
+            <div class="detail-item">
+                <strong><i class="fa-solid fa-barcode me-2"></i>Mã đơn bán hàng:</strong> @header.MaDBH
+            </div>
+
+            <div class="detail-item">
+                <strong><i class="fa-solid fa-calendar me-2"></i>Ngày bán hàng:</strong> 
+                @header.NgayBH.ToString("dd/MM/yyyy")
+            </div>
+
+            <div class="detail-item">
+                <strong><i class="fa-solid fa-user me-2"></i>Khách hàng:</strong> @header.TenKH
+            </div>
+
+            <div class="detail-item">
+                <strong><i class="fa-solid fa-list-check me-2"></i>Trạng thái:</strong> @header.TenTTBH
+            </div>
+
+            @if (!string.IsNullOrEmpty(header.DiaChiDBH))
+            {
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-map-marker-alt me-2"></i>Địa chỉ giao hàng:</strong> @header.DiaChiDBH
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(header.TenXa))
+            {
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-map me-2"></i>Xã/Phường:</strong> @header.TenXa
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(header.TenTinh))
+            {
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-map-marked-alt me-2"></i>Tỉnh/Thành phố:</strong> @header.TenTinh
+                </div>
+            }
+
+            <div class="table-detail">
+                <h5 class="mb-3 text-primary">
+                    <i class="fa-solid fa-box me-2"></i>
+                    Chi tiết sản phẩm
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-danger">
+                            <tr>
+                                <th class="text-center">STT</th>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int stt = 1;
+                                decimal tongTien = 0;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                var thanhTien = (item.SLB ?? 0) * (item.DGB ?? 0);
+                                tongTien += thanhTien;
+                                <tr>
+                                    <td class="text-center">@stt</td>
+                                    <td>@item.TenSP</td>
+                                    <td class="text-center">@item.SLB</td>
+                                    <td class="text-end">@string.Format("{0:N0} đ", item.DGB)</td>
+                                    <td class="text-end">@string.Format("{0:N0} đ", thanhTien)</td>
+                                </tr>
+                                stt++;
+                            }
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr>
+                                <th colspan="4" class="text-end">Tổng tiền:</th>
+                                <th class="text-end text-danger">@string.Format("{0:N0} đ", tongTien)</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@header?.MaDBH" />
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                <i class="fa-solid fa-trash-can me-2"></i>
+                Xóa
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
+            </a>
+        </div>
     </form>
 </div>
 
@@ -39,7 +177,7 @@
         function confirmDelete() {
             Swal.fire({
                 title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa đơn bán hàng này?',
+                text: 'Bạn có chắc chắn muốn xóa đơn bán hàng này? Hành động này không thể hoàn tác!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Xóa',

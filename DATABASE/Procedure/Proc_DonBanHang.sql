@@ -5,7 +5,7 @@ CREATE TYPE dbo.CTBH_List AS TABLE
 (
     MaSP VARCHAR(10),
     SLB INT,
-    DGB MONEY
+    DGB DECIMAL(18,2)
 );
 GO
 
@@ -15,6 +15,7 @@ CREATE OR ALTER PROC DonBanHang_Insert
     @MaKH VARCHAR(10),
     @DiaChiDBH NVARCHAR(255),
     @MaXa SMALLINT,
+	@MaTTBH CHAR(3),
     @ChiTiet CTBH_List READONLY
 )
 AS
@@ -41,8 +42,8 @@ BEGIN
         SET @MaDBH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
 
         -- Thêm đơn bán hàng
-        INSERT INTO DonBanHang(MaDBH, NgayBH, MaKH, DiaChiDBH, MaXa)
-        VALUES (@MaDBH, @NgayBH, @MaKH, @DiaChiDBH, @MaXa);
+        INSERT INTO DonBanHang(MaDBH, NgayBH, MaKH, DiaChiDBH, MaXa, MaTTBH)
+        VALUES (@MaDBH, @NgayBH, @MaKH, @DiaChiDBH, @MaXa, @MaTTBH);
 
         -- Thêm chi tiết
         INSERT INTO CTBH(MaDBH, MaSP, SLB, DGB)
@@ -65,6 +66,7 @@ CREATE OR ALTER PROC DonBanHang_Update
     @MaKH VARCHAR(10),
     @DiaChiDBH NVARCHAR(255),
     @MaXa SMALLINT,
+	@MaTTBH CHAR(3),
     @ChiTiet CTBH_List READONLY
 )
 AS
@@ -86,7 +88,8 @@ BEGIN
         SET NgayBH = @NgayBH,
             MaKH = @MaKH,
             DiaChiDBH = @DiaChiDBH,
-            MaXa = @MaXa
+            MaXa = @MaXa,
+			MaTTBH = @MaTTBH
         WHERE MaDBH = @MaDBH;
 
         -- Xóa chi tiết cũ
@@ -141,21 +144,38 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        DBH.MaDBH,
-        DBH.NgayBH,
-        DBH.MaKH,
-        KH.TenKH,
-        DBH.DiaChiDBH,
-        DBH.MaXa,
-        CT.MaSP,
-        SP.TenSP,
-        CT.SLB,
-        CT.DGB
-    FROM DonBanHang DBH
-    JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
-    JOIN CTBH CT ON CT.MaDBH = DBH.MaDBH
-    JOIN SanPham SP ON SP.MaSP = CT.MaSP
-    ORDER BY DBH.NgayBH DESC, DBH.MaDBH DESC;
+        D.MaDBH,
+        D.NgayBH,
+        D.MaKH,
+        K.TenKH,
+        D.DiaChiDBH,
+        D.MaXa,
+		X.TenXa,
+		T.TenTinh,
+
+        D.MaTTBH,
+        TT.TenTTBH, 
+
+        -- Gộp chuỗi sản phẩm
+        STRING_AGG(C.MaSP, ', ') AS MaSP, 
+        STRING_AGG(S.TenSP, N', ') AS TenSP,
+
+        1 AS SLB, 
+        ISNULL(SUM(C.SLB * C.DGB), 0) AS DGB
+
+    FROM DonBanHang D
+    JOIN KhachHang K ON D.MaKH = K.MaKH
+    JOIN TrangThaiBH TT ON TT.MaTTBH = D.MaTTBH 
+	JOIN Xa X ON X.MaXa = D.MaXa 
+	JOIN Tinh T ON T.MaTinh = X.MaTinh
+    LEFT JOIN CTBH C ON C.MaDBH = D.MaDBH
+    LEFT JOIN SanPham S ON S.MaSP = C.MaSP
+    
+    GROUP BY 
+        D.MaDBH, D.NgayBH, D.MaKH, K.TenKH, 
+        D.DiaChiDBH, D.MaXa, D.MaTTBH, TT.TenTTBH, X.TenXa, T.TenTinh
+    
+    ORDER BY D.NgayBH DESC, D.MaDBH DESC;
 END;
 GO
 
@@ -168,20 +188,23 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        DBH.MaDBH,
-        DBH.NgayBH,
-        DBH.MaKH,
-        KH.TenKH,
-        DBH.DiaChiDBH,
-        DBH.MaXa,
+       DBH.*,
+	   KH.TenKH,
+        TT.TenTTBH,
         CT.MaSP,
         SP.TenSP,
         CT.SLB,
-        CT.DGB
+        CT.DGB,
+		X.TenXa,
+		T.TenTinh,
+        (CT.SLB * CT.DGB) AS ThanhTien
     FROM DonBanHang DBH
     JOIN KhachHang KH ON DBH.MaKH = KH.MaKH
+    JOIN TrangThaiBH TT ON DBH.MaTTBH = TT.MaTTBH
     JOIN CTBH CT ON CT.MaDBH = DBH.MaDBH
     JOIN SanPham SP ON SP.MaSP = CT.MaSP
+	JOIN Xa X ON X.MaXa = DBH.MaXa 
+	JOIN Tinh T ON T.MaTinh = X.MaTinh
     WHERE DBH.MaDBH = @MaDBH;
 END;
 GO
@@ -190,17 +213,39 @@ CREATE OR ALTER PROC DonBanHang_Search
 (
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
-    @Year INT = NULL
+    @Year INT = NULL,
+    @MaTTBH CHAR(3) = NULL
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT D.*, K.TenKH, C.SLB, C.DGB, C.MaSP, S.TenSP
+    SELECT 
+        D.MaDBH,
+        D.NgayBH,
+        D.MaKH,
+        K.TenKH,
+        D.DiaChiDBH,
+        D.MaXa,
+        
+        NULL AS TenTinh, 
+        NULL AS TenXa,
+
+        D.MaTTBH,
+        TT.TenTTBH, 
+
+        STRING_AGG(C.MaSP, ', ') AS MaSP, 
+        STRING_AGG(S.TenSP, N', ') AS TenSP,
+
+        1 AS SLB, 
+        ISNULL(SUM(C.SLB * C.DGB), 0) AS DGB
+
     FROM DonBanHang D
-    LEFT JOIN KhachHang K ON K.MaKH = D.MaKH
-    LEFT JOIN CTBH C ON C.MaDBH = D.MaDBH
-    LEFT JOIN SanPham S ON S.MaSP = C.MaSP
+    JOIN KhachHang K ON K.MaKH = D.MaKH
+    JOIN TrangThaiBH TT ON D.MaTTBH = TT.MaTTBH
+    LEFT JOIN CTBH C ON C.MaDBH = D.MaDBH 
+    LEFT JOIN SanPham S ON S.MaSP = C.MaSP 
+    
     WHERE
         (@Search IS NULL OR @Search = '' 
             OR D.MaDBH LIKE '%' + @Search + '%'
@@ -209,6 +254,12 @@ BEGIN
         )
         AND (@Month IS NULL OR MONTH(D.NgayBH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayBH) = @Year)
-    ORDER BY D.NgayBH DESC;
+        AND (@MaTTBH IS NULL OR D.MaTTBH = @MaTTBH)
+    
+    GROUP BY 
+        D.MaDBH, D.NgayBH, D.MaKH, K.TenKH, 
+        D.DiaChiDBH, D.MaXa, D.MaTTBH, TT.TenTTBH
+    
+    ORDER BY D.NgayBH ASC, D.MaDBH ASC;
 END;
 GO

@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyBanHang.Models
 {
+	[Table("Xa")]
 	public class Xa
 	{
 		[Key]
@@ -17,12 +19,25 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã tỉnh")]
 		public short MaTinh { get; set; }
 
-		//[NotMapped]
+		[NotMapped]
 		[Display(Name = "Tên tỉnh")]
 		public string? TenTinh { get; set; }
 
-		//[ForeignKey("MaTinh")]
-		//[Display(Name = "Tỉnh")]
-		//public Tinh? Tinh { get; set; }
+	}
+
+	[Keyless]
+	public class XaDTO
+	{
+		[Display(Name = "Mã xã")]
+		public short? MaXa { get; set; }
+
+		[Display(Name = "Tên xã")]
+		public string? TenXa { get; set; }
+
+		[Display(Name = "Mã tỉnh")]
+		public short? MaTinh { get; set; }
+
+		[Display(Name = "Tên tỉnh")]
+		public string? TenTinh { get; set; }
 	}
 }

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.Xa>
+﻿@model IEnumerable<QuanLyBanHang.Models.XaDTO>
 
 @{
     ViewBag.Title = "Quản lý Xã";
@@ -132,12 +132,12 @@
         });
 
         // clickable row giữ nguyên
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".clickable-row").forEach(row => {
-                row.addEventListener("click", function () {
-                    window.location = this.dataset.href;
-                });
-            });
-        });
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     document.querySelectorAll(".clickable-row").forEach(row => {
+        //         row.addEventListener("click", function () {
+        //             window.location = this.dataset.href;
+        //         });
+        //     });
+        // });
     </script>
 }

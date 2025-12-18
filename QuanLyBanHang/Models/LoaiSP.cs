@@ -27,13 +27,6 @@ namespace QuanLyBanHang.Models
 		[NotMapped]
 		[Display(Name = "Tên Nhóm Sản Phẩm")]
 		public string? TenNhom { get; set; }
-
-		//[ForeignKey(nameof(MaNhom))]
-		//[Display(Name = "Nhóm Sản Phẩm")]
-		//public NhomSP? NhomSP { get; set; }
-
-		//[Display(Name = "Danh Sách Sản Phẩm")]
-		//public ICollection<SanPham>? SanPhams { get; set; }
 	}
 
 	[Keyless]

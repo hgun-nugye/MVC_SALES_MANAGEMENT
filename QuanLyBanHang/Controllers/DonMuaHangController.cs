@@ -51,7 +51,6 @@ namespace QuanLyBanHang.Controllers
 
 		public async Task<IActionResult> Create()
 		{
-			// Sử dụng service thay vì query trực tiếp từ context để tránh shadow property
 			var nhaCCList = await _nhaCCService.GetAll();
 			var nhanVienList = await _nhanVienService.GetAll();
 			var sanPhamList = await _spService.GetAll();
@@ -75,28 +74,40 @@ namespace QuanLyBanHang.Controllers
 		{
 			// Bỏ qua validate MaDMH vì sẽ được sinh ở tầng DB / SP
 			ModelState.Remove("MaDMH");
-			if (model.CTMHs != null)
+			model.CTMHs ??= new List<CTMH>();
+
+			for (int i = 0; i < model.CTMHs.Count; i++)
 			{
-				for (int i = 0; i < model.CTMHs.Count; i++)
-				{
-					ModelState.Remove($"CTMHs[{i}].MaDMH");
-				}
+				ModelState.Remove($"CTMHs[{i}].MaDMH");
 			}
 
-			if (!ModelState.IsValid || model.CTMHs == null || !model.CTMHs.Any())
+			// Giữ bản gốc để trả về view
+			var originalDetails = model.CTMHs.ToList();
+			var cleanedDetails = model.CTMHs
+				.Where(x => !string.IsNullOrEmpty(x.MaSP))
+				.ToList();
+
+			if (!cleanedDetails.Any())
+				ModelState.AddModelError("CTMHs", "Vui lòng chọn ít nhất 1 sản phẩm.");
+
+			// Giá trị mặc định
+			foreach (var ct in cleanedDetails)
+			{
+				ct.SLM ??= 1;
+				ct.DGM ??= 0;
+			}
+
+			if (!ModelState.IsValid)
 			{
 				TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ thông tin đơn mua hàng và chi tiết sản phẩm.";
-				// Đảm bảo có ít nhất một dòng chi tiết để view binding không lỗi
-				model.CTMHs ??= new List<CTMH>();
-				if (!model.CTMHs.Any())
-					model.CTMHs.Add(new CTMH());
-
+				model.CTMHs = originalDetails.Any() ? originalDetails : new List<CTMH> { new CTMH() };
 				await LoadDropdowns(model);
 				return View(model);
 			}
 
 			try
 			{
+				model.CTMHs = cleanedDetails;
 				await _dmhService.Create(model);
 				TempData["SuccessMessage"] = "Thêm đơn mua hàng thành công!";
 				return RedirectToAction(nameof(Index));
@@ -151,18 +162,40 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(DonMuaHangEditCTMH model)
 		{
-			if (!ModelState.IsValid) return View(model);
-			try
+			// Xử lý logic làm sạch dữ liệu
+			model.ChiTiet ??= new List<CTMH>();
+			var cleanedDetails = model.ChiTiet
+				.Where(x => !string.IsNullOrEmpty(x.MaSP))
+				.ToList();
+
+			if (!cleanedDetails.Any())
+				ModelState.AddModelError("ChiTiet", "Vui lòng chọn ít nhất 1 sản phẩm.");
+
+			foreach (var ct in cleanedDetails)
 			{
-
-				await _dmhService.Update(model);
-
-				TempData["SuccessMessage"] = "Cập nhật đơn mua hàng thành công!";
-				return RedirectToAction(nameof(Details), new { id = model.MaDMH });
+				ct.SLM ??= 1;
+				ct.DGM ??= 0;
 			}
-			catch (Exception ex)
+
+			if (ModelState.IsValid)
 			{
-				TempData["ErrorMessage"] = ex.Message;
+				try
+				{
+					model.ChiTiet = cleanedDetails;
+
+					await _dmhService.Update(model);
+
+					TempData["SuccessMessage"] = "Cập nhật đơn mua hàng thành công!";
+					return RedirectToAction(nameof(Details), new { id = model.MaDMH });
+				}
+				catch (Exception ex)
+				{
+					TempData["ErrorMessage"] = ex.Message;
+				}
+			}
+			else
+			{
+				model.ChiTiet = cleanedDetails.Any() ? cleanedDetails : model.ChiTiet;
 			}
 
 			var nhaCCList = await _nhaCCService.GetAll();
@@ -170,8 +203,11 @@ namespace QuanLyBanHang.Controllers
 
 			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC", model.MaNCC);
 			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV", model.MaNV);
-			return View(model);
 
+			if (model.ChiTiet == null || !model.ChiTiet.Any())
+				model.ChiTiet = new List<CTMH> { new CTMH() };
+
+			return View(model);
 		}
 
 		public async Task<IActionResult> Delete(string id)

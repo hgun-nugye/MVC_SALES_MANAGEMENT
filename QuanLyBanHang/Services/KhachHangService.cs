@@ -82,6 +82,7 @@ namespace QuanLyBanHang.Services
                     @DienThoaiKH = {model.DienThoaiKH},
                     @EmailKH = {model.EmailKH},
                     @DiaChiKH = {model.DiaChiKH},
+					@GioiTinh = {model.GioiTinh},
                     @AnhKH = {model.AnhKH},
                     @MaXa = {model.MaXa},
                     @TenDNKH = {model.TenDNKH},

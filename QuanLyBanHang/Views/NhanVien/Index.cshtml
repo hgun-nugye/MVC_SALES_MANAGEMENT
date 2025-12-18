@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.NhanVien>
+﻿@model IEnumerable<QuanLyBanHang.Models.NhanVienDetailView>
 
 @{
     ViewBag.Title = "Quản lý Nhân Viên";
@@ -11,19 +11,19 @@
         max-width: 400px;
     }
 
-        .search-wrapper input {
-            padding-left: 38px !important;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
+    .search-wrapper input {
+        padding-left: 38px !important;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
 
-        .search-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
+    .search-wrapper i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
 
     .table {
         overflow-x: auto;
@@ -34,48 +34,68 @@
     .table-hover tbody tr:hover {
         background-color: #f5faff;
         transition: 0.2s;
+        cursor: pointer;
+    }
+
+    .badge-dynamic {
+        /* Sử dụng màu HSL để tự động tạo màu nền và viền dựa trên biến --role-hue */
+        background-color: hsl(var(--role-hue), 70%, 90%); /* Màu nền nhạt */
+        color: hsl(var(--role-hue), 70%, 20%); /* Chữ màu đậm cùng tông */
+        border: 1px solid hsl(var(--role-hue), 70%, 80%);
+        padding: 0.5em 0.8em;
+        font-weight: 600;
+        border-radius: 12px;
     }
 </style>
 
-<div class="container">
-    <h4 class="mb-3 text-success">
-        Danh sách Nhân Viên
-    </h4>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-success mb-0">
+            <i class="fa-solid fa-users me-2"></i>
+            Danh sách Nhân Viên
+        </h4>
+       
+    </div>
 
-    @* Form  *@
+    <!-- Form tìm kiếm -->
     <form id="Form" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
-              <div class="search-wrapper" style="max-width: 350px; position: relative;">
-            <i class="fa fa-search" style="
-            position: absolute; left: 12px; top: 50%;
-            transform: translateY(-50%); color: #777;
-        "></i>
-
+        <div class="search-wrapper" style="max-width: 350px; position: relative;">
+            <i class="fa fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #777;"></i>
             <input id="searchBox" name="search" type="text" class="form-control"
                    value="@ViewBag.Search"
                    placeholder="Tìm mã nhân viên, tên nhân viên..."
                    style="padding-left: 35px;">
-
         </div>
 
-        <div class="d-flex flex-wrap align-items-center gap-2">           
-            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
-            <a href="@Url.Action("Create", "NhanVien")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" id="btnClear" class="btn btn-secondary">
+                <i class="fa-solid fa-rotate-left me-2"></i>
+                Reset
+            </button>
+
+            <a href="@Url.Action("Create", "NhanVien")" class="btn btn-success">
+                <i class="fa-solid fa-circle-plus me-2"></i>
+                Thêm nhân viên
+            </a>
         </div>
     </form>
 
-
-    <div class="table">
-        <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+    <!-- Bảng danh sách -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle shadow-sm">
             <thead class="table-success">
                 <tr>
-                    <th class="w-15">Mã NV</th>
-                    <th class="w-25">Tên Nhân Viên</th>
-                    <th class="w-15">Vai Trò</th>
-                    <th class="w-20">Tên Đăng Nhập</th>
+                    <th class="text-center" style="width: 10%;">Mã NV</th>
+                    <th class="text-center" style="width: 20%;">Tên Nhân Viên</th>
+                    <th class="text-center" style="width: 10%;">CCCD</th>
+                    <th class="text-center" style="width: 12%;">Số Điện Thoại</th>
+                    <th class="text-center" style="width: 15%;">Email</th>
+                    <th class="text-center" style="width: 15%;">Vai Trò</th>
+                    <th class="text-center" style="width: 18%;">Tên Đăng Nhập</th>
                 </tr>
             </thead>
-            <tbody class="text-start">
-                @if(Model != null && Model.Any())
+            <tbody>
+                @if (Model != null && Model.Any())
                 {
                     @foreach (var item in Model)
                     {
@@ -83,18 +103,36 @@
                             data-href="@Url.Action("Details", "NhanVien", new { id = item.MaNV })"
                             data-manv="@item.MaNV"
                             data-tennv="@item.TenNV">
-
                             <td class="text-center">@item.MaNV</td>
                             <td class="text-center">@item.TenNV</td>
-                            <td class="text-center">@item.VaiTro</td>
-                            <td class="text-center">@item.TenDNNV</td>
+                            <td class="text-center">@item.CCCD</td>
+                            <td class="text-center">@item.SDT</td>
+                            <td class="text-center">@(item.Email ?? "-")</td>
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(item.TenVT))
+                                {
+                                    // Tạo một mã số duy nhất từ tên vị trí
+                                    var hue = Math.Abs(item.TenVT.GetHashCode()) % 360;
+                                    <span class="badge badge-dynamic" style="--role-hue: @hue;">
+                                        @item.TenVT
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td class="text-center">@(item.TenDNNV ?? "-")</td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="4" class="text-center text-muted fst-italic">Không có nhân viên nào.</td>
+                        <td colspan="7" class="text-center text-muted fst-italic py-4">
+                            <i class="fa-solid fa-inbox me-2"></i>
+                            Không có nhân viên nào.
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -124,9 +162,8 @@
             $("#searchBox").val("");
             $("#Form").submit();
         });
-    </script>
 
-    <script>
+        // Click vào row để xem chi tiết
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".clickable-row").forEach(row => {
                 row.addEventListener("click", function () {

@@ -4,62 +4,169 @@
     ViewBag.Title = "Xóa Sản phẩm";
 }
 
-<div class="container">
-    <h4 class="text-danger mb-3">Xóa Sản phẩm</h4>
+<style>
+    .delete-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+    }
 
-    <div class="alert alert-warning shadow-sm">
-        Bạn có chắc muốn xóa sản phẩm <strong>@Model.TenSP</strong> không?
+    .page-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .product-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        object-fit: contain;
+    }
+
+    .detail-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px dotted #dee2e6;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-trash-can"></i>
+            Xóa Sản phẩm
+        </h4>
     </div>
 
-    <div class="shadow-sm">
+    <div class="alert alert-warning shadow-sm">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        <strong>Cảnh báo:</strong> Bạn có chắc muốn xóa sản phẩm <strong>@Model.TenSP</strong> không? Hành động này không thể hoàn tác!
+    </div>
+
+    <div class="delete-card">
         <div class="row">
             <!-- Ảnh minh họa -->
-            <div class="col-md-5 text-center mt-4">
-                <img src="@Url.Content("~/images/" + Model.AnhMH)"
-                     alt="@Model.TenSP"
-                     class="img-fluid rounded border mt-4"
-                     style="max-height: 400px; object-fit: contain;" />
+            <div class="col-md-4 text-center">
+                @if (!string.IsNullOrEmpty(Model.AnhMH))
+                {
+                    <img src="@(string.IsNullOrEmpty(Model.AnhMH) ? Url.Content("~/images/default-product.png") : @Url.Content("~/images/" + Model.AnhMH))" class="product-image" />
+
+                }
+                else
+                {
+                    <div class="product-image d-flex align-items-center justify-content-center bg-light">
+                        <i class="fa-solid fa-image fa-4x text-muted"></i>
+                    </div>
+                }
             </div>
 
             <!-- Thông tin sản phẩm -->
-            <div class="col-md-7">
-                <div class="p-3">
-                    <h4 class="text-success mb-3">@Model.TenSP</h4>
-                    <p><strong>Mã sản phẩm:</strong> @Model.MaSP</p>
-                    <p><strong>Mô tả:</strong> @Model.MoTaSP</p>
-                    <p><strong>Thành phần:</strong> @Model.ThanhPhan</p>
-                    <p><strong>Công dụng:</strong> @Model.CongDung</p>
-                    <p><strong>Hướng dẫn sử dụng:</strong> @Model.HDSD</p>
-                    <p><strong>Bảo quản:</strong> @Model.BaoQuan</p>
-
-                    <div class="row mt-3">
-                        <p class="col-md-6"><strong>Đơn giá:</strong> @string.Format("{0:N0} đ", Model.DonGia)</p>
-                        <p class="col-md-6"><strong>Giá bán:</strong> @string.Format("{0:N0} đ", Model.GiaBan)</p>
-                        <p class="col-md-6"><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
-                        <p class="col-md-6"><strong>Trạng thái:</strong> @Model.TrangThai</p>
-                        <p class="col-md-6"><strong>Loại sản phẩm:</strong> @Model.TenLoai</p>
-                        <p class="col-md-6"><strong>Hãng sản xuất:</strong> @Model.TenHang</p>
-                        <p class="col-md-6"><strong>Xuất xứ:</strong> @Model.XuatXu </p>
-
-                    </div>
-
-
+            <div class="col-md-8">
+                <h4 class="text-success mb-3">@Model.TenSP</h4>
+                
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-barcode me-2"></i>Mã sản phẩm:</strong> @Model.MaSP
                 </div>
+
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-money-bill me-2"></i>Giá bán:</strong> 
+                    @string.Format("{0:N0} đ", Model.GiaBan)
+                </div>
+
+                @if (Model.SoLuongTon.HasValue)
+                {
+                    <div class="detail-item">
+                        <strong><i class="fa-solid fa-boxes me-2"></i>Số lượng tồn:</strong> 
+                        <span class="badge @(Model.SoLuongTon > 0 ? "bg-success" : "bg-danger")">
+                            @Model.SoLuongTon
+                        </span>
+                    </div>
+                }
+
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-weight me-2"></i>Trọng lượng:</strong> 
+                    @Model.TrongLuong?.ToString("N2") gram
+                </div>
+
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-flag me-2"></i>Trạng thái:</strong> 
+                    <span class="badge bg-info">@(Model.TenTT ?? Model.MaTT)</span>
+                </div>
+
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-tags me-2"></i>Loại sản phẩm:</strong> @Model.TenLoai
+                </div>
+
+                <div class="detail-item">
+                    <strong><i class="fa-solid fa-industry me-2"></i>Hãng sản xuất:</strong> @Model.TenHangSX
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.MoTaSP))
+                {
+                    <div class="detail-item">
+                        <strong><i class="fa-solid fa-align-left me-2"></i>Mô tả:</strong>
+                        <div class="mt-2">@Model.MoTaSP</div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.ThanhPhan))
+                {
+                    <div class="detail-item">
+                        <strong><i class="fa-solid fa-flask me-2"></i>Thành phần:</strong>
+                        <div class="mt-2">@Model.ThanhPhan</div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.CongDung))
+                {
+                    <div class="detail-item">
+                        <strong><i class="fa-solid fa-star me-2"></i>Công dụng:</strong>
+                        <div class="mt-2">@Model.CongDung</div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.HDSD))
+                {
+                    <div class="detail-item">
+                        <strong><i class="fa-solid fa-book me-2"></i>Hướng dẫn sử dụng:</strong>
+                        <div class="mt-2">@Model.HDSD</div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.HDBaoQuan))
+                {
+                    <div class="detail-item">
+                        <strong><i class="fa-solid fa-snowflake me-2"></i>Hướng dẫn bảo quản:</strong>
+                        <div class="mt-2">@Model.HDBaoQuan</div>
+                    </div>
+                }
             </div>
         </div>
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post">
         @Html.AntiForgeryToken()
-
-        <!-- Các field ẩn cần gửi lên controller -->
         <input type="hidden" asp-for="MaSP" />
 
         <div class="d-flex gap-2 mt-4">
             <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fa-solid fa-trash-can me-2"></i> Xóa
+                <i class="fa-solid fa-trash-can me-2"></i>
+                Xóa
             </button>
-            <a asp-action="Details" asp-route-id="@Model.MaSP" class="btn btn-secondary">Quay lại</a>
+            <a asp-action="Details" asp-route-id="@Model.MaSP" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
+            </a>
         </div>
     </form>
 </div>
@@ -70,7 +177,7 @@
         function confirmDelete() {
             Swal.fire({
                 title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa sản phẩm này?',
+                text: 'Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Xóa',

@@ -1,0 +1,28 @@
+@model QuanLyBanHang.Models.TrangThaiMH
+@{
+    ViewBag.Title = "Chi tiết Trạng thái mua hàng";
+}
+
+<div class="container">
+    <h4 class="text-success mb-3">
+        Chi tiết Trạng thái mua hàng
+    </h4>
+
+    <div class="border p-4 rounded shadow-sm bg-light">
+        <p><strong>@Html.DisplayNameFor(m => m.MaTTMH):</strong> @Model.MaTTMH</p>
+        <p><strong>@Html.DisplayNameFor(m => m.TenTTMH):</strong> @Model.TenTTMH</p>
+    </div>
+
+    <div class="mt-4">
+        <a class="btn btn-warning text-white me-2" href="@Url.Action("Edit", "TrangThaiMH", new { id = Model.MaTTMH })">
+            <i class="fa-solid fa-pen-to-square"></i> Sửa
+        </a>
+        <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "TrangThaiMH", new { id = Model.MaTTMH })">
+            <i class="fa-solid fa-trash"></i> Xóa
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
+

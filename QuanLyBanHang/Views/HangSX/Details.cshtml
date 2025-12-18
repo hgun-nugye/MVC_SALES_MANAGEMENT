@@ -1,4 +1,4 @@
-@model QuanLyBanHang.Models.Hang
+@model QuanLyBanHang.Models.HangSX
 @{
     ViewBag.Title = "Chi tiết Hãng";
 }
@@ -9,17 +9,17 @@
     </h4>
 
     <div class="border p-4 rounded shadow-sm bg-light">
-            <p><strong>@Html.DisplayNameFor(m => m.MaHang):</strong> @Model.MaHang</p>
-            <p><strong>@Html.DisplayNameFor(m => m.TenHang):</strong> @Model.TenHang</p>
+            <p><strong>@Html.DisplayNameFor(m => m.MaHangSX):</strong> @Model.MaHangSX</p>
+            <p><strong>@Html.DisplayNameFor(m => m.TenHangSX):</strong> @Model.TenHangSX</p>
             <p><strong>@Html.DisplayNameFor(m => m.MaNuoc):</strong> @Model.MaNuoc</p>
             <p><strong>@Html.DisplayNameFor(m => m.TenNuoc):</strong> @(Model.TenNuoc)</p>
     </div>
 
     <div class="mt-4">
-        <a class="btn btn-warning text-white me-2" href="@Url.Action("Edit", "Hang", new { id = Model.MaHang })">
+        <a class="btn btn-warning text-white me-2" href="@Url.Action("Edit", "HangSX", new { id = Model.MaHangSX })">
             <i class="fa-solid fa-pen-to-square"></i> Sửa
         </a>
-        <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "Hang", new { id = Model.MaHang })">
+        <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "HangSX", new { id = Model.MaHangSX })">
             <i class="fa-solid fa-trash"></i> Xóa
         </a>
         <a asp-action="Index" class="btn btn-secondary">

@@ -20,48 +20,45 @@ namespace QuanLyBanHang.Models
 		public string TenSP { get; set; } = string.Empty;
 
 		[DataType(DataType.Currency)]
-		[Display(Name = "Đơn giá")]
-		[Required(ErrorMessage = "Đơn giá không được để trống")]
-		[Range(0, double.MaxValue, ErrorMessage = "Đơn giá phải >= 0")]
-		public decimal DonGia { get; set; }
-
-		[DataType(DataType.Currency)]
 		[Display(Name = "Giá bán")]
 		[Required(ErrorMessage = "Giá bán không được để trống")]
 		[Range(0, double.MaxValue, ErrorMessage = "Giá bán phải >= 0")]
+		[Column(TypeName = "decimal(18,2)")]
 		public decimal GiaBan { get; set; }
 
 		[Display(Name = "Mô tả sản phẩm")]
-		[StringLength(1000)]
-		public string? MoTaSP { get; set; }
+		[Required(ErrorMessage = "Mô tả sản phẩm không được để trống")]
+		public string MoTaSP { get; set; } = string.Empty;
 
 		[Display(Name = "Ảnh minh họa")]
 		public string? AnhMH { get; set; }
 
 		[Display(Name = "Thành phần")]
-		public string? ThanhPhan { get; set; }
+		[Required(ErrorMessage = "Thành phần không được để trống")]
+		public string ThanhPhan { get; set; } = string.Empty;
 
 		[Display(Name = "Công dụng")]
-		public string? CongDung { get; set; }
+		[Required(ErrorMessage = "Công dụng không được để trống")]
+		public string CongDung { get; set; } = string.Empty;
 
 		[Display(Name = "Hướng dẫn sử dụng")]
-		public string? HDSD { get; set; }
+		[Required(ErrorMessage = "Hướng dẫn sử dụng không được để trống")]
+		public string HDSD { get; set; } = string.Empty;
 
-		[Display(Name = "Xuất xứ")]
-		public string? XuatXu { get; set; }
+		[Display(Name = "Hướng dẫn bảo quản")]
+		[Required(ErrorMessage = "Hướng dẫn bảo quản không được để trống")]
+		public string HDBaoQuan { get; set; } = string.Empty;
 
-		[Display(Name = "Bảo quản")]
-		public string? BaoQuan { get; set; }
+		[Display(Name = "Trọng lượng")]
+		[Required(ErrorMessage = "Trọng lượng không được để trống")]
+		[Range(0, double.MaxValue, ErrorMessage = "Trọng lượng phải >= 0")]
+		[Column(TypeName = "decimal(5,2)")]
+		public decimal TrongLuong { get; set; }
 
-		[Display(Name = "Trạng thái")]
-		[Required(ErrorMessage = "Trạng thái không được để trống")]
-		[StringLength(50)]
-		public string TrangThai { get; set; } = string.Empty;
-
-		[Display(Name = "Số lượng tồn")]
-		[Required(ErrorMessage = "Số lượng tồn không được để trống")]
-		[Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn phải >= 0")]
-		public int SoLuongTon { get; set; }
+		[Display(Name = "Mã Trạng Thái")]
+		[Required(ErrorMessage = "Mã trạng thái không được để trống")]
+		[StringLength(3, ErrorMessage = "Mã trạng thái tối đa 3 ký tự")]
+		public string MaTT { get; set; } = string.Empty;
 
 		[Display(Name = "Mã loại")]
 		[Required(ErrorMessage = "Mã loại không được để trống")]
@@ -69,13 +66,14 @@ namespace QuanLyBanHang.Models
 
 		[Display(Name = "Mã hãng")]
 		[Required(ErrorMessage = "Mã hãng không được để trống")]
-		public string MaHang { get; set; } = string.Empty;
+		[StringLength(5, ErrorMessage = "Mã hãng tối đa 5 ký tự")]
+		public string MaHangSX { get; set; } = string.Empty;
 
 		// Quan hệ
 		//[ForeignKey("MaLoai")]
 		//public LoaiSP? LoaiSP { get; set; }
 
-		//[ForeignKey("MaHang")]
+		//[ForeignKey("MaHangSX")]
 		//public Hang? Hang { get; set; }
 
 		//public virtual ICollection<CTMH>? CTMHs { get; set; }
@@ -88,7 +86,11 @@ namespace QuanLyBanHang.Models
 
 		[NotMapped]
 		[Display(Name = "Tên hàng")]
-		public string? TenHang { get; set; }
+		public string? TenHangSX { get; set; }
+
+		[NotMapped]
+		[Display(Name = "Tên trạng thái")]
+		public string? TenTT { get; set; }
 
 		[NotMapped]
 		[Display(Name = "Upload ảnh")]
@@ -105,11 +107,8 @@ namespace QuanLyBanHang.Models
 		public string? TenSP { get; set; }
 
 		[DataType(DataType.Currency)]
-		[Display(Name = "Đơn giá")]
-		public decimal? DonGia { get; set; }
-
-		[DataType(DataType.Currency)]
 		[Display(Name = "Giá bán")]
+		[Column(TypeName = "decimal(18,2)")]
 		public decimal? GiaBan { get; set; }
 
 		[Display(Name = "Mô tả sản phẩm")]
@@ -127,28 +126,32 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Hướng dẫn sử dụng")]
 		public string? HDSD { get; set; }
 
-		[Display(Name = "Xuất xứ")]
-		public string? XuatXu { get; set; }
+		[Display(Name = "Hướng dẫn bảo quản")]
+		public string? HDBaoQuan { get; set; }
 
-		[Display(Name = "Bảo quản")]
-		public string? BaoQuan { get; set; }
+		[Display(Name = "Trọng lượng")]
+		[Column(TypeName = "decimal(5,2)")]
+		public decimal? TrongLuong { get; set; }
 
-		[Display(Name = "Trạng thái")]
-		public string? TrangThai { get; set; }
-
-		[Display(Name = "Số lượng tồn")]
-		public int? SoLuongTon { get; set; }
+		[Display(Name = "Mã Trạng Thái")]
+		public string? MaTT { get; set; }
 
 		[Display(Name = "Mã loại")]
 		public string? MaLoai { get; set; }
 
 		[Display(Name = "Mã hàng")]
-		public string? MaHang { get; set; }
+		public string? MaHangSX { get; set; }
 
 		[Display(Name = "Tên loại sản phẩm")]
 		public string? TenLoai { get; set; }
 
 		[Display(Name = "Tên hàng")]
-		public string? TenHang { get; set; }
+		public string? TenHangSX { get; set; }
+
+		[Display(Name = "Tên trạng thái")]
+		public string? TenTT { get; set; }
+
+		[Display(Name = "Số lượng tồn")]
+		public int? SoLuongTon { get; set; }
 	}
 }

@@ -1,9 +1,10 @@
 ﻿@model QuanLyBanHang.Models.DonBanHang
 
 @{
-    ViewBag.Title = "Thêm Đơn bán hàng";
-
     var spList = ViewBag.MaSP as IEnumerable<SelectListItem>;
+    bool isCustomer = ViewBag.IsCustomer == true;
+
+    ViewBag.Title = isCustomer ? "Mua hàng" : "Thêm Đơn bán hàng";
 }
 
 <style>
@@ -178,7 +179,7 @@
     <div class="page-header">
         <h4>
             <i class="fa-solid fa-plus-circle"></i>
-            Thêm đơn bán hàng mới
+            @(isCustomer ? "Tạo đơn mua hàng" : "Thêm đơn bán hàng mới")
         </h4>
     </div>
 
@@ -195,7 +196,7 @@
                 <div class="col-md-6">
                     <label asp-for="NgayBH" class="form-label required-field">
                         <i class="fa-solid fa-calendar"></i>
-                        Ngày bán hàng
+                        @(isCustomer ? "Ngày mua hàng" : "Ngày bán hàng")
                     </label>
                     <div class="input-group-icon">
                         <i class="fa-solid fa-calendar-days"></i>
@@ -205,18 +206,91 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="MaKH" class="form-label required-field">
-                        <i class="fa-solid fa-user"></i>
-                        Khách hàng
+                    @if (!isCustomer)
+                    {
+                        <label asp-for="MaKH" class="form-label required-field">
+                            <i class="fa-solid fa-user"></i>
+                            Khách hàng
+                        </label>
+                        <div class="input-group-icon">
+                            <i class="fa-solid fa-users"></i>
+                            <select asp-for="MaKH" asp-items="ViewBag.MaKH" class="form-select">
+                                <option value="">-- Chọn khách hàng --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="MaKH" class="text-danger small mt-1"></span>
+                    }
+                    else
+                    {
+                        <input type="hidden" asp-for="MaKH" />
+                        <div class="alert alert-info mb-0">
+                            <i class="fa-solid fa-info-circle me-2"></i>
+                            <strong>Khách hàng:</strong> @Context.Session.GetString("UserName")
+                        </div>
+                    }
+
+                    @if (isCustomer && string.IsNullOrEmpty(Model?.MaKH))
+                    {
+                        <small class="text-muted d-block mt-1">
+                            Chưa có thông tin khách hàng?
+                            <a href="@Url.Action("Create", "KhachHang")">Đăng ký khách hàng mới</a>
+                            trước khi đặt hàng.
+                        </small>
+                    }
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="DiaChiDBH" class="form-label required-field">
+                        <i class="fa-solid fa-map-marker-alt"></i>
+                        @(isCustomer ? "Địa chỉ nhận hàng" : "Địa chỉ đơn bán hàng")
                     </label>
                     <div class="input-group-icon">
-                        <i class="fa-solid fa-users"></i>
-                        <select asp-for="MaKH" asp-items="ViewBag.MaKH" class="form-select">
-                            <option value="">-- Chọn khách hàng --</option>
+                        <i class="fa-solid fa-home"></i>
+                        <input asp-for="DiaChiDBH" class="form-control" placeholder="Nhập địa chỉ giao hàng..." />
+                    </div>
+                    <span asp-validation-for="DiaChiDBH" class="text-danger small mt-1"></span>
+                </div>
+                                
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fa-solid fa-city"></i>
+                        Tỉnh
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-map"></i>
+                        <select id="MaTinh" name="maTinh" asp-items="@ViewBag.Tinh" class="form-select">
+                            <option value="">-- Chọn Tỉnh --</option>
                         </select>
                     </div>
-                    <span asp-validation-for="MaKH" class="text-danger small mt-1"></span>
                 </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MaXa" class="form-label required-field">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        Xã
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <select id="MaXa" asp-for="MaXa" asp-items="@ViewBag.Xa" class="form-select">
+                            <option value="">-- Chọn Xã --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaXa" class="text-danger small mt-1"></span>
+                </div>
+
+                @if (!isCustomer)
+                {
+                    <div class="col-md-6">
+                        <label asp-for="MaTTBH" class="form-label required-field">
+                            <i class="fa-solid fa-list-check"></i>
+                            Trạng thái đơn hàng
+                        </label>
+                        <select asp-for="MaTTBH" asp-items="ViewBag.MaTTBH" class="form-select">
+                            <option value="">-- Chọn trạng thái --</option>
+                        </select>
+                        <span asp-validation-for="MaTTBH" class="text-danger small mt-1"></span>
+                    </div>
+                }
             </div>
         </div>
 
@@ -263,7 +337,11 @@
                                         </select>
                                     </td>
                                     <td><input name="CTBHs[@i].SLB" type="number" min="1" class="form-control" value="@Model.CTBHs[i].SLB" /></td>
-                                    <td><input name="CTBHs[@i].DGB" type="number" min="0" step="1000" class="form-control" value="@Model.CTBHs[i].DGB" /></td>
+                                    <td>
+                                        <input name="CTBHs[@i].DGB" type="number" min="0" step="1000"
+                                               class="form-control" value="@Model.CTBHs[i].DGB"
+                                               @(isCustomer ? "readonly" : "") />
+                                    </td>
                                     <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
                                 </tr>
                             }
@@ -281,7 +359,10 @@
                                     </select>
                                 </td>
                                 <td><input name="CTBHs[0].SLB" class="form-control" type="number" min="1" /></td>
-                                <td><input name="CTBHs[0].DGB" class="form-control" type="number" min="0" step="1000" /></td>
+                                <td>
+                                    <input name="CTBHs[0].DGB" class="form-control" type="number" min="0" step="1000"
+                                           @(isCustomer ? "readonly" : "") />
+                                </td>
                                 <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
                             </tr>
                         }
@@ -301,7 +382,7 @@
             </a>
             <button type="submit" class="btn btn-success btn-submit">
                 <i class="fa-solid fa-check me-2"></i>
-                Thêm đơn bán hàng
+                @(isCustomer ? "Xác nhận đặt hàng" : "Thêm đơn bán hàng")
             </button>
         </div>
     </form>
@@ -335,7 +416,7 @@
                     </td>
 
                     <td>
-                        <input name="CTBHs[${index}].DGB" type="number" min="0" step="1000" class="form-control" />
+                        <input name="CTBHs[${index}].DGB" type="number" min="0" step="1000" class="form-control" @(isCustomer ? "readonly" : "") />
                     </td>
 
                     <td>
@@ -353,6 +434,34 @@
                     e.target.closest("tr").remove();
                 }
             });
+        });
+
+         $(function () {
+            $('#MaTinh').change(function () {
+                var maTinh = $(this).val();
+                var maXaSelected = '@ViewData["MaXaSelected"]';
+
+                $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
+
+                if (maTinh) {
+                    $.getJSON('/KhachHang/GetXaByTinh', { maTinh: maTinh }, function (data) {
+                        var options = '<option value="">-- Chọn Xã --</option>';
+
+                        $.each(data, function (i, xa) {
+                            var maXa = xa.MaXa !== undefined ? xa.MaXa : xa.maXa;
+                            var tenXa = xa.TenXa !== undefined ? xa.TenXa : xa.tenXa;
+                            var selected = (maXa == maXaSelected) ? 'selected' : '';
+                            options += `<option value="${maXa}" ${selected}>${tenXa}</option>`;
+                        });
+
+                        $('#MaXa').html(options);
+                    });
+                }
+            });
+
+            if ($('#MaTinh').val()) {
+                $('#MaTinh').trigger('change');
+            }
         });
     </script>
 }

@@ -1,4 +1,4 @@
-@model IEnumerable<QuanLyBanHang.Models.Hang>
+@model IEnumerable<QuanLyBanHang.Models.HangSX>
 
 @{
     ViewBag.Title = "Quản lý Hãng";
@@ -59,7 +59,7 @@
 
         <div class="d-flex flex-wrap align-items-center gap-2">           
             <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
-            <a href="@Url.Action("Create", "Hang")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
+            <a href="@Url.Action("Create", "HangSX")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
         </div>
     </form>
 
@@ -80,12 +80,12 @@
                     @foreach (var item in Model)
                     {
                         <tr class="clickable-row"
-                            data-href="@Url.Action("Details", "Hang", new { id = item.MaHang })"
-                            data-mahang="@item.MaHang"
-                            data-tenhang="@item.TenHang">
+                            data-href="@Url.Action("Details", "Hang", new { id = item.MaHangSX })"
+                            data-MaHangSX="@item.MaHangSX"
+                            data-TenHangSX="@item.TenHangSX">
 
-                            <td class="text-center">@item.MaHang</td>
-                            <td class="text-center">@item.TenHang</td>
+                            <td class="text-center">@item.MaHangSX</td>
+                            <td class="text-center">@item.TenHangSX</td>
                             <td class="text-center">@item.MaNuoc</td>
                             <td class="text-center">@(item.TenNuoc)</td>
                         </tr>

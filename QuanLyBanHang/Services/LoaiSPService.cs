@@ -47,6 +47,7 @@ namespace QuanLyBanHang.Services
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC LoaiSP_Insert 
+                    @MaLoai = {model.MaLoai},
                     @TenLoai = {model.TenLoai},
                     @MaNhom = {model.MaNhom}
             ");

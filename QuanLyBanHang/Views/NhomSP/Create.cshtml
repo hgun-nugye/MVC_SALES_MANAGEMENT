@@ -149,7 +149,19 @@
                 Thông tin nhóm sản phẩm
             </div>
             <div class="row g-4">
-                <div class="col-12">
+                <div class="col-md-6">
+                    <label asp-for="MaNhom" class="form-label required-field">
+                        <i class="fa-solid fa-barcode"></i>
+                        Mã nhóm sản phẩm
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-key"></i>
+                        <input asp-for="MaNhom" class="form-control" placeholder="Nhập mã nhóm (tối đa 10 ký tự)" />
+                    </div>
+                    <span asp-validation-for="MaNhom" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
                     <label asp-for="TenNhom" class="form-label required-field">
                         <i class="fa-solid fa-tag"></i>
                         Tên nhóm sản phẩm

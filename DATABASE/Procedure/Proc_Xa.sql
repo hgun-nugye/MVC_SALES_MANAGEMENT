@@ -17,11 +17,11 @@ BEGIN
     END;
 
     DECLARE @MaXa SMALLINT;
-    DECLARE @Base INT = @MaTinh * 100;  -- Dải mã xã của tỉnh
+    DECLARE @Base INT = @MaTinh * 1000;  
 
     SELECT @MaXa = MAX(MaXa)
     FROM Xa
-    WHERE MaXa BETWEEN @Base + 1 AND @Base + 99;
+    WHERE MaXa BETWEEN @Base + 1 AND @Base + 999;
 
     IF (@MaXa IS NULL)
         SET @MaXa = @Base + 1;

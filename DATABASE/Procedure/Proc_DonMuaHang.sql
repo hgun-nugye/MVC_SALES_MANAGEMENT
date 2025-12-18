@@ -5,7 +5,7 @@ CREATE TYPE CTMH_List AS TABLE
 (
     MaSP VARCHAR(10),
     SLM INT,
-    DGM MONEY
+    DGM DECIMAL(18,2)
 );
 GO
 
@@ -14,6 +14,7 @@ CREATE OR ALTER PROC DonMuaHang_Insert
     @NgayMH DATE,
     @MaNCC VARCHAR(10),
     @MaNV VARCHAR(10),
+	@MaTTMH CHAR(3),
     @ChiTiet CTMH_List READONLY
 )
 AS
@@ -40,8 +41,8 @@ BEGIN
         SET @MaDMH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
 
         -- Thêm đơn mua hàng
-        INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC, MaNV)
-        VALUES (@MaDMH, @NgayMH, @MaNCC, @MaNV);
+        INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC, MaNV, MaTTMH)
+        VALUES (@MaDMH, @NgayMH, @MaNCC, @MaNV, @MaTTMH);
 
         -- Thêm chi tiết
         INSERT INTO CTMH(MaDMH, MaSP, SLM, DGM)
@@ -64,6 +65,7 @@ CREATE OR ALTER PROC DonMuaHang_Update
     @NgayMH DATE,
     @MaNCC VARCHAR(10),
     @MaNV VARCHAR(10),
+	@MaTTMH CHAR(3),
     @ChiTiet CTMH_List READONLY
 )
 AS
@@ -83,7 +85,8 @@ BEGIN
         UPDATE DonMuaHang
         SET NgayMH = @NgayMH,
             MaNCC = @MaNCC,
-            MaNV = @MaNV
+            MaNV = @MaNV,
+			MaTTMH = @MaTTMH
         WHERE MaDMH = @MaDMH;
 
         -- Xóa chi tiết cũ
@@ -141,20 +144,27 @@ BEGIN
         D.MaDMH,
         D.NgayMH,
         D.MaNCC,
+		D.MaTTMH,
         N.TenNCC,
         D.MaNV,
         NV.TenNV,
-        (
-            SELECT 
-                C.MaSP, S.TenSP, C.SLM, C.DGM
-            FROM CTMH C
-            JOIN SanPham S ON S.MaSP = C.MaSP
-            WHERE C.MaDMH = D.MaDMH
-            FOR JSON PATH
-        ) AS ChiTietJSON
+		TT.TenTTMH,
+        -- Gộp danh sách sản phẩm thành chuỗi
+        STRING_AGG(C.MaSP, ', ') AS MaSP, 
+        STRING_AGG(S.TenSP, N', ') AS TenSP,
+
+        -- Thủ thuật map với Class C# (ThanhTien = SL * DG)
+        1 AS SLM, 
+        ISNULL(SUM(C.SLM * C.DGM), 0) AS DGM -- Tổng tiền đơn hàng
+
     FROM DonMuaHang D
     JOIN NhaCC N ON N.MaNCC = D.MaNCC
     JOIN NhanVien NV ON NV.MaNV = D.MaNV
+	JOIN TrangThaiMH TT ON TT.MaTTMH = D.MaTTMH
+    LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
+    LEFT JOIN SanPham S ON S.MaSP = C.MaSP
+
+    GROUP BY D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, D.MaNV, NV.TenNV, D.MaTTMH, TT. TenTTMH
     ORDER BY D.NgayMH DESC, D.MaDMH DESC;
 END;
 GO
@@ -169,6 +179,8 @@ BEGIN
         D.MaDMH,
         D.NgayMH,
         D.MaNCC,
+		D.MaTTMH,
+		TT.TenTTMH,
         N.TenNCC,
         D.MaNV,
         NV.TenNV,
@@ -181,6 +193,7 @@ BEGIN
     LEFT JOIN NhanVien NV ON NV.MaNV = D.MaNV
     LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
     LEFT JOIN SanPham S ON S.MaSP = C.MaSP
+	LEFT JOIN TrangThaiMH TT ON TT.MaTTMH = D.MaTTMH
     WHERE D.MaDMH = @MaDMH;
 END;
 GO
@@ -193,22 +206,33 @@ CREATE OR ALTER PROC DonMuaHang_Search
 )
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         D.MaDMH,
         D.NgayMH,
         D.MaNCC,
         N.TenNCC,
         D.MaNV,
+		D.MaTTMH, 
+		TT.TenTTMH,
         NV.TenNV,
-        S.MaSP,
-        S.TenSP,
-        C.DGM,
-        C.SLM
+		
+        -- Gộp tên sản phẩm
+        STRING_AGG(C.MaSP, ', ') AS MaSP, 
+        STRING_AGG(S.TenSP, N', ') AS TenSP,
+
+        -- Tổng tiền
+        1 AS SLM, 
+        ISNULL(SUM(C.SLM * C.DGM), 0) AS DGM
+
     FROM DonMuaHang D
-    LEFT JOIN NhaCC N ON N.MaNCC = D.MaNCC
-    LEFT JOIN NhanVien NV ON NV.MaNV = D.MaNV
+    JOIN NhaCC N ON N.MaNCC = D.MaNCC
+    JOIN NhanVien NV ON NV.MaNV = D.MaNV
+	JOIN TrangThaiMH TT ON TT.MaTTMH = D.MaTTMH
     LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
     LEFT JOIN SanPham S ON S.MaSP = C.MaSP
+
     WHERE
         (
             @Search IS NULL OR @Search = '' OR
@@ -219,6 +243,8 @@ BEGIN
         )
         AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year)
-    ORDER BY D.NgayMH DESC;
+
+    GROUP BY D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, D.MaNV, NV.TenNV, D.MaTTMH, TT.TenTTMH
+    ORDER BY D.NgayMH ASC, D.MaDMH ASC;
 END;
 GO

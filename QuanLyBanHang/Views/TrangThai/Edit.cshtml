@@ -1,0 +1,69 @@
+@model QuanLyBanHang.Models.TrangThai
+@{
+    ViewBag.Title = "Sửa Trạng thái";
+}
+
+<div class="container">
+    <h4 class="text-success mb-3">
+        Sửa Trạng thái
+    </h4>
+
+    <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fa-solid fa-triangle-exclamation"></i> Lỗi xác thực:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fa-solid fa-exclamation-circle"></i> Lỗi:</strong> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="MaTT" class="form-label"></label>
+                <input asp-for="MaTT" class="form-control" readonly />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="TenTT" class="form-label required-field">
+                    <i class="fa-solid fa-tag"></i>
+                    @Html.DisplayNameFor(m => m.TenTT)
+                </label>
+                <input asp-for="TenTT" class="form-control" placeholder="Nhập tên trạng thái" />
+                <span asp-validation-for="TenTT" class="text-danger small mt-1 d-block"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2 justify-content-end">
+            <a asp-action="Details" asp-route-id="@Model.MaTT" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+            <button type="submit" class="btn btn-warning text-white">
+                <i class="fa-solid fa-save"></i> Cập nhật
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

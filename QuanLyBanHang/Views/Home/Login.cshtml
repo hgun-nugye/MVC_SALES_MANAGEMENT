@@ -1,0 +1,176 @@
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<style>
+    .login-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem 0;
+    }
+
+    .login-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,.1);
+        padding: 3rem;
+        max-width: 450px;
+        width: 100%;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-header h2 {
+        color: #198754;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control {
+        padding-left: 45px;
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25, 135, 84, 0.4);
+    }
+
+    .divider {
+        text-align: center;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 45%;
+        height: 1px;
+        background: #dee2e6;
+    }
+
+    .divider::before {
+        left: 0;
+    }
+
+    .divider::after {
+        right: 0;
+    }
+
+    .signup-link {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+
+    .signup-link a {
+        color: #198754;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .signup-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2><i class="fa-solid fa-sign-in-alt me-2"></i>Đăng nhập</h2>
+            <p>Vui lòng đăng nhập để tiếp tục</p>
+        </div>
+
+        <form method="post" asp-action="Login">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label for="username" class="form-label">
+                    <i class="fa-solid fa-user me-1"></i>Tên đăng nhập
+                </label>
+                <div class="input-group-icon">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           placeholder="Nhập tên đăng nhập" required autofocus />
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label">
+                    <i class="fa-solid fa-lock me-1"></i>Mật khẩu
+                </label>
+                <div class="input-group-icon">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           placeholder="Nhập mật khẩu" required />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-login">
+                <i class="fa-solid fa-sign-in-alt me-2"></i>Đăng nhập
+            </button>
+
+            <div class="divider"></div>
+
+            <div class="signup-link">
+                <p class="mb-0">Chưa có tài khoản? 
+                    <a href="@Url.Action("SignUp", "Home")">Đăng ký ngay</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+

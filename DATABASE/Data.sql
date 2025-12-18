@@ -35,7 +35,7 @@ INSERT INTO Nuoc VALUES
 GO
 
 -- Hãng
-INSERT INTO Hang VALUES
+INSERT INTO HangSX VALUES
 ('H0001', N'Innisfree', 'QG001'),
 ('H0002', N'Some By Mi', 'QG001'),
 ('H0003', N'La Roche-Posay', 'QG003'),
@@ -117,53 +117,72 @@ GO
 
 -- Sản phẩm
 INSERT INTO SanPham VALUES
-('SP001', N'Sữa rửa mặt Innisfree Green Tea', 120000,
+('SP00000001', N'Sữa rửa mặt Innisfree Green Tea', 120000,
  N'Làm sạch da dịu nhẹ', NULL,
  N'Trà xanh Jeju', N'Làm sạch & cấp ẩm',
  N'Dùng sáng và tối', N'Bảo quản nơi khô ráo', 150,
  'TT1', 'SRM', 'H0001'),
 
-('SP002', N'Toner Some By Mi AHA BHA PHA', 180000,
+('SP00000002', N'Toner Some By Mi AHA BHA PHA', 180000,
  N'Làm sạch sâu, giảm mụn', NULL,
  N'AHA, BHA, PHA', N'Cân bằng da, giảm mụn',
  N'Dùng sau rửa mặt', N'Tránh ánh nắng trực tiếp', 120,
  'TT2', 'TONER', 'H0002'),
 
-('SP003', N'Serum La Roche-Posay Hyalu B5', 850000,
+('SP00000003', N'Serum La Roche-Posay Hyalu B5', 850000,
  N'Cấp ẩm và phục hồi da', NULL,
  N'Vitamin B5, HA', N'Phục hồi da',
  N'Dùng buổi tối', N'Nơi khô mát', 80,
  'TT3', 'SERUM', 'H0003'),
 
-('SP004', N'Kem dưỡng Cocoon Bưởi', 220000,
+('SP00000004', N'Kem dưỡng Cocoon Bưởi', 220000,
  N'Dưỡng ẩm, phục hồi da', NULL,
  N'Tinh dầu bưởi', N'Dưỡng ẩm, sáng da',
  N'Dùng sáng và tối', N'Nơi khô ráo', 100,
  'TT1', 'KDUONG', 'H0004'),
 
-('SP005', N'Kem chống nắng La Roche-Posay SPF50+', 450000,
+('SP00000005', N'Kem chống nắng La Roche-Posay SPF50+', 450000,
  N'Chống nắng phổ rộng', NULL,
  N'Mexoryl XL', N'Bảo vệ da khỏi tia UV',
  N'Dùng ban ngày', N'Tránh nhiệt độ cao', 60,
  'TT4', 'KCN', 'H0003');
 GO
 
+-- TTBH
+INSERT INTO TrangThaiBH (MaTTBH, TenTTBH) VALUES 
+('CHO', N'Chờ xác nhận'),
+('XLY', N'Đang xử lý'),
+('GIA', N'Đang giao hàng'),
+('HTH', N'Hoàn thành'),
+('TRH', N'Trả hàng'),
+('HUY', N'Đã hủy');
+GO
+
+-- TTMH
+INSERT INTO TrangThaiMH (MaTTMH, TenTTMH) VALUES 
+('CHO', N'Chờ nhập'),
+('XLY', N'Đang xử lý'),
+('DNH', N'Đang nhập'),
+('HTH', N'Hoàn thành'),
+('HUY', N'Đã hủy');
+GO
+
 -- DMH 
 INSERT INTO DonMuaHang VALUES
-('DMH001', '2025-11-01', 'NCC0000001', 'NV25121002');
+('M2511010001', '2025-11-01', 'NCC0000001', 'NV25121002', 'HTH');
 
 INSERT INTO CTMH VALUES
-('DMH001', 'SP001', 100, 90000),
-('DMH001', 'SP002', 80, 140000),
-('DMH001', 'SP004', 70, 170000);
+('M2511010001', 'SP00000001', 100, 90000),
+('M2511010001', 'SP00000002', 80, 140000),
+('M2511010001', 'SP00000004', 70, 170000);
 GO
 
 -- DBH
 INSERT INTO DonBanHang VALUES
-('DBH001', '2025-12-01', 'KH00000001', N'10 Tràng Tiền', 101);
+('B2512010001', '2025-12-01', 'KH00000001', N'10 Tràng Tiền', 101, 'CHO');
 
 INSERT INTO CTBH VALUES
-('DBH001', 'SP001', 2, 120000),
-('DBH001', 'SP003', 1, 850000),
-('DBH001', 'SP005', 1, 450000);
+('B2512010001', 'SP00000001', 2, 120000),
+('B2512010001', 'SP00000003', 1, 850000),
+('B2512010001', 'SP00000005', 1, 450000);
 GO

@@ -1,0 +1,41 @@
+@model QuanLyBanHang.Models.TrangThaiBH
+@{
+    ViewBag.Title = "Thêm Trạng thái đơn hàng";
+}
+
+<div class="container">
+    <h4 class="text-success mb-3">
+        Thêm Trạng thái đơn hàng
+    </h4>
+
+    <form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="MaTTBH" class="form-label"></label>
+                <input asp-for="MaTTBH" class="form-control" placeholder="Nhập mã (tối đa 3 ký tự)" />
+                <span asp-validation-for="MaTTBH" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="TenTTBH" class="form-label"></label>
+                <input asp-for="TenTTBH" class="form-control" placeholder="Nhập tên trạng thái" />
+                <span asp-validation-for="TenTTBH" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2 justify-content-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Thêm mới
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

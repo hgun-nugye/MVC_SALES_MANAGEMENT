@@ -8,20 +8,20 @@ namespace QuanLyBanHang.Models
 	public class DonMuaHang
 	{
 		[Key]
-		[Required(ErrorMessage = "Mã đơn mua hàng không được để trống.")]
+		//[Required(ErrorMessage = "Mã đơn mua hàng không được để trống.")]
 		[StringLength(11, ErrorMessage = "Mã đơn mua hàng tối đa 11 ký tự.")]
 		[Display(Name = "Mã Đơn Mua Hàng")]
-		public string MaDMH { get; set; } = string.Empty;
+		public string? MaDMH { get; set; }
 
 		[Required(ErrorMessage = "Ngày mua hàng không được để trống.")]
 		[DataType(DataType.Date)]
 		[Display(Name = "Ngày Mua Hàng")]
 		public DateTime NgayMH { get; set; }
 
-		//[Required(ErrorMessage = "Mã nhà cung cấp không được để trống.")]
+		[Required(ErrorMessage = "Mã nhà cung cấp không được để trống.")]
 		[StringLength(10, ErrorMessage = "Mã nhà cung cấp tối đa 10 ký tự.")]
 		[Display(Name = "Mã Nhà Cung Cấp")]
-		public string? MaNCC { get; set; } 
+		public string MaNCC { get; set; } = string.Empty; 
 		[NotMapped]
 		[Display(Name = "Tên Nhà Cung Cấp")]
 		public string? TenNCC { get; set; }
@@ -29,7 +29,7 @@ namespace QuanLyBanHang.Models
 		[Required(ErrorMessage = "Mã nhân viên không được để trống.")]
 		[StringLength(10, ErrorMessage = "Mã nhân viên tối đa 10 ký tự.")]
 		[Display(Name = "Mã Nhân Viên")]
-		public string? MaNV { get; set; }
+		public string MaNV { get; set; } = string.Empty;
 
 		[NotMapped]
 		[Display(Name = "Tên Nhân Viên")]

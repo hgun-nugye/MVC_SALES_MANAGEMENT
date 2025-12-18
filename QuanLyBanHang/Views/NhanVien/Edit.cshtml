@@ -3,54 +3,263 @@
     ViewBag.Title = "Sửa Nhân Viên";
 }
 
-<div class="container ">
-    <h4 class="text-success mb-3">
-        Sửa Thông Tin Nhân Viên
-    </h4>
+<style>
+    .form-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+    }
 
-    <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    .section-title {
+        color: #ffc107;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #ffc107;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="MaNV" class="form-label"></label>
-            <input asp-for="MaNV" class="form-control" readonly />
-        </div>
-        <div class="form-group mb-3">
-            <label asp-for="TenNV" class="form-label"></label>
-            <input asp-for="TenNV" class="form-control" />
-            <span asp-validation-for="TenNV" class="text-danger"></span>
-        </div>
-        <div class="form-group mb-3">
-            <label asp-for="VaiTro" class="form-label"></label>
-            <select asp-for="VaiTro" asp-items="ViewBag.VaiTro" class="form-select">
-                <option value="">-- Chọn vai trò --</option>
-            </select>
-            <span asp-validation-for="VaiTro" class="text-danger"></span>
-        </div>
-        <div class="form-group mb-3">
-            <label asp-for="TenDNNV" class="form-label"></label>
-            <input asp-for="TenDNNV" class="form-control" />
-            <span asp-validation-for="TenDNNV" class="text-danger"></span>
-        </div>
-        <div class="form-group mb-3">
-            <label asp-for="MatKhauNV" class="form-label"></label>
-            <input asp-for="MatKhauNV" type="password" class="form-control" />
-            <span asp-validation-for="MatKhauNV" class="text-danger"></span>
+    .form-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.15);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-edit"></i>
+            Sửa thông tin nhân viên
+        </h4>
+    </div>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+        @Html.HiddenFor(m => m.MaNV)
+
+        <!-- Thông tin cá nhân -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-info-circle"></i>
+                Thông tin cá nhân
+            </div>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <label asp-for="MaNV" class="form-label">Mã nhân viên</label>
+                    <input asp-for="MaNV" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CCCD" class="form-label required-field">CCCD</label>
+                    <input asp-for="CCCD" class="form-control" maxlength="12" />
+                    <span asp-validation-for="CCCD" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="TenNV" class="form-label required-field">Tên nhân viên</label>
+                    <input asp-for="TenNV" class="form-control" />
+                    <span asp-validation-for="TenNV" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="GioiTinh" class="form-label required-field">Giới tính</label>
+                    <select asp-for="GioiTinh" class="form-select">
+                        <option value="true">Nam</option>
+                        <option value="false">Nữ</option>
+                    </select>
+                    <span asp-validation-for="GioiTinh" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="NgaySinh" class="form-label">Ngày sinh</label>
+                    <input asp-for="NgaySinh" type="date" class="form-control" />
+                    <span asp-validation-for="NgaySinh" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="SDT" class="form-label required-field">Số điện thoại</label>
+                    <input asp-for="SDT" class="form-control" maxlength="10" />
+                    <span asp-validation-for="SDT" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" type="email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="NgayLam" class="form-label">Ngày làm việc</label>
+                    <input asp-for="NgayLam" type="date" class="form-control" />
+                    <span asp-validation-for="NgayLam" class="text-danger small"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="mt-4 d-flex gap-2">
-            <button type="submit" class="btn btn-warning text-white">
-                <i class="fa-solid fa-save"></i> Cập nhật
-            </button>
+        <!-- Địa chỉ -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-map-marker-alt"></i>
+                Địa chỉ
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="DiaChiNV" class="form-label required-field">Địa chỉ</label>
+                    <input asp-for="DiaChiNV" class="form-control" />
+                    <span asp-validation-for="DiaChiNV" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Tỉnh</label>
+                    <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.Tinh">
+                        <option value="">@Model.TenTinh</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MaXa" class="form-label"></label>
+                    <select id="MaXa" asp-for="MaXa" class="form-control" asp-items="@ViewBag.Xa">
+                        <option value="">@Model.TenXa</option>
+                    </select>
+                    <span asp-validation-for="MaXa" class="text-danger"></span>
+                </div>
+            </div>
+           
+
+        </div>
+
+        <!-- Thông tin đăng nhập -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-user-shield"></i>
+                Thông tin đăng nhập
+            </div>
+            <div class="row g-4">
+                <div class="col-md-9">
+                    <label asp-for="TenDNNV" class="form-label">Tên đăng nhập</label>
+                    <input asp-for="TenDNNV" class="form-control" />
+                    <span asp-validation-for="TenDNNV" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MatKhauNV" class="form-label">Mật khẩu</label>
+                    <input asp-for="MatKhauNV" type="password" class="form-control" placeholder="Để trống nếu không đổi" />
+                    <span asp-validation-for="MatKhauNV" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label required-field">Vai trò</label>
+                    <select name="maVT" asp-items="ViewBag.VaiTro" class="form-select">
+                        <option value="">-- Chọn vai trò --</option>
+                    </select>
+                    <span class="text-danger small" id="maVT-error"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ảnh nhân viên -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-image"></i>
+                Ảnh nhân viên
+            </div>
+            <div class="row">
+                @if (!string.IsNullOrEmpty(Model?.AnhNV))
+                {
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ảnh hiện tại:</label>
+                        <img src="@Url.Content("~/images/" + Model.AnhNV)" alt="Ảnh nhân viên" style="max-width: 150px; height: auto; border-radius: 8px;" />
+                    </div>
+                }
+                <div class="col-md-6">
+                    <label asp-for="AnhFile" class="form-label">Chọn ảnh mới:</label>
+                    <input asp-for="AnhFile" type="file" class="form-control" accept="image/*" />
+                    <span asp-validation-for="AnhFile" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-end mb-4">
             <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
             </a>
+            <button type="submit" class="btn btn-warning text-white">
+                <i class="fa-solid fa-save me-2"></i>
+                Cập nhật
+            </button>
         </div>
     </form>
-
-    
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const maVT = document.querySelector('select[name="maVT"]').value;
+            if (!maVT) {
+                e.preventDefault();
+                document.getElementById('maVT-error').textContent = 'Vui lòng chọn vai trò';
+                return false;
+            }
+        });
+
+        $(function () {
+            // Khi chọn Tỉnh → load Xã
+            $('#MaTinh').change(function () {
+                var maTinh = $(this).val();
+
+                $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
+
+                if (maTinh) {
+                    $.getJSON('/KhachHang/GetXaByTinh', { maTinh: maTinh }, function (data) {
+
+                        var options = '<option value="">-- Chọn Xã --</option>';
+
+                        $.each(data, function (i, xa) {
+                            options += `<option value="${xa.maXa}">${xa.tenXa}</option>`;
+                        });
+
+                        $('#MaXa').html(options);
+                    });
+                }
+            });
+
+            // Khi load trang → Tự chọn lại Xã đúng với Model.MaXa
+            var selectedXa = "@Model.MaXa";
+            if ($('#MaTinh').val()) {
+                $('#MaTinh').trigger('change');
+
+                setTimeout(() => {
+                    $('#MaXa').val(selectedXa);
+                }, 300);
+            }
+        });
+    </script>
 }

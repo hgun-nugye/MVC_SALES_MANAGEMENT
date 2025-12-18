@@ -19,28 +19,29 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Tên khách hàng")]
 		public string TenKH { get; set; } = string.Empty;
 
-		[Required(ErrorMessage = "Số điện thoại không được để trống")]
-		[StringLength(15, ErrorMessage = "Số điện thoại không được quá 15 ký tự")]
-		[Display(Name = "Số điện thoại")]
-		public string DienThoaiKH { get; set; } = string.Empty;
-
 		[StringLength(255)]
 		[Display(Name = "Ảnh khách hàng")]
 		public string? AnhKH { get; set; }
+
+		[Display(Name = "Giới Tính")]
+		public bool? GioiTinh { get; set; }
 
 		[EmailAddress(ErrorMessage = "Email không hợp lệ")]
 		[StringLength(255)]
 		[Display(Name = "Email khách hàng")]
 		public string? EmailKH { get; set; }
 
-		[Required(ErrorMessage = "Địa chỉ không được để trống")]
+		[Required(ErrorMessage = "Số điện thoại không được để trống")]
+		[StringLength(10, ErrorMessage = "Số điện thoại không được quá 10 ký tự")]
+		[Display(Name = "Số điện thoại")]
+		public string DienThoaiKH { get; set; } = string.Empty;
+
 		[StringLength(255)]
 		[Display(Name = "Địa chỉ")]
-		public string DiaChiKH { get; set; } = string.Empty;
+		public string? DiaChiKH { get; set; }
 
-		[Required(ErrorMessage = "Mã xã không được để trống")]
 		[Display(Name = "Mã xã")]
-		public short MaXa { get; set; }
+		public short? MaXa { get; set; }
 
 		
 		//   Tên đăng nhập & mật khẩu
@@ -50,9 +51,10 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Tên đăng nhập")]
 		public string TenDNKH { get; set; } = string.Empty;
 
+		[Required(ErrorMessage = "Mật khẩu không được để trống")]
 		[StringLength(255)]
 		[Display(Name = "Mật khẩu")]
-		public string? MatKhauKH { get; set; }
+		public string MatKhauKH { get; set; } = string.Empty;
 
 		
 		//   Thuộc tính hiển thị

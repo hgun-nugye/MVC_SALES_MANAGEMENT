@@ -1,0 +1,133 @@
+@model IEnumerable<QuanLyBanHang.Models.TrangThai>
+@{
+    ViewBag.Title = "Quản lý Trạng thái";
+}
+
+<style>
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .search-wrapper input {
+        padding-left: 38px !important;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .table {
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5faff;
+        transition: 0.2s;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+    }
+
+    .clickable-row:hover {
+        background-color: #f5faff !important;
+    }
+</style>
+
+<div class="container">
+    <h4 class="mb-3 text-success">
+        Danh sách Trạng thái
+    </h4>
+
+    <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+        <div class="search-wrapper flex-grow-1">
+            <i class="fa fa-search"></i>
+            <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm mã hoặc tên trạng thái">
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
+            <a href="@Url.Action("Create", "TrangThai")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
+        </div>
+    </form>
+
+    <table class="table table-hover align-middle text-center shadow-sm">
+        <thead class="table-success">
+            <tr>
+                <th class="w-25">Mã trạng thái</th>
+                <th class="w-50">Tên trạng thái</th>
+            </tr>
+        </thead>
+        <tbody class="text-start">
+        @if(Model!=null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr class="clickable-row" data-href="@Url.Action("Details", "TrangThai", new { id = item.MaTT })">
+                    <td class="text-center">@item.MaTT</td>
+                    <td class="text-center">@item.TenTT</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" class="text-center text-muted fst-italic">Không có trạng thái nào.</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function debounce(fn, delay) {
+            let timer = null;
+            return function () {
+                const context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(context, args), delay);
+            };
+        }
+
+        $("#searchBox").on("change", debounce(function () {
+            $("#Form").submit();
+        }, 400));
+
+        $("#btnClear").on("click", function () {
+            $("#searchBox").val("");
+            $("#Form").submit();
+        });
+
+        // Clickable row - xử lý click vào row để xem detail
+        $(document).ready(function() {
+            // Sử dụng event delegation để xử lý cả row được load sau
+            $(document).off('click', '.clickable-row').on('click', '.clickable-row', function(e) {
+                // Ngăn click vào các element con (button, link, input)
+                if ($(e.target).is('a, button, input, select, textarea') || $(e.target).closest('a, button').length) {
+                    return;
+                }
+                
+                var href = $(this).data('href');
+                if (href && href !== '#') {
+                    // Sử dụng window.location.href thay vì window.location để đảm bảo navigate
+                    window.location.href = href;
+                }
+            });
+            
+            // Thêm cursor pointer cho clickable row
+            $('.clickable-row').css('cursor', 'pointer');
+        });
+    </script>
+}
+

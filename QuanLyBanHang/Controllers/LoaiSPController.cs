@@ -51,8 +51,6 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(LoaiSP model)
 		{
-			// Mã loại sinh bởi DB/SP
-			ModelState.Remove("MaLoai");
 			if (!ModelState.IsValid)
 			{
 				ViewBag.MaNhom = new SelectList(await _nspService.GetAll(), "MaNhom", "TenNhom");

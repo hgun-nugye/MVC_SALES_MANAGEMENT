@@ -1,0 +1,305 @@
+@model QuanLyBanHang.Models.KhachHang
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<style>
+    .signup-container {
+        min-height: calc(100vh - 200px);
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .signup-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,.1);
+        padding: 2.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .signup-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .signup-header h2 {
+        color: #198754;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control,
+    .input-group-icon .form-select {
+        padding-left: 2.5rem;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25, 135, 84, 0.4);
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .image-upload-area {
+        border: 2px dashed #198754;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .image-upload-area:hover {
+        background: #e8f5e9;
+        border-color: #157347;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+        margin-top: 1rem;
+        object-fit: cover;
+    }
+</style>
+
+<div class="signup-container">
+    <div class="signup-card">
+        <div class="signup-header">
+            <h2><i class="fa-solid fa-user-plus me-2"></i>Đăng ký tài khoản khách hàng</h2>
+            <p class="text-muted mb-0">Điền thông tin để tạo tài khoản mới</p>
+        </div>
+
+        <form asp-action="SignUp" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="TenKH" class="form-label required-field">
+                        <i class="fa-solid fa-user me-1"></i>Tên khách hàng
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input asp-for="TenKH" class="form-control" placeholder="Nhập tên khách hàng" />
+                    </div>
+                    <span asp-validation-for="TenKH" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="DienThoaiKH" class="form-label required-field">
+                        <i class="fa-solid fa-phone me-1"></i>Số điện thoại
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-mobile-alt"></i>
+                        <input asp-for="DienThoaiKH" class="form-control" placeholder="Nhập số điện thoại" />
+                    </div>
+                    <span asp-validation-for="DienThoaiKH" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="EmailKH" class="form-label">
+                        <i class="fa-solid fa-envelope me-1"></i>Email
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-at"></i>
+                        <input asp-for="EmailKH" type="email" class="form-control" placeholder="Nhập email" />
+                    </div>
+                    <span asp-validation-for="EmailKH" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="GioiTinh" class="form-label">
+                        <i class="fa-solid fa-venus-mars me-1"></i>Giới tính
+                    </label>
+                    <select asp-for="GioiTinh" class="form-select">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="true">Nam</option>
+                        <option value="false">Nữ</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="TenDNKH" class="form-label required-field">
+                        <i class="fa-solid fa-user-circle me-1"></i>Tên đăng nhập
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input asp-for="TenDNKH" class="form-control" placeholder="Nhập tên đăng nhập" />
+                    </div>
+                    <span asp-validation-for="TenDNKH" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MatKhauKH" class="form-label required-field">
+                        <i class="fa-solid fa-lock me-1"></i>Mật khẩu
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input asp-for="MatKhauKH" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+                    </div>
+                    <span asp-validation-for="MatKhauKH" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="DiaChiKH" class="form-label required-field">
+                        <i class="fa-solid fa-map-marker-alt me-1"></i>Địa chỉ
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <input asp-for="DiaChiKH" class="form-control" placeholder="Nhập địa chỉ" />
+                    </div>
+                    <span asp-validation-for="DiaChiKH" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fa-solid fa-city me-1"></i>Tỉnh
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-map"></i>
+                        <select id="MaTinh" name="maTinh" asp-items="@ViewBag.MaTinh" class="form-select">
+                            <option value="">-- Chọn Tỉnh --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MaXa" class="form-label required-field">
+                        <i class="fa-solid fa-map-location-dot me-1"></i>Xã
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <select id="MaXa" asp-for="MaXa" asp-items="@ViewBag.MaXa" class="form-select">
+                            <option value="">-- Chọn Xã --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaXa" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="AnhFile" class="form-label required-field">
+                        <i class="fa-solid fa-image me-1"></i>Ảnh đại diện
+                    </label>
+                    <input type="file" asp-for="AnhFile" id="AnhFile" class="form-control" accept="image/*" onchange="previewImage(this)" />
+                    <small class="text-muted">Chấp nhận: JPG, PNG, GIF. Tối đa: 5MB</small>
+                    <span asp-validation-for="AnhFile" class="text-danger small d-block"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fa-solid fa-eye me-1"></i>Xem trước
+                    </label>
+                    <div class="image-upload-area" id="imagePreviewArea">
+                        <i class="fa-solid fa-image fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0 small">Ảnh sẽ hiển thị ở đây</p>
+                        <img id="imagePreview" class="image-preview d-none" alt="Preview" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-2"></i>Quay lại
+                </a>
+                <button type="submit" class="btn btn-success btn-submit">
+                    <i class="fa-solid fa-check me-2"></i>Đăng ký
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const previewArea = document.getElementById('imagePreviewArea');
+            const file = input.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                    previewArea.querySelector('i').classList.add('d-none');
+                    previewArea.querySelector('p').classList.add('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.classList.add('d-none');
+                previewArea.querySelector('i').classList.remove('d-none');
+                previewArea.querySelector('p').classList.remove('d-none');
+            }
+        }
+
+        $(function () {
+            $('#MaTinh').change(function () {
+                var maTinh = $(this).val();
+                $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
+
+                if (maTinh) {
+                    $.getJSON('/Home/GetXaByTinh', { maTinh: maTinh }, function (data) {
+                        var options = '<option value="">-- Chọn Xã --</option>';
+                        $.each(data, function (i, xa) {
+                            var maXa = xa.maXa !== undefined ? xa.maXa : xa.MaXa;
+                            var tenXa = xa.tenXa !== undefined ? xa.tenXa : xa.TenXa;
+                            options += `<option value="${maXa}">${tenXa}</option>`;
+                        });
+                        $('#MaXa').html(options);
+                    });
+                }
+            });
+        });
+    </script>
+}
+

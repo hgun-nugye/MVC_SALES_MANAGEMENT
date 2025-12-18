@@ -73,6 +73,9 @@ namespace QuanLyBanHang.Services
 			{
 				new SqlParameter("@NgayBH", model.NgayBH),
 				new SqlParameter("@MaKH", model.MaKH),
+				new SqlParameter("@DiaChiDBH", model.DiaChiDBH),
+				new SqlParameter("@MaXa", model.MaXa),
+				new SqlParameter("@MaTTBH", model.MaTTBH ?? (object)DBNull.Value),
 				new SqlParameter("@ChiTiet", table)
 				{
 					SqlDbType = SqlDbType.Structured,
@@ -81,33 +84,40 @@ namespace QuanLyBanHang.Services
 			};
 
 			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC DonBanHang_Insert @NgayBH, @MaKH, @ChiTiet", parameters
+				"EXEC DonBanHang_Insert @NgayBH, @MaKH, @DiaChiDBH, @MaXa, @MaTTBH, @ChiTiet", parameters
 			);
 
 			return true;
 		}
 
-		public async Task Update(DonBanHangEditCTBH model)
+		public async Task Update(DonBanHang model)
 		{
-			// Update header
-			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC DonBanHang_Update  @MaDBH,@NgayBH, @MaKH",
+			var table = new DataTable();
+			table.Columns.Add("MaSP", typeof(string));
+			table.Columns.Add("SLB", typeof(int));
+			table.Columns.Add("DGB", typeof(decimal));
+
+			foreach (var ct in model.CTBHs)
+				table.Rows.Add(ct.MaSP, ct.SLB, ct.DGB);
+
+			var parameters = new[]
+			{
 				new SqlParameter("@MaDBH", model.MaDBH),
 				new SqlParameter("@NgayBH", model.NgayBH),
-				new SqlParameter("@MaKH", model.MaKH)
-			);
+				new SqlParameter("@MaKH", model.MaKH),
+				new SqlParameter("@DiaChiDBH", model.DiaChiDBH),
+				new SqlParameter("@MaXa", model.MaXa),
+				new SqlParameter("@MaTTBH", model.MaTTBH),
+				new SqlParameter("@ChiTiet", table)
+				{
+					SqlDbType = SqlDbType.Structured,
+					TypeName = "dbo.CTBH_List"
+				}
+			};
 
-			// Update each product
-			foreach (var ct in model.ChiTiet)
-			{
-				await _context.Database.ExecuteSqlRawAsync(
-					"EXEC CTBH_Update @MaDBH, @MaSP, @SLB, @DGB",
-					new SqlParameter("@MaDBH", model.MaDBH),
-					new SqlParameter("@MaSP", ct.MaSP),
-					new SqlParameter("@SLB", ct.SLB),
-					new SqlParameter("@DGB", ct.DGB)
-				);
-			}
+			await _context.Database.ExecuteSqlRawAsync(
+				"EXEC DonBanHang_Update @MaDBH, @NgayBH, @MaKH, @DiaChiDBH, @MaXa, @MaTTBH, @ChiTiet", parameters
+			);
 		}
 
 		public async Task Delete(string id)
@@ -125,17 +135,18 @@ namespace QuanLyBanHang.Services
 			);
 		}
 
-		public async Task<List<DonBanHangDetail>> Search(string? keyword, int? month, int? year)
+		public async Task<List<DonBanHangDetail>> Search(string? keyword, int? month, int? year, string? MaTTBH)
 		{
 			var parameters = new[]
 			{
 				new SqlParameter("@Search", (object?)keyword ?? DBNull.Value),
 				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value),
+				new SqlParameter("@MaTTBH", (object?)MaTTBH ?? DBNull.Value)
 			};
 
 			var data = await _context.DonBanHangDetail
-				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year", parameters)
+				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year, @MaTTBH", parameters)
 				.ToListAsync();
 
 			return data;
@@ -144,7 +155,7 @@ namespace QuanLyBanHang.Services
 		public async Task<List<DonBanHang>> Reset()
 		{
 			var data = await _context.DonBanHang
-				.FromSqlRaw("EXEC DonBanHang_Search @Search=NULL, @Month=NULL, @Year=NULL")
+				.FromSqlRaw("EXEC DonBanHang_Search @Search=NULL, @Month=NULL, @Year=NULL, @MaTTBH=NULL")
 				.ToListAsync();
 
 			return data;

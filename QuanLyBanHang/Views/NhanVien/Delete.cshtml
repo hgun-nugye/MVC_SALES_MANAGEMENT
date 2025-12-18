@@ -1,34 +1,162 @@
 ﻿@model QuanLyBanHang.Models.NhanVien
 
 @{
-    ViewBag.Title = "Xóa Nhân Viên ";
+    ViewBag.Title = "Xóa Nhân Viên";
 }
 
-<div class=" container">
-    <h4 class="text-danger mb-3">
-        Xóa Nhân Viên
-    </h4>
+<style>
+    .delete-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+    }
 
-    <div class="alert alert-warning shadow-sm">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc muốn xóa <strong>@Model.TenNV</strong> không?
+    .detail-item {
+        display: flex;
+        padding: 0.75rem 0;
+        border-bottom: 1px dotted #dee2e6;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        min-width: 180px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-label i {
+        color: #dc3545;
+        width: 20px;
+    }
+
+    .detail-value {
+        color: #212529;
+        flex: 1;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h4>
+            <i class="fa-solid fa-trash-can"></i>
+            Xóa Nhân Viên
+        </h4>
     </div>
 
-    <div class="border p-4 rounded shadow-sm bg-light">
-        <p><strong>@Html.DisplayNameFor(m => m.MaNV):</strong> @Model.MaNV</p>
-        <p><strong>@Html.DisplayNameFor(m => m.TenNV):</strong> @Model.TenNV</p>
-        <p><strong>@Html.DisplayNameFor(m => m.VaiTro):</strong> @Model.VaiTro</p>
-        <p><strong>@Html.DisplayNameFor(m => m.TenDNNV):</strong> @Model.TenDNNV</p>
+    <div class="alert alert-warning shadow-sm">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        <strong>Cảnh báo:</strong> Bạn có chắc muốn xóa nhân viên <strong>@Model.TenNV</strong> không? Hành động này không thể hoàn tác!
+    </div>
+
+    <div class="delete-card">
+        <div class="detail-item">
+            <div class="detail-label">
+                <i class="fa-solid fa-id-card"></i>
+                Mã nhân viên:
+            </div>
+            <div class="detail-value">@Model.MaNV</div>
+        </div>
+
+        <div class="detail-item">
+            <div class="detail-label">
+                <i class="fa-solid fa-id-card"></i>
+                CCCD:
+            </div>
+            <div class="detail-value">@Model.CCCD</div>
+        </div>
+
+        <div class="detail-item">
+            <div class="detail-label">
+                <i class="fa-solid fa-user"></i>
+                Tên nhân viên:
+            </div>
+            <div class="detail-value">@Model.TenNV</div>
+        </div>
+
+        <div class="detail-item">
+            <div class="detail-label">
+                <i class="fa-solid fa-venus-mars"></i>
+                Giới tính:
+            </div>
+            <div class="detail-value">@(Model.GioiTinh ? "Nam" : "Nữ")</div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SDT))
+        {
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fa-solid fa-phone"></i>
+                    Số điện thoại:
+                </div>
+                <div class="detail-value">@Model.SDT</div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Email))
+        {
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fa-solid fa-envelope"></i>
+                    Email:
+                </div>
+                <div class="detail-value">@Model.Email</div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.TenVT))
+        {
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fa-solid fa-user-tag"></i>
+                    Vai trò:
+                </div>
+                <div class="detail-value">
+                    <span class="badge bg-primary">@Model.TenVT</span>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.TenDNNV))
+        {
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fa-solid fa-user-circle"></i>
+                    Tên đăng nhập:
+                </div>
+                <div class="detail-value">@Model.TenDNNV</div>
+            </div>
+        }
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
         <input type="hidden" asp-for="MaNV" />
-        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-            <i class="fa-solid fa-trash-can me-2"></i> Xóa
-        </button>
-        <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                <i class="fa-solid fa-trash-can me-2"></i>
+                Xóa
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Quay lại
+            </a>
+        </div>
     </form>
 </div>
 
@@ -38,7 +166,7 @@
         function confirmDelete() {
             Swal.fire({
                 title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa nhân viên này?',
+                text: 'Bạn có chắc chắn muốn xóa nhân viên này? Hành động này không thể hoàn tác!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Xóa',

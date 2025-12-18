@@ -1,40 +1,42 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
-using System.Linq;
-
 namespace QuanLyBanHang.Controllers
 {
 	public class SanPhamController : Controller
 	{
 		private readonly SanPhamService _spService;
 		private readonly LoaiSPService _loaiSPService;
-		private readonly HangService _hangService;
+		private readonly HangSXService _hangService;
+		private readonly AppDbContext _context;
 		private readonly IWebHostEnvironment _environment;
 		public SanPhamController(
+			AppDbContext context,
+			SanPhamService spService,
 			SanPhamService service,
 			LoaiSPService loaiSPService,
-			HangService hangService,
+			HangSXService hangService,
 			IWebHostEnvironment environment)
 		{
 			_spService = service;
 			_loaiSPService = loaiSPService;
 			_hangService = hangService;
 			_environment = environment;
+			_context = context;
 		}
 
-		public async Task<IActionResult> Index(string? search, string? status, string? type)
+		public async Task<IActionResult> Index(string? search, string? maTT, string? maLoai)
 		{
 			ViewBag.Search = search;
-			ViewBag.Status = status;
-			ViewBag.Type = type;
+			ViewBag.MaTT = maTT;
+			ViewBag.MaLoai = maLoai;
 
 			// Load dropdown
-			await LoadDropdownsAsync(type, status);
+			await LoadDropdownsAsync(maLoai, maTT);
 
-			var data = await _spService.Search(search, status, type);
+			var data = await _spService.Search(search, maTT, maLoai);
 			return View(data);
 		}
 
@@ -54,7 +56,7 @@ namespace QuanLyBanHang.Controllers
 			return View();
 		}
 
-		
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(SanPham sp, IFormFile? AnhFile)
@@ -115,7 +117,7 @@ namespace QuanLyBanHang.Controllers
 			{
 				// Giữ lại đường dẫn ảnh đã upload để không phải chọn lại
 				sp.AnhMH = filePath;
-				await LoadDropdownsAsync(sp.MaLoai, sp.TrangThai, sp.MaHang);
+				await LoadDropdownsAsync(sp.MaLoai, sp.MaTT, sp.MaHangSX);
 				return View(sp);
 			}
 
@@ -140,7 +142,7 @@ namespace QuanLyBanHang.Controllers
 				}
 
 				ModelState.AddModelError("", "Lỗi khi thêm sản phẩm: " + ex.Message);
-				await LoadDropdownsAsync(sp.MaLoai, sp.TrangThai, sp.MaHang);
+				await LoadDropdownsAsync(sp.MaLoai, sp.MaTT, sp.MaHangSX);
 				return View(sp);
 			}
 		}
@@ -152,7 +154,7 @@ namespace QuanLyBanHang.Controllers
 			var sp = await _spService.GetById(id);
 			if (sp == null) return NotFound();
 
-			await LoadDropdownsAsync(sp.MaLoai, sp.TrangThai, sp.MaHang);
+			await LoadDropdownsAsync(sp.MaLoai, sp.MaTT, sp.MaHangSX);
 			return View(sp);
 		}
 
@@ -164,7 +166,7 @@ namespace QuanLyBanHang.Controllers
 
 			if (!ModelState.IsValid)
 			{
-				await LoadDropdownsAsync(sp.MaLoai, sp.TrangThai, sp.MaHang);
+				await LoadDropdownsAsync(sp.MaLoai, sp.MaTT, sp.MaHangSX);
 				return View(sp);
 			}
 
@@ -186,7 +188,7 @@ namespace QuanLyBanHang.Controllers
 			TempData["SuccessMessage"] = "Cập nhật sản phẩm thành công!";
 			return RedirectToAction(nameof(Index));
 		}
-				
+
 		[HttpGet]
 		public async Task<IActionResult> Delete(string id)
 		{
@@ -211,26 +213,21 @@ namespace QuanLyBanHang.Controllers
 			{
 				TempData["ErrorMessage"] = "Không thể xóa sản phẩm này!";
 			}
-				return RedirectToAction(nameof(Index));
+			return RedirectToAction(nameof(Index));
 		}
 
 		// Load dropdowns
-		private async Task LoadDropdownsAsync(string? selectedLoai = null, string? selectedTrangThai = null, string? selectedHang = null)
+		private async Task LoadDropdownsAsync(string? selectedLoai = null, string? selectedMaTT = null, string? selectedHang = null)
 		{
 			var loaiList = await _loaiSPService.GetAll();
 			ViewBag.LoaiSP = new SelectList(loaiList, "MaLoai", "TenLoai", selectedLoai);
 
 			var hangList = await _hangService.GetAll();
-			ViewBag.MaHang = new SelectList(hangList, "MaHang", "TenHang", selectedHang);
+			ViewBag.MaHangSX = new SelectList(hangList, "MaHanSX", "TenHangSX", selectedHang);
 
-			var statusList = new List<SelectListItem>
-			{
-				new() { Text = "Còn Hàng", Value = "Còn Hàng" },
-				new() { Text = "Hết Hàng", Value = "Hết Hàng" },
-				new() { Text = "Cháy Hàng", Value = "Cháy Hàng" },
-				new() { Text = "Sắp Hết", Value = "Sắp Hết" }
-			};
-			ViewBag.TrangThai = new SelectList(statusList, "Value", "Text", selectedTrangThai);
+			// Load TrangThai from database
+			var trangThaiList = await _context.TrangThai.ToListAsync();
+			ViewBag.MaTT = new SelectList(trangThaiList, "MaTT", "TenTT", selectedMaTT);
 		}
 	}
 }

@@ -16,21 +16,23 @@ CREATE OR ALTER PROC SanPham_Insert
 
     @MaTT CHAR(3),
     @MaLoai VARCHAR(10),
-    @MaHang CHAR(5)
+    @MaHangSX CHAR(5)
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
-	IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP)
+    -- Kiểm tra trùng tên sản phẩm
+    IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP)
     BEGIN
-        RAISERROR(N'Sản phẩm đã tồn tại.', 16, 1);
+        RAISERROR(N'Tên sản phẩm đã tồn tại.', 16, 1);
         RETURN;
     END;
 
     DECLARE @MaSP VARCHAR(10);
     DECLARE @MaxID INT;
 
+    -- Tạo mã tự động: SP00000001
     SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaSP, 3, 8) AS INT)), 0)
     FROM SanPham;
 
@@ -40,13 +42,13 @@ BEGIN
     (
         MaSP, TenSP, GiaBan, MoTaSP, AnhMH,
         ThanhPhan, CongDung, HDSD, HDBaoQuan, TrongLuong,
-        MaTT, MaLoai, MaHang
+        MaTT, MaLoai, MaHangSX
     )
     VALUES
     (
         @MaSP, @TenSP, @GiaBan, @MoTaSP, @AnhMH,
         @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong,
-        @MaTT, @MaLoai, @MaHang
+        @MaTT, @MaLoai, @MaHangSX
     );
 
     PRINT N'Thêm sản phẩm thành công!';
@@ -69,7 +71,7 @@ CREATE OR ALTER PROC SanPham_Update
 
     @MaTT CHAR(3),
     @MaLoai VARCHAR(10),
-    @MaHang CHAR(5)
+    @MaHangSX CHAR(5)
 )
 AS
 BEGIN
@@ -81,9 +83,10 @@ BEGIN
         RETURN;
     END;
 
-	IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP and MaSP<>@MaSP)
+    -- Kiểm tra trùng tên với sản phẩm khác (ngoại trừ chính nó)
+    IF EXISTS (SELECT 1 FROM SanPham WHERE TenSP = @TenSP AND MaSP <> @MaSP)
     BEGIN
-        RAISERROR(N'Sản phẩm đã tồn tại.', 16, 1);
+        RAISERROR(N'Tên sản phẩm đã tồn tại ở một mã khác.', 16, 1);
         RETURN;
     END;
 
@@ -102,7 +105,7 @@ BEGIN
 
         MaTT = @MaTT,
         MaLoai = @MaLoai,
-        MaHang = @MaHang
+        MaHangSX = @MaHangSX
     WHERE MaSP = @MaSP;
 
     PRINT N'Cập nhật sản phẩm thành công!';
@@ -123,6 +126,13 @@ BEGIN
         RETURN;
     END;
 
+    -- Kiểm tra xem sản phẩm đã có giao dịch chưa
+    IF EXISTS (SELECT 1 FROM CTMH WHERE MaSP = @MaSP) OR EXISTS (SELECT 1 FROM CTBH WHERE MaSP = @MaSP)
+    BEGIN
+        RAISERROR(N'Sản phẩm đã có phát sinh giao dịch (Mua/Bán), không thể xóa! Hãy chuyển trạng thái sang Ngừng kinh doanh.', 16, 1);
+        RETURN;
+    END
+
     DELETE FROM SanPham WHERE MaSP = @MaSP;
     PRINT N'Xóa sản phẩm thành công!';
 END;
@@ -134,36 +144,25 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        S.MaSP,
-        S.TenSP,
-        S.GiaBan,
-        S.MoTaSP,
-        S.AnhMH,
-        S.ThanhPhan,
-        S.CongDung,
-        S.HDSD,
-        S.HDBaoQuan,
-        S.TrongLuong,
+        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
+        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+        S.MaTT, S.MaLoai, S.MaHangSX, 
 
         L.TenLoai,
-        H.TenHang,
+        H.TenHangSX,
         TT.TenTT,
-
-        -- TỒN KHO
-        ISNULL(SUM(CMH.SLM), 0) - ISNULL(SUM(CBH.SLB), 0) AS SoLuongTon
+        (
+            ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+            - 
+            ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+        ) AS SoLuongTon
 
     FROM SanPham S
     JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-    JOIN Hang H ON H.MaHang = S.MaHang
+    JOIN HangSX H ON H.MaHangSX = S.MaHangSX
     JOIN TrangThai TT ON TT.MaTT = S.MaTT
-
-    LEFT JOIN CTMH CMH ON CMH.MaSP = S.MaSP
-    LEFT JOIN CTBH CBH ON CBH.MaSP = S.MaSP
-
-    GROUP BY 
-        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
-        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
-        L.TenLoai, H.TenHang, TT.TenTT;
+    
+    ORDER BY S.TenSP;
 END;
 GO
 
@@ -176,37 +175,26 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        S.MaSP,
-        S.TenSP,
-        S.GiaBan,
-        S.MoTaSP,
-        S.AnhMH,
-        S.ThanhPhan,
-        S.CongDung,
-        S.HDSD,
-        S.HDBaoQuan,
-        S.TrongLuong,
+        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
+        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+        
+        S.MaTT, S.MaLoai, S.MaHangSX, 
 
         L.TenLoai,
-        H.TenHang,
+        H.TenHangSX,
         TT.TenTT,
-
-        ISNULL(SUM(CMH.SLM), 0) - ISNULL(SUM(CBH.SLB), 0) AS SoLuongTon
+        (
+            ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+            - 
+            ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+        ) AS SoLuongTon
 
     FROM SanPham S
     JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-    JOIN Hang H ON H.MaHang = S.MaHang
+    JOIN HangSX H ON H.MaHangSX = S.MaHangSX
     JOIN TrangThai TT ON TT.MaTT = S.MaTT
 
-    LEFT JOIN CTMH CMH ON CMH.MaSP = S.MaSP
-    LEFT JOIN CTBH CBH ON CBH.MaSP = S.MaSP
-
-    WHERE S.MaSP = @MaSP
-
-    GROUP BY 
-        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
-        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
-        L.TenLoai, H.TenHang, TT.TenTT;
+    WHERE S.MaSP = @MaSP;
 END;
 GO
 
@@ -221,44 +209,33 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        S.MaSP,
-        S.TenSP,
-        S.GiaBan,
-        S.MoTaSP,
-        S.AnhMH,
-        S.ThanhPhan,
-        S.CongDung,
-        S.HDSD,
-        S.HDBaoQuan,
-        S.TrongLuong,
-
+        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH, 
+        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+        S.MaTT, S.MaLoai, S.MaHangSX, 
         L.TenLoai,
-        H.TenHang,
+        H.TenHangSX,
         TT.TenTT,
-
-        ISNULL(SUM(CMH.SLM), 0) - ISNULL(SUM(CBH.SLB), 0) AS SoLuongTon
+        (
+            ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+            - 
+            ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+        ) AS SoLuongTon
 
     FROM SanPham S
     JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-    JOIN Hang H ON H.MaHang = S.MaHang
+    JOIN HangSX H ON H.MaHangSX = S.MaHangSX
     JOIN TrangThai TT ON TT.MaTT = S.MaTT
-
-    LEFT JOIN CTMH CMH ON CMH.MaSP = S.MaSP
-    LEFT JOIN CTBH CBH ON CBH.MaSP = S.MaSP
 
     WHERE
         (
             @Search IS NULL OR @Search = '' OR
             S.TenSP LIKE '%' + @Search + '%' OR
-            H.TenHang LIKE '%' + @Search + '%' OR
+            H.TenHangSX LIKE '%' + @Search + '%' OR
             L.TenLoai LIKE '%' + @Search + '%'
         )
         AND (@MaTT IS NULL OR S.MaTT = @MaTT)
         AND (@MaLoai IS NULL OR S.MaLoai = @MaLoai)
-
-    GROUP BY 
-        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
-        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
-        L.TenLoai, H.TenHang, TT.TenTT;
+    
+    ORDER BY S.TenSP;
 END;
 GO

@@ -5,11 +5,12 @@
 
     // Lấy dòng đầu tiên để hiển thị thông tin chung
     var don = Model.FirstOrDefault();
+    bool isCustomer = ViewBag.IsCustomer == true;
 }
 
 <div class=" container">
     <h4 class="mb-3 text-success">
-        Chi tiết Đơn bán hàng - Đơn @don?.MaDBH
+        @(isCustomer ? "Chi tiết đơn hàng" : "Chi tiết Đơn bán hàng") - Đơn @don?.MaDBH
     </h4>
 
     @if (don != null)
@@ -21,6 +22,11 @@
                     <dd class="col-sm-9">@don.NgayBH.ToString("dd/MM/yyyy")</dd>
                     <dt class="col-sm-3">Khách hàng:</dt>
                     <dd class="col-sm-9">@don.TenKH</dd>
+                    <dt class="col-sm-3">Trạng thái:</dt>
+                    <dd class="col-sm-9">@don.TenTTBH</dd>
+                    
+                <dt class="col-sm-3" >Địa chỉ giao hàng:</dt>
+                <dd class="col-sm-9">@don.DiaChiDBH, @don.TenXa, @don.TenTinh</dd>
                 </dl>
             </div>
 
@@ -36,7 +42,6 @@
                         <th class="text-end">Đơn giá bán</th>
                         <th class="text-end">Thành tiền</th>
                         <th class="text-center">Xóa sản phẩm</th>
-
                     </tr>
                 </thead>
             <tbody>
@@ -56,14 +61,15 @@
                         </td>
 
                         <td class="text-center">
-                            <a href="@Url.Action("DeleteDetail", "DonBanHang",
-                                   new { maDBH = ct.MaDBH, maSP = ct.MaSP })"
-                       class="btn btn-sm btn-danger">
-                        <i class="fa-solid fa-trash"></i>
-                            </a>
+                            @if (!isCustomer)
+                            {
+                                <a href="@Url.Action("DeleteDetail", "DonBanHang",
+                                       new { maDBH = ct.MaDBH, maSP = ct.MaSP })"
+                                   class="btn btn-sm btn-danger">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            }
                         </td>
-
-
                     </tr>
                         }
             </tbody>
@@ -91,21 +97,16 @@
     }
 
     <div class="mt-4">
-       
-        @if (don != null)
+        @if (don != null && !isCustomer)
         {
             <a href="@Url.Action("Edit", "DonBanHang", new { id = don.MaDBH })" class="btn btn-warning text-white me-2">
                 <i class="fa-solid fa-pen-to-square"></i> Sửa
             </a>
-        }
 
-        @if (don != null)
-        {
             <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "DonBanHang", new { id = don.MaDBH })">
                 <i class="fa-solid fa-trash"></i> Xóa
             </a>
         }
-
         <a asp-action="Index" asp-route-id="@don.MaDBH" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>

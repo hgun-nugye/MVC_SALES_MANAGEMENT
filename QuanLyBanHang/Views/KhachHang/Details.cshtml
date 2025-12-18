@@ -12,9 +12,7 @@
         <div class="row">
             <!-- Ảnh minh họa -->
             <div class="col-md-5 text-center">
-                <img src="@Url.Content("~/images/"+Model.AnhKH)"
-                     alt="@Model.TenKH"
-                     class="img-fluid rounded"
+                <img src="@(string.IsNullOrEmpty(Model.AnhKH) ? Url.Content("~/images/default-user.png") : @Url.Content("~/images/" + Model.AnhKH))" class="img-fluid rounded"
                      style="max-height: 400px; object-fit: contain;" />
             </div>
 

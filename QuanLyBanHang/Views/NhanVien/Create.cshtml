@@ -140,43 +140,137 @@
         </h4>
     </div>
 
-    <form asp-action="Create" method="post">
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
         @Html.ValidationSummary(true, "", new { @class = "alert alert-danger alert-dismissible fade show", role = "alert" })
 
+        <!-- Thông tin cá nhân -->
         <div class="form-section">
             <div class="section-title">
                 <i class="fa-solid fa-info-circle"></i>
-                Thông tin nhân viên
+                Thông tin cá nhân
             </div>
             <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="CCCD" class="form-label required-field">
+                        <i class="fa-solid fa-id-card"></i>
+                        CCCD
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input asp-for="CCCD" class="form-control" placeholder="Nhập số CCCD..." maxlength="12" />
+                    </div>
+                    <span asp-validation-for="CCCD" class="text-danger small mt-1"></span>
+                </div>
+
                 <div class="col-md-6">
                     <label asp-for="TenNV" class="form-label required-field">
                         <i class="fa-solid fa-user"></i>
                         Tên nhân viên
                     </label>
                     <div class="input-group-icon">
-                        <i class="fa-solid fa-id-card"></i>
+                        <i class="fa-solid fa-user"></i>
                         <input asp-for="TenNV" class="form-control" placeholder="Nhập tên nhân viên..." />
                     </div>
                     <span asp-validation-for="TenNV" class="text-danger small mt-1"></span>
                 </div>
 
-                <div class="col-md-6">
-                    <label asp-for="VaiTro" class="form-label required-field">
-                        <i class="fa-solid fa-user-tag"></i>
-                        Vai trò
+                <div class="col-md-4">
+                    <label asp-for="GioiTinh" class="form-label required-field">
+                        <i class="fa-solid fa-venus-mars"></i>
+                        Giới tính
+                    </label>
+                    <select asp-for="GioiTinh" class="form-select">
+                        <option value="true">Nam</option>
+                        <option value="false">Nữ</option>
+                    </select>
+                    <span asp-validation-for="GioiTinh" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="NgaySinh" class="form-label">
+                        <i class="fa-solid fa-calendar"></i>
+                        Ngày sinh
+                    </label>
+                    <input asp-for="NgaySinh" type="date" class="form-control" />
+                    <span asp-validation-for="NgaySinh" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="SDT" class="form-label required-field">
+                        <i class="fa-solid fa-phone"></i>
+                        Số điện thoại
                     </label>
                     <div class="input-group-icon">
-                        <i class="fa-solid fa-briefcase"></i>
-                        <select asp-for="VaiTro" asp-items="ViewBag.VaiTro" class="form-select">
-                            <option value="">-- Chọn vai trò --</option>
-                        </select>
+                        <i class="fa-solid fa-phone"></i>
+                        <input asp-for="SDT" class="form-control" placeholder="Nhập số điện thoại..." maxlength="10" />
                     </div>
-                    <span asp-validation-for="VaiTro" class="text-danger small mt-1"></span>
+                    <span asp-validation-for="SDT" class="text-danger small mt-1"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="TenDNNV" class="form-label required-field">
+                    <label asp-for="Email" class="form-label">
+                        <i class="fa-solid fa-envelope"></i>
+                        Email
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Nhập email..." />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="NgayLam" class="form-label">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        Ngày làm việc
+                    </label>
+                    <input asp-for="NgayLam" type="date" class="form-control" />
+                    <span asp-validation-for="NgayLam" class="text-danger small mt-1"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-map-marker-alt"></i>
+                Địa chỉ
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="DiaChiNV" class="form-label required-field">
+                        <i class="fa-solid fa-home"></i>
+                        Địa chỉ
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-home"></i>
+                        <input asp-for="DiaChiNV" class="form-control" placeholder="Nhập địa chỉ chi tiết..." />
+                    </div>
+                    <span asp-validation-for="DiaChiNV" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MaXa" class="form-label required-field">
+                        <i class="fa-solid fa-map"></i>
+                        Xã/Phường
+                    </label>
+                    <select asp-for="MaXa" asp-items="ViewBag.Xa" class="form-select">
+                        <option value="">-- Chọn xã/phường --</option>
+                    </select>
+                    <span asp-validation-for="MaXa" class="text-danger small mt-1"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin đăng nhập -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-user-shield"></i>
+                Thông tin đăng nhập
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="TenDNNV" class="form-label">
                         <i class="fa-solid fa-user-circle"></i>
                         Tên đăng nhập
                     </label>
@@ -188,7 +282,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="MatKhauNV" class="form-label required-field">
+                    <label asp-for="MatKhauNV" class="form-label">
                         <i class="fa-solid fa-lock"></i>
                         Mật khẩu
                     </label>
@@ -197,6 +291,39 @@
                         <input asp-for="MatKhauNV" type="password" class="form-control" placeholder="Nhập mật khẩu..." />
                     </div>
                     <span asp-validation-for="MatKhauNV" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label required-field">
+                        <i class="fa-solid fa-user-tag"></i>
+                        Vai trò
+                    </label>
+                    <select name="maVT" asp-items="ViewBag.VaiTro" class="form-select">
+                        <option value="">-- Chọn vai trò --</option>
+                    </select>
+                    <span class="text-danger small mt-1" id="maVT-error"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ảnh nhân viên -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-image"></i>
+                Ảnh nhân viên
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="AnhFile" class="form-label">
+                        <i class="fa-solid fa-upload"></i>
+                        Chọn ảnh
+                    </label>
+                    <input asp-for="AnhFile" type="file" class="form-control" accept="image/*" />
+                    <span asp-validation-for="AnhFile" class="text-danger small mt-1"></span>
+                    <small class="text-muted d-block mt-2">
+                        <i class="fa-solid fa-info-circle"></i>
+                        Chấp nhận định dạng: JPG, PNG, GIF. Kích thước tối đa: 5MB
+                    </small>
                 </div>
             </div>
         </div>
@@ -217,4 +344,15 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Validate maVT before submit
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const maVT = document.querySelector('select[name="maVT"]').value;
+            if (!maVT) {
+                e.preventDefault();
+                document.getElementById('maVT-error').textContent = 'Vui lòng chọn vai trò';
+                return false;
+            }
+        });
+    </script>
 }

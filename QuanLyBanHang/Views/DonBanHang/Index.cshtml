@@ -29,10 +29,22 @@
 
 
 <div class="container">
-    <h4 class="mb-5 text-success">
-        Danh sách Đơn bán hàng
-    </h4>
+    @{
+        bool isCustomer = ViewBag.IsCustomer == true;
+    }
 
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <h4 class="mb-5 text-success">
+            @(isCustomer ? "Đơn hàng của bạn" : "Danh sách Đơn bán hàng")
+        </h4>
+
+        @if (!isCustomer)
+        {
+            <a href="@Url.Action("Index", "TrangThaiBH")" class="btn btn-success">
+                <i class="fa-solid fa-list-check"></i> Quản lý trạng thái bán hàng
+            </a>
+        }
+    </div>
     <!-- FORM LỌC -->
     <form id="Form" method="get"
           class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
@@ -66,6 +78,17 @@
                         @Html.Raw($"<option value='{y}' {(ViewBag.Year == y ? "selected" : "")}>{y}</option>")
                     }
                 </select>
+
+                <!-- TRẠNG THÁI -->
+                <select name="MaTTBH" id="ttdhSelect" class="form-select" style="width: 180px;">
+                    <option value="">-- Trạng thái --</option>
+                    @foreach (var tt in (IEnumerable<SelectListItem>)ViewBag.TrangThaiBH)
+                    {
+                        <option value="@tt.Value" selected="@(tt.Value == ViewBag.MaTTBH)">
+                            @tt.Text
+                        </option>
+                    }
+                </select>
             </div>          
 
             <button type="button" id="btnClear" class="btn btn-secondary">
@@ -88,6 +111,7 @@
                     <th>Ngày bán hàng</th>
                     <th>Mã KH</th>
                     <th>Tên KH</th>
+                    <th>Trạng thái</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -101,6 +125,7 @@
                             <td>@item.NgayBH.ToString("dd/MM/yyyy")</td>
                             <td>@item.MaKH</td>
                             <td>@item.TenKH</td>
+                            <td>@item.TenTTBH</td>
 
                         </tr>
                     }
@@ -130,7 +155,7 @@
             }
 
         // khi thay đổi  -> submit form
-        $("#searchBox, #monthSelect, #yearSelect").on("change", debounce(function(){
+        $("#searchBox, #monthSelect, #yearSelect, #ttdhSelect").on("change", debounce(function(){
             $("#Form").submit();
         }, 400));
 
@@ -139,6 +164,7 @@
             $("#searchBox").val("");
             $("#monthSelect").val("");
             $("#yearSelect").val("");
+            $("#ttdhSelect").val("");
             $("#Form").submit();
         });
     </script>

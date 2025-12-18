@@ -80,3 +80,20 @@ BEGIN
     SELECT * FROM TrangThai ORDER BY MaTT;
 END;
 GO
+
+
+CREATE OR ALTER PROC TrangThai_Search
+(
+    @Search NVARCHAR(50) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT MaTT, TenTT
+    FROM TrangThai
+    WHERE (@Search IS NULL OR @Search = '' 
+           OR MaTT LIKE '%' + @Search + '%' 
+           OR TenTT LIKE N'%' + @Search + '%')
+END;
+GO

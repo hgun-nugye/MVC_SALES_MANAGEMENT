@@ -162,13 +162,7 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        nv.MaNV,
-        nv.TenNV,
-        nv.GioiTinh,
-        nv.NgaySinh,
-        nv.SDT,
-        nv.Email,
-        nv.NgayLam,
+        nv.*,
         vt.TenVT,
         x.TenXa,
         t.TenTinh
@@ -216,14 +210,15 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        nv.MaNV,
-        nv.TenNV,
-        nv.SDT,
-        nv.Email,
-        vt.TenVT
+        nv.*,
+        vt.TenVT,
+		X.TenXa, 
+		T.TenTinh
     FROM NhanVien nv
     JOIN PhanQuyen pq ON pq.MaNV = nv.MaNV
     JOIN VaiTro vt ON vt.MaVT = pq.MaVT
+	JOIN Xa X ON X.MaXa = nv.MaXa 
+	JOIN Tinh T ON T.MaTinh = X. MaTinh
     WHERE
         @Search IS NULL OR @Search = '' OR
         nv.TenNV LIKE '%' + @Search + '%' OR

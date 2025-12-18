@@ -1,4 +1,4 @@
-@model QuanLyBanHang.Models.Hang
+@model QuanLyBanHang.Models.HangSX
 @{
     ViewBag.Title = "Thêm Hãng";
 }
@@ -150,15 +150,15 @@
             </div>
             <div class="row g-4">
                 <div class="col-md-6">
-                    <label asp-for="TenHang" class="form-label required-field">
+                    <label asp-for="TenHangSX" class="form-label required-field">
                         <i class="fa-solid fa-industry"></i>
                         Tên hãng
                     </label>
                     <div class="input-group-icon">
                         <i class="fa-solid fa-building"></i>
-                        <input asp-for="TenHang" class="form-control" placeholder="Nhập tên hãng..." />
+                        <input asp-for="TenHangSX" class="form-control" placeholder="Nhập tên hãng..." />
                     </div>
-                    <span asp-validation-for="TenHang" class="text-danger small mt-1"></span>
+                    <span asp-validation-for="TenHangSX" class="text-danger small mt-1"></span>
                 </div>
 
                 <div class="col-md-6">

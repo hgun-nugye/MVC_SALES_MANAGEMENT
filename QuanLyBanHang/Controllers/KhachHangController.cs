@@ -69,12 +69,6 @@ namespace QuanLyBanHang.Controllers
 				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
 				ViewData["MaXaSelected"] = model.MaXa;
 
-				if (model.AnhFile == null)
-				{
-					TempData["ErrorMessage"] = "Vui lòng chọn ảnh minh họa!";
-					return View(model);
-				}
-
 				await _khService.Create(model, model.AnhFile);
 
 				TempData["SuccessMessage"] = "Thêm khách hàng thành công!";
@@ -102,7 +96,7 @@ namespace QuanLyBanHang.Controllers
 			var kh = await _khService.GetByID(id);
 			if (kh == null) return NotFound();
 
-			short maTinh = await _xaService.GetByIDWithTinh(kh.MaXa);
+			short maTinh = kh.MaXa.HasValue ? await _xaService.GetByIDWithTinh(kh.MaXa.Value) : (short)0;
 
 			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 			var xaList = await _xaService.GetByIDTinh(maTinh);
@@ -117,7 +111,7 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				short maTinh = await _xaService.GetByIDWithTinh(model.MaXa);
+				short maTinh = model.MaXa.HasValue ? await _xaService.GetByIDWithTinh(model.MaXa.Value) : (short)0;
 				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);
@@ -137,7 +131,7 @@ namespace QuanLyBanHang.Controllers
 				ModelState.AddModelError("", ex.Message);
 				TempData["ErrorMessage"] = ex.Message;
 
-				short maTinh = await _xaService.GetByIDWithTinh(model.MaXa);
+				short maTinh = model.MaXa.HasValue ? await _xaService.GetByIDWithTinh(model.MaXa.Value) : (short)0;
 				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);

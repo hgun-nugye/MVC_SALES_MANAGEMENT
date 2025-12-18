@@ -43,8 +43,6 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(NhomSP model)
 		{
-			// Mã nhóm sinh bởi DB/SP
-			ModelState.Remove("MaNhom");
 			if (ModelState.IsValid)
 			{
 				try

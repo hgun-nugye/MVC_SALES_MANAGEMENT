@@ -1,4 +1,4 @@
-@model QuanLyBanHang.Models.Hang
+@model QuanLyBanHang.Models.HangSX
 @{
     ViewBag.Title = "Sửa Hãng";
 }
@@ -12,13 +12,13 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group mb-3">
-            <label asp-for="MaHang" class="form-label"></label>
-            <input asp-for="MaHang" class="form-control" readonly />
+            <label asp-for="MaHangSX" class="form-label"></label>
+            <input asp-for="MaHangSX" class="form-control" readonly />
         </div>
         <div class="form-group mb-3">
-            <label asp-for="TenHang" class="form-label"></label>
-            <input asp-for="TenHang" class="form-control" />
-            <span asp-validation-for="TenHang" class="text-danger"></span>
+            <label asp-for="TenHangSX" class="form-label"></label>
+            <input asp-for="TenHangSX" class="form-control" />
+            <span asp-validation-for="TenHangSX" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
             <label asp-for="MaNuoc" class="form-label"></label>
@@ -32,7 +32,7 @@
             <button type="submit" class="btn btn-warning text-white">
                 <i class="fa-solid fa-save"></i> Cập nhật
             </button>
-            <a asp-action="Details" asp-route-id="@Model.MaHang" class="btn btn-secondary">
+            <a asp-action="Details" asp-route-id="@Model.MaHangSX" class="btn btn-secondary">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại
             </a>
         </div>

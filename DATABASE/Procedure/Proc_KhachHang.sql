@@ -171,6 +171,7 @@ BEGIN
         KH.DienThoaiKH,
         KH.EmailKH,
         KH.DiaChiKH,
+		KH.AnhKH,
         X.TenXa,
         T.TenTinh
     FROM KhachHang KH
@@ -207,11 +208,7 @@ CREATE OR ALTER PROC KhachHang_Search
 AS
 BEGIN
     SELECT 
-        KH.MaKH,
-        KH.TenKH,
-        KH.GioiTinh,
-        KH.DienThoaiKH,
-        KH.EmailKH,
+        KH.*,
         X.TenXa,
         T.TenTinh
     FROM KhachHang KH

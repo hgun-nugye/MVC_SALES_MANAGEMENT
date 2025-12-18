@@ -1,0 +1,54 @@
+@model QuanLyBanHang.Models.TrangThaiMH
+
+@{
+    ViewBag.Title = "Xóa Trạng thái mua hàng";
+}
+
+<div class="container">
+    <h4 class="text-danger mb-3">
+        Xóa Trạng thái mua hàng
+    </h4>
+
+    <div class="alert alert-warning shadow-sm">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Bạn có chắc muốn xóa <strong>@Model.TenTTMH</strong> không?
+    </div>
+
+    <div class="border p-4 rounded shadow-sm bg-light">
+        <p><strong>@Html.DisplayNameFor(m => m.MaTTMH):</strong> @Model.MaTTMH</p>
+        <p><strong>@Html.DisplayNameFor(m => m.TenTTMH):</strong> @Model.TenTTMH</p>
+    </div>
+
+    <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
+        <input type="hidden" asp-for="MaTTMH" />
+        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+            <i class="fa-solid fa-trash-can me-2"></i> Xóa
+        </button>
+        <a asp-action="Details" asp-route-id="@Model.MaTTMH" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete() {
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: 'Bạn có chắc chắn muốn xóa trạng thái này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+    </script>
+}
+

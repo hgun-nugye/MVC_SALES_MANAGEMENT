@@ -1,3 +1,33 @@
 ﻿@{
-    Layout = "_Layout";
+    // Kiểm tra request AJAX
+    var isAjax = Context.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
+    // Lấy các thông tin cần thiết từ Session (Chỉ khai báo 1 lần duy nhất ở đây)
+    var isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
+    var isCustomerFromSession = Context.Session.GetString("IsCustomer") == "true";
+
+    if (isAjax)
+    {
+        Layout = null;
+    }
+    else
+    {
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+        var action = ViewContext.RouteData.Values["action"]?.ToString();
+
+        if (controller == "Home" && !isLoggedIn && (action == "Index" || action == "Login" || action == "SignUp"))
+        {
+            Layout = "_HomeLayout";
+        }
+        else
+        {
+            Layout = "_Layout";
+        }
+    }
+
+    // chế độ hiển thị
+    var isCustomerMode = isLoggedIn && isCustomerFromSession;
+
+    ViewBag.IsCustomer = isCustomerMode;
+    ViewBag.UserMode = isCustomerMode ? "Customer" : "Admin";
 }

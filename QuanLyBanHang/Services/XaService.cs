@@ -13,7 +13,7 @@ namespace QuanLyBanHang.Services
 			_context = context;
 		}
 
-		public async Task<List<Xa>> Search(string? search, string? tinh)
+		public async Task<List<XaDTO>> Search(string? search, string? tinh)
 		{
 			var parameters = new[]
 			{
@@ -21,7 +21,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaTinh", (object?)tinh ?? DBNull.Value)
 			};
 
-			return await _context.Xa
+			return await _context.XaDTO
 				.FromSqlRaw("EXEC Xa_Search @Search, @MaTinh", parameters)
 				.ToListAsync();
 		}
