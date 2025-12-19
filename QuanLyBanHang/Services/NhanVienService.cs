@@ -1,6 +1,6 @@
-using QuanLyBanHang.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using QuanLyBanHang.Models;
 
 namespace QuanLyBanHang.Services
 {
@@ -67,8 +67,18 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Cập nhật Nhân Viên
-		public async Task Update(NhanVien model, string maVT)
+		public async Task Update(NhanVien model, string maVT, string? newPassword)
 		{
+			string finalPassword;
+
+			if (!string.IsNullOrWhiteSpace(newPassword))
+			{
+				finalPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+			}
+			else
+			{
+				finalPassword = model.MatKhauNV;
+			}
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC NhanVien_Update 
                     @MaNV = {model.MaNV},

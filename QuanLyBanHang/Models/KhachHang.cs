@@ -23,6 +23,7 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Ảnh khách hàng")]
 		public string? AnhKH { get; set; }
 
+		[Required(ErrorMessage = "Giới tính không được để trống")]
 		[Display(Name = "Giới Tính")]
 		public bool? GioiTinh { get; set; }
 
@@ -36,10 +37,12 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Số điện thoại")]
 		public string DienThoaiKH { get; set; } = string.Empty;
 
+		[Required(ErrorMessage = "Địa chỉ không được để trống")]
 		[StringLength(255)]
 		[Display(Name = "Địa chỉ")]
 		public string? DiaChiKH { get; set; }
 
+		[Required(ErrorMessage = "Địa chỉ không được để trống")]
 		[Display(Name = "Mã xã")]
 		public short? MaXa { get; set; }
 

@@ -222,6 +222,7 @@
                     }
                     else
                     {
+                        <label></label>
                         <input type="hidden" asp-for="MaKH" />
                         <div class="alert alert-info mb-0">
                             <i class="fa-solid fa-info-circle me-2"></i>
@@ -257,7 +258,6 @@
                         Tỉnh
                     </label>
                     <div class="input-group-icon">
-                        <i class="fa-solid fa-map"></i>
                         <select id="MaTinh" name="maTinh" asp-items="@ViewBag.Tinh" class="form-select">
                             <option value="">-- Chọn Tỉnh --</option>
                         </select>
@@ -270,7 +270,7 @@
                         Xã
                     </label>
                     <div class="input-group-icon">
-                        <i class="fa-solid fa-location-dot"></i>
+                        
                         <select id="MaXa" asp-for="MaXa" asp-items="@ViewBag.Xa" class="form-select">
                             <option value="">-- Chọn Xã --</option>
                         </select>
@@ -287,6 +287,19 @@
                         </label>
                         <select asp-for="MaTTBH" asp-items="ViewBag.MaTTBH" class="form-select">
                             <option value="">-- Chọn trạng thái --</option>
+                        </select>
+                        <span asp-validation-for="MaTTBH" class="text-danger small mt-1"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-6">
+                        <label asp-for="MaTTBH" class="form-label required-field">
+                            <i class="fa-solid fa-list-check"></i>
+                            Trạng thái đơn hàng
+                        </label>
+                        <select asp-for="MaTTBH" asp-items="ViewBag.MaTTBH" class="form-select" disabled>
+                            <option value="CHO">Chờ xác nhận </option>
                         </select>
                         <span asp-validation-for="MaTTBH" class="text-danger small mt-1"></span>
                     </div>

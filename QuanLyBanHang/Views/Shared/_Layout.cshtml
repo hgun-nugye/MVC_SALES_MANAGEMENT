@@ -198,17 +198,17 @@
                 <div class="px-3">
                     @if (ViewBag.IsCustomer == true)
                     {
-                        <div class="badge bg-info text-dark w-100 mb-1">
+                        <div class="badge bg-info text-dark w-100 mb-1 p-2 text-white" style="font-size: 16px">
                             <i class="fa-solid fa-user-circle me-1"></i>Khách hàng
                         </div>
                     }
                     else
                     {
-                        <div class="badge bg-success w-100 mb-1">
+                        <div class="badge bg-success w-100 mb-1 p-2 text-white" style="font-size:16px">
                             <i class="fa-solid fa-user-tie me-1"></i>Nhân viên
                         </div>
                     }
-                    <div class="small text-muted mt-1" style="word-break: break-word;">
+                    <div class="text-muted mt-1" style="word-break: break-word;">
                         @Context.Session.GetString("UserName")
                     </div>
                 </div>
@@ -266,14 +266,8 @@
             <a href="@Url.Action("Index", "DonBanHang")" class="ajax-link @(ctrl == "DonBanHang" ? "active" : "")">
                 <i class="fa-solid fa-shopping-cart me-2"></i>Đơn Bán Hàng
             </a>
-            <a href="@Url.Action("Index", "TrangThaiBH")" class="ajax-link @(ctrl == "TrangThaiBH" ? "active" : "")">
-                <i class="fa-solid fa-list-check me-2"></i>Trạng thái Đơn hàng
-            </a>
             <a href="@Url.Action("Index", "DonMuaHang")" class="ajax-link @(ctrl == "DonMuaHang" ? "active" : "")">
                 <i class="fa-solid fa-shopping-bag me-2"></i>Đơn Mua Hàng
-            </a>
-            <a href="@Url.Action("Index", "TrangThaiMH")" class="ajax-link @(ctrl == "TrangThaiMH" ? "active" : "")">
-                <i class="fa-solid fa-list-check me-2"></i>Trạng thái Nhập hàng
             </a>
 
             <!-- Địa lý -->
@@ -322,9 +316,13 @@
                 }
             </div>
             <div>
-                <a href="@Url.Action("Logout", "Home")" class="btn btn-danger btn-sm">
+                <a class="dropdown-item text-danger btn btn-danger" href="javascript:void(0)" onclick="confirmLogout()">
                     <i class="fa-solid fa-sign-out-alt me-2"></i>Đăng xuất
                 </a>
+
+                <form id="logoutForm" action="@Url.Action("LogoutConfirmed", "Home")" method="post" style="display:none;">
+                    @Html.AntiForgeryToken()
+                </form>
             </div>
         </div>
 
@@ -402,7 +400,7 @@
     <script>
         $(document).ready(function () {
             $(document).on('click', '.ajax-link', function (e) {
-                e.preventDefault(); // Ngăn load trang
+                e.preventDefault(); 
 
                 var url = $(this).attr('href');
                 var $this = $(this);
@@ -424,11 +422,8 @@
                         $('.sidebar a').removeClass('active');
                         $this.addClass('active');
 
-                        // Đổi URL trên trình duyệt để User có thể F5
                         window.history.pushState({ path: url }, '', url);
-
-                        // Nếu bạn có dùng các thư viện như DataTable hay Tooltip, hãy khởi tạo lại ở đây
-                        // ví dụ: $('.table').DataTable();
+                      
                     },
                     error: function () {
                         $('#main-content').css('opacity', '1');
@@ -443,7 +438,6 @@
             };
         });
 
-            // --- THÊM ĐOẠN NÀY ĐỂ XỬ LÝ CLICK ROW CHO TOÀN BỘ APP ---
             $(document).on('click', '.clickable-row', function (e) {
                 // Nếu click vào nút bấm hoặc link bên trong row thì không chạy Detail
                 if ($(e.target).closest('a, button, input').length) return;
@@ -470,9 +464,28 @@
                     }
                 });
             }
-
-            window.onpopstate = function () { location.reload(); };
         });
     </script>
+
+    <script>
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Bạn muốn đăng xuất?',
+                text: "Phiên làm việc của bạn sẽ kết thúc!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Đăng xuất',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form ẩn để gửi POST request lên Controller
+                    document.getElementById('logoutForm').submit();
+                }
+            })
+        }
+    </script>
+    
 </body>
 </html>

@@ -58,13 +58,10 @@ namespace QuanLyBanHang.Services
 
 		// Create KhachHang
 		public async Task<string> Create(KhachHang model, IFormFile anhFile)
-		{
-			if (anhFile == null || anhFile.Length == 0)
-				throw new ArgumentException("Vui lòng chọn ảnh minh họa!");
-
+		{			
 			// Upload ảnh
 			var fileName = Guid.NewGuid() + Path.GetExtension(anhFile.FileName);
-			var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+			var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/customers");
 			if (!Directory.Exists(folderPath))
 				Directory.CreateDirectory(folderPath);
 
@@ -112,7 +109,7 @@ namespace QuanLyBanHang.Services
 			{
 				var fileName = Guid.NewGuid() + Path.GetExtension(anhFile.FileName);
 
-				var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+				var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "customers");
 				if (!Directory.Exists(folder))
 					Directory.CreateDirectory(folder);
 

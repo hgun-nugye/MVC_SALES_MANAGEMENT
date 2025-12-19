@@ -67,11 +67,7 @@ namespace QuanLyBanHang.Controllers
 
 			// Validate file upload (allow dùng lại ảnh cũ khi form reload)
 			var hasExistingImage = !string.IsNullOrEmpty(sp.AnhMH);
-			if ((AnhFile == null || AnhFile.Length == 0) && !hasExistingImage)
-			{
-				ModelState.AddModelError("AnhFile", "Vui lòng chọn ảnh minh họa!");
-			}
-			else if (AnhFile != null && AnhFile.Length > 0)
+			if (AnhFile != null && AnhFile.Length > 0)
 			{
 				if (AnhFile.Length > 5 * 1024 * 1024) // 5MB
 				{
@@ -97,7 +93,7 @@ namespace QuanLyBanHang.Controllers
 				try
 				{
 					var fileName = Guid.NewGuid().ToString() + Path.GetExtension(AnhFile!.FileName);
-					var folderPath = Path.Combine(_environment.WebRootPath, "images");
+					var folderPath = Path.Combine(_environment.WebRootPath, "images", "products");
 					if (!Directory.Exists(folderPath))
 						Directory.CreateDirectory(folderPath);
 
@@ -154,8 +150,26 @@ namespace QuanLyBanHang.Controllers
 			var sp = await _spService.GetById(id);
 			if (sp == null) return NotFound();
 
+			// Chuyển đổi thủ công sang Dto
+			var spDto = new SanPhamDto
+			{
+				MaSP = sp.MaSP,
+				TenSP = sp.TenSP,
+				GiaBan = sp.GiaBan,
+				AnhMH = sp.AnhMH,
+				TrongLuong = sp.TrongLuong,
+				MaTT = sp.MaTT,
+				MoTaSP = sp.MoTaSP,
+				ThanhPhan = sp.ThanhPhan,
+				CongDung = sp.CongDung,
+				HDSD = sp.HDSD,
+				HDBaoQuan = sp.HDBaoQuan,
+				MaLoai = sp.MaLoai,
+				MaHangSX = sp.MaHangSX
+			};
+
 			await LoadDropdownsAsync(sp.MaLoai, sp.MaTT, sp.MaHangSX);
-			return View(sp);
+			return View(spDto); // Truyền Dto vào View
 		}
 
 		[HttpPost]
@@ -223,7 +237,7 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.LoaiSP = new SelectList(loaiList, "MaLoai", "TenLoai", selectedLoai);
 
 			var hangList = await _hangService.GetAll();
-			ViewBag.MaHangSX = new SelectList(hangList, "MaHanSX", "TenHangSX", selectedHang);
+			ViewBag.MaHangSX = new SelectList(hangList, "MaHangSX", "TenHangSX", selectedHang);
 
 			// Load TrangThai from database
 			var trangThaiList = await _context.TrangThai.ToListAsync();

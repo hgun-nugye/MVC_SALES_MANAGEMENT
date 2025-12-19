@@ -30,19 +30,19 @@
                 </dl>
             </div>
 
-            <h4 class="text-success mt-4">
-                <i class="fa-solid fa-boxes-stacked"></i> Danh sách sản phẩm bán
-            </h4>
+        <h4 class="text-success mt-4">
+            <i class="fa-solid fa-boxes-stacked"></i> Danh sách sản phẩm bán
+        </h4>
 
-            <table class="table mt-4">
-                <thead class="table-success">
-                    <tr>
-                        <th>Tên sản phẩm</th>
-                        <th class="text-center">Số lượng bán</th>
-                        <th class="text-end">Đơn giá bán</th>
-                        <th class="text-end">Thành tiền</th>
-                        <th class="text-center">Xóa sản phẩm</th>
-                    </tr>
+        <table class="table mt-4">
+            <thead class="table-success">
+                <tr>
+                    <th>Tên sản phẩm</th>
+                    <th class="text-center">Số lượng bán</th>
+                    <th class="text-end">Đơn giá bán</th>
+                    <th class="text-end">Thành tiền</th>
+                    @if (!isCustomer) { <th class="text-center">Xóa sản phẩm</th>}
+                </tr>
                 </thead>
             <tbody>
                 @foreach (var ct in Model)

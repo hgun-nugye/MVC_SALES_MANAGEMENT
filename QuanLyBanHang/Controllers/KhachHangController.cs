@@ -11,13 +11,15 @@ namespace QuanLyBanHang.Controllers
 		private readonly KhachHangService _khService;
 		private readonly XaService _xaService;
 		private readonly TinhService _tinhService;
+		private readonly IWebHostEnvironment _environment;
 
-		public KhachHangController(AppDbContext context, KhachHangService khService, XaService xaService, TinhService tinhService)
+		public KhachHangController(AppDbContext context, KhachHangService khService, XaService xaService, TinhService tinhService, IWebHostEnvironment environment)
 		{
 			_context = context;
 			_khService = khService;
 			_xaService = xaService;
 			_tinhService = tinhService;
+			_environment = environment;
 		}
 
 		public async Task<IActionResult> Index(string? search, string? tinh)
@@ -56,19 +58,69 @@ namespace QuanLyBanHang.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(KhachHang model, short maTinh)
+		public async Task<IActionResult> Create(KhachHang model, short maTinh, IFormFile? AnhFile)
 		{
+			// Mã khách hàng sinh bởi DB/SP
+			ModelState.Remove("MaKH");
+
+			var hasExistingImage = !string.IsNullOrEmpty(model.AnhKH);
+			if (AnhFile != null && AnhFile.Length > 0)
+			{
+				if (AnhFile.Length > 5 * 1024 * 1024) // 5MB
+				{
+					ModelState.AddModelError("AnhFile", "Kích thước ảnh không được vượt quá 5MB!");
+				}
+				else
+				{
+					var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+					var extension = Path.GetExtension(AnhFile.FileName).ToLowerInvariant();
+					if (!allowedExtensions.Contains(extension))
+					{
+						ModelState.AddModelError("AnhFile", "Chỉ chấp nhận file ảnh: JPG, PNG, GIF, WEBP!");
+					}
+				}
+			}
+
+			// Lưu file ngay khi hợp lệ để giữ lại khi reload form
+			string? filePath = model.AnhKH;
+				var hasFileError = ModelState.TryGetValue("AnhFile", out var fileState) && fileState.Errors.Count > 0;
+			var shouldSaveFile = AnhFile != null && AnhFile.Length > 0 && !hasFileError;
+			if (shouldSaveFile)
+			{
+				try
+				{
+					var fileName = Guid.NewGuid().ToString() + Path.GetExtension(AnhFile!.FileName);
+					var folderPath = Path.Combine(_environment.WebRootPath, "images", "customers");
+					if (!Directory.Exists(folderPath))
+						Directory.CreateDirectory(folderPath);
+
+					var savePath = Path.Combine(folderPath, fileName);
+					using var stream = new FileStream(savePath, FileMode.Create);
+					await AnhFile.CopyToAsync(stream);
+					filePath = fileName;
+					model.AnhKH = fileName; // giữ lại khi return View
+				}
+				catch (Exception ex)
+				{
+					ModelState.AddModelError("", "Lỗi khi lưu file: " + ex.Message);
+				}
+			}
+
+
+			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+
+			var xaList = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+			ViewData["MaXaSelected"] = model.MaXa;
+			if (!ModelState.IsValid)
+			{
+				// Giữ lại đường dẫn ảnh đã upload để không phải chọn lại
+				model.AnhKH = filePath;
+				return View(model);
+			}
+
 			try
 			{
-				// Mã khách hàng sinh bởi DB/SP
-				ModelState.Remove("MaKH");
-
-				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
-
-				var xaList = await _xaService.GetByIDTinh(maTinh);
-				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
-				ViewData["MaXaSelected"] = model.MaXa;
-
 				await _khService.Create(model, model.AnhFile);
 
 				TempData["SuccessMessage"] = "Thêm khách hàng thành công!";
@@ -76,14 +128,18 @@ namespace QuanLyBanHang.Controllers
 			}
 			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = ex.Message;
-				ModelState.AddModelError("", ex.Message);
+				if (!string.IsNullOrEmpty(filePath))
+				{
+					try
+					{
+						var fileToDelete = Path.Combine(_environment.WebRootPath, "images", "customer",filePath);
+						if (System.IO.File.Exists(fileToDelete))
+							System.IO.File.Delete(fileToDelete);
+					}
+					catch { }
+				}
 
-				// Nếu lỗi validation hoặc lỗi khác
-				var xaList = await _xaService.GetByIDTinh(maTinh);
-				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
-				ViewData["MaXaSelected"] = model.MaXa;
-
+				ModelState.AddModelError("", "Lỗi khi thêm khách hàng: " + ex.Message);
 				return View(model);
 			}
 		}

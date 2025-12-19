@@ -56,8 +56,8 @@
             <!-- Ảnh minh họa -->
             <div class="col-md-4 text-center">
                 @if (!string.IsNullOrEmpty(Model.AnhMH))
-                {                  
-                    <img src="@(string.IsNullOrEmpty(Model.AnhMH) ? Url.Content("~/images/default-product.png") : @Url.Content("~/images/" + Model.AnhMH))" class="product-image"/>
+                {
+                    <img src="@(string.IsNullOrEmpty(Model.AnhMH) ? Url.Content("~/images/default-product.png") : @Url.Content("~/images/products/" + Model.AnhMH))" class="product-image" />
                 }
                 else
                 {

@@ -36,14 +36,14 @@
     @{
         bool isCustomer = ViewBag.IsCustomer == true;
     }
-    <div class="d-flex flex-wrap align-items-center gap-2">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
         <h4 class="mb-5 text-success">
             Danh sách Đơn mua hàng
         </h4>
 
         @if (!isCustomer)
         {
-            <a href="@Url.Action("Index", "TrangThaiMH")" class="btn btn-success">
+            <a href="@Url.Action("Index", "TrangThaiMH")" class="btn btn-success mb-5">
                 <i class="fa-solid fa-list-check"></i> Quản lý trạng thái mua hàng
             </a>
         }

@@ -67,8 +67,14 @@ namespace QuanLyBanHang.Services
 			table.Columns.Add("DGB", typeof(decimal));
 
 			foreach (var ct in model.CTBHs)
-				table.Rows.Add(ct.MaSP, ct.SLB, ct.DGB);
+			{
+				var sp = await _context.SanPham.AsNoTracking()
+								.FirstOrDefaultAsync(s => s.MaSP == ct.MaSP);
 
+				decimal giaThucTe = sp?.GiaBan ?? 0;
+
+				table.Rows.Add(ct.MaSP, ct.SLB, giaThucTe);
+			}
 			var parameters = new[]
 			{
 				new SqlParameter("@NgayBH", model.NgayBH),

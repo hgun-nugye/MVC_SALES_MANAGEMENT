@@ -16,28 +16,32 @@ namespace QuanLyBanHang.Controllers
         private readonly XaService _xaService;
         private readonly TinhService _tinhService;
         private readonly AppDbContext _context;
+		private readonly IWebHostEnvironment _environment;
 
-        public HomeController(
+
+		public HomeController(
             ILogger<HomeController> logger,
-            SanPhamService sanPhamService,
-            KhachHangService khachHangService,
-            NhanVienService nhanVienService,
-            XaService xaService,
-            TinhService tinhService,
-            AppDbContext context)
-        {
-            _logger = logger;
-            _sanPhamService = sanPhamService;
-            _khachHangService = khachHangService;
-            _nhanVienService = nhanVienService;
-            _xaService = xaService;
-            _tinhService = tinhService;
-            _context = context;
-        }
+			SanPhamService sanPhamService,
+			KhachHangService khachHangService,
+			NhanVienService nhanVienService,
+			XaService xaService,
+			TinhService tinhService,
+			AppDbContext context
+,
+			IWebHostEnvironment environment)
+		{
+			_logger = logger;
+			_sanPhamService = sanPhamService;
+			_khachHangService = khachHangService;
+			_nhanVienService = nhanVienService;
+			_xaService = xaService;
+			_tinhService = tinhService;
+			_context = context;
+			_environment = environment;
+		}
 
-        public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index()
         {
-            // Lấy danh sách sản phẩm để hiển thị dạng card
             var sanPhams = await _sanPhamService.GetAll();
             return View(sanPhams);
         }
@@ -45,7 +49,6 @@ namespace QuanLyBanHang.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Nếu đã đăng nhập, chuyển về trang chủ
             if (HttpContext.Session.GetString("IsLoggedIn") == "true")
             {
                 return RedirectToAction("Index");
@@ -100,123 +103,134 @@ namespace QuanLyBanHang.Controllers
             // Đăng nhập thất bại
             TempData["ErrorMessage"] = "Tên đăng nhập hoặc mật khẩu không đúng!";
             return View();
-        }
+        }		
 
-        [HttpGet]
-        public async Task<IActionResult> SignUp()
-        {
-            // Load dropdown cho Xã và Tỉnh
-            var tinhList = await _tinhService.GetAll();
-            ViewBag.MaTinh = new SelectList(tinhList, "MaTinh", "TenTinh");
-            ViewBag.MaXa = new SelectList(new List<Xa>(), "MaXa", "TenXa");
+		[HttpGet]
+		public async Task<IActionResult> SignUp()
+		{
+			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			ViewBag.Xa = new SelectList(Enumerable.Empty<object>(), "MaXa", "TenXa");
+			ViewData["MaXaSelected"] = null;
+			return View();
+		}
 
-            return View();
-        }
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> SignUp(KhachHang model, short maTinh, IFormFile? AnhFile)
+		{
+			// Mã khách hàng sinh bởi DB/SP
+			ModelState.Remove("MaKH");
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SignUp(KhachHang khachHang, IFormFile? AnhFile)
-        {
-            // Bỏ qua validation cho MaKH vì nó được tự động generate
-            ModelState.Remove("MaKH");
-            ModelState.Remove("AnhFile");
+			var hasExistingImage = !string.IsNullOrEmpty(model.AnhKH);
+			if (AnhFile != null && AnhFile.Length > 0)
+			{
+				if (AnhFile.Length > 5 * 1024 * 1024) // 5MB
+				{
+					ModelState.AddModelError("AnhFile", "Kích thước ảnh không được vượt quá 5MB!");
+				}
+				else
+				{
+					var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+					var extension = Path.GetExtension(AnhFile.FileName).ToLowerInvariant();
+					if (!allowedExtensions.Contains(extension))
+					{
+						ModelState.AddModelError("AnhFile", "Chỉ chấp nhận file ảnh: JPG, PNG, GIF, WEBP!");
+					}
+				}
+			}
 
-            // Validate file upload
-            if (AnhFile == null || AnhFile.Length == 0)
-            {
-                ModelState.AddModelError("AnhFile", "Vui lòng chọn ảnh đại diện!");
-            }
-            else if (AnhFile.Length > 5 * 1024 * 1024) // 5MB
-            {
-                ModelState.AddModelError("AnhFile", "Kích thước ảnh không được vượt quá 5MB!");
-            }
-            else
-            {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-                var extension = Path.GetExtension(AnhFile.FileName).ToLowerInvariant();
-                if (!allowedExtensions.Contains(extension))
-                {
-                    ModelState.AddModelError("AnhFile", "Chỉ chấp nhận file ảnh: JPG, PNG, GIF, WEBP!");
-                }
-            }
+			// Lưu file ngay khi hợp lệ để giữ lại khi reload form
+			string? filePath = model.AnhKH;
+			var hasFileError = ModelState.TryGetValue("AnhFile", out var fileState) && fileState.Errors.Count > 0;
+			var shouldSaveFile = AnhFile != null && AnhFile.Length > 0 && !hasFileError;
+			if (shouldSaveFile)
+			{
+				try
+				{
+					var fileName = Guid.NewGuid().ToString() + Path.GetExtension(AnhFile!.FileName);
+					var folderPath = Path.Combine(_environment.WebRootPath, "images", "customers");
+					if (!Directory.Exists(folderPath))
+						Directory.CreateDirectory(folderPath);
 
-            // Kiểm tra tên đăng nhập đã tồn tại chưa
-            if (!string.IsNullOrEmpty(khachHang.TenDNKH))
-            {
-                var existingKH = await _context.KhachHang
-                    .FirstOrDefaultAsync(kh => kh.TenDNKH == khachHang.TenDNKH);
-                if (existingKH != null)
-                {
-                    ModelState.AddModelError("TenDNKH", "Tên đăng nhập đã tồn tại!");
-                }
-            }
+					var savePath = Path.Combine(folderPath, fileName);
+					using var stream = new FileStream(savePath, FileMode.Create);
+					await AnhFile.CopyToAsync(stream);
+					filePath = fileName;
+					model.AnhKH = fileName; // giữ lại khi return View
+				}
+				catch (Exception ex)
+				{
+					ModelState.AddModelError("", "Lỗi khi lưu file: " + ex.Message);
+				}
+			}
 
-            if (!ModelState.IsValid)
-            {
-                // Load lại dropdown
-                var tinhList = await _tinhService.GetAll();
-                ViewBag.MaTinh = new SelectList(tinhList, "MaTinh", "TenTinh", khachHang.MaXa);
-                
-                // Lấy mã tỉnh từ Xã nếu có
-                short maTinh = 0;
-                if (khachHang.MaXa.HasValue)
-                {
-                    maTinh = await _xaService.GetByIDWithTinh(khachHang.MaXa.Value);
-                }
-                
-                if (maTinh > 0)
-                {
-                    var xaList = await _xaService.GetByIDTinh(maTinh);
-                    ViewBag.MaXa = new SelectList(xaList, "MaXa", "TenXa", khachHang.MaXa);
-                }
-                else
-                {
-                    ViewBag.MaXa = new SelectList(new List<Xa>(), "MaXa", "TenXa");
-                }
 
-                return View(khachHang);
-            }
+			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
-            try
-            {
-                if (AnhFile == null || AnhFile.Length == 0)
-                {
-                    ModelState.AddModelError("AnhFile", "Vui lòng chọn ảnh đại diện!");
-                    var tinhList = await _tinhService.GetAll();
-                    ViewBag.MaTinh = new SelectList(tinhList, "MaTinh", "TenTinh");
-                    ViewBag.MaXa = new SelectList(new List<Xa>(), "MaXa", "TenXa");
-                    return View(khachHang);
-                }
+			var xaList = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+			ViewData["MaXaSelected"] = model.MaXa;
+			if (!ModelState.IsValid)
+			{
+				// Giữ lại đường dẫn ảnh đã upload để không phải chọn lại
+				model.AnhKH = filePath;
+				return View(model);
+			}
 
-                await _khachHangService.Create(khachHang, AnhFile);
-                TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
-                return RedirectToAction("Login");
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Lỗi khi đăng ký: " + ex.Message;
-                var tinhList = await _tinhService.GetAll();
-                ViewBag.MaTinh = new SelectList(tinhList, "MaTinh", "TenTinh");
-                ViewBag.MaXa = new SelectList(new List<Xa>(), "MaXa", "TenXa");
-                return View(khachHang);
-            }
-        }
+			try
+			{
+				await _khachHangService.Create(model, model.AnhFile);
 
-        [HttpGet]
+				TempData["SuccessMessage"] = "Thêm khách hàng thành công!";
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				if (!string.IsNullOrEmpty(filePath))
+				{
+					try
+					{
+						var fileToDelete = Path.Combine(_environment.WebRootPath, "images", "customers", filePath);
+						if (System.IO.File.Exists(fileToDelete))
+							System.IO.File.Delete(fileToDelete);
+					}
+					catch { }
+				}
+
+				ModelState.AddModelError("", "Lỗi khi thêm khách hàng: " + ex.Message);
+				return View(model);
+			}
+		}
+
+		[HttpGet]
         public async Task<IActionResult> GetXaByTinh(short maTinh)
         {
             var xaList = await _xaService.GetByIDTinh(maTinh);
             return Json(xaList.Select(x => new { MaXa = x.MaXa, TenXa = x.TenXa }));
         }
 
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            TempData["SuccessMessage"] = "Đăng xuất thành công!";
-            return RedirectToAction("Index");
-        }
+		[HttpGet]
+		public IActionResult Logout()
+		{
+			if (HttpContext.Session.GetString("IsLoggedIn") != "true")
+			{
+				return RedirectToAction("Index");
+			}
+			return View();
+		}
 
-        public IActionResult Privacy()
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult LogoutConfirmed()
+		{
+			HttpContext.Session.Clear();
+
+			TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công!";
+
+			return RedirectToAction("Index", "Home");
+		}
+
+		public IActionResult Privacy()
         {
             return View();
         }

@@ -182,7 +182,7 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Ảnh hiện tại / xem trước:</label>
                     <img id="previewImage"
-                         src="@(string.IsNullOrEmpty(Model?.AnhMH) ? "" : Url.Content("~/images/" + Model.AnhMH))"
+                         src="@(string.IsNullOrEmpty(Model?.AnhMH) ? "" : Url.Content("~/images/products" + Model.AnhMH))"
                          alt="@Model.TenSP"
                          style="max-width: 240px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); object-fit: cover; background: #f8f9fa;" />
                 </div>

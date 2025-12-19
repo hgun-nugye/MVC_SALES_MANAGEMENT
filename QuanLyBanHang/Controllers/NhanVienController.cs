@@ -65,7 +65,8 @@ namespace QuanLyBanHang.Controllers
 			ModelState.Remove("TenXa");
 			ModelState.Remove("TenTinh");
 			ModelState.Remove("AnhFile");
-			
+			ModelState.Remove("MatKhau");
+
 			if (ModelState.IsValid)
 			{
 				try
@@ -129,7 +130,7 @@ namespace QuanLyBanHang.Controllers
 		// EDIT - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(NhanVien model, string maVT)
+		public async Task<IActionResult> Edit(NhanVien model, string maVT, string? newPassword)
 		{
 			ModelState.Remove("TenXa");
 			ModelState.Remove("TenTinh");
@@ -139,7 +140,7 @@ namespace QuanLyBanHang.Controllers
 			{
 				try
 				{
-					await _nhanVienService.Update(model, maVT);
+					await _nhanVienService.Update(model, maVT, newPassword);
 
 					TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
 					return RedirectToAction(nameof(Index));
