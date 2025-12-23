@@ -11,7 +11,7 @@ CREATE OR ALTER PROC NhanVien_Insert
     @Email VARCHAR(50),
     @DiaChiNV NVARCHAR(255),
     @MaXa SMALLINT,
-
+    @AnhNV NVARCHAR(255),
     @TenDNNV VARCHAR(50),
     @MatKhauNV VARCHAR(255),
 
@@ -48,13 +48,13 @@ BEGIN
     (
         MaNV, CCCD, TenNV, GioiTinh, NgaySinh,
         SDT, Email, DiaChiNV, MaXa,
-        TenDNNV, MatKhauNV
+        TenDNNV, MatKhauNV, AnhNV
     )
     VALUES
     (
         @MaNV, @CCCD, @TenNV, @GioiTinh, @NgaySinh,
         @SDT, @Email, @DiaChiNV, @MaXa,
-        @TenDNNV, @MatKhauNV
+        @TenDNNV, @MatKhauNV, @AnhNV
     );
 
     INSERT INTO PhanQuyen(MaVT, MaNV)
@@ -77,6 +77,7 @@ CREATE OR ALTER PROC NhanVien_Update
     @Email VARCHAR(50),
     @DiaChiNV NVARCHAR(255),
     @MaXa SMALLINT,
+    @AnhNV NVARCHAR(255),
 
     @TenDNNV VARCHAR(50),
     @MatKhauNV VARCHAR(255),
@@ -118,7 +119,8 @@ BEGIN
         DiaChiNV = @DiaChiNV,
         MaXa = @MaXa,
         TenDNNV = @TenDNNV,
-        MatKhauNV = @MatKhauNV
+        MatKhauNV = @MatKhauNV,
+		AnhNV = @AnhNV
     WHERE MaNV = @MaNV;
 
     -- Update vai trò

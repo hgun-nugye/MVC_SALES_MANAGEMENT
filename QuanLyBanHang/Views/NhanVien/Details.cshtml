@@ -18,10 +18,6 @@
         border-bottom: 1px solid #e9ecef;
     }
 
-    .detail-section:last-child {
-        border-bottom: none;
-    }
-
     .section-title {
         color: #198754;
         font-weight: 600;
@@ -75,8 +71,8 @@
     }
 
     .avatar-img {
-        width: 150px;
-        height: 150px;
+        width: 300px;
+        height: 300px;
         border-radius: 50%;
         object-fit: cover;
         border: 4px solid #198754;
@@ -100,7 +96,14 @@
                 Thông tin cá nhân
             </div>
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-lg-6 col-sm-12">
+                    <div class="avatar-container">
+                      <img src="@(string.IsNullOrEmpty(Model.AnhNV) ? Url.Content("~/images/default-user.png") : @Url.Content("~/images/employees/" + Model.AnhNV))" alt="Ảnh nhân viên" class="avatar-img"/>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-sm-12">
                     <div class="detail-item">
                         <div class="detail-label">
                             <i class="fa-solid fa-id-card"></i>
@@ -166,91 +169,79 @@
                             <div class="detail-value">@Model.NgayLam.Value.ToString("dd/MM/yyyy")</div>
                         </div>
                     }
-                </div>
-                <div class="col-md-4">
-                    <div class="avatar-container">
-                        @if (!string.IsNullOrEmpty(Model.AnhNV))
-                        {
-                            <img src="@Url.Content("~/images/" + Model.AnhNV)" alt="Ảnh nhân viên" class="avatar-img" />
-                        }
-                        else
-                        {
-                            <div class="avatar-img d-flex align-items-center justify-content-center bg-light">
-                                <i class="fa-solid fa-user fa-4x text-muted"></i>
-                            </div>
-                        }
-                    </div>
-                </div>
+                </div>               
             </div>
         </div>
 
-        <!-- Địa chỉ -->
-        <div class="detail-section">
-            <div class="section-title">
-                <i class="fa-solid fa-map-marker-alt"></i>
-                Địa chỉ
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fa-solid fa-home"></i>
-                    Địa chỉ:
+        <div class="row g-4">
+            <!-- Địa chỉ -->
+            <div class="detail-section col-lg-6 col-sm-12">
+                <div class="section-title">
+                    <i class="fa-solid fa-map-marker-alt"></i>
+                    Địa chỉ
                 </div>
-                <div class="detail-value">@Model.DiaChiNV</div>
-            </div>
-            @if (!string.IsNullOrEmpty(Model.TenXa))
-            {
                 <div class="detail-item">
                     <div class="detail-label">
-                        <i class="fa-solid fa-map"></i>
-                        Xã/Phường:
+                        <i class="fa-solid fa-home"></i>
+                        Địa chỉ:
                     </div>
-                    <div class="detail-value">@Model.TenXa</div>
+                    <div class="detail-value">@Model.DiaChiNV</div>
                 </div>
-            }
-            @if (!string.IsNullOrEmpty(Model.TenTinh))
-            {
-                <div class="detail-item">
-                    <div class="detail-label">
-                        <i class="fa-solid fa-map-marked-alt"></i>
-                        Tỉnh/Thành phố:
+                @if (!string.IsNullOrEmpty(Model.TenXa))
+                {
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            <i class="fa-solid fa-map"></i>
+                            Xã/Phường:
+                        </div>
+                        <div class="detail-value">@Model.TenXa</div>
                     </div>
-                    <div class="detail-value">@Model.TenTinh</div>
-                </div>
-            }
-        </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.TenTinh))
+                {
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            <i class="fa-solid fa-map-marked-alt"></i>
+                            Tỉnh/Thành phố:
+                        </div>
+                        <div class="detail-value">@Model.TenTinh</div>
+                    </div>
+                }
+            </div>
 
-        <!-- Thông tin đăng nhập -->
-        <div class="detail-section">
-            <div class="section-title">
-                <i class="fa-solid fa-user-shield"></i>
-                Thông tin đăng nhập
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fa-solid fa-user-circle"></i>
-                    Tên đăng nhập:
+            <!-- Thông tin đăng nhập -->
+            <div class="detail-section col-lg-6  col-sm-12">
+                <div class="section-title">
+                    <i class="fa-solid fa-user-shield"></i>
+                    Thông tin đăng nhập
                 </div>
-                <div class="detail-value">@(Model.TenDNNV ?? "Chưa có")</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fa-solid fa-lock"></i>
-                    Mật khẩu:
-                </div>
-                <div class="detail-value">********</div>
-            </div>
-            @if (!string.IsNullOrEmpty(Model.TenVT))
-            {
                 <div class="detail-item">
                     <div class="detail-label">
-                        <i class="fa-solid fa-user-tag"></i>
-                        Vai trò:
+                        <i class="fa-solid fa-user-circle"></i>
+                        Tên đăng nhập:
                     </div>
-                    <div class="detail-value">
-                        <span class="fw-bold bg-primary text-success">@Model.TenVT</span>
-                    </div>
+                    <div class="detail-value">@(Model.TenDNNV ?? "Chưa có")</div>
                 </div>
-            }
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fa-solid fa-lock"></i>
+                        Mật khẩu:
+                    </div>
+                    <div class="detail-value">********</div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.TenVT))
+                {
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            <i class="fa-solid fa-user-tag"></i>
+                            Vai trò:
+                        </div>
+                        <div class="detail-value">
+                            <span class="fw-bold bg-primary text-success">@Model.TenVT</span>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 

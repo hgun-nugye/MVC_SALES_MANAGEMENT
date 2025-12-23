@@ -34,6 +34,90 @@
         background-color: #f5faff;
         transition: 0.2s;
     }
+
+    .product-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+        box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,.15) !important;
+        }
+
+    .product-image {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+        background: #f8f9fa;
+    }
+
+    .product-body {
+        padding: 1.25rem;
+    }
+
+    .product-title {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+        min-height: 3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        min-height: 3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .price {
+        color: #198754;
+        font-weight: bold;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-view-detail {
+        background-color: #198754;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+        .btn-view-detail:hover {
+            background-color: #157347;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+        }
+
+    .no-products {
+        text-align: center;
+        padding: 4rem 0;
+        color: #6c757d;
+    }
+
+        .no-products i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
 </style>
 
 
@@ -55,16 +139,18 @@
     </div>
 
     <!--  Form -->
-    <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
-        <div class="search-wrapper flex-grow-1">
-            <i class="fa fa-search"></i>
-            <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên, mã sản phẩm...">
-        </div>
+    @if (!isCustomer)
+    {
+        <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+            <div class="search-wrapper flex-grow-1">
+                <i class="fa fa-search"></i>
+                <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên, mã sản phẩm...">
+            </div>
 
-        <div class="d-flex flex-wrap align-items-center gap-2">
-            <div class="d-flex align-items-center gap-2">   
-                @Html.DropDownList(
-                "maTT",
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    @Html.DropDownList(
+                    "maTT",
                                 (SelectList)ViewBag.MaTT,
                                 "-- Trạng thái --",
                                 new { @class = "form-select", style = "width:150px;", id = "maTTSelect" }
@@ -77,67 +163,123 @@
                                 new { @class = "form-select", style = "width:130px;", id = "maLoaiSelect" }
                                 )
 
-            </div>            
+            </div>
 
             <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
             @if (!isCustomer)
-            {
-                <a href="@Url.Action("Create", "SanPham")" class="btn btn-success">
-                    <i class="fa-solid fa-circle-plus"></i> Add
-                </a>
-            }
-        </div>
-    </form>
-
-
-   <div class="table">
-        <table class="table table-hover align-middle text-center shadow-sm">
-            <thead class="table-success">
-                <tr>
-                    <th>Ảnh</th>
-                    <th>Tên SP</th>
-                    <th>Giá bán</th>
-                    <th>Trọng lượng</th>
-                    <th>Trạng thái</th>
-                    <th>Hãng</th>
-                    <th>Số lượng tồn</th>
-                </tr>
-            </thead>
-            <tbody class="text-start">
-                @if (Model != null && Model.Any())
                 {
-                    @foreach (var sp in Model)
-                    {
-                        <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })">
-                            <td class="text-center">
-                                <img src="@(string.IsNullOrEmpty(sp.AnhMH) ? Url.Content("~/images/default-product.png") : @Url.Content("~/images/products/" + sp.AnhMH))" alt="@sp.TenSP" width="60" height="60" style="object-fit:cover; border-radius:5px;">
-                            </td>
-                            <td>@sp.TenSP</td>
-                            <td>@String.Format("{0:N0} đ", sp.GiaBan)</td>
-                            <td>@(sp.TrongLuong?.ToString("N2") ?? "-") gram</td>
-                            <td>
-                                <span class="badge bg-info">@(sp.TenTT ?? sp.MaTT)</span>
-                            </td>
-                            <td>@sp.TenHangSX</td>
-                            <td class="text-center">
-                                <span class="badge @(sp.SoLuongTon > 0 ? "bg-success" : "bg-danger")">
-                                    @(sp.SoLuongTon ?? 0)
-                                </span>
-                            </td>
+                    <a href="@Url.Action("Create", "SanPham")" class="btn btn-success">
+                        <i class="fa-solid fa-circle-plus"></i> Add
+                    </a>
+                }
+            </div>
+        </form>
 
+
+        <div class="table">
+            <table class="table table-hover align-middle text-center shadow-sm">
+                <thead class="table-success">
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Tên SP</th>
+                        <th>Giá bán</th>
+                        <th>Trọng lượng</th>
+                        <th>Trạng thái</th>
+                        <th>Hãng</th>
+                        <th>Số lượng tồn</th>
+                    </tr>
+                </thead>
+                <tbody class="text-start">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var sp in Model)
+                        {
+                            <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })">
+                                <td class="text-center">
+                                    <img src="@(string.IsNullOrEmpty(sp.AnhMH) ? Url.Content("~/images/default-product.png") : @Url.Content("~/images/products/" + sp.AnhMH))" alt="@sp.TenSP" width="60" height="60" style="object-fit:cover; border-radius:5px;">
+                                </td>
+                                <td>@sp.TenSP</td>
+                                <td>@String.Format("{0:N0} đ", sp.GiaBan)</td>
+                                <td>@(sp.TrongLuong?.ToString("N2") ?? "-") gram</td>
+                                <td>
+                                    <span class="badge bg-info">@(sp.TenTT ?? sp.MaTT)</span>
+                                </td>
+                                <td>@sp.TenHangSX</td>
+                                <td class="text-center">
+                                    <span class="badge @(sp.SoLuongTon > 0 ? "bg-success" : "bg-danger")">
+                                        @(sp.SoLuongTon ?? 0)
+                                    </span>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted fst-italic">Không có sản phẩm nào.</td>
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="7" class="text-center text-muted fst-italic">Không có sản phẩm nào.</td>
-                    </tr>
-                }
 
-            </tbody>
-        </table>
-   </div>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="container products-section">
+            @if (Model != null && Model.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var product in Model)
+                    {
+                        <div class="col-md-4 col-lg-3">
+                            <div class="card product-card">
+                                <img src="@(string.IsNullOrEmpty(product.AnhMH) ? Url.Content("~/images/default-product.png") : Url.Content($"~/images/products/{product.AnhMH}"))"
+                                     class="card-img-top product-image"
+                                     alt="@product.TenSP" />
+                                <div class="card-body product-body">
+                                    <h5 class="card-title product-title">@product.TenSP</h5>
+                                    <p class="card-text product-description">@product.MoTaSP</p>
+                                    <div class="price">
+                                        @if (product.GiaBan.HasValue)
+                                        {
+                                            <span>@product.GiaBan.Value.ToString("N0") đ</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Liên hệ</span>
+                                        }
+                                    </div>
+                                    @if (Context.Session.GetString("IsLoggedIn") == "true")
+                                    {
+                                        <a href="@Url.Action("Details", "SanPham", new { id = product.MaSP })" class="btn btn-success btn-view-detail">
+                                            <i class="fa-solid fa-eye me-2"></i>Xem chi tiết
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Login", "Home")" class="btn btn-success btn-view-detail">
+                                            <i class="fa-solid fa-sign-in-alt me-2"></i>Đăng nhập để xem
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-products">
+                    <i class="fa-solid fa-box-open"></i>
+                    <h4>Chưa có sản phẩm nào</h4>
+                    <p>Vui lòng quay lại sau.</p>
+                </div>
+            }
+        </div>
+    }
+
 </div>
 
 @section Scripts {

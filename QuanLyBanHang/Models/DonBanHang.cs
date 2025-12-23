@@ -31,9 +31,9 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã Khách Hàng")]
 		public string MaKH { get; set; } = string.Empty;
 
-		[Required(ErrorMessage = "Địa chỉ đơn bán hàng không được để trống.")]
+		[Required(ErrorMessage = "Địa chỉ giao hàng không được để trống.")]
 		[StringLength(255, ErrorMessage = "Địa chỉ tối đa 255 ký tự.")]
-		[Display(Name = "Địa Chỉ Đơn Bán Hàng")]
+		[Display(Name = "Địa Chỉ Giao Hàng")]
 		public string DiaChiDBH { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Mã xã không được để trống.")]

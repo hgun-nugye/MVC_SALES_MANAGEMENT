@@ -191,42 +191,17 @@
 
     <!-- SIDEBAR -->
     <div class="sidebar shadow-lg">
-        <div class="pb-3 border-bottom text-center">
-            <img src="~/images/logo.png" class="rounded-circle w-50 text-center mb-2" />
-            @if (Context.Session.GetString("IsLoggedIn") == "true")
-            {
-                <div class="px-3">
-                    @if (ViewBag.IsCustomer == true)
-                    {
-                        <div class="badge bg-info text-dark w-100 mb-1 p-2 text-white" style="font-size: 16px">
-                            <i class="fa-solid fa-user-circle me-1"></i>Khách hàng
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="badge bg-success w-100 mb-1 p-2 text-white" style="font-size:16px">
-                            <i class="fa-solid fa-user-tie me-1"></i>Nhân viên
-                        </div>
-                    }
-                    <div class="text-muted mt-1" style="word-break: break-word;">
-                        @Context.Session.GetString("UserName")
-                    </div>
-                </div>
-            }
+        <div class="pb-3 text-center">
+            <img src="~/images/logo.png" class="rounded-circle w-50 text-center mb-2" />           
         </div>
 
         @{
             var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
             bool isCustomer = ViewBag.IsCustomer == true;
-        }
-
-        <!-- Dashboard -->
-        <a href="@Url.Action("Index", "Home")" class="ajax-link @(ctrl == "Home" ? "active" : "")">
-            <i class="fa-solid fa-bars-progress me-2"></i>Dashboard
-        </a>
+        }              
 
         @if (!isCustomer)
-        {
+        {           
             <!-- Hàng hóa -->
             <div class="menu-label">Hàng hóa</div>
             <a href="@Url.Action("Index", "SanPham")" class="ajax-link @(ctrl == "SanPham" ? "active" : "")">
@@ -235,10 +210,6 @@
             <a href="@Url.Action("Index", "LoaiSP")" class="ajax-link @(ctrl == "LoaiSP" ? "active" : "")">
                 <i class="fa-solid fa-tags me-2"></i>Loại Sản Phẩm
             </a>
-            <a href="@Url.Action("Index", "NhomSP")" class="ajax-link @(ctrl == "NhomSP" ? "active" : "")">
-                <i class="fa-solid fa-layer-group me-2"></i>Nhóm Sản Phẩm
-            </a>
-
             <!-- Thông tin cơ bản -->
             <div class="menu-label">Thông tin cơ bản</div>
             <a href="@Url.Action("Index", "HangSX")" class="ajax-link @(ctrl == "HangSX" ? "active" : "")">
@@ -271,10 +242,7 @@
             </a>
 
             <!-- Địa lý -->
-            <div class="menu-label">Địa lý</div>
-            <a href="@Url.Action("Index", "Tinh")" class="ajax-link @(ctrl == "Tinh" ? "active" : "")">
-                <i class="fa-solid fa-map me-2"></i>Tỉnh / Thành phố
-            </a>
+            <div class="menu-label">Đơn vị hành chính</div>
             <a href="@Url.Action("Index", "Xa")" class="ajax-link @(ctrl == "Xa" ? "active" : "")">
                 <i class="fa-solid fa-map-location-dot me-2"></i>Xã / Phường
             </a>
@@ -298,22 +266,35 @@
         <!-- Header với thông tin người dùng và nút đăng xuất -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                @if (isCustomer)
-                {
-                    <h5 class="mb-0">
-                        <i class="fa-solid fa-user-circle text-info me-2"></i>
+                @{                    
+                    string userName = Context.Session.GetString("UserName");
+                    string userAvatar = Context.Session.GetString("UserAvatar"); // Lấy tên file ảnh từ Session
+
+                    // Xác định thư mục chứa ảnh dựa trên loại người dùng
+                    string folder = isCustomer ? "customers" : "employees";
+
+                    // Tạo đường dẫn ảnh hoàn chỉnh
+                    string avatarPath = string.IsNullOrEmpty(userAvatar)
+                    ? Url.Content("~/images/default-user.png")
+                    : Url.Content($"~/images/{folder}/{userAvatar}");
+                }
+
+                <h5 class="mb-0 d-flex align-items-center gap-2">
+                    <img src="@avatarPath"
+                         width="40"
+                         height="40"
+                         style="object-fit:cover; border-radius:50%; border: 1px solid #ddd;">
+
+                    @if (isCustomer)
+                    {
                         <span class="text-info">Khách hàng: </span>
-                        <strong>@Context.Session.GetString("UserName")</strong>
-                    </h5>
-                }
-                else
-                {
-                    <h5 class="mb-0">
-                        <i class="fa-solid fa-user-tie text-success me-2"></i>
+                    }
+                    else
+                    {
                         <span class="text-success">Nhân viên: </span>
-                        <strong>@Context.Session.GetString("UserName")</strong>
-                    </h5>
-                }
+                    }
+                    <strong>@userName</strong>
+                </h5>
             </div>
             <div>
                 <a class="dropdown-item text-danger btn btn-danger" href="javascript:void(0)" onclick="confirmLogout()">
@@ -397,75 +378,67 @@
     }
 
 
-    <script>
-        $(document).ready(function () {
+    @* <script>
+                $(document).ready(function () {
+            // Xử lý click menu sidebar
             $(document).on('click', '.ajax-link', function (e) {
-                e.preventDefault(); 
-
                 var url = $(this).attr('href');
+                if (url === "#" || !url || url.includes("Logout")) return;
+
+                e.preventDefault();
                 var $this = $(this);
 
-                if (url === "#" || !url) return;
-
-                // Hiệu ứng chờ (Loading)
-                $('#main-content').css('opacity', '0.5');
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    headers: { "X-Requested-With": "XMLHttpRequest" }, // Gửi header để _ViewStart nhận diện
-                    success: function (data) {
-                        // Cập nhật vùng nội dung
-                        $('#main-content').html(data).css('opacity', '1');
-
-                        // Cập nhật Menu Active
-                        $('.sidebar a').removeClass('active');
-                        $this.addClass('active');
-
-                        window.history.pushState({ path: url }, '', url);
-                      
-                    },
-                    error: function () {
-                        $('#main-content').css('opacity', '1');
-                        Swal.fire('Lỗi!', 'Không thể kết nối máy chủ.', 'error');
-                    }
-                });
+                loadAjaxContent(url, $this);
             });
 
-            // Xử lý nút Back của trình duyệt
-            window.onpopstate = function () {
-                location.reload();
-            };
-        });
-
+            // Xử lý click vào dòng trong table
             $(document).on('click', '.clickable-row', function (e) {
-                // Nếu click vào nút bấm hoặc link bên trong row thì không chạy Detail
                 if ($(e.target).closest('a, button, input').length) return;
-
                 var url = $(this).data('href');
-                if (url) {
-                    // Gọi AJAX để load trang Detail luôn (không load lại trang)
-                    loadAjaxContent(url);
-                }
+                if (url) loadAjaxContent(url);
             });
 
-            // Hàm dùng chung để load nội dung AJAX
-            function loadAjaxContent(url) {
+            // Hàm dùng chung để load nội dung
+            function loadAjaxContent(url, $menuElement) {
                 $('#main-content').css('opacity', '0.5');
+
                 $.ajax({
                     url: url,
                     type: 'GET',
                     headers: { "X-Requested-With": "XMLHttpRequest" },
                     success: function (data) {
+                        // Cập nhật vùng nội dung
                         $('#main-content').html(data).css('opacity', '1');
+
+                        // Cập nhật trạng thái Active trên Sidebar
+                        if ($menuElement) {
+                            $('.sidebar a').removeClass('active');
+                            $menuElement.addClass('active');
+                        }
+
+                        // Đổi URL trên trình duyệt mà không reload
                         window.history.pushState({ path: url }, '', url);
-                        // Cuộn lên đầu trang sau khi load nội dung mới
                         window.scrollTo(0, 0);
+                    },
+                    error: function () {
+                        $('#main-content').css('opacity', '1');
+                        Swal.fire('Lỗi!', 'Không thể tải nội dung.', 'error');
                     }
                 });
             }
+
+                   // Xử lý nút Back/Forward của trình duyệt mà không reload
+        window.onpopstate = function (event) {
+            // Lấy URL từ lịch sử trình duyệt
+            var url = location.pathname + location.search;
+
+            // Thay vì reload(), ta gọi hàm load nội dung AJAX
+            if (url) {
+                loadAjaxContent(url);
+            }
+        };
         });
-    </script>
+    </script> *@
 
     <script>
         function confirmLogout() {

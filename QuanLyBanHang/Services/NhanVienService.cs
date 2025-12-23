@@ -73,26 +73,29 @@ namespace QuanLyBanHang.Services
 
 			if (!string.IsNullOrWhiteSpace(newPassword))
 			{
+				// Nếu có mật khẩu mới thì mã hóa
 				finalPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
 			}
 			else
 			{
 				finalPassword = model.MatKhauNV;
 			}
+
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                EXEC NhanVien_Update 
-                    @MaNV = {model.MaNV},
-                    @CCCD = {model.CCCD},
-                    @TenNV = {model.TenNV},
-                    @GioiTinh = {model.GioiTinh},
-                    @NgaySinh = {model.NgaySinh},
-                    @SDT = {model.SDT},
-                    @Email = {model.Email},
-                    @DiaChiNV = {model.DiaChiNV},
-                    @MaXa = {model.MaXa},
-                    @TenDNNV = {model.TenDNNV},
-                    @MatKhauNV = {model.MatKhauNV},
-                    @MaVT = {maVT}");
+			EXEC NhanVien_Update 
+				@MaNV = {model.MaNV},
+				@CCCD = {model.CCCD},
+				@TenNV = {model.TenNV},
+				@GioiTinh = {model.GioiTinh},
+				@NgaySinh = {model.NgaySinh},
+				@SDT = {model.SDT},
+				@Email = {model.Email},
+				@DiaChiNV = {model.DiaChiNV},
+				@MaXa = {model.MaXa},
+				@TenDNNV = {model.TenDNNV},
+				@MatKhauNV = {finalPassword}, 
+				@AnhNV = {model.AnhNV},
+				@MaVT = {maVT}");
 		}
 
 		// Xóa Nhân Viên

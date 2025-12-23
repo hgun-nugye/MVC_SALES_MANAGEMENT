@@ -202,7 +202,8 @@ CREATE OR ALTER PROC DonMuaHang_Search
 (
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
-    @Year INT = NULL
+    @Year INT = NULL,
+	 @MaTTMH CHAR(3) = NULL
 )
 AS
 BEGIN
@@ -243,7 +244,8 @@ BEGIN
         )
         AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year)
-
+		AND (@MaTTMH IS NULL OR D.MaTTMH = @MaTTMH)
+    
     GROUP BY D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, D.MaNV, NV.TenNV, D.MaTTMH, TT.TenTTMH
     ORDER BY D.NgayMH ASC, D.MaDMH ASC;
 END;

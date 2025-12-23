@@ -130,7 +130,7 @@ namespace QuanLyBanHang.Controllers
 				{
 					try
 					{
-						var fileToDelete = Path.Combine(_environment.WebRootPath, "images", filePath);
+						var fileToDelete = Path.Combine(_environment.WebRootPath, "images","products", filePath);
 						if (System.IO.File.Exists(fileToDelete))
 							System.IO.File.Delete(fileToDelete);
 					}
@@ -189,7 +189,7 @@ namespace QuanLyBanHang.Controllers
 			if (AnhFile != null && AnhFile.Length > 0)
 			{
 				var fileName = Guid.NewGuid() + Path.GetExtension(AnhFile.FileName);
-				var folderPath = Path.Combine(_environment.WebRootPath, "images");
+				var folderPath = Path.Combine(_environment.WebRootPath, "images", "products");
 				if (!Directory.Exists(folderPath))
 					Directory.CreateDirectory(folderPath);
 				var savePath = Path.Combine(folderPath, fileName);
@@ -242,6 +242,13 @@ namespace QuanLyBanHang.Controllers
 			// Load TrangThai from database
 			var trangThaiList = await _context.TrangThai.ToListAsync();
 			ViewBag.MaTT = new SelectList(trangThaiList, "MaTT", "TenTT", selectedMaTT);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> GetGia(string id)
+		{
+			var sp = await _context.SanPham.FindAsync(id);
+			return Json(new { gia = sp?.GiaBan ?? 0 });
 		}
 	}
 }

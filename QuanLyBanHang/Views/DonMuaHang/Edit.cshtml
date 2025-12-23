@@ -4,10 +4,19 @@
     ViewBag.Title = "Sửa Đơn mua hàng";
 }
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
 <div class="container border p-4 rounded shadow-sm bg-light">
 
     <h4 class="mb-3 text-success">
-        Sửa Đơn bán hàng
+        Sửa Đơn mua hàng
     </h4>
 
     <form asp-action="Edit" method="post">
@@ -16,26 +25,36 @@
         <input type="hidden" asp-for="MaDMH" />
 
         <!-- THÔNG TIN ĐƠN -->
-        <div class="mb-3">
-            <label asp-for="NgayMH" class="form-label fw-bold"></label>
-            <input asp-for="NgayMH" type="date" class="form-control" />
-            <span asp-validation-for="NgayMH" class="text-danger"></span>
-        </div>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="NgayMH" class="form-label fw-bold"></label>
+                <input asp-for="NgayMH" type="date" class="form-control" />
+                <span asp-validation-for="NgayMH" class="text-danger"></span>
+            </div>
 
-        <div class="mb-3">
-            <label asp-for="MaNCC" class="form-label fw-bold"></label>
-            <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select">
-                <option value="">-- Chọn nhà cung cấp --</option>
-            </select>
-            <span asp-validation-for="MaNCC" class="text-danger"></span>
-        </div>
+            <div class="col-md-3">
+                <label asp-for="MaNCC" class="form-label fw-bold"></label>
+                <select asp-for="MaNCC" asp-items="ViewBag.MaNCC" class="form-select">
+                    <option value="">-- Chọn nhà cung cấp --</option>
+                </select>
+                <span asp-validation-for="MaNCC" class="text-danger"></span>
+            </div>
 
-        <div class="mb-3">
-            <label asp-for="MaNV" class="form-label fw-bold"></label>
-            <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
-                <option value="">-- Chọn nhân viên --</option>
-            </select>
-            <span asp-validation-for="MaNV" class="text-danger"></span>
+            <div class="col-md-3">
+                <label asp-for="MaNV" class="form-label fw-bold"></label>
+                <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
+                    <option value="">-- Chọn nhân viên --</option>
+                </select>
+                <span asp-validation-for="MaNV" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="MaTTMH" class="form-label fw-bold"></label>
+                <select asp-for="MaTTMH" asp-items="ViewBag.MaTTMH" class="form-select">
+                    <option value="">-- Chọn trạng thái --</option>
+                </select>
+                <span asp-validation-for="MaTTMH" class="text-danger"></span>
+            </div>
         </div>
 
         <hr />
@@ -51,11 +70,13 @@
                     <th>Đơn giá</th>
                 </tr>
             </thead>
-            <tbody>
+            @* <tbody>
                 @for (int i = 0; i < Model.ChiTiet.Count; i++)
                 {
                     <tr>
                         <td>
+                            <input type="hidden" asp-for="ChiTiet[i].MaDMH" />
+
                             <input type="hidden" asp-for="ChiTiet[i].MaSP" />
                             <span>@Model.ChiTiet[i].TenSP</span>
 
@@ -65,6 +86,31 @@
                         </td>
                         <td>
                             <input asp-for="ChiTiet[i].DGM" class="form-control" />
+                        </td>
+                    </tr>
+                }
+            </tbody> *@
+
+            <tbody>
+                @for (int i = 0; i < Model.ChiTiet.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @* Lưu trữ toàn bộ thông tin định danh *@
+                            <input type="hidden" asp-for="ChiTiet[i].MaDMH" />
+                            <input type="hidden" asp-for="ChiTiet[i].MaSP" />
+                            <input type="hidden" asp-for="ChiTiet[i].TenSP" />
+
+                            <span>@Model.ChiTiet[i].TenSP</span>
+                        </td>
+                        <td>
+                            @* Sử dụng type="number" để đảm bảo trình duyệt gửi đúng định dạng số *@
+                            <input type="number" asp-for="ChiTiet[i].SLM" class="form-control" step="1" />
+                            <span asp-validation-for="ChiTiet[i].SLM" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <input type="number" asp-for="ChiTiet[i].DGM" class="form-control" step="0.01" />
+                            <span asp-validation-for="ChiTiet[i].DGM" class="text-danger"></span>
                         </td>
                     </tr>
                 }

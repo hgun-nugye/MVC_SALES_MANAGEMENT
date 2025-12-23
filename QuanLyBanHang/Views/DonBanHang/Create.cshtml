@@ -278,7 +278,7 @@
                     <span asp-validation-for="MaXa" class="text-danger small mt-1"></span>
                 </div>
 
-                @if (!isCustomer)
+                @* @if (!isCustomer)
                 {
                     <div class="col-md-6">
                         <label asp-for="MaTTBH" class="form-label required-field">
@@ -303,7 +303,26 @@
                         </select>
                         <span asp-validation-for="MaTTBH" class="text-danger small mt-1"></span>
                     </div>
-                }
+                } *@
+
+                <div class="col-md-6">
+                    <label asp-for="MaTTBH" class="form-label required-field">
+                        <i class="fa-solid fa-list-check"></i>
+                        Trạng thái đơn hàng
+                    </label>
+                    @if (isCustomer)
+                    {
+                        <input type="hidden" name="MaTTBH" value="CHO" />
+                        <input class="form-control" value="Chờ xác nhận" readonly />
+                    }
+                    else
+                    {
+                        <select asp-for="MaTTBH" asp-items="ViewBag.MaTTBH" class="form-select">
+                            <option value="">-- Chọn trạng thái --</option>
+                        </select>
+                    }
+                    <span asp-validation-for="MaTTBH" class="text-danger small mt-1"></span>
+                </div>
             </div>
         </div>
 
@@ -405,33 +424,58 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-
+                document.addEventListener("DOMContentLoaded", function () {
             const addRowBtn = document.getElementById("addRow");
             const tableBody = document.querySelector("#ctbhTable tbody");
-            let index = tableBody.rows.length;
+            const isCustomer = @(isCustomer.ToString().ToLower());
 
-            // --- Template sản phẩm đã FIX
-            const spOptionsHtml = document.getElementById("spTemplate").innerHTML;
+            // Hàm cập nhật đơn giá qua AJAX
+            async function updatePrice(selectElement) {
+                const maSP = selectElement.value;
+                const row = selectElement.closest("tr");
+                const priceInput = row.querySelector('input[name*=".DGB"]');
 
+                if (!maSP) {
+                    priceInput.value = 0;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/SanPham/GetGia?id=${maSP}`);
+                    const data = await response.json();
+                    priceInput.value = data.gia;
+                } catch (error) {
+                    console.error("Lỗi lấy giá:", error);
+                }
+            }
+
+            // Sự kiện khi thay đổi sản phẩm (cho các dòng có sẵn)
+            tableBody.addEventListener("change", function (e) {
+                if (e.target.classList.contains("form-select")) {
+                    updatePrice(e.target);
+                }
+            });
+
+            // Thêm dòng mới
             addRowBtn.addEventListener("click", () => {
+                let index = tableBody.rows.length;
+                const spOptionsHtml = document.getElementById("spTemplate").innerHTML;
                 const newRow = document.createElement("tr");
+
                 newRow.innerHTML = `
                     <td>
-                        <select name="CTBHs[${index}].MaSP" class="form-select">
+                        <select name="CTBHs[${index}].MaSP" class="form-select select-sp">
                             <option value="">-- Chọn sản phẩm --</option>
                             ${spOptionsHtml}
                         </select>
                     </td>
-
                     <td>
-                        <input name="CTBHs[${index}].SLB" type="number" min="1" class="form-control" />
+                        <input name="CTBHs[${index}].SLB" type="number" min="1" class="form-control" value="1" />
                     </td>
-
                     <td>
-                        <input name="CTBHs[${index}].DGB" type="number" min="0" step="1000" class="form-control" @(isCustomer ? "readonly" : "") />
+                        <input name="CTBHs[${index}].DGB" type="number" class="form-control"
+                               ${isCustomer ? "readonly" : ""} value="0" />
                     </td>
-
                     <td>
                         <button type="button" class="btn btn-danger btn-sm removeRow">
                             <i class="fa-solid fa-trash"></i>
@@ -439,12 +483,13 @@
                     </td>
                 `;
                 tableBody.appendChild(newRow);
-                index++;
             });
 
+            // Xóa dòng
             tableBody.addEventListener("click", function (e) {
                 if (e.target.closest(".removeRow")) {
                     e.target.closest("tr").remove();
+                    // Cập nhật lại index nếu cần thiết để tránh đứt quãng mảng (tùy chọn)
                 }
             });
         });

@@ -75,13 +75,15 @@ namespace QuanLyBanHang.Services
 
 				table.Rows.Add(ct.MaSP, ct.SLB, giaThucTe);
 			}
+			string finalStatus = string.IsNullOrEmpty(model.MaTTBH) ? "CHO" : model.MaTTBH;
+						
 			var parameters = new[]
 			{
 				new SqlParameter("@NgayBH", model.NgayBH),
 				new SqlParameter("@MaKH", model.MaKH),
 				new SqlParameter("@DiaChiDBH", model.DiaChiDBH),
 				new SqlParameter("@MaXa", model.MaXa),
-				new SqlParameter("@MaTTBH", model.MaTTBH ?? (object)DBNull.Value),
+				new SqlParameter("@MaTTBH", finalStatus),
 				new SqlParameter("@ChiTiet", table)
 				{
 					SqlDbType = SqlDbType.Structured,

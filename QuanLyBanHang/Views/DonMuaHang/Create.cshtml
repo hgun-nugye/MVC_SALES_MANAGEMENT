@@ -209,7 +209,7 @@
                 Thông tin đơn hàng
             </div>
             <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label asp-for="NgayMH" class="form-label required-field">
                         <i class="fa-solid fa-calendar"></i>
                         Ngày mua hàng
@@ -221,7 +221,7 @@
                     <span asp-validation-for="NgayMH" class="text-danger small mt-1"></span>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label asp-for="MaNCC" class="form-label required-field">
                         <i class="fa-solid fa-truck"></i>
                         Nhà cung cấp
@@ -235,7 +235,7 @@
                     <span asp-validation-for="MaNCC" class="text-danger small mt-1"></span>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label asp-for="MaNV" class="form-label required-field">
                         <i class="fa-solid fa-user-tie"></i>
                         Nhân viên
@@ -247,6 +247,20 @@
                         </select>
                     </div>
                     <span asp-validation-for="MaNV" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="MaTTMH" class="form-label required-field">
+                        <i class="fa-solid fa-list-check"></i>
+                        Trạng thái mua hàng
+                    </label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-list"></i>
+                        <select asp-for="MaTTMH" asp-items="ViewBag.MaTTMH" class="form-select">
+                            <option value="">-- Chọn trạng thái --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaTTMH" class="text-danger small mt-1"></span>
                 </div>
             </div>
         </div>

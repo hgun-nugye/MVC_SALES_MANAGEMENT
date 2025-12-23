@@ -37,6 +37,16 @@ namespace QuanLyBanHang.Models
 
 		[Display(Name = "Chi Tiết Mua Hàng")]
 		public virtual List<CTMH>? CTMHs { get; set; }
+
+		// TRẠNG THÁI ĐƠN MUA HÀNG
+		[Required(ErrorMessage = "Trạng thái mua hàng không được để trống.")]
+		[StringLength(3, ErrorMessage = "Mã trạng thái mua hàng tối đa 3 ký tự.")]
+		[Display(Name = "Mã Trạng Thái Mua Hàng")]
+		public string? MaTTMH { get; set; }
+
+		[NotMapped]
+		[Display(Name = "Trạng Thái Mua Hàng")]
+		public string? TenTTMH { get; set; }
 	}
 
 	[Keyless]
@@ -60,6 +70,12 @@ namespace QuanLyBanHang.Models
 
 		[Display(Name = "Tên Nhân Viên")]
 		public string? TenNV { get; set; }
+
+		[Display(Name = "Mã Trạng Thái Mua Hàng")]
+		public string? MaTTMH { get; set; }
+
+		[Display(Name = "Trạng Thái Mua Hàng")]
+		public string? TenTTMH { get; set; }
 
 		[Display(Name = "Mã Sản Phẩm")]
 		public string? MaSP { get; set; }
@@ -93,6 +109,11 @@ namespace QuanLyBanHang.Models
 
 		[Display(Name = "Mã Nhân Viên")]
 		public string? MaNV { get; set; }
+
+		[Required(ErrorMessage = "Trạng thái mua hàng không được để trống.")]
+		[StringLength(3, ErrorMessage = "Mã trạng thái mua hàng tối đa 3 ký tự.")]
+		[Display(Name = "Mã Trạng Thái Mua Hàng")]
+		public string MaTTMH { get; set; } = string.Empty;
 
 		[Display(Name = "Chi Tiết Mua Hàng")]
 		public List<CTMH> ChiTiet { get; set; } = new();

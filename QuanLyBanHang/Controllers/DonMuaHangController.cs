@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
 
@@ -12,6 +13,7 @@ namespace QuanLyBanHang.Controllers
 		private readonly SanPhamService _spService;
 		private readonly NhaCCService _nhaCCService;
 		private readonly NhanVienService _nhanVienService;
+		private readonly TrangThaiMHService _trangThaiMHService;
 		private readonly AppDbContext _context;
 
 		public DonMuaHangController(
@@ -20,6 +22,7 @@ namespace QuanLyBanHang.Controllers
 			SanPhamService spService,
 			NhaCCService nhaCCService,
 			NhanVienService nhanVienService,
+			TrangThaiMHService trangThaiMHService,
 			AppDbContext context)
 		{
 			_dmhService = service;
@@ -27,19 +30,25 @@ namespace QuanLyBanHang.Controllers
 			_spService = spService;
 			_nhaCCService = nhaCCService;
 			_nhanVienService = nhanVienService;
+			_trangThaiMHService = trangThaiMHService;
 			_context = context;
 		}
 
-		public async Task<IActionResult> Index(string? search, int? month, int? year)
-		{
-			ViewBag.Search = search;
-			ViewBag.Month = month;
-			ViewBag.Year = year;
+	public async Task<IActionResult> Index(string? search, int? month, int? year, string? MaTTMH)
+	{
+		ViewBag.Search = search;
+		ViewBag.Month = month;
+		ViewBag.Year = year;
+		ViewBag.MaTTMH = MaTTMH;
 
-			var model = await _dmhService.Search(search, month, year);
+		// Đảm bảo ViewBag.TrangThaiMH không null
+		var trangThaiList = await _context.TrangThaiMH.ToListAsync();
+		ViewBag.TrangThaiMH = new SelectList(trangThaiList ?? new List<TrangThaiMH>(), "MaTTMH", "TenTTMH", MaTTMH);
+		
+		var model = await _dmhService.Search(search, month, year, MaTTMH);
 
-			return View(model);
-		}
+		return View(model);
+	}
 
 		public async Task<IActionResult> Details(string id)
 		{
@@ -54,10 +63,12 @@ namespace QuanLyBanHang.Controllers
 			var nhaCCList = await _nhaCCService.GetAll();
 			var nhanVienList = await _nhanVienService.GetAll();
 			var sanPhamList = await _spService.GetAll();
+			var trangThaiMHList = await _trangThaiMHService.GetAll();
 
 			ViewBag.MaNCC = new SelectList(_context.NhaCC.ToList(), "MaNCC", "TenNCC");
 			ViewBag.MaNV = new SelectList(_context.NhanVien.ToList(), "MaNV", "TenNV");
 			ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
+			ViewBag.MaTTMH = new SelectList(trangThaiMHList, "MaTTMH", "TenTTMH", "CHO");
 
 			var model = new DonMuaHang
 			{
@@ -134,8 +145,8 @@ namespace QuanLyBanHang.Controllers
 			// Lấy chi tiết
 			var details = rows.Select(x => new CTMH
 			{
-				MaDMH = x.MaDMH!,
-				MaSP = x.MaSP!,
+				MaDMH = x.MaDMH,
+				MaSP = x.MaSP,
 				SLM = x.SLM ?? 0,
 				DGM = x.DGM ?? 0,
 				TenSP = x.TenSP
@@ -143,18 +154,21 @@ namespace QuanLyBanHang.Controllers
 
 			var ct = new DonMuaHangEditCTMH
 			{
-				MaDMH = header.MaDMH!,
+				MaDMH = header.MaDMH,
 				NgayMH = header.NgayMH,
-				MaNCC = header.MaNCC!,
-				MaNV = header.MaNV!,
+				MaNCC = header.MaNCC,
+				MaNV = header.MaNV,
+				MaTTMH = header.MaTTMH ?? "CHO",
 				ChiTiet = details
 			};
 
 			var nhaCCList = await _nhaCCService.GetAll();
 			var nhanVienList = await _nhanVienService.GetAll();
+			var trangThaiMHList = await _trangThaiMHService.GetAll();
 
-			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC", ct.MaNCC);
-			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV", ct.MaNV);
+			ViewBag.MaNCC = new SelectList(nhaCCList ?? new List<NhaCC>(), "MaNCC", "TenNCC", ct.MaNCC);
+			ViewBag.MaNV = new SelectList(nhanVienList ?? new List<NhanVien>(), "MaNV", "TenNV", ct.MaNV);
+			ViewBag.MaTTMH = new SelectList(trangThaiMHList ?? new List<TrangThaiMH>(), "MaTTMH", "TenTTMH", ct.MaTTMH);
 			return View(ct);
 		}
 
@@ -162,6 +176,14 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(DonMuaHangEditCTMH model)
 		{
+			if (!ModelState.IsValid)
+			{
+				var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+				var errorString = string.Join(", ", errors);
+				// Bạn có thể đặt Breakpoint ở đây để xem giá trị của errorString
+				TempData["ErrorMessage"] = "Dữ liệu không hợp lệ: " + errorString;
+			}
+
 			// Xử lý logic làm sạch dữ liệu
 			model.ChiTiet ??= new List<CTMH>();
 			var cleanedDetails = model.ChiTiet
@@ -200,9 +222,11 @@ namespace QuanLyBanHang.Controllers
 
 			var nhaCCList = await _nhaCCService.GetAll();
 			var nhanVienList = await _nhanVienService.GetAll();
+			var trangThaiMHList = await _trangThaiMHService.GetAll();
 
 			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC", model.MaNCC);
 			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV", model.MaNV);
+			ViewBag.MaTTMH = new SelectList(trangThaiMHList, "MaTTMH", "TenTTMH", model.MaTTMH);
 
 			if (model.ChiTiet == null || !model.ChiTiet.Any())
 				model.ChiTiet = new List<CTMH> { new CTMH() };
@@ -261,20 +285,6 @@ namespace QuanLyBanHang.Controllers
 			}
 
 			return RedirectToAction("Details", new { id = MaDMH });
-		}
-
-
-		[HttpGet]
-		public async Task<IActionResult> Search(string? search, int? month, int? year)
-		{
-			var data = await _dmhService.Search(search, month, year);
-			return PartialView("DonMuaHangTable", data);
-		}
-
-		public async Task<IActionResult> Clear()
-		{
-			var data = await _dmhService.Reset();
-			return PartialView("DonMuaHangTable", data);
 		}
 
 		private async Task LoadDropdowns(DonMuaHang model)

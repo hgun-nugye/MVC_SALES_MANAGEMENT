@@ -11,15 +11,6 @@ CREATE OR ALTER PROC CTMH_Insert
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    -- Kiểm tra trùng sản phẩm trong cùng đơn
-    IF EXISTS (SELECT 1 FROM CTMH WHERE MaDMH = @MaDMH AND MaSP = @MaSP)
-    BEGIN
-        RAISERROR(N'Sản phẩm đã tồn tại trong đơn mua này.', 16, 1);
-        RETURN;
-    END;
-
-    -- Thêm chi tiết đơn mua
     INSERT INTO CTMH (MaDMH, MaSP, SLM, DGM)
     VALUES (@MaDMH, @MaSP, @SLM, @DGM);	
 END;
@@ -97,6 +88,17 @@ BEGIN
         DECLARE @Err NVARCHAR(4000) = ERROR_MESSAGE();
         RAISERROR(N'Lỗi khi xóa CTMH: %s', 16, 1, @Err);
     END CATCH;
+END;
+GO
+
+CREATE OR ALTER PROC CTMH_DeleteByMaDMH
+(
+    @MaDMH CHAR(11)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM CTMH WHERE MaDMH = @MaDMH;
 END;
 GO
 

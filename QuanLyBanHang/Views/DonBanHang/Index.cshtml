@@ -25,6 +25,50 @@
             border-radius: 8px;
         }
 
+    /* Tùy chỉnh màu sắc Badge trạng thái */
+    .badge-status {
+        padding: 0.5em 0.8em;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        display: inline-block;
+        min-width: 100px;
+    }
+
+    .status-cho {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+    /* Chờ xử lý - Vàng */
+    .status-dxl {
+        background-color: #cfe2ff;
+        color: #084298;
+        border: 1px solid #b6d4fe;
+    }
+    /* Đang xử lý - Xanh biển */
+    .status-dgh {
+        background-color: #e0cffc;
+        color: #6610f2;
+        border: 1px solid #d1b9fb;
+    }
+    /* Đang giao - Tím */
+    .status-dtt {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+    /* Đã thanh toán - Xanh lá */
+    .status-huy {
+        background-color: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+    /* Đã hủy - Đỏ */
+    .status-default {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
 </style>
 
 
@@ -88,7 +132,8 @@
                             @tt.Text
                         </option>
                     }
-                </select>
+                </select> 
+
             </div>          
 
             <button type="button" id="btnClear" class="btn btn-secondary">
@@ -125,8 +170,14 @@
                             <td>@item.NgayBH.ToString("dd/MM/yyyy")</td>
                             <td>@item.MaKH</td>
                             <td>@item.TenKH</td>
-                            <td>@item.TenTTBH</td>
-
+                            <td>
+                                @{
+                                    string statusClass = item.MaTTBH?.ToLower().Trim() ?? "default";
+                                }
+                                <span class="badge-status status-@statusClass">
+                                    @item.TenTTBH
+                                </span>
+                            </td>
                         </tr>
                     }
                 }

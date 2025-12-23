@@ -75,23 +75,16 @@ namespace QuanLyBanHang.Controllers
 
 		private async Task LoadDropdowns(string? selectedKH = null, string? selectedTTDH = null, short? selectedXa = null)
 		{
-			ViewBag.MaSP = _context.SanPham
-				.Select(x => new SelectListItem
-				{
-					Value = x.MaSP ?? "",
-					Text = x.TenSP ?? ""
-				})
-				.ToList() ?? new List<SelectListItem>();
+			// Nạp danh sách Khách hàng
+			var khachHangs = await _context.KhachHang.ToListAsync();
+			ViewBag.KhachHang = new SelectList(khachHangs, "MaKH", "TenKH", selectedKH);
 
-			ViewBag.MaKH = _context.KhachHang
-				.Select(x => new SelectListItem
-				{
-					Value = x.MaKH ?? "",
-					Text = x.TenKH ?? ""
-				})
-				.ToList() ?? new List<SelectListItem>();
+			// Nạp danh sách Trạng thái bán hàng - Đây là cái View đang cần
+			var trangThais = await _context.TrangThaiBH.ToListAsync();
+			ViewBag.TrangThaiBH = new SelectList(trangThais, "MaTTBH", "TenTTBH", selectedTTDH);
 
-			ViewBag.MaTTBH = new SelectList(await _ttdhService.GetAll(), "MaTTBH", "TenTTBH", selectedTTDH);
+			// Nạp danh sách Sản phẩm cho chi tiết đơn hàng
+			ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
 		}
 
 		public async Task<IActionResult> Create()
@@ -145,23 +138,35 @@ namespace QuanLyBanHang.Controllers
 					{
 						model.MaKH = userId;
 					}
+
+					if (string.IsNullOrEmpty(model.MaTTBH))
+					{
+						model.MaTTBH = "CHO";
+					}
+				}
+				else
+				{
+					if (string.IsNullOrEmpty(model.MaTTBH))
+					{
+						ModelState.AddModelError("MaTTBH", "Vui lòng chọn trạng thái đơn hàng.");
+					}
 				}
 
-				// 1. Kiểm tra Khách hàng
+				// Kiểm tra Khách hàng
 				if (string.IsNullOrEmpty(model.MaKH))
 				{
-					ModelState.AddModelError("MaKH", isCustomer 
-						? "Không tìm thấy thông tin khách hàng. Vui lòng đăng nhập lại." 
+					ModelState.AddModelError("MaKH", isCustomer
+						? "Không tìm thấy thông tin khách hàng. Vui lòng đăng nhập lại."
 						: "Vui lòng chọn khách hàng.");
 				}
 
-				// 2. Kiểm tra Địa chỉ
+				// Kiểm tra Địa chỉ
 				if (string.IsNullOrEmpty(model.DiaChiDBH))
 				{
 					ModelState.AddModelError("DiaChiDBH", "Vui lòng nhập địa chỉ nhận hàng.");
 				}
 
-				// 3. Kiểm tra Tỉnh/Xã (Nếu maTinh = 0 hoặc MaXa = null)
+				// Kiểm tra Tỉnh/Xã (Nếu maTinh = 0 hoặc MaXa = null)
 				if (maTinh == 0)
 				{
 					ModelState.AddModelError("maTinh", "Vui lòng chọn Tỉnh/Thành phố.");
@@ -171,7 +176,7 @@ namespace QuanLyBanHang.Controllers
 					ModelState.AddModelError("MaXa", "Vui lòng chọn Xã/Phường.");
 				}
 
-				// 4. Kiểm tra Ngày bán/mua
+				// Kiểm tra Ngày bán/mua
 				if (model.NgayBH == default(DateTime))
 				{
 					ModelState.AddModelError("NgayBH", isCustomer
@@ -327,13 +332,13 @@ namespace QuanLyBanHang.Controllers
 					? _context.Xa.Where(x => x.MaTinh == currentMaTinh.Value).ToList()
 					: new List<Xa>();
 
+			ViewData["MaXaSelected"] = header.MaXa;
 			ViewBag.Xa = new SelectList(listXa, "MaXa", "TenXa", header.MaXa);
 
 			await LoadDropdowns(header.MaKH, header.MaTTBH);
 			
 			return View(ct);
 		}
-
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]

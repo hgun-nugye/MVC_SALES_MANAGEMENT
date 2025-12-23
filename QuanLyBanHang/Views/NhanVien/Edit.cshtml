@@ -169,7 +169,7 @@
 
                 <div class="col-md-6">
                     <label asp-for="MatKhauNV" class="form-label">Mật khẩu</label>
-                    <input asp-for="MatKhauNV" type="password" class="form-control" placeholder="Để trống nếu không đổi" />
+                    <input type="password" name="newPassword" class="form-control" placeholder="Để trống nếu không đổi" />
                     <span asp-validation-for="MatKhauNV" class="text-danger small"></span>
                 </div>
 
@@ -183,24 +183,27 @@
             </div>
         </div>
 
-        <!-- Ảnh nhân viên -->
+        <!-- Ảnh nhân viên -->        
         <div class="form-section">
             <div class="section-title">
                 <i class="fa-solid fa-image"></i>
                 Ảnh nhân viên
             </div>
             <div class="row">
-                @if (!string.IsNullOrEmpty(Model?.AnhNV))
-                {
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Ảnh hiện tại:</label>
-                        <img src="@Url.Content("~/images/" + Model.AnhNV)" alt="Ảnh nhân viên" style="max-width: 150px; height: auto; border-radius: 8px;" />
-                    </div>
-                }
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ảnh hiện tại / xem trước:</label>
+                    <img id="previewImage"
+                         src="@(string.IsNullOrEmpty(Model?.AnhNV) ? "" : Url.Content("~/images/employees" + Model.AnhNV))"
+                         alt="@Model.TenNV"
+                         style="max-width: 240px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); object-fit: cover; background: #f8f9fa;" />
+                </div>
                 <div class="col-md-6">
-                    <label asp-for="AnhFile" class="form-label">Chọn ảnh mới:</label>
-                    <input asp-for="AnhFile" type="file" class="form-control" accept="image/*" />
-                    <span asp-validation-for="AnhFile" class="text-danger small"></span>
+                    <label class="form-label">Chọn ảnh mới:</label>
+                    <input type="file" name="AnhFile" id="AnhFile" class="form-control" accept="image/*" />
+                    <small class="text-muted d-block mt-2">
+                        <i class="fa-solid fa-info-circle"></i>
+                        Chấp nhận định dạng: JPG, PNG, GIF. Kích thước tối đa: 5MB
+                    </small>
                 </div>
             </div>
         </div>
@@ -261,5 +264,23 @@
                 }, 300);
             }
         });
+    </script>
+
+    <script>
+        const fileInput = document.getElementById("AnhFile");
+        const previewImg = document.getElementById("previewImage");
+
+        if (fileInput && previewImg) {
+            fileInput.addEventListener("change", function (e) {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    previewImg.src = ev.target?.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
     </script>
 }

@@ -56,54 +56,58 @@ namespace QuanLyBanHang.Controllers
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string username, string password)
-        {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-                TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!";
-                return View();
-            }
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Login(string username, string password)
+		{
+			if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+			{
+				TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!";
+				return View();
+			}
 
-            // Kiểm tra trong bảng KhachHang
-            var khachHang = await _context.KhachHang
-                .FirstOrDefaultAsync(kh => kh.TenDNKH == username && kh.MatKhauKH == password);
+			// 1. Kiểm tra trong bảng KhachHang
+			var khachHang = await _context.KhachHang
+				.FirstOrDefaultAsync(kh => kh.TenDNKH == username);
 
-            if (khachHang != null)
-            {
-                // Đăng nhập thành công - Khách hàng
-                HttpContext.Session.SetString("IsLoggedIn", "true");
-                HttpContext.Session.SetString("IsCustomer", "true");
-                HttpContext.Session.SetString("UserId", khachHang.MaKH);
-                HttpContext.Session.SetString("UserName", khachHang.TenKH);
-                HttpContext.Session.SetString("UserType", "Customer");
+			// Sử dụng BCrypt.Verify để so sánh mật khẩu nhập vào với mật khẩu hash trong DB
+			if (khachHang != null && BCrypt.Net.BCrypt.Verify(password, khachHang.MatKhauKH))
+			{
+				// Đăng nhập thành công - Khách hàng
+				HttpContext.Session.SetString("IsLoggedIn", "true");
+				HttpContext.Session.SetString("IsCustomer", "true");
+				HttpContext.Session.SetString("UserId", khachHang.MaKH);
+				HttpContext.Session.SetString("UserName", khachHang.TenKH);
+				HttpContext.Session.SetString("UserType", "Customer");
+				HttpContext.Session.SetString("UserAvatar", khachHang.AnhKH ?? "");
+				TempData["SuccessMessage"] = "Đăng nhập thành công!";
+				return RedirectToAction("Index", "SanPham");
+			}
 
-                TempData["SuccessMessage"] = "Đăng nhập thành công!";
-                return RedirectToAction("Index", "SanPham");
-            }
+			// 2. Kiểm tra trong bảng NhanVien
+			var nhanVien = await _context.NhanVien
+				.FirstOrDefaultAsync(nv => nv.TenDNNV == username);
 
-            // Kiểm tra trong bảng NhanVien
-            var nhanVien = await _context.NhanVien
-                .FirstOrDefaultAsync(nv => nv.TenDNNV == username && nv.MatKhauNV == password);
+			// Sử dụng BCrypt.Verify cho Nhân viên
+			if (nhanVien != null && BCrypt.Net.BCrypt.Verify(password, nhanVien.MatKhauNV))
+			{
+				// Đăng nhập thành công - Nhân viên
+				HttpContext.Session.SetString("IsLoggedIn", "true");
+				HttpContext.Session.SetString("IsCustomer", "false");
+				HttpContext.Session.SetString("UserId", nhanVien.MaNV);
+				HttpContext.Session.SetString("UserName", nhanVien.TenNV);
+				HttpContext.Session.SetString("UserType", "Employee");
+				HttpContext.Session.SetString("UserAvatar", nhanVien.AnhNV ?? "");
+				TempData["SuccessMessage"] = "Đăng nhập thành công!";
 
-            if (nhanVien != null)
-            {
-                // Đăng nhập thành công - Nhân viên
-                HttpContext.Session.SetString("IsLoggedIn", "true");
-                HttpContext.Session.SetString("IsCustomer", "false");
-                HttpContext.Session.SetString("UserId", nhanVien.MaNV);
-                HttpContext.Session.SetString("UserName", nhanVien.TenNV);
-                HttpContext.Session.SetString("UserType", "Employee");
+				// Thường nhân viên sẽ chuyển hướng vào trang quản trị (Admin) thay vì trang SanPham của khách
+				return RedirectToAction("Index", "SanPham");
+			}
 
-                TempData["SuccessMessage"] = "Đăng nhập thành công!";
-                return RedirectToAction("Index", "SanPham");
-            }
-
-            // Đăng nhập thất bại
-            TempData["ErrorMessage"] = "Tên đăng nhập hoặc mật khẩu không đúng!";
-            return View();
-        }		
+			// Đăng nhập thất bại
+			TempData["ErrorMessage"] = "Tên đăng nhập hoặc mật khẩu không đúng!";
+			return View();
+		}
 
 		[HttpGet]
 		public async Task<IActionResult> SignUp()

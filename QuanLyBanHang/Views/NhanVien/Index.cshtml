@@ -49,8 +49,8 @@
 </style>
 
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="text-success mb-0">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h4 class="text-success">
             <i class="fa-solid fa-users me-2"></i>
             Danh sách Nhân Viên
         </h4>
@@ -103,8 +103,11 @@
                             data-href="@Url.Action("Details", "NhanVien", new { id = item.MaNV })"
                             data-manv="@item.MaNV"
                             data-tennv="@item.TenNV">
-                            <td class="text-center">@item.MaNV</td>
-                            <td class="text-center">@item.TenNV</td>
+                            <td class="text-center">
+                                <img src="@(string.IsNullOrEmpty(item.AnhNV) ? Url.Content("~/images/default-user.png") : @Url.Content("~/images/employees/" + item.AnhNV))" width="40" height="40" style="object-fit:cover; border-radius:10px;">
+                                @item.MaNV
+                            </td>
+                            <td>@item.TenNV</td>
                             <td class="text-center">@item.CCCD</td>
                             <td class="text-center">@item.SDT</td>
                             <td class="text-center">@(item.Email ?? "-")</td>

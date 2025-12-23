@@ -59,6 +59,7 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã Xã")]
 		public short? MaXa { get; set; }
 
+		[Required(ErrorMessage = "Tên đăng nhập không được để trống.")]
 		[StringLength(50, ErrorMessage = "Tên đăng nhập tối đa 50 ký tự.")]
 		[Display(Name = "Tên Đăng Nhập")]
 		public string? TenDNNV { get; set; }

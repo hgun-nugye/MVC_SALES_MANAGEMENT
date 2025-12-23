@@ -29,6 +29,46 @@
             .search-wrapper input:focus {
                 box-shadow: 0 0 0 3px rgba(13,110,253,0.25);
             }
+
+    /* Tùy chỉnh màu sắc Badge trạng thái mua hàng */
+    .badge-status {
+        padding: 0.5em 0.8em;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        display: inline-block;
+        min-width: 110px;
+        text-align: center;
+    }
+
+    .status-cho {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+    /* Chờ xác nhận - Vàng */
+    .status-dnh {
+        background-color: #cfe2ff;
+        color: #084298;
+        border: 1px solid #b6d4fe;
+    }
+    /* Đã nhận hàng - Xanh biển */
+    .status-dtt {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+    /* Đã thanh toán - Xanh lá */
+    .status-huy {
+        background-color: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+    /* Đã hủy - Đỏ */
+    .status-default {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
 </style>
 
 
@@ -81,6 +121,16 @@
                         @Html.Raw($"<option value='{y}' {(ViewBag.Year == y ? "selected" : "")}>{y}</option>")
                     }
                 </select>
+
+                <select name="MaTTMH" id="ttdhSelect" class="form-select" style="width: 180px;">
+                    <option value="">-- Trạng thái --</option>
+                    @foreach (var tt in (IEnumerable<SelectListItem>)ViewBag.TrangThaiMH)
+                    {
+                        <option value="@tt.Value" selected="@(tt.Value == ViewBag.MaTTMH)">
+                            @tt.Text
+                        </option>
+                    }
+                </select>
             </div>
 
             <button type="button" id="btnClear" class="btn btn-secondary">
@@ -103,6 +153,7 @@
                     <th>Ngày mua</th>
                     <th>Mã Nhà cung cấp</th>
                     <th>Tên Nhà cung cấp</th>
+                    <th>Trạng thái</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -116,14 +167,22 @@
                             <td class="text-center">@item.NgayMH.ToString("dd/MM/yyyy")</td>
                             <td class="text-center">@item.MaNCC</td>
                             <td class="text-center">@item.TenNCC</td>
-
+                            <td class="text-center">
+                                @{
+                                    // Lấy mã trạng thái để áp dụng class CSS (ví dụ: status-cho, status-dtt)
+                                    var statusClass = item.MaTTMH?.ToLower().Trim() ?? "default";
+                                }
+                                <span class="badge-status status-@statusClass">
+                                    @item.TenTTMH
+                                </span>
+                            </td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="4" class="text-muted fst-italic">Không có đơn hàng nào.</td>
+                        <td colspan="5" class="text-muted fst-italic text-center">Không có đơn hàng nào.</td>
                     </tr>
                 }
             </tbody>
@@ -144,7 +203,7 @@
             }
 
         // khi thay đổi  -> submit form
-        $("#searchBox, #monthSelect, #yearSelect").on("change", debounce(function(){
+        $("#searchBox, #monthSelect, #yearSelect, #ttdhSelect").on("change", debounce(function(){
             $("#Form").submit();
         }, 400));
 
@@ -153,6 +212,7 @@
             $("#searchBox").val("");
             $("#monthSelect").val("");
             $("#yearSelect").val("");
+            $("#ttdhSelect").val("");
             $("#Form").submit();
         });
     </script>
