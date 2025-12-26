@@ -8,16 +8,20 @@ namespace QuanLyBanHang.Models
 	public class Xa
 	{
 		[Key]
+		[Required(ErrorMessage = "Mã xã không được để trống")]
+		[StringLength(5, ErrorMessage = "Mã xã tối đa 5 ký tự")]
 		[Display(Name = "Mã xã")]
-		public short MaXa { get; set; }
+		public string MaXa { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Tên xã không được để trống")]
 		[StringLength(90, ErrorMessage = "Tên xã không được quá 90 ký tự")]
 		[Display(Name = "Tên xã")]
 		public string TenXa { get; set; } = string.Empty;
 
+		[Required(ErrorMessage = "Mã tỉnh không được để trống")]
+		[StringLength(2, ErrorMessage = "Mã tỉnh tối đa 2 ký tự")]
 		[Display(Name = "Mã tỉnh")]
-		public short MaTinh { get; set; }
+		public string MaTinh { get; set; } = string.Empty;
 
 		[NotMapped]
 		[Display(Name = "Tên tỉnh")]
@@ -29,13 +33,13 @@ namespace QuanLyBanHang.Models
 	public class XaDTO
 	{
 		[Display(Name = "Mã xã")]
-		public short? MaXa { get; set; }
+		public string? MaXa { get; set; }
 
 		[Display(Name = "Tên xã")]
 		public string? TenXa { get; set; }
 
 		[Display(Name = "Mã tỉnh")]
-		public short? MaTinh { get; set; }
+		public string? MaTinh { get; set; }
 
 		[Display(Name = "Tên tỉnh")]
 		public string? TenTinh { get; set; }

@@ -23,7 +23,7 @@
       
         <div class="form-group mb-3">
             <label asp-for="MaTinh" class="form-label"></label>
-            <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.MaTinhList">
+            <select asp-for="MaTinh" class="form-control" asp-items="@ViewBag.MaTinhList">
                 <option value="">@Model.TenTinh</option>
             </select>
             <span asp-validation-for="MaTinh" class="text-danger"></span>

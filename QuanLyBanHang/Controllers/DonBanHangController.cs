@@ -73,15 +73,15 @@ namespace QuanLyBanHang.Controllers
 			return View(result);
 		}
 
-		private async Task LoadDropdowns(string? selectedKH = null, string? selectedTTDH = null, short? selectedXa = null)
+		private async Task LoadDropdowns(string? selectedKH = null, string? selectedTTDH = null, string? selectedXa = null)
 		{
 			// Nạp danh sách Khách hàng
 			var khachHangs = await _context.KhachHang.ToListAsync();
-			ViewBag.KhachHang = new SelectList(khachHangs, "MaKH", "TenKH", selectedKH);
+			ViewBag.MaKH = new SelectList(khachHangs, "MaKH", "TenKH", selectedKH);
 
 			// Nạp danh sách Trạng thái bán hàng - Đây là cái View đang cần
 			var trangThais = await _context.TrangThaiBH.ToListAsync();
-			ViewBag.TrangThaiBH = new SelectList(trangThais, "MaTTBH", "TenTTBH", selectedTTDH);
+			ViewBag.MaTTBH = new SelectList(trangThais, "MaTTBH", "TenTTBH", selectedTTDH);
 
 			// Nạp danh sách Sản phẩm cho chi tiết đơn hàng
 			ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
@@ -120,7 +120,7 @@ namespace QuanLyBanHang.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(DonBanHang model, short maTinh)
+		public async Task<IActionResult> Create(DonBanHang model, string maTinh)
 		{
 			try
 			{
@@ -166,12 +166,12 @@ namespace QuanLyBanHang.Controllers
 					ModelState.AddModelError("DiaChiDBH", "Vui lòng nhập địa chỉ nhận hàng.");
 				}
 
-				// Kiểm tra Tỉnh/Xã (Nếu maTinh = 0 hoặc MaXa = null)
-				if (maTinh == 0)
+				// Kiểm tra Tỉnh/Xã (Nếu maTinh = "" hoặc MaXa = null)
+				if (string.IsNullOrEmpty(maTinh))
 				{
 					ModelState.AddModelError("maTinh", "Vui lòng chọn Tỉnh/Thành phố.");
 				}
-				else if (model.MaXa == null || model.MaXa == 0)
+				else if (string.IsNullOrEmpty(model.MaXa))
 				{
 					ModelState.AddModelError("MaXa", "Vui lòng chọn Xã/Phường.");
 				}
@@ -312,25 +312,25 @@ namespace QuanLyBanHang.Controllers
 				NgayBH = header.NgayBH,
 				MaKH = header.MaKH!,
 				DiaChiDBH = header.DiaChiDBH ?? "",
-				MaXa = header.MaXa ?? 0,
+				MaXa = header.MaXa ?? "",
 				TenXa= header.TenXa,
 				TenTinh = header.TenTinh,
 				CTBHs = details,
 				MaTTBH = header.MaTTBH ?? string.Empty
 			};
 						
-			short? currentMaTinh = null;
+			string? currentMaTinh = null;
 
-			if (header.MaXa.HasValue)
-			{
-				currentMaTinh = await _xaService.GetByIDWithTinh(header.MaXa.Value);
-			}
+			if (!string.IsNullOrEmpty(header.MaXa))
+	{
+		currentMaTinh = await _xaService.GetMaTinhByXa(header.MaXa);
+	}
 
 			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", currentMaTinh);
 
-			var listXa = currentMaTinh.HasValue
-					? _context.Xa.Where(x => x.MaTinh == currentMaTinh.Value).ToList()
-					: new List<Xa>();
+			var listXa = !string.IsNullOrEmpty(currentMaTinh)
+			? _context.Xa.Where(x => x.MaTinh == currentMaTinh).ToList()
+			: new List<Xa>();
 
 			ViewData["MaXaSelected"] = header.MaXa;
 			ViewBag.Xa = new SelectList(listXa, "MaXa", "TenXa", header.MaXa);

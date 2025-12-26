@@ -21,9 +21,25 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaTinh", (object?)tinh ?? DBNull.Value)
 			};
 
-			return await _context.XaDTO
+			var result = await _context.XaDTO
 				.FromSqlRaw("EXEC Xa_Search @Search, @MaTinh", parameters)
 				.ToListAsync();
+
+            // Fallback: Populate TenTinh nếu SP trả về null hoặc mapping không khớp
+            // Lấy danh sách tất cả tỉnh để lookup (giả sử số lượng tỉnh ít ~63)
+            if (result.Any(x => string.IsNullOrEmpty(x.TenTinh)))
+            {
+                var tinhList = await _context.Tinh.ToDictionaryAsync(t => t.MaTinh, t => t.TenTinh);
+                foreach (var item in result)
+                {
+                    if (string.IsNullOrEmpty(item.TenTinh) && !string.IsNullOrEmpty(item.MaTinh) && tinhList.ContainsKey(item.MaTinh))
+                    {
+                        item.TenTinh = tinhList[item.MaTinh];
+                    }
+                }
+            }
+            
+            return result;
 		}
 
 
@@ -41,11 +57,20 @@ namespace QuanLyBanHang.Services
 		}
 
 		// DETAILS - Xem chi tiết
-		public async Task<Xa?> GetByIDWithTinh(string id)
+		public async Task<Xa?> GetByID(string id)
 		{
-			return (await _context.Xa.FromSqlInterpolated($"EXEC Xa_GetByIDWithTinh @MaXa = {id}")
+			var xa = (await _context.Xa.FromSqlInterpolated($"EXEC Xa_GetByIDWithTinh @MaXa = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
+
+			// Populate TenTinh thủ công vì property này là [NotMapped]
+			if (xa != null && !string.IsNullOrEmpty(xa.MaTinh))
+			{
+				var tinh = await _context.Tinh.FindAsync(xa.MaTinh);
+				xa.TenTinh = tinh?.TenTinh;
+			}
+
+			return xa;
 		}
 
 		// CREATE
@@ -56,6 +81,9 @@ namespace QuanLyBanHang.Services
 							@TenXa = {model.TenXa},
 							@MaTinh = {model.MaTinh}
 					");
+
+			// Clear EF cache
+			_context.ChangeTracker.Clear();
 		}
 
 		// EDIT
@@ -72,7 +100,7 @@ namespace QuanLyBanHang.Services
 		// DELETE 
 		public async Task Delete(string id)
 		{
-			var xa = await GetByIDWithTinh(id);
+			var xa = await GetByID(id);
 			if (xa == null)
 				throw new KeyNotFoundException("Xã không tồn tại!");
 
@@ -80,7 +108,7 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Lấy danh sách Xã theo Tỉnh
-		public async Task<List<Xa>> GetByIDTinh(short maTinh)
+		public async Task<List<Xa>> GetByIDTinh(string maTinh)
 		{
 			return await _context.Xa
 				.FromSqlInterpolated($"EXEC Xa_GetByIDTinh @MaTinh={maTinh}")
@@ -88,14 +116,14 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Lấy thông tin Tỉnh từ MaXa
-		public async Task<short> GetByIDWithTinh(short maXa)
+		public async Task<string?> GetMaTinhByXa(string maXa)
 		{
 			var xa = (await _context.Xa
 				.FromSqlInterpolated($"EXEC Xa_GetByIDWithTinh @MaXa={maXa}")
 				.ToListAsync())
 				.FirstOrDefault();
 
-			return xa?.MaTinh ?? 0;
+			return xa?.MaTinh ?? "";
 		}
 	}
 }

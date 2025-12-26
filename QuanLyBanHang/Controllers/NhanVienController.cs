@@ -56,7 +56,7 @@ namespace QuanLyBanHang.Controllers
 		// CREATE - POST
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(NhanVien model, string maVT, short maTinh)
+		public async Task<IActionResult> Create(NhanVien model, string maVT, string maTinh)
 		{
 			// Mã nhân viên sinh bởi DB/SP
 			ModelState.Remove("MaNV");
@@ -134,7 +134,7 @@ namespace QuanLyBanHang.Controllers
 			var vaiTros = await _context.VaiTro.ToListAsync();
 			ViewBag.VaiTro = new SelectList(vaiTros, "MaVT", "TenVT", maVT);
 
-			short maTinh = nhanVien.MaXa.HasValue ? await _xaService.GetByIDWithTinh(nhanVien.MaXa.Value) : (short)0;
+			string? maTinh = !string.IsNullOrEmpty(nhanVien.MaXa) ? await _xaService.GetMaTinhByXa(nhanVien.MaXa) : null;
 
 			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 			var xaList = await _xaService.GetByIDTinh(maTinh);
@@ -205,7 +205,7 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.VaiTro = new SelectList(vaiTros, "MaVT", "TenVT", maVT);
 
 			// Logic load lại Tỉnh/Xã để tránh lỗi giao diện
-			short maTinh = model.MaXa.HasValue ? await _xaService.GetByIDWithTinh(model.MaXa.Value) : (short)0;
+			string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
 			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);

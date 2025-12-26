@@ -36,7 +36,7 @@ namespace QuanLyBanHang.Controllers
 		// DETAILS - Xem chi tiết
 		public async Task<IActionResult> Details(string id)
 		{
-			var xa = (await _xaService.GetByIDWithTinh(id));
+			var xa = (await _xaService.GetByID(id));
 
 			if (xa == null)
 				return NotFound();
@@ -57,6 +57,10 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(Xa model)
 		{
+			// Bỏ qua validation TenTinh vì nó là NotMapped và không binding từ form
+			ModelState.Remove("TenTinh");
+			ModelState.Remove("MaXa");
+
 			if (ModelState.IsValid)
 			{
 				try
@@ -76,6 +80,9 @@ namespace QuanLyBanHang.Controllers
 				}
 			}
 
+			// Reload dropdown khi validation fail hoặc có lỗi exception
+			ViewBag.MaTinhList = new SelectList(await _tinhService.GetAll(), "MaTinh", "TenTinh", model.MaTinh);
+
 			return View(model);
 		}
 
@@ -87,7 +94,7 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var xa = (await _xaService.GetByIDWithTinh(id));
+			var xa = (await _xaService.GetByID(id));
 
 			if (xa == null)
 				return NotFound();
@@ -101,6 +108,9 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(Xa model)
 		{
+			// Bỏ qua validation TenTinh
+			ModelState.Remove("TenTinh");
+
 			if (ModelState.IsValid)
 			{
 				try
@@ -119,7 +129,7 @@ namespace QuanLyBanHang.Controllers
 				}
 			}
 
-			ViewBag.MaTinhList = new SelectList(_context.Tinh, "MaTinh", "TenTinh", model.MaTinh);
+			ViewBag.MaTinhList = new SelectList(await _tinhService.GetAll(), "MaTinh", "TenTinh", model.MaTinh);
 
 			return View(model);
 		}
@@ -132,7 +142,7 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(id))
 				return BadRequest();
 
-			var xa = (await _xaService.GetByIDWithTinh(id));
+			var xa = (await _xaService.GetByID(id));
 
 			if (xa == null)
 				return NotFound();
@@ -151,7 +161,7 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var xa = (await _xaService.GetByIDWithTinh(id));
+			var xa = (await _xaService.GetByID(id));
 
 			if (xa != null)
 			{

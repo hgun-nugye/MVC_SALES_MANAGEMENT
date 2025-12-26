@@ -37,8 +37,9 @@ namespace QuanLyBanHang.Models
 		public string DiaChiDBH { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Mã xã không được để trống.")]
+		[StringLength(5, ErrorMessage = "Mã xã tối đa 5 ký tự")]
 		[Display(Name = "Mã Xã")]
-		public short MaXa { get; set; }
+		public string MaXa { get; set; } = string.Empty;
 
 		// Tên khách hàng chỉ hiển thị, không map DB
 		[NotMapped]
@@ -103,7 +104,7 @@ namespace QuanLyBanHang.Models
 		public string? DiaChiDBH { get; set; }
 
 		[Display(Name = "Mã Xã")]
-		public short? MaXa { get; set; }
+		public string? MaXa { get; set; }
 
 		[Display(Name ="Mã trạng thái đơn hàng")]
 		public string? MaTTBH { get; set; }
@@ -142,8 +143,9 @@ namespace QuanLyBanHang.Models
 		public string DiaChiDBH { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Mã xã không được để trống.")]
-		[Display(Name = "Mã Xã")]
-		public short MaXa { get; set; }
+	[StringLength(5, ErrorMessage = "Mã xã tối đa 5 ký tự")]
+	[Display(Name = "Mã Xã")]
+	public string MaXa { get; set; } = string.Empty;
 
 		[NotMapped]
 		public string? TenXa { get; set; }

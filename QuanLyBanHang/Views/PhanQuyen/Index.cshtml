@@ -45,9 +45,15 @@
 </style>
 
 <div class="container">
-    <h4 class="mb-3 text-success">
-        Danh sách Phân quyền
-    </h4>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <h4 class="mb-5 text-success">
+            Danh sách Phân quyền
+        </h4>
+        <a href="@Url.Action("Index", "VaiTro")" class="btn btn-success mb-5">
+            <i class="fa-solid fa-list-check"></i> Quản lý Vai trò
+            </a>
+
+    </div>
 
     <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
         <div class="search-wrapper flex-grow-1">

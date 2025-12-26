@@ -52,7 +52,7 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(NhaCC model, short maTinh)
+		public async Task<IActionResult> Create(NhaCC model, string maTinh)
 		{
 			// Mã NCC sinh bởi DB/SP
 			ModelState.Remove("MaNCC");
@@ -91,7 +91,7 @@ namespace QuanLyBanHang.Controllers
 			var ncc = await _nhaCCService.GetById(id);
 			if (ncc == null) return NotFound();
 
-			short maTinh = await _xaService.GetByIDWithTinh(ncc.MaXa);
+			string? maTinh = !string.IsNullOrEmpty(ncc.MaXa) ? await _xaService.GetMaTinhByXa(ncc.MaXa) : null;
 
 			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 			var xaList = await _xaService.GetByIDTinh(maTinh);
@@ -106,7 +106,7 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				short maTinh = await _xaService.GetByIDWithTinh(model.MaXa);
+				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
 				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);

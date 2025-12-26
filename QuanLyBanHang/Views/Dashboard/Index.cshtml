@@ -1,0 +1,434 @@
+@model QuanLyBanHang.Services.DashboardStats
+
+@{
+    ViewData["Title"] = "Dashboard - Báo cáo";
+}
+
+<style>
+    .stats-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid;
+        height: 100%;
+    }
+
+    .stats-card.green { border-left-color: #4CAF50; }
+    .stats-card.blue { border-left-color: #2196F3; }
+    .stats-card.orange { border-left-color: #FF9800; }
+    .stats-card.purple { border-left-color: #9C27B0; }
+    .stats-card.red { border-left-color: #F44336; }
+
+    .stats-value {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #212121;
+        margin: 0;
+    }
+
+    .stats-label {
+        font-size: 0.875rem;
+        color: #757575;
+        margin-top: 0.5rem;
+    }
+
+    .report-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: #212121;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #4CAF50;
+    }
+
+    .table thead th {
+        background-color: #F5F5F5;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #757575;
+    }
+
+    .table tbody tr:hover {
+        background-color: #F9F9F9;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header với nút Export -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-success mb-0">
+            <i class="fas fa-chart-line me-2"></i>Dashboard - Báo cáo tổng hợp
+        </h2>
+        <div>
+            <button class="btn btn-success" onclick="exportToExcel()">
+                <i class="fas fa-file-excel me-2"></i>Xuất Excel (Toàn bộ)
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card green">
+                <i class="fas fa-box text-success" style="font-size: 2rem; opacity: 0.3; float: right;"></i>
+                <h3 class="stats-value">@Model.TotalProducts</h3>
+                <p class="stats-label">Tổng số sản phẩm</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card blue">
+                <i class="fas fa-users text-primary" style="font-size: 2rem; opacity: 0.3; float: right;"></i>
+                <h3 class="stats-value">@Model.TotalCustomers</h3>
+                <p class="stats-label">Tổng số khách hàng</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card orange">
+                <i class="fas fa-shopping-cart text-warning" style="font-size: 2rem; opacity: 0.3; float: right;"></i>
+                <h3 class="stats-value">@Model.TotalOrders</h3>
+                <p class="stats-label">Tổng đơn bán hàng</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card red">
+                <i class="fas fa-dollar-sign text-danger" style="font-size: 2rem; opacity: 0.3; float: right;"></i>
+                <h3 class="stats-value">@Model.YearlyRevenue.ToString("N0")</h3>
+                <p class="stats-label">Doanh thu năm (VNĐ)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doanh thu theo tháng -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="report-section">
+                <h4 class="section-title">
+                    <i class="fas fa-chart-bar me-2 text-success"></i>
+                    Doanh thu theo tháng (@DateTime.Now.Year)
+                </h4>
+                <canvas id="revenueChart" height="60"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chi tiết hóa đơn -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="report-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="section-title mb-0">
+                        <i class="fas fa-file-invoice me-2 text-success"></i>
+                        Chi tiết hóa đơn bán hàng
+                    </h4>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="fromDate" class="form-control form-control-sm" style="width: auto;">
+                        <input type="date" id="toDate" class="form-control form-control-sm" style="width: auto;">
+                        <button class="btn btn-sm btn-primary" onclick="filterOrders()">
+                            <i class="fas fa-filter me-1"></i>Lọc
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Ngày bán</th>
+                                <th>Khách hàng</th>
+                                <th>Địa chỉ</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Số SP</th>
+                                <th class="text-end">Tổng tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doanh thu theo sản phẩm -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="report-section">
+                <h4 class="section-title">
+                    <i class="fas fa-box-open me-2 text-success"></i>
+                    Doanh thu theo sản phẩm
+                </h4>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="productRevenueTable">
+                        <thead>
+                            <tr>
+                                <th>Mã SP</th>
+                                <th>Tên sản phẩm</th>
+                                <th class="text-end">Giá bán</th>
+                                <th class="text-end">Số lượng bán</th>
+                                <th class="text-end">Số đơn hàng</th>
+                                <th class="text-end">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top sản phẩm -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="report-section">
+                <h4 class="section-title">
+                    <i class="fas fa-fire me-2 text-danger"></i>
+                    Top 10 sản phẩm bán chạy
+                </h4>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="topProductsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Mã SP</th>
+                                <th>Tên sản phẩm</th>
+                                <th class="text-end">Đã bán</th>
+                                <th class="text-end">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="report-section">
+                <h4 class="section-title">
+                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                    Top 10 sản phẩm ít bán chạy
+                </h4>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="slowProductsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Mã SP</th>
+                                <th>Tên sản phẩm</th>
+                                <th class="text-end">Đã bán</th>
+                                <th class="text-end">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            loadRevenueChart();
+            loadOrders();
+            loadProductRevenue();
+            loadTopProducts();
+            loadSlowProducts();
+        });
+
+        function loadRevenueChart() {
+            $.get('@Url.Action("GetMonthlyRevenue", "Dashboard")?year=@DateTime.Now.Year', function (data) {
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(d => d.monthName),
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: data.map(d => d.revenue),
+                            backgroundColor: '#4CAF50',
+                            borderColor: '#388E3C',
+                            borderWidth: 1
+                        }, {
+                            label: 'Số đơn hàng',
+                            data: data.map(d => d.orderCount),
+                            backgroundColor: '#2196F3',
+                            borderColor: '#1976D2',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                position: 'left',
+                                ticks: {
+                                    callback: function (value) {
+                                        return value.toLocaleString('vi-VN') + ' đ';
+                                    }
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        function loadOrders(fromDate, toDate) {
+            let url = '@Url.Action("GetOrderDetails", "Dashboard")';
+            if (fromDate || toDate) {
+                url += '?';
+                if (fromDate) url += 'fromDate=' + fromDate + '&';
+                if (toDate) url += 'toDate=' + toDate;
+            }
+
+            $.get(url, function (data) {
+                let html = '';
+                let total = 0;
+                data.forEach(order => {
+                    html += `
+                        <tr>
+                            <td>${order.maDBH}</td>
+                            <td>${new Date(order.ngayBH).toLocaleDateString('vi-VN')}</td>
+                            <td>${order.tenKH}</td>
+                            <td>${order.diaChiDBH}</td>
+                            <td><span class="badge bg-success">${order.trangThai}</span></td>
+                            <td class="text-end">${order.soLuongSP}</td>
+                            <td class="text-end"><strong>${order.tongTien.toLocaleString('vi-VN')} đ</strong></td>
+                        </tr>
+                    `;
+                    total += order.tongTien;
+                });
+
+                html += `
+                    <tr class="table-success fw-bold">
+                        <td colspan="6" class="text-end">TỔNG CỘNG:</td>
+                        <td class="text-end">${total.toLocaleString('vi-VN')} đ</td>
+                    </tr>
+                `;
+
+                $('#ordersTable tbody').html(html || '<tr><td colspan="7" class="text-center text-muted">Chưa có dữ liệu</td></tr>');
+            });
+        }
+
+        function loadProductRevenue() {
+            $.get('@Url.Action("GetProductRevenue", "Dashboard")', function (data) {
+                let html = '';
+                let total = 0;
+                data.forEach(product => {
+                    html += `
+                        <tr>
+                            <td>${product.maSP}</td>
+                            <td>${product.tenSP}</td>
+                            <td class="text-end">${product.giaBan.toLocaleString('vi-VN')} đ</td>
+                            <td class="text-end">${product.soLuongBan}</td>
+                            <td class="text-end">${product.soDonHang}</td>
+                            <td class="text-end"><strong>${product.doanhThu.toLocaleString('vi-VN')} đ</strong></td>
+                        </tr>
+                    `;
+                    total += product.doanhThu;
+                });
+
+                html += `
+                    <tr class="table-success fw-bold">
+                        <td colspan="5" class="text-end">TỔNG CỘNG:</td>
+                        <td class="text-end">${total.toLocaleString('vi-VN')} đ</td>
+                    </tr>
+                `;
+
+                $('#productRevenueTable tbody').html(html || '<tr><td colspan="6" class="text-center text-muted">Chưa có dữ liệu</td></tr>');
+            });
+        }
+
+        function loadTopProducts() {
+            $.get('@Url.Action("GetTopProducts", "Dashboard")?limit=10', function (data) {
+                let html = '';
+                data.forEach((item, index) => {
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.maSP}</td>
+                            <td>${item.tenSP}</td>
+                            <td class="text-end"><strong>${item.totalQuantitySold}</strong></td>
+                            <td class="text-end text-success"><strong>${item.totalRevenue.toLocaleString('vi-VN')} đ</strong></td>
+                        </tr>
+                    `;
+                });
+                $('#topProductsTable tbody').html(html || '<tr><td colspan="5" class="text-center text-muted">Chưa có dữ liệu</td></tr>');
+            });
+        }
+
+        function loadSlowProducts() {
+            $.get('@Url.Action("GetSlowMovingProducts", "Dashboard")?limit=10', function (data) {
+                let html = '';
+                data.forEach((item, index) => {
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.maSP}</td>
+                            <td>${item.tenSP}</td>
+                            <td class="text-end">${item.totalQuantitySold}</td>
+                            <td class="text-end text-warning">${item.totalRevenue.toLocaleString('vi-VN')} đ</td>
+                        </tr>
+                    `;
+                });
+                $('#slowProductsTable tbody').html(html || '<tr><td colspan="5" class="text-center text-muted">Chưa có dữ liệu</td></tr>');
+            });
+        }
+
+        function filterOrders() {
+            const fromDate = $('#fromDate').val();
+            const toDate = $('#toDate').val();
+            loadOrders(fromDate, toDate);
+        }
+
+        function exportToExcel() {
+            const fromDate = $('#fromDate').val();
+            const toDate = $('#toDate').val();
+            let url = '@Url.Action("ExportToExcel", "Dashboard")';
+            
+            if (fromDate || toDate) {
+                url += '?';
+                if (fromDate) url += 'fromDate=' + fromDate + '&';
+                if (toDate) url += 'toDate=' + toDate;
+            }
+            
+            window.location.href = url;
+        }
+    </script>
+}

@@ -35,18 +35,19 @@ namespace QuanLyBanHang.Models
 		[Required(ErrorMessage = "Số điện thoại không được để trống")]
 		[StringLength(10, ErrorMessage = "Số điện thoại không được quá 10 ký tự")]
 		[Display(Name = "Số điện thoại")]
+		[RegularExpression(@"^\d{10}$", ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số")]
 		public string DienThoaiKH { get; set; } = string.Empty;
 
 		[StringLength(255)]
 		[Display(Name = "Địa chỉ")]
 		public string? DiaChiKH { get; set; }
 
+		[StringLength(5, ErrorMessage = "Mã xã tối đa 5 ký tự")]
 		[Display(Name = "Mã xã")]
-		public short? MaXa { get; set; }
+		public string? MaXa { get; set; }
 
 		
-		//   Tên đăng nhập & mật khẩu
-		
+		//   Tên đăng nhập & mật khẩu		
 		[Required(ErrorMessage = "Tên đăng nhập không được để trống")]
 		[StringLength(50, ErrorMessage = "Tên đăng nhập không được quá 50 ký tự")]
 		[Display(Name = "Tên đăng nhập")]
@@ -58,8 +59,7 @@ namespace QuanLyBanHang.Models
 		public string MatKhauKH { get; set; } = string.Empty;
 
 		
-		//   Thuộc tính hiển thị
-		
+		//   Thuộc tính hiển thị		
 		[NotMapped]
 		[Display(Name = "Tên xã")]
 		public string? TenXa { get; set; }
@@ -70,13 +70,8 @@ namespace QuanLyBanHang.Models
 
 		[NotMapped]
 		[Display(Name = "Ảnh upload")]
-		public IFormFile? AnhFile { get; set; }
+		public IFormFile? AnhFile { get; set; }	
 		
-		//   Quan hệ
-		
-		[ForeignKey("MaXa")]
-		[Display(Name = "Xã")]
-		public virtual Xa? Xa { get; set; }
 	}
 
 	[Keyless]

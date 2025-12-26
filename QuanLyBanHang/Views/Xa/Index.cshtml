@@ -54,8 +54,7 @@
             <i class="fa fa-search"></i>
             <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên, mã xã...">
         </div>
-
-        <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
             <div class="d-flex align-items-center gap-2 w-50">
                 <label class="w-100 text-end opacity-50">Tỉnh/Thành phố:</label>
                  <select asp-items="ViewBag.TinhList" name="maTinh" class="form-control w-100" id="maTinhSelect">
@@ -138,12 +137,12 @@
         });
 
         // clickable row giữ nguyên
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     document.querySelectorAll(".clickable-row").forEach(row => {
-        //         row.addEventListener("click", function () {
-        //             window.location = this.dataset.href;
-        //         });
-        //     });
-        // });
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                    window.location = this.dataset.href;
+                });
+            });
+        });
     </script>
 }

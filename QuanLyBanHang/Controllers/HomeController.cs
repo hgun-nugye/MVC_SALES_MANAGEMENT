@@ -1,26 +1,26 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
+using System.Diagnostics;
 
 namespace QuanLyBanHang.Controllers
 {
-    public class HomeController : Controller
-    {
-        private readonly ILogger<HomeController> _logger;
-        private readonly SanPhamService _sanPhamService;
-        private readonly KhachHangService _khachHangService;
-        private readonly NhanVienService _nhanVienService;
-        private readonly XaService _xaService;
-        private readonly TinhService _tinhService;
-        private readonly AppDbContext _context;
+	public class HomeController : Controller
+	{
+		private readonly ILogger<HomeController> _logger;
+		private readonly SanPhamService _sanPhamService;
+		private readonly KhachHangService _khachHangService;
+		private readonly NhanVienService _nhanVienService;
+		private readonly XaService _xaService;
+		private readonly TinhService _tinhService;
+		private readonly AppDbContext _context;
 		private readonly IWebHostEnvironment _environment;
 
 
 		public HomeController(
-            ILogger<HomeController> logger,
+			ILogger<HomeController> logger,
 			SanPhamService sanPhamService,
 			KhachHangService khachHangService,
 			NhanVienService nhanVienService,
@@ -41,20 +41,20 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		public async Task<IActionResult> Index()
-        {
-            var sanPhams = await _sanPhamService.GetAll();
-            return View(sanPhams);
-        }
+		{
+			var sanPhams = await _sanPhamService.GetAll();
+			return View(sanPhams);
+		}
 
-        [HttpGet]
-        public IActionResult Login()
-        {
-            if (HttpContext.Session.GetString("IsLoggedIn") == "true")
-            {
-                return RedirectToAction("Index");
-            }
-            return View();
-        }
+		[HttpGet]
+		public IActionResult Login()
+		{
+			if (HttpContext.Session.GetString("IsLoggedIn") == "true")
+			{
+				return RedirectToAction("Index");
+			}
+			return View();
+		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -74,12 +74,13 @@ namespace QuanLyBanHang.Controllers
 			if (khachHang != null && BCrypt.Net.BCrypt.Verify(password, khachHang.MatKhauKH))
 			{
 				// Đăng nhập thành công - Khách hàng
-				HttpContext.Session.SetString("IsLoggedIn", "true");
-				HttpContext.Session.SetString("IsCustomer", "true");
-				HttpContext.Session.SetString("UserId", khachHang.MaKH);
-				HttpContext.Session.SetString("UserName", khachHang.TenKH);
-				HttpContext.Session.SetString("UserType", "Customer");
-				HttpContext.Session.SetString("UserAvatar", khachHang.AnhKH ?? "");
+				Helpers.SessionHelper.SetCustomerSession(
+					HttpContext.Session,
+					khachHang.MaKH,
+					khachHang.TenKH,
+					khachHang.AnhKH ?? ""
+				);
+
 				TempData["SuccessMessage"] = "Đăng nhập thành công!";
 				return RedirectToAction("Index", "SanPham");
 			}
@@ -91,17 +92,37 @@ namespace QuanLyBanHang.Controllers
 			// Sử dụng BCrypt.Verify cho Nhân viên
 			if (nhanVien != null && BCrypt.Net.BCrypt.Verify(password, nhanVien.MatKhauNV))
 			{
+				// Lấy vai trò từ bảng PhanQuyen
+				var phanQuyen = await _context.PhanQuyen
+					.Where(pq => pq.MaNV == nhanVien.MaNV)
+					.Join(_context.VaiTro,
+						pq => pq.MaVT,
+						vt => vt.MaVT,
+						(pq, vt) => new { pq, vt })
+					.FirstOrDefaultAsync();
+
+				string userRole = phanQuyen?.vt.TenVT ?? "Employee"; // Mặc định là Employee nếu không có vai trò
+
 				// Đăng nhập thành công - Nhân viên
-				HttpContext.Session.SetString("IsLoggedIn", "true");
-				HttpContext.Session.SetString("IsCustomer", "false");
-				HttpContext.Session.SetString("UserId", nhanVien.MaNV);
-				HttpContext.Session.SetString("UserName", nhanVien.TenNV);
-				HttpContext.Session.SetString("UserType", "Employee");
-				HttpContext.Session.SetString("UserAvatar", nhanVien.AnhNV ?? "");
+				Helpers.SessionHelper.SetEmployeeSession(
+					HttpContext.Session,
+					nhanVien.MaNV,
+					nhanVien.TenNV,
+					userRole,
+					nhanVien.AnhNV ?? ""
+				);
+
 				TempData["SuccessMessage"] = "Đăng nhập thành công!";
 
-				// Thường nhân viên sẽ chuyển hướng vào trang quản trị (Admin) thay vì trang SanPham của khách
-				return RedirectToAction("Index", "SanPham");
+				// Chuyển hướng theo vai trò
+				if (userRole == "Admin")
+				{
+					return RedirectToAction("Index", "NhanVien"); // Trang quản lý nhân viên
+				}
+				else
+				{
+					return RedirectToAction("Index", "SanPham"); // Trang quản lý sản phẩm
+				}
 			}
 
 			// Đăng nhập thất bại
@@ -120,7 +141,7 @@ namespace QuanLyBanHang.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> SignUp(KhachHang model, short maTinh, IFormFile? AnhFile)
+		public async Task<IActionResult> SignUp(KhachHang model, string maTinh, IFormFile? AnhFile)
 		{
 			// Mã khách hàng sinh bởi DB/SP
 			ModelState.Remove("MaKH");
@@ -207,16 +228,16 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		[HttpGet]
-        public async Task<IActionResult> GetXaByTinh(short maTinh)
-        {
-            var xaList = await _xaService.GetByIDTinh(maTinh);
-            return Json(xaList.Select(x => new { MaXa = x.MaXa, TenXa = x.TenXa }));
-        }
+		public async Task<IActionResult> GetXaByTinh(string maTinh)
+		{
+			var xaList = await _xaService.GetByIDTinh(maTinh);
+			return Json(xaList.Select(x => new { MaXa = x.MaXa, TenXa = x.TenXa }));
+		}
 
 		[HttpGet]
 		public IActionResult Logout()
 		{
-			if (HttpContext.Session.GetString("IsLoggedIn") != "true")
+			if (!Helpers.SessionHelper.IsLoggedIn(HttpContext.Session))
 			{
 				return RedirectToAction("Index");
 			}
@@ -227,22 +248,29 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public IActionResult LogoutConfirmed()
 		{
-			HttpContext.Session.Clear();
+			Helpers.SessionHelper.ClearSession(HttpContext.Session);
 
 			TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công!";
 
 			return RedirectToAction("Index", "Home");
 		}
 
-		public IActionResult Privacy()
-        {
-            return View();
-        }
+		// Action hiển thị khi user không có quyền truy cập
+		public IActionResult AccessDenied()
+		{
+			ViewBag.Message = "Bạn không có quyền truy cập trang này!";
+			return View();
+		}
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-    }
+		public IActionResult Privacy()
+		{
+			return View();
+		}
+
+		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+		public IActionResult Error()
+		{
+			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+		}
+	}
 }

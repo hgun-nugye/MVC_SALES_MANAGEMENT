@@ -58,7 +58,7 @@ namespace QuanLyBanHang.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(KhachHang model, short maTinh, IFormFile? AnhFile)
+		public async Task<IActionResult> Create(KhachHang model, string maTinh, IFormFile? AnhFile)
 		{
 			// Mã khách hàng sinh bởi DB/SP
 			ModelState.Remove("MaKH");
@@ -152,7 +152,7 @@ namespace QuanLyBanHang.Controllers
 			var kh = await _khService.GetByID(id);
 			if (kh == null) return NotFound();
 
-			short maTinh = kh.MaXa.HasValue ? await _xaService.GetByIDWithTinh(kh.MaXa.Value) : (short)0;
+			string? maTinh = !string.IsNullOrEmpty(kh.MaXa) ? await _xaService.GetMaTinhByXa(kh.MaXa) : null;
 
 			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 			var xaList = await _xaService.GetByIDTinh(maTinh);
@@ -167,7 +167,7 @@ namespace QuanLyBanHang.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				short maTinh = model.MaXa.HasValue ? await _xaService.GetByIDWithTinh(model.MaXa.Value) : (short)0;
+				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
 				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);
@@ -187,7 +187,7 @@ namespace QuanLyBanHang.Controllers
 				ModelState.AddModelError("", ex.Message);
 				TempData["ErrorMessage"] = ex.Message;
 
-				short maTinh = model.MaXa.HasValue ? await _xaService.GetByIDWithTinh(model.MaXa.Value) : (short)0;
+				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
 				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);
@@ -236,7 +236,7 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetXaByTinh(short maTinh)
+		public async Task<IActionResult> GetXaByTinh(string maTinh)
 		{
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			return Json(xaList);

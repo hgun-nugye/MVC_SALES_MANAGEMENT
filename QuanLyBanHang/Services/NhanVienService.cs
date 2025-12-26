@@ -59,6 +59,7 @@ namespace QuanLyBanHang.Services
                     @NgaySinh = {model.NgaySinh},
                     @SDT = {model.SDT},
                     @Email = {model.Email},
+					@AnhNV = {model.AnhNV},
                     @DiaChiNV = {model.DiaChiNV},
                     @MaXa = {model.MaXa},
                     @TenDNNV = {model.TenDNNV},

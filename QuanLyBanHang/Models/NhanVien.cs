@@ -17,6 +17,7 @@ namespace QuanLyBanHang.Models
 		[Required(ErrorMessage = "CCCD không được để trống.")]
 		[StringLength(12, ErrorMessage = "CCCD phải có 12 ký tự.")]
 		[Display(Name = "CCCD")]
+		[RegularExpression(@"^\d{12}$", ErrorMessage = "CCCD phải gồm đúng 12 chữ số")]
 		public string CCCD { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Tên nhân viên không được để trống.")]
@@ -35,6 +36,7 @@ namespace QuanLyBanHang.Models
 		[Required(ErrorMessage = "Số điện thoại không được để trống.")]
 		[StringLength(10, ErrorMessage = "Số điện thoại tối đa 10 ký tự.")]
 		[Display(Name = "Số Điện Thoại")]
+		[RegularExpression(@"^\d{10}$", ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số")]
 		public string SDT { get; set; } = string.Empty;
 
 		[EmailAddress(ErrorMessage = "Email không hợp lệ.")]
@@ -56,8 +58,9 @@ namespace QuanLyBanHang.Models
 		public string DiaChiNV { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Mã xã không được để trống.")]
+		[StringLength(5, ErrorMessage = "Mã xã tối đa 5 ký tự")]
 		[Display(Name = "Mã Xã")]
-		public short? MaXa { get; set; }
+		public string? MaXa { get; set; }
 
 		[Required(ErrorMessage = "Tên đăng nhập không được để trống.")]
 		[StringLength(50, ErrorMessage = "Tên đăng nhập tối đa 50 ký tự.")]
@@ -83,11 +86,6 @@ namespace QuanLyBanHang.Models
 		[NotMapped]
 		[Display(Name = "Upload ảnh")]
 		public IFormFile? AnhFile { get; set; }
-
-		// Quan hệ
-		[ForeignKey("MaXa")]
-		[Display(Name = "Xã")]
-		public virtual Xa? Xa { get; set; }
 	}
 
 	[Keyless]
@@ -96,7 +94,6 @@ namespace QuanLyBanHang.Models
 		
 		[Display(Name = "Mã Nhân Viên")]
 		public string MaNV { get; set; } = string.Empty;
-
 		
 		[Display(Name = "CCCD")]
 		public string CCCD { get; set; } = string.Empty;
@@ -127,16 +124,16 @@ namespace QuanLyBanHang.Models
 		public string? AnhNV { get; set; }
 		
 		[Display(Name = "Địa Chỉ")]
-		public string DiaChiNV { get; set; } = string.Empty;
+		public string? DiaChiNV { get; set; }
 
 		[Display(Name = "Mã Xã")]
-		public short MaXa { get; set; }
+	public string? MaXa { get; set; }
 
-		[Display(Name = "Tên Đăng Nhập")]
-		public string? TenDNNV { get; set; }
-	
-		[Display(Name = "Mật Khẩu")]
-		public string? MatKhauNV { get; set; }
+	[Display(Name = "Tên Đăng Nhập")]
+	public string? TenDNNV { get; set; }
+
+	[Display(Name = "Mật Khẩu")]
+	public string? MatKhauNV { get; set; }
 
 		[Display(Name = "Tên Xã")]
 		public string? TenXa { get; set; }
