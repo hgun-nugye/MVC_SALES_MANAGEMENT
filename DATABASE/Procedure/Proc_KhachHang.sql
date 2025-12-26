@@ -1,6 +1,9 @@
 ﻿USE DB_QLBH;
 GO
 
+-- =========================
+-- Thêm khách hàng
+-- =========================
 CREATE OR ALTER PROC KhachHang_Insert
 (
     @TenKH NVARCHAR(100),
@@ -9,7 +12,7 @@ CREATE OR ALTER PROC KhachHang_Insert
     @DienThoaiKH VARCHAR(15),
     @EmailKH NVARCHAR(255),
     @DiaChiKH NVARCHAR(255),
-    @MaXa SMALLINT,
+    @MaXa CHAR(5),
     @TenDNKH VARCHAR(50),
     @MatKhauKH VARCHAR(255)
 )
@@ -17,18 +20,21 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- kiểm tra trùng SDT
     IF EXISTS (SELECT 1 FROM KhachHang WHERE DienThoaiKH = @DienThoaiKH)
     BEGIN
         RAISERROR(N'Số điện thoại đã tồn tại.', 16, 1);
         RETURN;
     END;
 
+    -- kiểm tra trùng email
     IF EXISTS (SELECT 1 FROM KhachHang WHERE EmailKH = @EmailKH)
     BEGIN
         RAISERROR(N'Email đã tồn tại.', 16, 1);
         RETURN;
     END;
 
+    -- kiểm tra trùng tên đăng nhập
     IF EXISTS (SELECT 1 FROM KhachHang WHERE TenDNKH = @TenDNKH)
     BEGIN
         RAISERROR(N'Tên đăng nhập đã tồn tại.', 16, 1);
@@ -38,6 +44,7 @@ BEGIN
     DECLARE @MaKH VARCHAR(10);
     DECLARE @MaxID INT;
 
+    -- sinh mã khách hàng
     SELECT @MaxID = ISNULL(MAX(CAST(SUBSTRING(MaKH, 3, 8) AS INT)), 0)
     FROM KhachHang;
 
@@ -55,11 +62,12 @@ BEGIN
         @DienThoaiKH, @EmailKH, @DiaChiKH,
         @MaXa, @TenDNKH, @MatKhauKH
     );
-
-    PRINT N'Thêm khách hàng thành công!';
 END;
 GO
 
+-- =========================
+-- Cập nhật khách hàng
+-- =========================
 CREATE OR ALTER PROC KhachHang_Update
 (
     @MaKH VARCHAR(10),
@@ -69,7 +77,7 @@ CREATE OR ALTER PROC KhachHang_Update
     @DienThoaiKH VARCHAR(15),
     @EmailKH NVARCHAR(255),
     @DiaChiKH NVARCHAR(255),
-    @MaXa SMALLINT,
+    @MaXa CHAR(5),
     @TenDNKH VARCHAR(50),
     @MatKhauKH VARCHAR(255)
 )
@@ -77,25 +85,38 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- kiểm tra tồn tại
     IF NOT EXISTS (SELECT 1 FROM KhachHang WHERE MaKH = @MaKH)
     BEGIN
         RAISERROR(N'Không tìm thấy khách hàng.', 16, 1);
         RETURN;
     END;
 
-    IF EXISTS (SELECT 1 FROM KhachHang WHERE DienThoaiKH = @DienThoaiKH AND MaKH <> @MaKH)
+    -- kiểm tra trùng SDT
+    IF EXISTS (
+        SELECT 1 FROM KhachHang 
+        WHERE DienThoaiKH = @DienThoaiKH AND MaKH <> @MaKH
+    )
     BEGIN
         RAISERROR(N'Số điện thoại đã được sử dụng.', 16, 1);
         RETURN;
     END;
 
-    IF EXISTS (SELECT 1 FROM KhachHang WHERE EmailKH = @EmailKH AND MaKH <> @MaKH)
+    -- kiểm tra trùng email
+    IF EXISTS (
+        SELECT 1 FROM KhachHang 
+        WHERE EmailKH = @EmailKH AND MaKH <> @MaKH
+    )
     BEGIN
         RAISERROR(N'Email đã được sử dụng.', 16, 1);
         RETURN;
     END;
 
-    IF EXISTS (SELECT 1 FROM KhachHang WHERE TenDNKH = @TenDNKH AND MaKH <> @MaKH)
+    -- kiểm tra trùng tên đăng nhập
+    IF EXISTS (
+        SELECT 1 FROM KhachHang 
+        WHERE TenDNKH = @TenDNKH AND MaKH <> @MaKH
+    )
     BEGIN
         RAISERROR(N'Tên đăng nhập đã được sử dụng.', 16, 1);
         RETURN;
@@ -113,11 +134,12 @@ BEGIN
         TenDNKH = @TenDNKH,
         MatKhauKH = @MatKhauKH
     WHERE MaKH = @MaKH;
-
-    PRINT N'Cập nhật khách hàng thành công!';
 END;
 GO
 
+-- =========================
+-- Xóa khách hàng
+-- =========================
 CREATE OR ALTER PROC KhachHang_Delete
 (
     @MaKH VARCHAR(10)
@@ -128,21 +150,17 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM KhachHang WHERE MaKH = @MaKH)
     BEGIN
-        RAISERROR(N'Không tìm thấy khách hàng cần xóa.', 16, 1);
+        RAISERROR(N'Không tìm thấy khách hàng.', 16, 1);
         RETURN;
     END;
 
-    BEGIN TRY
-        DELETE FROM KhachHang WHERE MaKH = @MaKH;
-        PRINT N'Xóa khách hàng thành công!';
-    END TRY
-    BEGIN CATCH
-        DECLARE @Error NVARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR(N'Lỗi khi xóa khách hàng: %s', 16, 1, @Error);
-    END CATCH
+    DELETE FROM KhachHang WHERE MaKH = @MaKH;
 END;
 GO
 
+-- =========================
+-- Lấy tất cả khách hàng
+-- =========================
 CREATE OR ALTER PROC KhachHang_GetAll
 AS
 BEGIN
@@ -151,6 +169,9 @@ BEGIN
 END;
 GO
 
+-- =========================
+-- Lấy khách hàng theo mã
+-- =========================
 CREATE OR ALTER PROC KhachHang_GetByID
 (
     @MaKH VARCHAR(10)
@@ -161,6 +182,9 @@ BEGIN
 END;
 GO
 
+-- =========================
+-- Lấy khách hàng kèm xã, tỉnh
+-- =========================
 CREATE OR ALTER PROC KhachHang_GetAllWithXa
 AS
 BEGIN
@@ -171,7 +195,7 @@ BEGIN
         KH.DienThoaiKH,
         KH.EmailKH,
         KH.DiaChiKH,
-		KH.AnhKH,
+        KH.AnhKH,
         X.TenXa,
         T.TenTinh
     FROM KhachHang KH
@@ -181,6 +205,9 @@ BEGIN
 END;
 GO
 
+-- =========================
+-- Lấy khách hàng theo mã kèm xã, tỉnh
+-- =========================
 CREATE OR ALTER PROC KhachHang_GetByIDWithXa
 (
     @MaKH VARCHAR(10)
@@ -198,15 +225,19 @@ BEGIN
 END;
 GO
 
--- Search
+-- =========================
+-- Tìm kiếm khách hàng
+-- =========================
 CREATE OR ALTER PROC KhachHang_Search
 (
     @Search NVARCHAR(200) = NULL,
-    @MaTinh SMALLINT = NULL,
+    @MaTinh CHAR(2) = NULL,
     @GioiTinh BIT = NULL
 )
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         KH.*,
         X.TenXa,
@@ -216,13 +247,16 @@ BEGIN
     JOIN Tinh T ON X.MaTinh = T.MaTinh
     WHERE
         (
-            @Search IS NULL OR @Search = '' OR
-            KH.TenKH LIKE '%' + @Search + '%' OR
-            KH.EmailKH LIKE '%' + @Search + '%' OR
-            KH.DienThoaiKH LIKE '%' + @Search + '%'
+            @Search IS NULL OR @Search = ''
+            OR KH.TenKH LIKE N'%' + @Search + N'%'
+            OR KH.EmailKH LIKE '%' + @Search + '%'
+            OR KH.DienThoaiKH LIKE '%' + @Search + '%'
         )
-        AND (@MaTinh IS NULL OR T.MaTinh = @MaTinh)
-        AND (@GioiTinh IS NULL OR KH.GioiTinh = @GioiTinh);
+        AND (
+            @MaTinh IS NULL OR T.MaTinh = @MaTinh
+        )
+        AND (
+            @GioiTinh IS NULL OR KH.GioiTinh = @GioiTinh
+        );
 END;
 GO
-

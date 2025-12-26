@@ -1,86 +1,126 @@
 ﻿USE DB_QLBH;
 GO
--- INSERT
+
+-- =========================
+-- Thêm tỉnh
+-- =========================
 CREATE OR ALTER PROC Tinh_Insert
 (
-    @TenTinh NVARCHAR(90)
+    @TenTinh NVARCHAR(50)
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Kiểm tra trùng tên tỉnh
+    -- kiểm tra trùng tên tỉnh
     IF EXISTS (SELECT 1 FROM Tinh WHERE TenTinh = @TenTinh)
     BEGIN
-        RAISERROR(N'Tên tỉnh đã tồn tại.', 16, 1);
+        RAISERROR (N'Tên tỉnh đã tồn tại.', 16, 1);
         RETURN;
     END;
 
-    DECLARE @MaTinh SMALLINT;
-    SELECT @MaTinh = ISNULL(MAX(MaTinh), 0) + 1 FROM Tinh;
+    DECLARE @MaTinh CHAR(2);
+    DECLARE @So INT;
 
-    INSERT INTO Tinh (MaTinh, TenTinh)
+    -- lấy số lớn nhất
+    SELECT @So = MAX(CAST(MaTinh AS INT)) FROM Tinh;
+
+    IF @So IS NULL
+        SET @So = 1;
+    ELSE
+        SET @So = @So + 1;
+
+    -- tạo mã tỉnh 2 ký tự
+    SET @MaTinh = RIGHT('00' + CAST(@So AS VARCHAR(2)), 2);
+
+    INSERT INTO Tinh(MaTinh, TenTinh)
     VALUES (@MaTinh, @TenTinh);
 END;
 GO
 
--- UPDATE
+-- =========================
+-- Cập nhật tỉnh
+-- =========================
 CREATE OR ALTER PROC Tinh_Update
-(@MaTinh SMALLINT, @TenTinh NVARCHAR(90))
+(
+    @MaTinh CHAR(2),
+    @TenTinh NVARCHAR(50)
+)
 AS
 BEGIN
-	 SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-    -- Kiểm tra trùng tên tỉnh 
-    IF EXISTS (SELECT 1 FROM Tinh WHERE TenTinh = @TenTinh AND MaTinh <> @MaTinh)
+    -- kiểm tra trùng tên tỉnh
+    IF EXISTS (
+        SELECT 1 FROM Tinh 
+        WHERE TenTinh = @TenTinh AND MaTinh <> @MaTinh
+    )
     BEGIN
-        RAISERROR(N'Tên tỉnh đã tồn tại.', 16, 1);
+        RAISERROR (N'Tên tỉnh đã tồn tại.', 16, 1);
         RETURN;
     END;
 
-    UPDATE Tinh SET TenTinh = @TenTinh WHERE MaTinh = @MaTinh;
-END
+    UPDATE Tinh
+    SET TenTinh = @TenTinh
+    WHERE MaTinh = @MaTinh;
+END;
 GO
 
--- GET ALL
+-- =========================
+-- Lấy tất cả tỉnh
+-- =========================
 CREATE OR ALTER PROC Tinh_GetAll
 AS
 BEGIN
     SELECT * FROM Tinh;
-END
+END;
 GO
 
--- GET BY ID
+-- =========================
+-- Lấy tỉnh theo mã
+-- =========================
 CREATE OR ALTER PROC Tinh_GetByID
-(@MaTinh SMALLINT)
+(
+    @MaTinh CHAR(2)
+)
 AS
 BEGIN
-    SELECT * FROM Tinh WHERE MaTinh = @MaTinh;
-END
+    SELECT * 
+    FROM Tinh 
+    WHERE MaTinh = @MaTinh;
+END;
 GO
 
--- DELETE
+-- =========================
+-- Xóa tỉnh
+-- =========================
 CREATE OR ALTER PROC Tinh_Delete
-(@MaTinh SMALLINT)
+(
+    @MaTinh CHAR(2)
+)
 AS
 BEGIN
-    DELETE FROM Tinh WHERE MaTinh = @MaTinh;
-END
+    DELETE FROM Tinh 
+    WHERE MaTinh = @MaTinh;
+END;
 GO
 
--- search
-CREATE OR ALTER PROCEDURE Tinh_Search
-    @Search      NVARCHAR(100) = NULL   
+-- =========================
+-- Tìm kiếm tỉnh
+-- =========================
+CREATE OR ALTER PROC Tinh_Search
+(
+    @Search NVARCHAR(100) = NULL
+)
 AS
 BEGIN
     SET NOCOUNT ON;
+
     SELECT *
-        FROM Tinh
-    WHERE 
-        (
-            @Search IS NULL OR @Search = '' OR
-            Tinh.MaTinh   LIKE '%' + @Search + '%' OR
-            Tinh.TenTinh   LIKE '%' + @Search + '%'
-        )
+    FROM Tinh
+    WHERE
+        @Search IS NULL OR @Search = ''
+        OR MaTinh LIKE '%' + @Search + '%'
+        OR TenTinh LIKE N'%' + @Search + N'%';
 END;
 GO
