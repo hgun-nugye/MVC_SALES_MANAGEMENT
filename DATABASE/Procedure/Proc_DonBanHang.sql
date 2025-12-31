@@ -37,17 +37,19 @@ BEGIN
         DECLARE @Prefix CHAR(7);
 
         -- Tạo prefix: BYYMMDD
-        SET @Prefix = 'B'
-            + RIGHT(CAST(YEAR(@NgayBH) AS CHAR(4)), 2)
-            + RIGHT('0' + CAST(MONTH(@NgayBH) AS VARCHAR(2)), 2)
-            + RIGHT('0' + CAST(DAY(@NgayBH) AS VARCHAR(2)), 2);
+        -- Prefix: BYYMMDD
+		SET @Prefix = 'B'
+			+ RIGHT(CAST(YEAR(@NgayBH) AS CHAR(4)), 2)
+			+ RIGHT('0' + CAST(MONTH(@NgayBH) AS VARCHAR(2)), 2)
+			+ RIGHT('0' + CAST(DAY(@NgayBH) AS VARCHAR(2)), 2);
 
-        SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDBH,4) AS INT)), 0)
-        FROM DonBanHang
-        WHERE NgayBH = @NgayBH;
+		SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDBH,4) AS INT)), 0)
+		FROM DonBanHang
+		WHERE MaDBH LIKE @Prefix + '%';
 
-        SET @MaDBH = @Prefix 
-                   + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
+		SET @MaDBH = @Prefix 
+           + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
+
 
         -- Thêm đơn bán hàng
         INSERT INTO DonBanHang
@@ -244,27 +246,24 @@ BEGIN
         D.MaDBH,
         D.NgayBH,
         D.MaKH,
-		C.DGB,
-		C.SLB,
         K.TenKH,
         D.DiaChiDBH,
         D.MaTTBH,
         TT.TenTTBH,
-		X.MaXa,
-		X.TenXa,
-		T.MaTinh,
-		T.TenTinh,
+        X.MaXa,
+        X.TenXa,
+        T.MaTinh,
+        T.TenTinh,
         STRING_AGG(C.MaSP, ', ') AS MaSP,
         STRING_AGG(S.TenSP, N', ') AS TenSP,
-
         ISNULL(SUM(C.SLB * C.DGB), 0) AS TongTien
     FROM DonBanHang D
     JOIN KhachHang K ON K.MaKH = D.MaKH
     JOIN TrangThaiBH TT ON TT.MaTTBH = D.MaTTBH
     LEFT JOIN CTBH C ON C.MaDBH = D.MaDBH
     LEFT JOIN SanPham S ON S.MaSP = C.MaSP
-	LEFT JOIN Xa X ON X.MaXa = D.MaXa
-	LEFT JOIN Tinh T ON T.MaTinh = X.MaTinh
+    LEFT JOIN Xa X ON X.MaXa = D.MaXa
+    LEFT JOIN Tinh T ON T.MaTinh = X.MaTinh
     WHERE
         (@Search IS NULL OR @Search = ''
             OR D.MaDBH LIKE '%' + @Search + '%'
@@ -276,7 +275,39 @@ BEGIN
     GROUP BY
         D.MaDBH, D.NgayBH, D.MaKH, K.TenKH,
         D.DiaChiDBH, D.MaTTBH, TT.TenTTBH,
-		C.DGB, C.SLB, X.MaXa, T.MaTinh, T.TenTinh, X.TenXa
-    ORDER BY D.NgayBH DESC, D.MaDBH DESC;
+        X.MaXa, T.MaTinh, T.TenTinh, X.TenXa
+    ORDER BY D.NgayBH ASC
 END;
+GO
+
+
+CREATE OR ALTER PROCEDURE DonBanHang_Confirm
+    @MaDBH CHAR(11)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE DonBanHang
+    SET MaTTBH = 'DXN'
+    WHERE RTRIM(MaDBH) = RTRIM(@MaDBH)
+      AND RTRIM(MaTTBH) = 'CHO';
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        THROW 50001, N'Đơn hàng không ở trạng thái chờ xác nhận', 1;
+    END
+END
+GO
+
+CREATE OR ALTER PROCEDURE DonBanHang_Cancel
+    @MaDBH CHAR(11)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE DonBanHang
+    SET MaTTBH = 'HUY'
+    WHERE MaDBH = @MaDBH
+      AND MaTTBH IN ('CHO', 'DXN'); -- cho phép hủy đơn mới / đã xác nhận
+END
 GO

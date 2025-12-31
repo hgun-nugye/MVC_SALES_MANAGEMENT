@@ -10,7 +10,7 @@ CREATE OR ALTER PROC KhachHang_Insert
     @AnhKH NVARCHAR(255),
     @GioiTinh BIT,
     @DienThoaiKH VARCHAR(15),
-    @EmailKH NVARCHAR(255),
+    @EmailKH VARCHAR(255),
     @DiaChiKH NVARCHAR(255),
     @MaXa CHAR(5),
     @TenDNKH VARCHAR(50),
@@ -196,6 +196,7 @@ BEGIN
         KH.EmailKH,
         KH.DiaChiKH,
         KH.AnhKH,
+        KH.MaXa,
         X.TenXa,
         T.TenTinh
     FROM KhachHang KH

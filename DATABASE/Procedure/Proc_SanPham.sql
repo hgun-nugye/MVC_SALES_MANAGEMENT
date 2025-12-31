@@ -13,7 +13,7 @@ CREATE OR ALTER PROC SanPham_Insert
     @HDSD NVARCHAR(MAX),
     @HDBaoQuan NVARCHAR(MAX),
     @TrongLuong DECIMAL(5,2),
-
+	@DoiTuongSuDung NVARCHAR(MAX),
     @MaTT CHAR(3),
     @MaLoai VARCHAR(10),
     @MaHangSX CHAR(5)
@@ -41,13 +41,13 @@ BEGIN
     INSERT INTO SanPham
     (
         MaSP, TenSP, GiaBan, MoTaSP, AnhMH,
-        ThanhPhan, CongDung, HDSD, HDBaoQuan, TrongLuong,
+        ThanhPhan, CongDung, HDSD, HDBaoQuan, TrongLuong, DoiTuongSuDung,
         MaTT, MaLoai, MaHangSX
     )
     VALUES
     (
         @MaSP, @TenSP, @GiaBan, @MoTaSP, @AnhMH,
-        @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong,
+        @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong, @DoiTuongSuDung,
         @MaTT, @MaLoai, @MaHangSX
     );
 
@@ -68,6 +68,7 @@ CREATE OR ALTER PROC SanPham_Update
     @HDSD NVARCHAR(MAX),
     @HDBaoQuan NVARCHAR(MAX),
     @TrongLuong DECIMAL(5,2),
+	@DoiTuongSuDung NVARCHAR(MAX),
 
     @MaTT CHAR(3),
     @MaLoai VARCHAR(10),
@@ -102,6 +103,7 @@ BEGIN
         HDSD = @HDSD,
         HDBaoQuan = @HDBaoQuan,
         TrongLuong = @TrongLuong,
+		DoiTuongSuDung = @DoiTuongSuDung,
 
         MaTT = @MaTT,
         MaLoai = @MaLoai,
@@ -143,26 +145,47 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    WITH Inventory AS (
+        SELECT 
+            S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
+            S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+			S.DoiTuongSuDung,
+            S.MaTT AS OriginalMaTT, S.MaLoai, S.MaHangSX, 
+            L.TenLoai,
+            H.TenHangSX,
+            (
+                ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+                - 
+                ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+            ) AS SoLuongTon
+        FROM SanPham S
+        JOIN LoaiSP L ON L.MaLoai = S.MaLoai
+        JOIN HangSX H ON H.MaHangSX = S.MaHangSX
+    )
     SELECT 
-        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
-        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
-        S.MaTT, S.MaLoai, S.MaHangSX, 
-
-        L.TenLoai,
-        H.TenHangSX,
+        I.MaSP, I.TenSP, I.GiaBan, I.MoTaSP, I.AnhMH,
+        I.ThanhPhan, I.DoiTuongSuDung, I.CongDung, I.HDSD, I.HDBaoQuan, I.TrongLuong,
+        CASE 
+            WHEN I.OriginalMaTT = 'TT4' THEN 'TT4'
+            WHEN I.SoLuongTon = 0 THEN 'TT3'
+            WHEN I.SoLuongTon < 10 THEN 'TT2'
+            ELSE 'TT1'
+        END AS MaTT,
+        I.MaLoai, I.MaHangSX, 
+        I.TenLoai,
+        I.TenHangSX,
         TT.TenTT,
-        (
-            ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
-            - 
-            ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
-        ) AS SoLuongTon
-
-    FROM SanPham S
-    JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-    JOIN HangSX H ON H.MaHangSX = S.MaHangSX
-    JOIN TrangThai TT ON TT.MaTT = S.MaTT
-    
-    ORDER BY S.TenSP;
+        I.SoLuongTon
+    FROM Inventory I
+    JOIN TrangThai TT ON TT.MaTT = (
+        CASE 
+            WHEN I.OriginalMaTT = 'TT4' THEN 'TT4'
+            WHEN I.SoLuongTon = 0 THEN 'TT3'
+            WHEN I.SoLuongTon < 10 THEN 'TT2'
+            ELSE 'TT1'
+        END
+    )
+    ORDER BY I.TenSP;
 END;
 GO
 
@@ -174,27 +197,46 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    WITH Inventory AS (
+        SELECT 
+            S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH, S.DoiTuongSuDung,
+            S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+            S.MaTT AS OriginalMaTT, S.MaLoai, S.MaHangSX, 
+            L.TenLoai,
+            H.TenHangSX,
+            (
+                ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+                - 
+                ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+            ) AS SoLuongTon
+        FROM SanPham S
+        JOIN LoaiSP L ON L.MaLoai = S.MaLoai
+        JOIN HangSX H ON H.MaHangSX = S.MaHangSX
+        WHERE S.MaSP = @MaSP
+    )
     SELECT 
-        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH,
-        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
-        
-        S.MaTT, S.MaLoai, S.MaHangSX, 
-
-        L.TenLoai,
-        H.TenHangSX,
+        I.MaSP, I.TenSP, I.GiaBan, I.MoTaSP, I.AnhMH,I.DoiTuongSuDung,
+        I.ThanhPhan, I.CongDung, I.HDSD, I.HDBaoQuan, I.TrongLuong,
+        CASE 
+            WHEN I.OriginalMaTT = 'TT4' THEN 'TT4'
+            WHEN I.SoLuongTon = 0 THEN 'TT3'
+            WHEN I.SoLuongTon < 10 THEN 'TT2'
+            ELSE 'TT1'
+        END AS MaTT,
+        I.MaLoai, I.MaHangSX, 
+        I.TenLoai,
+        I.TenHangSX,
         TT.TenTT,
-        (
-            ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
-            - 
-            ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
-        ) AS SoLuongTon
-
-    FROM SanPham S
-    JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-    JOIN HangSX H ON H.MaHangSX = S.MaHangSX
-    JOIN TrangThai TT ON TT.MaTT = S.MaTT
-
-    WHERE S.MaSP = @MaSP;
+        I.SoLuongTon
+    FROM Inventory I
+    JOIN TrangThai TT ON TT.MaTT = (
+        CASE 
+            WHEN I.OriginalMaTT = 'TT4' THEN 'TT4'
+            WHEN I.SoLuongTon = 0 THEN 'TT3'
+            WHEN I.SoLuongTon < 10 THEN 'TT2'
+            ELSE 'TT1'
+        END
+    )
 END;
 GO
 
@@ -208,34 +250,61 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    WITH Inventory AS (
+        SELECT 
+            S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH, S.DoiTuongSuDung,
+            S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
+            S.MaTT AS OriginalMaTT, S.MaLoai, S.MaHangSX, 
+            L.TenLoai,
+            H.TenHangSX,
+            (
+                ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+                - 
+                ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+            ) AS SoLuongTon
+        FROM SanPham S
+        JOIN LoaiSP L ON L.MaLoai = S.MaLoai
+        JOIN HangSX H ON H.MaHangSX = S.MaHangSX
+        WHERE
+            (
+                @Search IS NULL OR @Search = '' OR
+                S.TenSP LIKE '%' + @Search + '%' OR
+                H.TenHangSX LIKE '%' + @Search + '%' OR
+                L.TenLoai LIKE '%' + @Search + '%' OR
+				S.DoiTuongSuDung LIKE '%' + @Search + '%'
+            )
+            AND (@MaLoai IS NULL OR S.MaLoai = @MaLoai)
+    )
     SELECT 
-        S.MaSP, S.TenSP, S.GiaBan, S.MoTaSP, S.AnhMH, 
-        S.ThanhPhan, S.CongDung, S.HDSD, S.HDBaoQuan, S.TrongLuong,
-        S.MaTT, S.MaLoai, S.MaHangSX, 
-        L.TenLoai,
-        H.TenHangSX,
+        I.MaSP, I.TenSP, I.GiaBan, I.MoTaSP, I.AnhMH, I.DoiTuongSuDung,
+        I.ThanhPhan, I.CongDung, I.HDSD, I.HDBaoQuan, I.TrongLuong,
+        CASE 
+            WHEN I.OriginalMaTT = 'TT4' THEN 'TT4'
+            WHEN I.SoLuongTon = 0 THEN 'TT3'
+            WHEN I.SoLuongTon < 10 THEN 'TT2'
+            ELSE 'TT1'
+        END AS MaTT,
+        I.MaLoai, I.MaHangSX, 
+        I.TenLoai,
+        I.TenHangSX,
         TT.TenTT,
-        (
-            ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
-            - 
-            ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
-        ) AS SoLuongTon
-
-    FROM SanPham S
-    JOIN LoaiSP L ON L.MaLoai = S.MaLoai
-    JOIN HangSX H ON H.MaHangSX = S.MaHangSX
-    JOIN TrangThai TT ON TT.MaTT = S.MaTT
-
-    WHERE
-        (
-            @Search IS NULL OR @Search = '' OR
-            S.TenSP LIKE '%' + @Search + '%' OR
-            H.TenHangSX LIKE '%' + @Search + '%' OR
-            L.TenLoai LIKE '%' + @Search + '%'
-        )
-        AND (@MaTT IS NULL OR S.MaTT = @MaTT)
-        AND (@MaLoai IS NULL OR S.MaLoai = @MaLoai)
-    
-    ORDER BY S.TenSP;
+        I.SoLuongTon
+    FROM Inventory I
+    JOIN TrangThai TT ON TT.MaTT = (
+        CASE 
+            WHEN I.OriginalMaTT = 'TT4' THEN 'TT4'
+            WHEN I.SoLuongTon = 0 THEN 'TT3'
+            WHEN I.SoLuongTon < 10 THEN 'TT2'
+            ELSE 'TT1'
+        END
+    )
+    WHERE (@MaTT IS NULL OR (
+        CASE 
+            WHEN I.OriginalMaTT = 'TT4' THEN 'TT4'
+            WHEN I.SoLuongTon = 0 THEN 'TT3'
+            WHEN I.SoLuongTon < 10 THEN 'TT2'
+            ELSE 'TT1'
+        END
+    ) = @MaTT)
 END;
 GO

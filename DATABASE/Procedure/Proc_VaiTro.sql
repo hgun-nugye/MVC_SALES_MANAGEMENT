@@ -82,3 +82,18 @@ BEGIN
 END;
 GO
 
+CREATE OR ALTER PROC VaiTro_Search
+(
+    @Search NVARCHAR(50) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT MaVT, TenVT
+    FROM VaiTro
+    WHERE @Search IS NULL OR @Search = ''
+       OR MaVT LIKE '%' + @Search + '%'
+       OR TenVT LIKE N'%' + @Search + '%';
+END;
+GO
+

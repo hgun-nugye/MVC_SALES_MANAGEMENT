@@ -30,15 +30,18 @@ BEGIN
         DECLARE @Prefix VARCHAR(8);
 
         -- Tạo mã đơn: MYYMMDDxxxx
-        SET @Prefix = 'M' + RIGHT(CAST(YEAR(@NgayMH) AS VARCHAR(4)), 2)
-                         + RIGHT('0' + CAST(MONTH(@NgayMH) AS VARCHAR(2)), 2)
-                         + RIGHT('0' + CAST(DAY(@NgayMH) AS VARCHAR(2)), 2);
+		SET @Prefix = 'B'
+			+ RIGHT(CAST(YEAR(@NgayMH) AS CHAR(4)), 2)
+			+ RIGHT('0' + CAST(MONTH(@NgayMH) AS VARCHAR(2)), 2)
+			+ RIGHT('0' + CAST(DAY(@NgayMH) AS VARCHAR(2)), 2);
 
-        SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDMH,4) AS INT)),0)
-        FROM DonMuaHang
-        WHERE NgayMH = @NgayMH;
+		SELECT @MaxNum = ISNULL(MAX(CAST(RIGHT(MaDMH,4) AS INT)), 0)
+		FROM DonMuaHang
+		WHERE MaDMH LIKE @Prefix + '%';
 
-        SET @MaDMH = @Prefix + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
+		SET @MaDMH = @Prefix 
+           + RIGHT('0000' + CAST(@MaxNum + 1 AS VARCHAR(4)), 4);
+
 
         -- Thêm đơn mua hàng
         INSERT INTO DonMuaHang(MaDMH, NgayMH, MaNCC, MaNV, MaTTMH)
@@ -203,7 +206,7 @@ CREATE OR ALTER PROC DonMuaHang_Search
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
     @Year INT = NULL,
-	 @MaTTMH CHAR(3) = NULL
+    @MaTTMH CHAR(3) = NULL
 )
 AS
 BEGIN
@@ -218,22 +221,15 @@ BEGIN
 		D.MaTTMH, 
 		TT.TenTTMH,
         NV.TenNV,
-		
-        -- Gộp tên sản phẩm
         STRING_AGG(C.MaSP, ', ') AS MaSP, 
         STRING_AGG(S.TenSP, N', ') AS TenSP,
-
-        -- Tổng tiền
-        1 AS SLM, 
-        ISNULL(SUM(C.SLM * C.DGM), 0) AS DGM
-
+        ISNULL(SUM(C.SLM * C.DGM), 0) AS TongTien
     FROM DonMuaHang D
     JOIN NhaCC N ON N.MaNCC = D.MaNCC
     JOIN NhanVien NV ON NV.MaNV = D.MaNV
 	JOIN TrangThaiMH TT ON TT.MaTTMH = D.MaTTMH
     LEFT JOIN CTMH C ON C.MaDMH = D.MaDMH
     LEFT JOIN SanPham S ON S.MaSP = C.MaSP
-
     WHERE
         (
             @Search IS NULL OR @Search = '' OR
@@ -245,8 +241,7 @@ BEGIN
         AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year)
 		AND (@MaTTMH IS NULL OR D.MaTTMH = @MaTTMH)
-    
-    GROUP BY D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, D.MaNV, NV.TenNV, D.MaTTMH, TT.TenTTMH
-    ORDER BY D.NgayMH ASC, D.MaDMH ASC;
+    GROUP BY D.MaDMH, D.NgayMH, D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, D.MaNV, NV.TenNV, D.MaTTMH, TT.TenTTMH
+	ORDER BY D.NgayMH ASC
 END;
 GO

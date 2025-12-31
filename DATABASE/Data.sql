@@ -104,7 +104,7 @@ GO
 -- ======================
 -- KHÁCH HÀNG
 -- ======================
-INSERT INTO KhachHang VALUES
+INSERT INTO KhachHang(MaKH, TenKH, AnhKH, GioiTinh, EmailKH, DienThoaiKH, DiaChiKH, TenDNKH, MatKhauKH, MaXa) VALUES
 ('KH00000001', N'Nguyễn Thị Lan', NULL, 0, 'lan@gmail.com', '0901111222', N'10 Tràng Tiền', 'lannt', '123456', '01001'),
 ('KH00000002', N'Trần Mỹ Anh', NULL, 0, 'anh@gmail.com', '0902222333', N'15 Nguyễn Huệ', 'anhtran', '123456', '02001'),
 ('KH00000003', N'Lê Hoàng', NULL, 1, 'hoang@gmail.com', '0903333444', N'88 Hải Châu', 'lehoang', '123456', '03001');
@@ -142,23 +142,32 @@ GO
 -- ======================
 -- SẢN PHẨM
 -- ======================
-INSERT INTO SanPham VALUES
+INSERT INTO SanPham (
+    MaSP, TenSP, GiaBan, MoTaSP, AnhMH,
+    ThanhPhan, CongDung, HDSD, HDBaoQuan,
+    TrongLuong, DoiTuongSuDung,
+    MaTT, MaLoai, MaHangSX
+)
+VALUES
 ('SP00000001', N'Sữa rửa mặt Innisfree Green Tea', 120000,
  N'Làm sạch da dịu nhẹ', NULL,
  N'Trà xanh Jeju', N'Làm sạch & cấp ẩm',
  N'Dùng sáng và tối', N'Bảo quản nơi khô ráo', 150,
+ N'Mọi loại da',
  'TT1', 'SRM', 'H0001'),
 
 ('SP00000002', N'Toner Some By Mi AHA BHA PHA', 180000,
  N'Làm sạch sâu, giảm mụn', NULL,
  N'AHA, BHA, PHA', N'Cân bằng da, giảm mụn',
  N'Dùng sau rửa mặt', N'Tránh ánh nắng trực tiếp', 120,
+ N'Da dầu, da mụn',
  'TT2', 'TONER', 'H0002'),
 
 ('SP00000003', N'Serum La Roche-Posay Hyalu B5', 850000,
  N'Cấp ẩm và phục hồi da', NULL,
  N'Vitamin B5, HA', N'Phục hồi da',
  N'Dùng buổi tối', N'Nơi khô mát', 80,
+ N'Da khô, da nhạy cảm',
  'TT3', 'SERUM', 'H0003');
 GO
 

@@ -82,3 +82,47 @@ BEGIN
     WHERE pq.MaNV = @MaNV;
 END;
 GO
+
+CREATE OR ALTER PROC PhanQuyen_GetAll
+AS
+BEGIN
+    SELECT pq.MaNV, nv.TenNV, vt.MaVT, vt.TenVT
+    FROM PhanQuyen pq
+    JOIN NhanVien nv ON pq.MaNV = nv.MaNV
+    JOIN VaiTro vt ON pq.MaVT = vt.MaVT;
+END;
+GO
+
+CREATE OR ALTER PROC PhanQuyen_Search
+(
+    @Search NVARCHAR(100) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT pq.MaNV, nv.TenNV, vt.MaVT, vt.TenVT
+    FROM PhanQuyen pq
+    JOIN NhanVien nv ON pq.MaNV = nv.MaNV
+    JOIN VaiTro vt ON pq.MaVT = vt.MaVT
+    WHERE @Search IS NULL OR @Search = ''
+       OR pq.MaNV LIKE '%' + @Search + '%'
+       OR nv.TenNV LIKE N'%' + @Search + '%'
+       OR vt.MaVT LIKE '%' + @Search + '%'
+       OR vt.TenVT LIKE N'%' + @Search + '%';
+END;
+GO
+
+CREATE OR ALTER PROC PhanQuyen_GetByID
+(
+    @MaVT CHAR(5),
+    @MaNV VARCHAR(10)
+)
+AS
+BEGIN
+    SELECT pq.MaNV, nv.TenNV, vt.MaVT, vt.TenVT
+    FROM PhanQuyen pq
+    JOIN NhanVien nv ON pq.MaNV = nv.MaNV
+    JOIN VaiTro vt ON pq.MaVT = vt.MaVT
+    WHERE pq.MaVT = @MaVT AND pq.MaNV = @MaNV;
+END;
+GO
