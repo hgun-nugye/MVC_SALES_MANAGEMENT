@@ -21,7 +21,7 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-		public async Task<IActionResult> Index(string? search, short? tinh)
+		public async Task<IActionResult> Index(string? search, string? tinh)
 		{
 			ViewBag.Search = search;
 			ViewBag.Tinh = tinh;
@@ -102,7 +102,7 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(NhaCC model)
+		public async Task<IActionResult> Edit(NhaCCDetailView model)
 		{
 			if (!ModelState.IsValid)
 			{

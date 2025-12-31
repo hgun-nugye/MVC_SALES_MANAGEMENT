@@ -38,22 +38,39 @@
 </style>
 
 <div class="container">
-    <h4 class="mb-3 text-success">
-        Danh sách Nhóm sản phẩm
-    </h4>    
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold">
+            <i class="fa-solid fa-layer-group me-2"></i>
+            Quản lý Nhóm sản phẩm
+        </h4>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index", "SanPham")" class="btn btn-outline-light fw-bold px-4">
+                <i class="fa-solid fa-gem me-2"></i> Sản phẩm
+            </a>
+            <a href="@Url.Action("Create", "NhomSP")" class="btn btn-light text-success fw-bold px-4">
+                <i class="fa-solid fa-plus-circle me-2"></i> Thêm
 
-    <!--  Form -->
-    <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
-        <div class="search-wrapper flex-grow-1">
-            <i class="fa fa-search"></i>
-            <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên loại sản phẩm">
+            </a>
         </div>
+    </div>
 
-        <div class="d-flex flex-wrap align-items-center gap-2">           
-            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
-            <a href="@Url.Action("Create", "NHomSP")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
-        </div>
-    </form>
+    <!-- FORM LỌC -->
+    <div class="filter-card">
+        <form id="Form" method="get" class="row g-3 align-items-end">
+            <div class="col-lg-11">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tìm kiếm</label>
+                <div class="search-input-group">
+                    <i class="fa fa-search"></i>
+                    <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên nhóm sản phẩm...">
+                </div>
+            </div>
+            <div class="col-lg-1 d-flex gap-2">
+                <button type="button" id="btnClear" class="btn btn-outline-secondary btn-clear">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </form>
+    </div>
 
     <table class="table  table-hover align-middle text-center shadow-sm">
         <thead class="table-success">

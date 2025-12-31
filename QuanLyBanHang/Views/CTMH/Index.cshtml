@@ -4,19 +4,45 @@
     ViewBag.Title = "Chi tiết mua hàng";
 }
 <div class="container">
-    <h4 class="mb-3 text-success">
-        <i class="fa-solid fa-list"></i> Chi tiết mua hàng
-    </h4>
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h2 class="fw-bold mb-1">
+            <i class="fa-solid fa-file-invoice me-2"></i>
+            Chi tiết mua hàng
+        </h2>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" asp-controller="DonMuaHang" class="btn btn-outline-light fw-bold px-4">
+                <i class="fa-solid fa-truck me-2"></i> Đơn mua hàng
+            </a>
+        </div>
+    </div>
+
+    <!-- FORM LỌC -->
+    <div class="filter-card">
+        <form id="Form" method="get" class="row g-3 align-items-end">
+            <div class="col-lg-11">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tìm kiếm nhanh</label>
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="searchBox" type="text" name="search" value="@ViewBag.Search"
+                           class="form-control" placeholder="Tìm theo mã đơn, mã SP, tên sản phẩm...">
+                </div>
+            </div>
+            <div class="col-lg-1 d-flex gap-2">
+                <button type="button" id="btnClear" class="btn btn-outline-secondary btn-clear">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </form>
+    </div>
 
     <table class="table  table-hover align-middle text-center shadow-sm">
-        <thead class="table-light">
+        <thead class="table-success">
             <tr>
-                <th><i class="fa-solid fa-hashtag"></i> Mã Đơn mua hàng</th>
-                <th><i class="fa-solid fa-hashtag"></i> Mã SP</th>
-                <th><i class="fa-solid fa-box"></i> Tên SP</th>
-                <th><i class="fa-solid fa-sort-numeric-up"></i> Số lượng</th>
-                <th><i class="fa-solid fa-money-bill"></i> Đơn giá</th>
-                <th><i class="fa-solid fa-gear"></i> Hành động</th>
+                <th>Mã Đơn mua hàng</th>
+                <th>Mã SP</th>
+                <th>Tên SP</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
             </tr>
         </thead>
         <tbody>
@@ -27,22 +53,17 @@
                     <tr>
                         <td>@item.MaDMH</td>
                         <td>@item.MaSP</td>
-                        <td>@item.TenSP</td>
+                        <td class="text-start">@item.TenSP</td>
                         <td>@item.SLM</td>
-                        <td>@item.DGM.ToString("N")</td>
-                        <td class="d-flex justify-content-center gap-1">
-                            <a asp-action="Details" asp-route-maDMH="@item.MaDMH" asp-route-maSP="@item.MaSP" class="btn btn-info btn-sm text-white">
-                                <i class="fa-solid fa-eye"></i> Xem
-                            </a>
-                            <a asp-action="Edit" asp-route-maDMH="@item.MaDMH" asp-route-maSP="@item.MaSP" class="btn btn-warning btn-sm text-white">
-                                <i class="fa-solid fa-pen-to-square"></i> Sửa
-                            </a>
-                            <a asp-action="Delete" asp-route-maDMH="@item.MaDMH" asp-route-maSP="@item.MaSP" class="btn btn-danger btn-sm">
-                                <i class="fa-solid fa-trash"></i> Xóa
-                            </a>
-                        </td>
+                        <td>@item.DGM.ToString("N")</td>                        
                     </tr>
                 }
+                <tr>
+                    <td colspan="4" class="fw-bold text-end">Tổng thành tiền:</td>
+                    <td class="fw-bold text-danger">
+                        @Model.Sum(i => i.SLM * i.DGM).ToString("N")
+                    </td>
+                </tr>
             }
             else
             {
@@ -52,27 +73,43 @@
             }
         </tbody>
     </table>
+    <div class="d-flex justify-content-end">
+        <a asp-action="Index" asp-controller="Dashboard" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
 </div>
 
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Debounce function
+            function debounce(fn, delay) {
+                let timer = null;
+                return function () {
+                    const context = this, args = arguments;
+                    clearTimeout(timer);
+                    timer = setTimeout(() => fn.apply(context, args), delay);
+                };
+            }
+
+            // Real-time search
+            $('#searchBox').on('input', debounce(function () {
+                $('#Form').submit();
+            }, 500));
+
+            // Clear filter
+            $('#btnClear').on('click', function () {
+                $('#searchBox').val('');
+                $('#Form').submit();
+            });
+        });
+    </script>
+}
+
 <style>
-    i {
-        margin-right: 8px;
-    }
-
-    .btn i {
-        margin-right: 5px;
-    }
-
-    .table th {
-        vertical-align: middle;
-    }
-
     .table-hover tbody tr:hover {
         background-color: #f5faff;
         transition: 0.2s;
-    }
-
-    .alert {
-        margin-top: 10px;
     }
 </style>

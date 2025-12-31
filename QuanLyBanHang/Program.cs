@@ -7,7 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb")));
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<QuanLyBanHang.Filters.AuthenticationFilter>();
+});
 
 // Cấu hình Session
 builder.Services.AddDistributedMemoryCache();
@@ -60,6 +63,7 @@ builder.Services.AddScoped<VaiTroService>();
 builder.Services.AddScoped<PhanQuyenService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<ExportService>();
+
 
 var app = builder.Build();
 

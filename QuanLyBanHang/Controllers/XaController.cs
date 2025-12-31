@@ -46,9 +46,10 @@ namespace QuanLyBanHang.Controllers
 
 		// CREATE - GET
 		[HttpGet]
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
-			ViewBag.MaTinhList = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			var tinhs = await _tinhService.GetAll();
+			ViewBag.MaTinhList = new SelectList(tinhs, "MaTinh", "TenTinh");
 			return View();
 		}
 
@@ -99,7 +100,8 @@ namespace QuanLyBanHang.Controllers
 			if (xa == null)
 				return NotFound();
 
-			ViewBag.MaTinhList = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			var tinhsEdit = await _tinhService.GetAll();
+			ViewBag.MaTinhList = new SelectList(tinhsEdit, "MaTinh", "TenTinh", xa.MaTinh);
 
 			return View(xa);
 		}

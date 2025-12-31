@@ -1,327 +1,451 @@
 ﻿@model IEnumerable<QuanLyBanHang.Models.SanPhamDto>
 
 @{
-    ViewBag.Title = "Quản lý Sản phẩm";
+    ViewBag.Title = "Thế giới Sản phẩm";
+    bool isCustomer = ViewBag.IsCustomer == true;
+    bool isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
+    bool isManagementMode = isLoggedIn && !isCustomer;
 }
+
 <style>
-    .search-wrapper {
-        position: relative;
-        width: 100%;
-        max-width: 400px;
-    }
-    
-        .search-wrapper input {
-            padding-left: 38px !important;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
 
-        .search-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
-
-    .table {
-        overflow-x: auto;
-        white-space: nowrap;
-        width: 100%;
+    .filter-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        border: 1px solid #f0f4f2;
     }
 
-    .table-hover tbody tr:hover {
-        background-color: #f5faff;
-        transition: 0.2s;
-    }
-
-    .product-card {
-        transition: transform 0.3s, box-shadow 0.3s;
-        border: none;
-        border-radius: 12px;
+    .admin-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.05);
         overflow: hidden;
-        height: 100%;
-        box-shadow: 0 2px 8px rgba(0,0,0,.1);
     }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,.15) !important;
-        }
-
-    .product-image {
-        height: 250px;
-        object-fit: cover;
-        width: 100%;
-        background: #f8f9fa;
+    .table thead {
+        background: #f8fbf9;
     }
 
-    .product-body {
+    .table th {
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        color: #555;
         padding: 1.25rem;
-    }
-
-    .product-title {
-        font-weight: 600;
-        color: #212529;
-        margin-bottom: 0.75rem;
-        font-size: 1.1rem;
-        min-height: 3rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .product-description {
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-        min-height: 3rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .price {
-        color: #198754;
-        font-weight: bold;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .btn-view-detail {
-        background-color: #198754;
-        color: white;
         border: none;
-        border-radius: 8px;
-        padding: 0.5rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.3s;
+    }
+
+    .table td {
+        padding: 1.25rem;
+        vertical-align: middle;
+        border-color: #f1f5f3;
+    }
+
+    .product-thumb {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .product-grid-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        height: 100%;
+        background: white;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+        position: relative;
+    }
+
+    .product-grid-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .img-container {
+        position: relative;
+        padding-top: 100%;
+        overflow: hidden;
+        background: #fdfdfd;
+    }
+
+    .img-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
     }
 
-        .btn-view-detail:hover {
-            background-color: #157347;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
-        }
-
-    .no-products {
-        text-align: center;
-        padding: 4rem 0;
-        color: #6c757d;
+    .product-grid-card:hover .img-container img {
+        transform: scale(1.1);
     }
 
-        .no-products i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
+    .stock-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        z-index: 2;
+        backdrop-filter: blur(4px);
+        color: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .product-info {
+        padding: 1.5rem;
+    }
+
+    .category-label {
+        color: #198754;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        display: block;
+        letter-spacing: 0.5px;
+    }
+
+    .product-name {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+        height: 3.2rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .product-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .price-tag {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #198754;
+    }
+
+    .btn-action-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f0f7f4;
+        color: #198754;
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .btn-action-circle:hover {
+        background: #198754;
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    .search-input-group {
+        position: relative;
+    }
+
+    .search-input-group i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+    }
+
+    .search-input-group .form-control {
+        padding-left: 2.8rem;
+        border-radius: 12px;
+        border: 1.5px solid #edf2ef;
+        height: 50px;
+    }
+
+    .btn-outline-light:hover{
+        color: darkgreen;
+    }
+
+    /* Màu sắc bổ sung cho trạng thái */
+    .bg-orange {
+        background-color: #fd7e14 !important;
+        color: white !important;
+    }
+    /* Cháy hàng */
+    .bg-stopped {
+        background-color: #6c757d !important;
+        color: white !important;
+    }
+    /* Ngưng bán */
 </style>
 
-
-<div class="container">
-    @{
-        bool isCustomer = ViewBag.IsCustomer == true;
-    }
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <h4 class="mb-5 text-success">
-            Danh sách Sản phẩm 
-        </h4>
-
-        @if (!isCustomer)
-        {
-            <a href="@Url.Action("Index", "TrangThai")" class="btn btn-success mb-5">
-                <i class="fa-solid fa-list-check"></i> Quản lý trạng thái sản phẩm 
-            </a>
-        }
+<div class="container py-4 min-vh-100" style="background: #fcfdfd;">    
+    <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fa-solid fa-gem me-2"></i>
+                @(isManagementMode ? "Quản lý Sản phẩm" : "Khám phá Sản phẩm")
+            </h2>
+            <p class="mb-0 opacity-75">@(isManagementMode ? "Theo dõi và quản lý danh mục hàng hóa hệ thống" : "Lựa chọn tốt nhất cho sức khỏe của bạn")</p>
+        </div>
+        <div class="d-flex gap-2">
+            @if (isManagementMode)
+            {
+                <a href="@Url.Action("Create", "SanPham")" class="btn btn-light text-success fw-bold px-4 py-2" style="border-radius:12px;">
+                    <i class="fa-solid fa-plus-circle me-2"></i> Thêm sản phẩm
+                </a>
+                <a href="@Url.Action("Index", "TrangThai")" class="btn btn-outline-light fw-bold px-4 py-2" style="border-radius:12px;">
+                    <i class="fa-solid fa-tags me-2"></i> Trạng thái
+                </a>
+            }
+        </div>
     </div>
 
-    <!--  Form -->
-    @if (!isCustomer)
-    {
-        <form id="Form" method="get" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
-            <div class="search-wrapper flex-grow-1">
-                <i class="fa fa-search"></i>
-                <input id="searchBox" type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm tên, mã sản phẩm...">
+    <div class="filter-card">
+        <form id="Form" method="get" class="row g-3 align-items-end">
+            <div class="col-lg-5">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tìm kiếm nhanh</label>
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="searchBox" type="text" name="search" value="@ViewBag.Search" 
+                           class="form-control" placeholder="Nhập tên sản phẩm, mã hàng...">
+                </div>
             </div>
-
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    @Html.DropDownList(
-                    "maTT",
-                                (SelectList)ViewBag.MaTT,
-                                "-- Trạng thái --",
-                                new { @class = "form-select", style = "width:150px;", id = "maTTSelect" }
-                                )
-
-                @Html.DropDownList(
-                                "maLoai",
-                                (SelectList)ViewBag.LoaiSP,
-                                "-- Loại SP --",
-                                new { @class = "form-select", style = "width:130px;", id = "maLoaiSelect" }
-                                )
-
+            <div class="col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Loại hàng</label>
+                @Html.DropDownList("maLoai", (SelectList)ViewBag.LoaiSP, "-- Tất cả --", 
+                    new { @class = "form-select", id = "maLoaiSelect", style = "border-radius:12px; height:50px; border:1.5px solid #edf2ef;" })
             </div>
-
-            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
-            @if (!isCustomer)
-                {
-                    <a href="@Url.Action("Create", "SanPham")" class="btn btn-success">
-                        <i class="fa-solid fa-circle-plus"></i> Add
-                    </a>
-                }
+            <div class="col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tình trạng</label>
+                @Html.DropDownList("maTT", (SelectList)ViewBag.MaTT, "-- Tất cả --", 
+                    new { @class = "form-select", id = "maTTSelect", style = "border-radius:12px; height:50px; border:1.5px solid #edf2ef;" })
+            </div>
+            <div class="col-lg-3 d-flex gap-2">               
+                <button type="button" id="btnClear" class="btn btn-outline-secondary" style="border-radius:12px; height:50px; width:50px;">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
             </div>
         </form>
+    </div>
 
-
-        <div class="table">
-            <table class="table table-hover align-middle text-center shadow-sm">
-                <thead class="table-success">
-                    <tr>
-                        <th>Ảnh</th>
-                        <th>Tên SP</th>
-                        <th>Giá bán</th>
-                        <th>Trọng lượng</th>
-                        <th>Trạng thái</th>
-                        <th>Hãng</th>
-                        <th>Số lượng tồn</th>
-                    </tr>
-                </thead>
-                <tbody class="text-start">
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var sp in Model)
+    @if (isManagementMode)
+    {
+        <!-- ADMIN TABLE VIEW -->
+        <div class="admin-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Sản phẩm</th>
+                            <th>Thương hiệu</th>
+                            <th>Giá niêm yết</th>
+                            <th>Kho hàng</th>
+                            <th class="text-center">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
                         {
-                            <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })">
-                                <td class="text-center">
-                                    <img src="@(string.IsNullOrEmpty(sp.AnhMH) ? Url.Content("~/images/default-product.png") : @Url.Content("~/images/products/" + sp.AnhMH))" alt="@sp.TenSP" width="60" height="60" style="object-fit:cover; border-radius:5px;">
-                                </td>
-                                <td>@sp.TenSP</td>
-                                <td>@String.Format("{0:N0} đ", sp.GiaBan)</td>
-                                <td>@(sp.TrongLuong?.ToString("N2") ?? "-") gram</td>
-                                <td>
-                                    <span class="badge bg-info">@(sp.TenTT ?? sp.MaTT)</span>
-                                </td>
-                                <td>@sp.TenHangSX</td>
-                                <td class="text-center">
-                                    <span class="badge @(sp.SoLuongTon > 0 ? "bg-success" : "bg-danger")">
-                                        @(sp.SoLuongTon ?? 0)
-                                    </span>
-                                </td>
+                            @foreach (var sp in Model)
+                            {
+                                // 1. Tính toán Logic hiển thị trước khi render HTML
+                                string statusClass = "bg-success";
+                                string progressColor = "bg-success";
+                                string statusText = sp.TenTT;
+                                int tonKho = sp.SoLuongTon ?? 0;
 
+                                if (sp.MaTT == "TT4" || sp.MaTT == "TT04") // Ngưng bán
+                                {
+                                    statusClass = "bg-secondary";
+                                    progressColor = "bg-secondary";
+                                }
+                                else if (tonKho == 0) // Hết hàng
+                                {
+                                    statusClass = "bg-danger";
+                                    progressColor = "bg-danger";
+                                }
+                                else if (tonKho < 10) // Cháy hàng
+                                {
+                                    statusClass = "bg-orange";
+                                    progressColor = "bg-orange";
+                                }
+
+                                var stockPercent = Math.Min(tonKho * 2, 100);
+
+                                // 2. Render Row
+                                <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })" style="cursor:pointer;">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="@(string.IsNullOrEmpty(sp.AnhMH) ? Url.Content("~/images/default-product.png") : Url.Content("~/images/products/" + sp.AnhMH))"
+                                                 class="product-thumb" alt="@sp.TenSP">
+                                            <div>
+                                                <div class="fw-bold text-dark">@sp.TenSP</div>
+                                                <small class="text-muted">#@sp.MaSP</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary text-white font-monospace">@sp.TenHangSX</span>
+                                    </td>
+                                    <td class="fw-bold text-success">
+                                        @String.Format("{0:N0} đ", sp.GiaBan)
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-bold" style="min-width: 25px;">@tonKho</span>
+                                            <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                                                <div class="progress-bar @progressColor" style="width: @stockPercent%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge text-white rounded-pill @statusClass px-3">
+                                            @statusText
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-box-open fa-3x mb-3 opacity-25"></i>
+                                    <p>Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
+                                </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7" class="text-center text-muted fst-italic">Không có sản phẩm nào.</td>
-                        </tr>
-                    }
-
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     }
     else
     {
-        <div class="container products-section">
+        <!-- CUSTOMER GRID VIEW -->
+        <div class="row g-4">
             @if (Model != null && Model.Any())
             {
-                <div class="row g-4">
-                    @foreach (var product in Model)
-                    {
-                        <div class="col-md-4 col-lg-3">
-                            <div class="card product-card">
-                                <img src="@(string.IsNullOrEmpty(product.AnhMH) ? Url.Content("~/images/default-product.png") : Url.Content($"~/images/products/{product.AnhMH}"))"
-                                     class="card-img-top product-image"
-                                     alt="@product.TenSP" />
-                                <div class="card-body product-body">
-                                    <h5 class="card-title product-title">@product.TenSP</h5>
-                                    <p class="card-text product-description">@product.MoTaSP</p>
-                                    <div class="price">
-                                        @if (product.GiaBan.HasValue)
-                                        {
-                                            <span>@product.GiaBan.Value.ToString("N0") đ</span>
-                                        }
-                                        else
-                                        {
-                                            <span>Liên hệ</span>
-                                        }
+                @foreach (var sp in Model)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="product-grid-card">
+                            <!-- Stock Badge -->
+                            @* <div class="stock-badge @(sp.SoLuongTon > 0 ? "bg-success text-white" : "bg-danger text-white")">
+                               @sp.TenTT
+                            </div> *@
+
+                            @{
+                                string badgeClass = "bg-success";
+                                if (sp.MaTT == "TT04" || sp.MaTT == "TT4") { badgeClass = "bg-secondary"; }
+                                else if (sp.SoLuongTon == 0) { badgeClass = "bg-danger"; }
+                                else if (sp.SoLuongTon < 10) { badgeClass = "bg-orange"; }
+                            }
+
+                            <div class="stock-badge @badgeClass">
+                                @if (sp.SoLuongTon > 0 && sp.SoLuongTon < 10)
+                                {
+                                    <i class="fa-solid fa-fire me-1"></i> 
+                                    @sp.TenTT
+                                }
+                                else
+                                {
+                                    @sp.TenTT
+                                }
+                            </div>
+
+                            <a href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })" class="text-decoration-none">
+                                <div class="img-container">
+                                    <img src="@(string.IsNullOrEmpty(sp.AnhMH) ? Url.Content("~/images/default-product.png") : Url.Content("~/images/products/" + sp.AnhMH))" 
+                                         alt="@sp.TenSP">
+                                </div>
+                            </a>
+
+                            <div class="product-info">
+                                <span class="category-label">@sp.TenLoai</span>
+                                <h5 class="product-name">@sp.TenSP</h5>
+                                
+                                <div class="product-meta">
+                                    <div class="price-tag">
+                                        @String.Format("{0:N0} đ", sp.GiaBan)
                                     </div>
-                                    @if (Context.Session.GetString("IsLoggedIn") == "true")
-                                    {
-                                        <a href="@Url.Action("Details", "SanPham", new { id = product.MaSP })" class="btn btn-success btn-view-detail">
-                                            <i class="fa-solid fa-eye me-2"></i>Xem chi tiết
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <a href="@Url.Action("Login", "Home")" class="btn btn-success btn-view-detail">
-                                            <i class="fa-solid fa-sign-in-alt me-2"></i>Đăng nhập để xem
-                                        </a>
-                                    }
+                                    <a href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })" class="btn-action-circle" title="Xem chi tiết">
+                                        <i class="fa-solid fa-arrow-right-long"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             }
             else
             {
-                <div class="no-products">
-                    <i class="fa-solid fa-box-open"></i>
-                    <h4>Chưa có sản phẩm nào</h4>
-                    <p>Vui lòng quay lại sau.</p>
+                <div class="col-12 text-center py-5">
+                    <div class="no-products">
+                        <i class="fa-solid fa-hurricane fa-3x text-muted mb-3"></i>
+                        <h4>Oops! Không có sản phẩm nào</h4>
+                        <p>Chúng tôi sẽ sớm cập nhật kho hàng mới.</p>
+                    </div>
                 </div>
             }
         </div>
     }
-
 </div>
 
 @section Scripts {
     <script>
-                // debounce function
-            function debounce(fn, delay) {
-                let timer = null;
-                return function() {
-                    const context = this, args = arguments;
-                    clearTimeout(timer);
-                    timer = setTimeout(() => fn.apply(context, args), delay);
-                };
-            }
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(context, args), delay);
+            };
+        }
 
-        // khi thay đổi  -> submit form
-               $("#searchBox").on("change", debounce(function(){
+        $("#searchBox").on("input", debounce(function(){
             $("#Form").submit();
-        }, 400));
+        }, 500));
 
         $("#maTTSelect, #maLoaiSelect").on("change", function(){
             $("#Form").submit();
         });
 
-        // clear 
         $("#btnClear").on("click", function(){
             $("#searchBox").val("");
             $("#maTTSelect").val("");
             $("#maLoaiSelect").val("");
             $("#Form").submit();
         });
-</script>
-    <script>
 
-        // clickable row
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".clickable-row").forEach(row => {
-                row.addEventListener("click", function () {
+                row.addEventListener("click", function (e) {
+                    if (e.target.closest("a, button, .badge")) return;
                     window.location = this.dataset.href;
                 });
             });
         });
     </script>
 }
-
-

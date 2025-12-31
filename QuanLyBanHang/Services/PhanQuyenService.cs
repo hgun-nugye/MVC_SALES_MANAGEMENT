@@ -1,5 +1,6 @@
 using QuanLyBanHang.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace QuanLyBanHang.Services
 {
@@ -12,29 +13,43 @@ namespace QuanLyBanHang.Services
 			_context = context;
 		}
 
+		private List<PhanQuyen> MapToPhanQuyen(List<PhanQuyenDto> dtos)
+		{
+			return dtos.Select(d => new PhanQuyen
+			{
+				MaVT = d.MaVT,
+				MaNV = d.MaNV,
+				VaiTro = new VaiTro { MaVT = d.MaVT, TenVT = d.TenVT },
+				NhanVien = new NhanVien { MaNV = d.MaNV, TenNV = d.TenNV }
+			}).ToList();
+		}
+
 		public async Task<List<PhanQuyen>> GetAll()
 		{
-			return await _context.PhanQuyen
-				.Include(pq => pq.VaiTro)
-				.Include(pq => pq.NhanVien)
+			var dtos = await _context.PhanQuyenDto
+				.FromSqlRaw("EXEC PhanQuyen_GetAll")
 				.ToListAsync();
+			return MapToPhanQuyen(dtos);
 		}
 
 		public async Task<List<PhanQuyen>> GetByNhanVien(string maNV)
 		{
-			return await _context.PhanQuyen
-				.Include(pq => pq.VaiTro)
-				.Include(pq => pq.NhanVien)
-				.Where(pq => pq.MaNV == maNV)
+			var dtos = await _context.PhanQuyenDto
+				.FromSqlRaw("EXEC PhanQuyen_GetByNhanVien @MaNV", new SqlParameter("@MaNV", maNV))
 				.ToListAsync();
+			return MapToPhanQuyen(dtos);
 		}
 
 		public async Task<PhanQuyen?> GetById(string maVT, string maNV)
 		{
-			return await _context.PhanQuyen
-				.Include(pq => pq.VaiTro)
-				.Include(pq => pq.NhanVien)
-				.FirstOrDefaultAsync(pq => pq.MaVT == maVT && pq.MaNV == maNV);
+			var parameters = new[] {
+				new SqlParameter("@MaVT", maVT),
+				new SqlParameter("@MaNV", maNV)
+			};
+			var dtos = await _context.PhanQuyenDto
+				.FromSqlRaw("EXEC PhanQuyen_GetByID @MaVT, @MaNV", parameters)
+				.ToListAsync();
+			return MapToPhanQuyen(dtos).FirstOrDefault();
 		}
 
 		public async Task Create(PhanQuyen model)
@@ -62,20 +77,12 @@ namespace QuanLyBanHang.Services
                     @MaNV = {maNV}");
 		}
 
-		// Search using LINQ
 		public async Task<List<PhanQuyen>> Search(string? search)
 		{
-			var all = await GetAll();
-			if (string.IsNullOrWhiteSpace(search))
-				return all;
-
-			search = search.ToLower();
-			return all.Where(pq => 
-				pq.MaVT.ToLower().Contains(search) || 
-				pq.MaNV.ToLower().Contains(search) ||
-				(pq.VaiTro != null && pq.VaiTro.TenVT.ToLower().Contains(search)) ||
-				(pq.NhanVien != null && pq.NhanVien.TenNV.ToLower().Contains(search))
-			).ToList();
+			var dtos = await _context.PhanQuyenDto
+				.FromSqlRaw("EXEC PhanQuyen_Search @Search", new SqlParameter("@Search", (object?)search ?? DBNull.Value))
+				.ToListAsync();
+			return MapToPhanQuyen(dtos);
 		}
 	}
 }

@@ -17,9 +17,6 @@ namespace QuanLyBanHang.Models
 		[StringLength(100, ErrorMessage = "Tên nước tối đa 100 ký tự.")]
 		[Display(Name = "Tên Nước")]
 		public string TenNuoc { get; set; } = string.Empty;
-
-		//[Display(Name = "Danh sách Hãng")]
-		//public ICollection<Hang>? Hangs { get; set; }
 	}
 
 	[Keyless]

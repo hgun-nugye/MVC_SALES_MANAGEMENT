@@ -48,9 +48,135 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		[HttpGet]
+		public async Task<IActionResult> Profile()
+		{
+			var userId = Helpers.SessionHelper.GetUserId(HttpContext.Session);
+			if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Home");
+
+			var kh = await _khService.GetByIDWithXa(userId);
+			if (kh == null) return NotFound();
+
+			return View(kh);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> EditProfile()
+		{
+			var userId = Helpers.SessionHelper.GetUserId(HttpContext.Session);
+			if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Home");
+
+			var kh = await _khService.GetByID(userId);
+			if (kh == null) return NotFound();
+
+			string? maTinh = !string.IsNullOrEmpty(kh.MaXa) ? await _xaService.GetMaTinhByXa(kh.MaXa) : null;
+
+			var allTinhs = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinhs, "MaTinh", "TenTinh", maTinh);
+			var xaList = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", kh.MaXa);
+			ViewData["MaXaSelected"] = kh.MaXa;
+			return View(kh);
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditProfile(KhachHang model, IFormFile? AnhFile)
+		{
+			var userId = Helpers.SessionHelper.GetUserId(HttpContext.Session);
+			if (string.IsNullOrEmpty(userId) || model.MaKH != userId) return RedirectToAction("Login", "Home");
+
+			// Bỏ qua kiểm tra mật khẩu
+			ModelState.Remove("MatKhauKH");
+
+			if (!ModelState.IsValid)
+			{
+				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
+				var allTinhsErr = await _tinhService.GetAll();
+				ViewBag.Tinh = new SelectList(allTinhsErr, "MaTinh", "TenTinh", maTinh);
+
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+				ViewData["MaXaSelected"] = model.MaXa;
+				return View(model);
+			}
+
+			try
+			{
+				await _khService.Update(model, AnhFile);
+                
+                // Cập nhật lại session nếu có đổi ảnh hoặc tên
+                if (AnhFile != null)
+                {
+                    var updatedKh = await _khService.GetByID(userId);
+                    HttpContext.Session.SetString(Helpers.SessionKeys.UserAvatar, updatedKh?.AnhKH ?? "");
+                }
+                HttpContext.Session.SetString(Helpers.SessionKeys.UserName, model.TenKH ?? "");
+
+				TempData["SuccessMessage"] = "Cập nhật thông tin cá nhân thành công!";
+				return RedirectToAction(nameof(Profile));
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError("", ex.Message);
+				TempData["ErrorMessage"] = ex.Message;
+
+				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
+				var allTinhsFail = await _tinhService.GetAll();
+				ViewBag.Tinh = new SelectList(allTinhsFail, "MaTinh", "TenTinh", maTinh);
+
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+
+				return View(model);
+			}
+		}
+
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            if (string.IsNullOrEmpty(Helpers.SessionHelper.GetUserId(HttpContext.Session)))
+                return RedirectToAction("Login", "Home");
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var userId = Helpers.SessionHelper.GetUserId(HttpContext.Session);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Home");
+
+            var kh = await _khService.GetByID(userId);
+            if (kh == null) return NotFound();
+
+            // Verify old password
+            if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, kh.MatKhauKH))
+            {
+                ModelState.AddModelError("OldPassword", "Mật khẩu hiện tại không chính xác.");
+                return View(model);
+            }
+
+            try
+            {
+                await _khService.ResetPassword(userId, model.NewPassword);
+                TempData["SuccessMessage"] = "Đổi mật khẩu thành công!";
+                return RedirectToAction(nameof(Profile));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi đổi mật khẩu: " + ex.Message;
+                return View(model);
+            }
+        }
+
+		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			var tinhsCreate = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(tinhsCreate, "MaTinh", "TenTinh");
 			ViewBag.Xa = new SelectList(Enumerable.Empty<object>(), "MaXa", "TenXa");
 			ViewData["MaXaSelected"] = null;
 			return View();
@@ -107,7 +233,8 @@ namespace QuanLyBanHang.Controllers
 			}
 
 
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+			var allTinhsPost = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinhsPost, "MaTinh", "TenTinh", maTinh);
 
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
@@ -132,7 +259,7 @@ namespace QuanLyBanHang.Controllers
 				{
 					try
 					{
-						var fileToDelete = Path.Combine(_environment.WebRootPath, "images", "customer",filePath);
+						var fileToDelete = Path.Combine(_environment.WebRootPath, "images", "customers",filePath);
 						if (System.IO.File.Exists(fileToDelete))
 							System.IO.File.Delete(fileToDelete);
 					}
@@ -154,7 +281,8 @@ namespace QuanLyBanHang.Controllers
 
 			string? maTinh = !string.IsNullOrEmpty(kh.MaXa) ? await _xaService.GetMaTinhByXa(kh.MaXa) : null;
 
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+			var allTinhsEdit = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinhsEdit, "MaTinh", "TenTinh", maTinh);
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", kh.MaXa);
 			ViewData["MaXaSelected"] = kh.MaXa;
@@ -165,10 +293,14 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(KhachHang model, IFormFile? AnhFile)
 		{
+			// Bỏ qua kiểm tra mật khẩu vì không cập nhật mật khẩu ở view này
+			ModelState.Remove("MatKhauKH");
+
 			if (!ModelState.IsValid)
 			{
 				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
-				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+				var allTinhsEditPost = await _tinhService.GetAll();
+				ViewBag.Tinh = new SelectList(allTinhsEditPost, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);
 				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
@@ -188,7 +320,8 @@ namespace QuanLyBanHang.Controllers
 				TempData["ErrorMessage"] = ex.Message;
 
 				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
-				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+				var allTinhsEditFail = await _tinhService.GetAll();
+				ViewBag.Tinh = new SelectList(allTinhsEditFail, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);
 				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
@@ -240,6 +373,25 @@ namespace QuanLyBanHang.Controllers
 		{
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			return Json(xaList);
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> ResetPassword(string id)
+		{
+			if (string.IsNullOrEmpty(id)) return BadRequest();
+
+			try
+			{
+				await _khService.ResetPassword(id, "123456");
+				TempData["SuccessMessage"] = "Đã reset mật khẩu thành công";
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = "Lỗi reset mật khẩu: " + ex.Message;
+			}
+
+			return RedirectToAction(nameof(Details), new { id });
 		}
 
 

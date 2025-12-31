@@ -44,7 +44,16 @@ namespace QuanLyBanHang.Services
 		public DbSet<SanPhamDto> SanPhamDto { get; set; } = null!;
 		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; } = null!;
 		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; } = null!;
+		public DbSet<DonBanHangDetailDto> DonBanHangDetailDto { get; set; } = null!;
 		public DbSet<XaDTO> XaDTO { get; set; } = null!;
+		public DbSet<PhanQuyenDto> PhanQuyenDto { get; set; } = null!;
+		public DbSet<DashboardStats> DashboardStats { get; set; } = null!;
+		public DbSet<MonthlyRevenueData> MonthlyRevenueData { get; set; } = null!;
+		public DbSet<TopProductData> TopProductData { get; set; } = null!;
+		public DbSet<OrderDetailReport> OrderDetailReport { get; set; } = null!;
+		public DbSet<ImportOrderDetailReport> ImportOrderDetailReport { get; set; } = null!;
+		public DbSet<ProductRevenueReport> ProductRevenueReport { get; set; } = null!;
+		
 
 
 		// ========== SQL VIEW ==========
@@ -74,76 +83,16 @@ namespace QuanLyBanHang.Services
 			modelBuilder.Entity<SanPhamDto>().HasNoKey();
 			modelBuilder.Entity<CTMHDetailDto>().HasNoKey();
 			modelBuilder.Entity<CTBHDetailDto>().HasNoKey();
+			modelBuilder.Entity<PhanQuyenDto>().HasNoKey();
+			modelBuilder.Entity<DashboardStats>().HasNoKey();
+			modelBuilder.Entity<MonthlyRevenueData>().HasNoKey();
+			modelBuilder.Entity<TopProductData>().HasNoKey();
+			modelBuilder.Entity<OrderDetailReport>().HasNoKey();
+			modelBuilder.Entity<ImportOrderDetailReport>().HasNoKey();
+			modelBuilder.Entity<ProductRevenueReport>().HasNoKey();
 
-			//// ====== SQL VIEW: No Key + tên view ======
-			//modelBuilder.Entity<NhaCCDetailView>()
-			//	.HasNoKey()
-			//	.ToView("NhaCCDetailView");
 
-			//modelBuilder.Entity<KhachHangDetailView>()
-			//	.HasNoKey()
-			//	.ToView("KhachHangDetailView");
 
-			//modelBuilder.Entity<XaDetail>()
-			//	.HasNoKey()
-			//	.ToView("XaDetail");
-
-			//// ====== DonBanHangDetail là View/ResultSet không có khóa ======
-			//modelBuilder.Entity<DonBanHangDetail>(entity =>
-			//{
-			//	entity.HasNoKey();
-			//	entity.Ignore(e => e.TenTinh);
-			//	entity.Ignore(e => e.TenXa);
-			//	entity.Ignore(e => e.ThanhTien);
-			//});
-
-			//// ====== DonMuaHangDetail là View/ResultSet không có khóa ======
-			//modelBuilder.Entity<DonMuaHangDetail>(entity =>
-			//{
-			//	entity.HasNoKey();
-			//	entity.Ignore(e => e.ThanhTien);
-			//});
-
-			//// ====== DonBanHang: bỏ property hiển thị ======
-			//modelBuilder.Entity<DonBanHang>(entity =>
-			//{
-			//	entity.Ignore(e => e.TenKH);
-			//});
-
-			// ====== DonMuaHang: cấu hình foreign key và bỏ property hiển thị ======
-			//modelBuilder.Entity<DonMuaHang>(entity =>
-			//{
-			//	entity.Ignore(e => e.TenNCC);
-			//	entity.Ignore(e => e.TenNV);
-
-			//// Cấu hình foreign key rõ ràng để tránh shadow property
-			//// Không sử dụng navigation property, chỉ dùng foreign key
-			//entity.HasOne(e => e.NhaCC)
-			//	.WithMany()
-			//	.HasForeignKey(e => e.MaNCC)
-			//	.OnDelete(DeleteBehavior.NoAction)
-			//	.IsRequired(false);
-
-			//entity.HasOne(e => e.NhanVien)
-			//	.WithMany()
-			//	.HasForeignKey(e => e.MaNV)
-			//	.OnDelete(DeleteBehavior.NoAction)
-			//	.IsRequired(false);
-
-			// Tắt auto-include cho navigation properties
-			//entity.Navigation(e => e.NhaCC).AutoInclude = false;
-			//entity.Navigation(e => e.NhanVien).AutoInclude = false;
-			//});
-
-			// ====== NhaCC: cấu hình để tránh shadow property khi query ======
-			//modelBuilder.Entity<NhaCC>(entity =>
-			//{
-			//	entity.Ignore(e => e.TenXa);
-			//	entity.Ignore(e => e.MaTinh);
-			//	entity.Ignore(e => e.TenTinh);
-			//	// Tắt navigation property nếu không cần
-			//	//entity.Navigation(e => e.SanPhams).AutoInclude = false;
-			//});
 		}
 	}
 }

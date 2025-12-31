@@ -14,7 +14,7 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Lấy danh sách + phân trang
-		public async Task<List<NhaCCDetailView>> Search(string? search, short? province)
+		public async Task<List<NhaCCDetailView>> Search(string? search, string? province)
 		{
 			var parameters = new[]
 			{
@@ -53,7 +53,7 @@ namespace QuanLyBanHang.Services
             ");
 		}
 
-		public async Task Update(NhaCC model)
+		public async Task Update(NhaCCDetailView model)
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC NhaCC_Update 

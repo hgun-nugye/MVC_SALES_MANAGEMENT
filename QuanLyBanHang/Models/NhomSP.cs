@@ -17,9 +17,6 @@ namespace QuanLyBanHang.Models
 		[StringLength(100, ErrorMessage = "Tên nhóm tối đa 100 ký tự.")]
 		[Display(Name = "Tên Nhóm Sản Phẩm")]
 		public string TenNhom { get; set; } = string.Empty;
-
-		//[Display(Name = "Danh Sách Loại Sản Phẩm")]
-		//public ICollection<LoaiSP>? LoaiSPs { get; set; }
 	}
 
 	[Keyless]

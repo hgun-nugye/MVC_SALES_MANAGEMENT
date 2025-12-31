@@ -49,18 +49,12 @@ namespace QuanLyBanHang.Services
                 EXEC TrangThai_Delete @MaTT = {id}");
 		}
 
-		// Search using LINQ since there's no Search procedure
 		public async Task<List<TrangThai>> Search(string? search)
 		{
-			var all = await GetAll();
-			if (string.IsNullOrWhiteSpace(search))
-				return all;
-
-			search = search.ToLower();
-			return all.Where(t => 
-				t.MaTT.ToLower().Contains(search) || 
-				t.TenTT.ToLower().Contains(search)
-			).ToList();
+			var parameter = new SqlParameter("@Search", (object?)search ?? DBNull.Value);
+			return await _context.TrangThai
+				.FromSqlRaw("EXEC TrangThai_Search @Search", parameter)
+				.ToListAsync();
 		}
 	}
 }

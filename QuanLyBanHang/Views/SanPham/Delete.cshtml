@@ -1,20 +1,12 @@
 ﻿@model QuanLyBanHang.Models.SanPhamDto
 
 @{
-    ViewBag.Title = "Xóa Sản phẩm";
+    ViewBag.Title = "Xác nhận xóa Sản phẩm";
 }
 
 <style>
-    .delete-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e9ecef;
-    }
-
     .page-header {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);
         color: white;
         padding: 1.5rem 2rem;
         border-radius: 12px;
@@ -22,153 +14,154 @@
         box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
     }
 
-    .product-image {
-        max-width: 100%;
-        max-height: 400px;
+    .delete-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: 1px solid #ffe3e3;
+    }
+
+    .warning-banner {
+        background: #fff5f5;
+        border-bottom: 1px solid #ffe3e3;
+        padding: 1.5rem 2rem;
+        color: #c92a2a;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 600;
+    }
+
+    .info-display {
+        background: #fcfcfc;
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        object-fit: contain;
+        padding: 2rem;
+        margin: 2rem;
+        border: 1px solid #f1f3f5;
     }
 
-    .detail-item {
-        padding: 0.5rem 0;
-        border-bottom: 1px dotted #dee2e6;
+    .product-avatar {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 4px solid white;
     }
 
-    .detail-item:last-child {
-        border-bottom: none;
+    .label-muted {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #adb5bd;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .value-emphasis {
+        color: #212529;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    .btn-delete-final {
+        background: #dc3545;
+        border: none;
+        padding: 0.85rem 3rem;
+        border-radius: 12px;
+        font-weight: 800;
+        transition: all 0.3s;
+        box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-delete-final:hover {
+        background: #c82333;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .brand-badge {
+        background: #e8f5e9;
+        color: #198754;
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+        display: inline-block;
     }
 </style>
 
-<div class="container-fluid">
+<div class="container py-4">
     <div class="page-header">
-        <h4>
-            <i class="fa-solid fa-trash-can"></i>
-            Xóa Sản phẩm
+        <h4 class="mb-0">
+            <i class="fa-solid fa-box-archive me-2"></i>
+            Xác nhận xóa sản phẩm khỏi hệ thống
         </h4>
     </div>
 
-    <div class="alert alert-warning shadow-sm">
-        <i class="fa-solid fa-triangle-exclamation me-2"></i>
-        <strong>Cảnh báo:</strong> Bạn có chắc muốn xóa sản phẩm <strong>@Model.TenSP</strong> không? Hành động này không thể hoàn tác!
-    </div>
-
     <div class="delete-card">
-        <div class="row">
-            <!-- Ảnh minh họa -->
-            <div class="col-md-4 text-center">
-                @if (!string.IsNullOrEmpty(Model.AnhMH))
-                {
-                    <img src="@(string.IsNullOrEmpty(Model.AnhMH) ? Url.Content("~/images/default-product.png") : @Url.Content("~/images/products/" + Model.AnhMH))" class="product-image" />
-
-                }
-                else
-                {
-                    <div class="product-image d-flex align-items-center justify-content-center bg-light">
-                        <i class="fa-solid fa-image fa-4x text-muted"></i>
-                    </div>
-                }
-            </div>
-
-            <!-- Thông tin sản phẩm -->
-            <div class="col-md-8">
-                <h4 class="text-success mb-3">@Model.TenSP</h4>
-                
-                <div class="detail-item">
-                    <strong><i class="fa-solid fa-barcode me-2"></i>Mã sản phẩm:</strong> @Model.MaSP
-                </div>
-
-                <div class="detail-item">
-                    <strong><i class="fa-solid fa-money-bill me-2"></i>Giá bán:</strong> 
-                    @string.Format("{0:N0} đ", Model.GiaBan)
-                </div>
-
-                @if (Model.SoLuongTon.HasValue)
-                {
-                    <div class="detail-item">
-                        <strong><i class="fa-solid fa-boxes me-2"></i>Số lượng tồn:</strong> 
-                        <span class="badge @(Model.SoLuongTon > 0 ? "bg-success" : "bg-danger")">
-                            @Model.SoLuongTon
-                        </span>
-                    </div>
-                }
-
-                <div class="detail-item">
-                    <strong><i class="fa-solid fa-weight me-2"></i>Trọng lượng:</strong> 
-                    @Model.TrongLuong?.ToString("N2") gram
-                </div>
-
-                <div class="detail-item">
-                    <strong><i class="fa-solid fa-flag me-2"></i>Trạng thái:</strong> 
-                    <span class="badge bg-info">@(Model.TenTT ?? Model.MaTT)</span>
-                </div>
-
-                <div class="detail-item">
-                    <strong><i class="fa-solid fa-tags me-2"></i>Loại sản phẩm:</strong> @Model.TenLoai
-                </div>
-
-                <div class="detail-item">
-                    <strong><i class="fa-solid fa-industry me-2"></i>Hãng sản xuất:</strong> @Model.TenHangSX
-                </div>
-
-                @if (!string.IsNullOrEmpty(Model.MoTaSP))
-                {
-                    <div class="detail-item">
-                        <strong><i class="fa-solid fa-align-left me-2"></i>Mô tả:</strong>
-                        <div class="mt-2">@Model.MoTaSP</div>
-                    </div>
-                }
-
-                @if (!string.IsNullOrEmpty(Model.ThanhPhan))
-                {
-                    <div class="detail-item">
-                        <strong><i class="fa-solid fa-flask me-2"></i>Thành phần:</strong>
-                        <div class="mt-2">@Model.ThanhPhan</div>
-                    </div>
-                }
-
-                @if (!string.IsNullOrEmpty(Model.CongDung))
-                {
-                    <div class="detail-item">
-                        <strong><i class="fa-solid fa-star me-2"></i>Công dụng:</strong>
-                        <div class="mt-2">@Model.CongDung</div>
-                    </div>
-                }
-
-                @if (!string.IsNullOrEmpty(Model.HDSD))
-                {
-                    <div class="detail-item">
-                        <strong><i class="fa-solid fa-book me-2"></i>Hướng dẫn sử dụng:</strong>
-                        <div class="mt-2">@Model.HDSD</div>
-                    </div>
-                }
-
-                @if (!string.IsNullOrEmpty(Model.HDBaoQuan))
-                {
-                    <div class="detail-item">
-                        <strong><i class="fa-solid fa-snowflake me-2"></i>Hướng dẫn bảo quản:</strong>
-                        <div class="mt-2">@Model.HDBaoQuan</div>
-                    </div>
-                }
+        <div class="warning-banner">
+            <i class="fa-solid fa-triangle-exclamation fa-2x"></i>
+            <div>
+                Bạn đang chuẩn bị xóa một sản phẩm. Hành động này sẽ gỡ bỏ hoàn toàn dữ liệu sản phẩm và không thể khôi phục.
             </div>
         </div>
-    </div>
 
-    <form id="deleteForm" asp-action="Delete" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="MaSP" />
+        <div class="info-display">
+            <div class="row align-items-center">
+                <div class="col-md-auto text-center mb-4 mb-md-0">
+                    <img src="@(string.IsNullOrEmpty(Model.AnhMH) ? Url.Content("~/images/default-product.png") : Url.Content("~/images/products/" + Model.AnhMH))" 
+                         class="product-avatar" alt="@Model.TenSP">
+                </div>
+                <div class="col-md">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <span class="brand-badge">@Model.TenHangSX</span>
+                            <div class="label-muted">Tên hàng hóa</div>
+                            <div class="value-emphasis">@Model.TenSP</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div></div>
+                            <div class="label-muted">Mã sản phẩm</div>
+                            <div class="value-emphasis text-muted">#@Model.MaSP</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label-muted">Giá niêm yết</div>
+                            <div class="value-emphasis text-success">@string.Format("{0:N0} đ", Model.GiaBan)</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label-muted">Phân loại</div>
+                            <div class="value-emphasis">@Model.TenLoai</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label-muted">Trọng lượng</div>
+                            <div class="value-emphasis">@Model.TrongLuong</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label-muted">Số lượng tồn</div>
+                            <div class="value-emphasis @(Model.SoLuongTon > 0 ? "text-dark" : "text-danger")">@Model.SoLuongTon</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div class="d-flex gap-2 mt-4">
-            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fa-solid fa-trash-can me-2"></i>
-                Xóa
-            </button>
-            <a asp-action="Details" asp-route-id="@Model.MaSP" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Quay lại
+        <div class="p-4 bg-light border-top d-flex justify-content-center gap-3">
+            <form id="deleteForm" asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="MaSP" />
+                <button type="button" class="btn btn-delete-final text-white" onclick="confirmDelete()">
+                    <i class="fa-solid fa-trash-can me-2"></i> Xóa vĩnh viễn
+                </button>
+            </form>
+            <a asp-action="Details" asp-route-id="@Model.MaSP" class="btn btn-outline-secondary px-5 d-flex align-items-center" style="border-radius:12px; font-weight:700;">
+                Hủy bỏ và quay lại
             </a>
         </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
@@ -176,14 +169,15 @@
     <script>
         function confirmDelete() {
             Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác!',
-                icon: 'warning',
+                title: 'Cảnh báo nguy hiểm!',
+                text: 'Dữ liệu về sản phẩm này sẽ biến mất vĩnh viễn.',
+                icon: 'error',
                 showCancelButton: true,
                 confirmButtonText: 'Xóa',
                 cancelButtonText: 'Hủy',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6'
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('deleteForm').submit();

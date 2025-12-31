@@ -75,7 +75,9 @@ namespace QuanLyBanHang.Services
 		// Lấy danh sách nhóm SP để lọc + dropdown
 		public async Task<List<NhomSP>> GetGroups()
 		{
-			return await _context.NhomSP.ToListAsync();
+			return await _context.NhomSP
+				.FromSqlRaw("EXEC NhomSP_GetAll")
+				.ToListAsync();
 		}
 	}
 }

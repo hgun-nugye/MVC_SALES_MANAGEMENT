@@ -5,25 +5,45 @@
 }
 
 <div class="container">
-    <h4 class="mb-3 text-success">
-        <i class="fa-solid fa-list"></i> Chi tiết bán hàng
-    </h4>
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h2 class="fw-bold mb-1">
+            <i class="fa-solid fa-list-check me-2"></i>
+            Chi tiết bán hàng
+        </h2>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" asp-controller="DonBanHang" class="btn btn-outline-light fw-bold px-4">
+                <i class="fa-solid fa-cart-shopping me-2"></i> Đơn bán hàng
+            </a>
+        </div>
+    </div>
 
-    <div class="mb-3">
-        <a asp-action="Create" asp-route-maDBH="@ViewBag.MaDBH" class="btn btn-success">
-            <i class="fa-solid fa-plus"></i> Thêm chi tiết
-        </a>
+    <!-- FORM LỌC -->
+    <div class="filter-card">
+        <form id="Form" method="get" class="row g-3 align-items-end">
+            <div class="col-lg-11">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tìm kiếm nhanh</label>
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="searchBox" type="text" name="search" value="@ViewBag.Search"
+                           class="form-control" placeholder="Tìm theo mã đơn, tên sản phẩm...">
+                </div>
+            </div>
+            <div class="col-lg-1 d-flex gap-2">
+                <button type="button" id="btnClear" class="btn btn-outline-secondary btn-clear">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </form>
     </div>
 
     <table class="table  table-hover align-middle text-center shadow-sm">
-        <thead class="table-light">
+        <thead class="table-success">
             <tr>
-                <th><i class="fa-solid fa-hashtag"></i> Mã đơn</th>
-                <th><i class="fa-solid fa-box"></i> Tên SP</th>
-                <th><i class="fa-solid fa-sort-numeric-up"></i> Số lượng</th>
-                <th><i class="fa-solid fa-money-bill"></i> Đơn giá</th>
-                <th><i class="fa-solid fa-coins"></i> Thành tiền</th>
-                <th><i class="fa-solid fa-gear"></i> Hành động</th>
+                <th>Mã đơn</th>
+                <th>Tên SP</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
             </tr>
         </thead>
         <tbody>
@@ -33,23 +53,19 @@
                 {
                     <tr>
                         <td>@item.MaDBH</td>
-                        <td>@item.TenSP</td>
+                        <td class="text-start">@item.TenSP</td>
                         <td>@item.SLB</td>
                         <td>@item.DGB.ToString("N0")</td>
-                        <td>@((item.SLB * item.DGB).ToString("N0"))</td>
-                        <td class="d-flex justify-content-center gap-1">
-                            <a asp-action="Details" asp-route-maDBH="@item.MaDBH" asp-route-maSP="@item.MaSP" class="btn btn-info btn-sm text-white">
-                                <i class="fa-solid fa-eye"></i> Xem
-                            </a>
-                            <a asp-action="Edit" asp-route-maDBH="@item.MaDBH" asp-route-maSP="@item.MaSP" class="btn btn-warning btn-sm text-white">
-                                <i class="fa-solid fa-pen-to-square"></i> Sửa
-                            </a>
-                            <a asp-action="Delete" asp-route-maDBH="@item.MaDBH" asp-route-maSP="@item.MaSP" class="btn btn-danger btn-sm">
-                                <i class="fa-solid fa-trash"></i> Xóa
-                            </a>
-                        </td>
+                        <td>@((item.SLB * item.DGB).ToString("N0"))</td>                        
                     </tr>
                 }
+                <tr class="table-secondary fw-bold">
+                    <td colspan="4" class="text-end">Tổng cộng:</td>
+                    <td>
+                        @Model.Sum(i => i.SLB * i.DGB).ToString("N0")
+                    </td>
+                </tr>
+
             }
             else
             {
@@ -59,4 +75,37 @@
             }
         </tbody>
     </table>
+
+    <div class="d-flex justify-content-end">
+        <a asp-action="Index" asp-controller="Dashboard" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Debounce function
+            function debounce(fn, delay) {
+                let timer = null;
+                return function () {
+                    const context = this, args = arguments;
+                    clearTimeout(timer);
+                    timer = setTimeout(() => fn.apply(context, args), delay);
+                };
+            }
+
+            // Real-time search
+            $('#searchBox').on('input', debounce(function () {
+                $('#Form').submit();
+            }, 500));
+
+            // Clear filter
+            $('#btnClear').on('click', function () {
+                $('#searchBox').val('');
+                $('#Form').submit();
+            });
+        });
+    </script>
+}

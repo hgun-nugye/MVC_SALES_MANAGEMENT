@@ -48,6 +48,8 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(Tinh model)
 		{
+			ModelState.Remove("MaTinh");
+
 			if (ModelState.IsValid)
 			{
 				try

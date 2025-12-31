@@ -1,40 +1,104 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.CTMHDetailDto>
-
+﻿@model QuanLyBanHang.Models.CTMHDetailDto
 
 @{
-    ViewBag.Title = "Chi tiết chi tiết mua hàng";
-    var item = @Model.FirstOrDefault();
+    ViewBag.Title = "Chi tiết Đơn mua hàng";
 }
 
-<div class=" container">
-    <h4 class="mb-3 text-success">
-        <i class="fa-solid fa-eye"></i> Chi tiết mua hàng - Đơn: @item.MaDMH
-    </h4>
+<style>
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
 
-    <div class="card shadow-sm p-4 mb-3">
-        <dl class="row">
-            <dt class="col-sm-3">Mã sản phẩm</dt>
-            <dd class="col-sm-9">@item.MaSP</dd>
+    .info-group {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f0f4f2;
+    }
 
-            <dt class="col-sm-3">Tên sản phẩm</dt>
-            <dd class="col-sm-9">@item.TenSP</dd>
+    .info-group:last-child {
+        border-bottom: none;
+    }
 
-            <dt class="col-sm-3">Số lượng</dt>
-            <dd class="col-sm-9">@item.SLM</dd>
+    .info-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-            <dt class="col-sm-3">Đơn giá</dt>
-            <dd class="col-sm-9">@item.DGM.ToString("N")</dd>
-        </dl>
+    .info-value {
+        font-size: 1.1rem;
+        color: #2d3436;
+        font-weight: 500;
+    }
+
+    .badge-id {
+        background: #198754;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(25,135,84,0.2);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">
+            <i class="fa-solid fa-eye me-2"></i>
+            Chi tiết sản phẩm nhập kho
+        </h4>
+        <div class="d-flex gap-2">
+            <span class="badge-id">Đơn: @Model.MaDMH</span>
+            <span class="badge-id bg-primary">SP: @Model.MaSP</span>
+        </div>
     </div>
-  
-</div>
 
-<div class="mt-4">
-    <a asp-action="Edit" asp-route-maDMH="@item.MaDMH" asp-route-maSP="@item.MaSP" class="btn btn-warning">
-        <i class="fa-solid fa-pen-to-square"></i> Sửa
-    </a>
-    <a asp-action="Index" asp-route-maDMH="@item.MaDMH" class="btn btn-secondary">
-        <i class="fa-solid fa-arrow-left"></i> Quay lại
-    </a>
+    <div class="info-card">
+        <div class="row g-0">
+            <div class="col-md-6 border-end">
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-box text-success"></i> Sản phẩm</div>
+                    <div class="info-value">@Model.TenSP</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-hashtag text-success"></i> Mã sản phẩm</div>
+                    <div class="info-value">@Model.MaSP</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-sort-numeric-up text-success"></i> Số lượng</div>
+                    <div class="info-value">@Model.SLM</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-money-bill-wave text-success"></i> Đơn giá nhập</div>
+                    <div class="info-value">@Model.DGM.ToString("N0") ₫</div>
+                </div>
+                <div class="info-group bg-light">
+                    <div class="info-label"><i class="fa-solid fa-coins text-warning"></i> Thành tiền</div>
+                    <div class="info-value text-success fw-bold fs-4">@((Model.SLM * Model.DGM).ToString("N0")) ₫</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="d-flex justify-content-end gap-2 mt-4 page-header bg-white shadow-sm p-3" style="border-radius: 12px; background: white !important; color: inherit;">
+        <button type="button" onclick="history.back()" class="btn btn-outline-secondary px-4 fw-bold">
+            <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+        </button>
+        <a asp-action="Edit" asp-route-maDMH="@Model.MaDMH" asp-route-maSP="@Model.MaSP" class="btn btn-warning text-white px-4 fw-bold">
+            <i class="fa-solid fa-pen-to-square me-2"></i> Chỉnh sửa
+        </a>
+    </div>
 </div>

@@ -1,0 +1,149 @@
+@model QuanLyBanHang.Models.CTBH
+@{
+    ViewBag.Title = "Thêm chi tiết bán hàng";
+}
+
+<style>
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid #f0f4f2;
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #dee2e6;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="page-header text-center mb-4">
+        <h4 class="fw-bold text-success">
+            <i class="fa-solid fa-plus-circle me-2"></i>
+            Thêm sản phẩm vào đơn bán
+        </h4>
+        <p class="text-muted">Mã Đơn: <span class="badge bg-success">@Model.MaDBH</span></p>
+    </div>
+
+    <div class="form-card">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MaDBH" />
+
+            <div class="mb-4">
+                <label asp-for="MaSP" class="form-label">Chọn sản phẩm</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-box text-success"></i></span>
+                    <select asp-for="MaSP" id="ProductSelect" class="form-select border-start-0" asp-items="@ViewBag.MaSP">
+                        <option value="">-- Chọn sản phẩm --</option>
+                    </select>
+                </div>
+                <div id="StockInfo" class="mt-2 small text-muted" style="display:none;">
+                    <i class="fa-solid fa-warehouse me-1"></i> Tồn kho hiện tại: <span id="AvailableStock" class="fw-bold text-success">0</span>
+                </div>
+                <span asp-validation-for="MaSP" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="SLB" class="form-label">Số lượng bán</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calculator text-success"></i></span>
+                    <input asp-for="SLB" id="QuantityInput" class="form-control border-start-0" type="number" min="1" placeholder="Nhập số lượng..." required />
+                </div>
+                <div id="QuantityWarning" class="text-danger small mt-1" style="display:none;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Số lượng vượt quá tồn kho!
+                </div>
+                <span asp-validation-for="SLB" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DGB" class="form-label">Đơn giá bán (₫)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-tag text-success"></i></span>
+                    <input asp-for="DGB" id="PriceInput" class="form-control border-start-0" type="number" step="0.01" placeholder="Nhập giá bán..." required />
+                </div>
+                <span asp-validation-for="DGB" class="text-danger small"></span>
+            </div>
+
+            <div class="d-grid gap-2 mt-5">
+                <button type="submit" id="SubmitBtn" class="btn btn-success py-2 fw-bold shadow-sm">
+                    <i class="fa-solid fa-plus me-2"></i> Thêm vào đơn hàng
+                </button>
+                <button type="button" onclick="history.back()" class="btn btn-outline-secondary py-2 fw-bold">
+                    Hủy bỏ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let availableStock = 0;
+
+            $('#ProductSelect').change(function() {
+                const maSP = $(this).val();
+                if (maSP) {
+                    $.get('/SanPham/GetGia/' + maSP, function(data) {
+                        $('#PriceInput').val(data.gia);
+                        availableStock = data.ton;
+                        $('#AvailableStock').text(availableStock);
+                        $('#StockInfo').fadeIn();
+                        validateQuantity();
+                    });
+                } else {
+                    $('#StockInfo').hide();
+                    availableStock = 0;
+                }
+            });
+
+            $('#QuantityInput').on('input change', function() {
+                validateQuantity();
+            });
+
+            function validateQuantity() {
+                const qty = parseInt($('#QuantityInput').val()) || 0;
+                if (qty > availableStock && availableStock >= 0) {
+                    $('#QuantityWarning').show();
+                    $('#SubmitBtn').attr('disabled', true).addClass('opacity-50');
+                } else {
+                    $('#QuantityWarning').hide();
+                    $('#SubmitBtn').attr('disabled', false).removeClass('opacity-50');
+                }
+            }
+
+            $('form').submit(function(e) {
+                const qty = parseInt($('#QuantityInput').val()) || 0;
+                if (qty > availableStock) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi số lượng',
+                        text: 'Số lượng mua không thể vượt quá số lượng tồn kho!'
+                    });
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

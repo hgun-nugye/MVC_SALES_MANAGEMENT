@@ -1,44 +1,108 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.CTBHDetailDto>
+﻿@model QuanLyBanHang.Models.CTBHDetailDto
 
 @{
-    ViewBag.Title = "Chi tiết sản phẩm trong đơn bán";
-    var item = Model.FirstOrDefault();
+    ViewBag.Title = "Chi tiết Đơn bán hàng";
 }
 
-<div class="container">
+<style>
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
 
-    <h4 class="text-success mb-3">
-        <i class="fa-solid fa-circle-info"></i> Chi tiết sản phẩm trong đơn
-    </h4>
+    .info-group {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f0f4f2;
+    }
 
-    @if (item != null)
-    {
-        <div class="card shadow-sm p-4">
-            <p><strong>Mã Đơn:</strong> @item.MaDBH</p>
-            <p><strong>Tên SP:</strong> @item.TenSP</p>
-            <p><strong>Số lượng:</strong> @item.SLB</p>
-            <p><strong>Đơn giá:</strong> @item.DGB.ToString("N0")</p>
-            <p><strong>Thành tiền:</strong> @((item.SLB * item.DGB).ToString("N0"))</p>
+    .info-group:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #2d3436;
+        font-weight: 500;
+    }
+
+    .badge-id {
+        background: #198754;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(25,135,84,0.2);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            Chi tiết sản phẩm trong đơn
+        </h4>
+        <div class="d-flex gap-2">
+            <span class="badge-id">Đơn: @Model.MaDBH</span>
+            <span class="badge-id bg-primary">SP: @Model.MaSP</span>
         </div>
-    }
-    else
-    {
-        <p class="text-danger">Không tìm thấy dữ liệu.</p>
-    }
+    </div>
 
-</div>
+    <div class="info-card">
+        <div class="row g-0">
+            <div class="col-md-6 border-end">
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-box text-success"></i> Sản phẩm</div>
+                    <div class="info-value">@Model.TenSP</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-hashtag text-success"></i> Mã sản phẩm</div>
+                    <div class="info-value">@Model.MaSP</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-calendar-day text-success"></i> Ngày bán</div>
+                    <div class="info-value">@Model.NgayBH.ToString("dd/MM/yyyy")</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-sort-numeric-up text-success"></i> Số lượng</div>
+                    <div class="info-value">@Model.SLB</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label"><i class="fa-solid fa-money-bill-wave text-success"></i> Đơn giá</div>
+                    <div class="info-value">@Model.DGB.ToString("N0") ₫</div>
+                </div>
+                <div class="info-group bg-light">
+                    <div class="info-label"><i class="fa-solid fa-coins text-warning"></i> Thành tiền</div>
+                    <div class="info-value text-success fw-bold fs-4">@((Model.SLB * Model.DGB).ToString("N0")) ₫</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="mt-4">
-    
-    @if (item != null)
-    {
-        <a href="@Url.Action("Edit", "DonBanHang", new { id = item.MaDBH })"
-           class="btn btn-warning text-white">
-            <i class="fa-solid fa-pen-to-square"></i> Sửa
+    <div class="d-flex justify-content-end gap-2 mt-4 page-header bg-white shadow-sm p-3" style="border-radius: 12px; background: white !important; color: inherit;">
+        <button type="button" onclick="goBack('@Url.Action("Index", "CTBH")')" class="btn btn-outline-secondary px-4 fw-bold">
+            <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+        </button>
+        <a asp-action="Edit" asp-route-maDBH="@Model.MaDBH" asp-route-maSP="@Model.MaSP" class="btn btn-warning text-white px-4 fw-bold">
+            <i class="fa-solid fa-pen-to-square me-2"></i> Chỉnh sửa
         </a>
-    }
-
-    <a asp-action="Index" asp-route-maDBH="@item?.MaDBH" class="btn btn-secondary">
-        <i class="fa-solid fa-arrow-left"></i> Quay lại
-    </a>
+    </div>
 </div>

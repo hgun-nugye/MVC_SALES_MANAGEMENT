@@ -1,0 +1,386 @@
+@model List<QuanLyBanHang.Models.CartItem>
+
+@{
+    ViewBag.Title = "Giỏ hàng";
+    decimal selectedTotal = Model.Where(i => i.IsSelected).Sum(i => i.ThanhTien);
+    int selectedCount = Model.Count(i => i.IsSelected);
+    bool allSelected = Model.Any() && Model.All(i => i.IsSelected);
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-green: #198754;
+        --light-green-bg: #42c74615; 
+        --hover-green: #146c43;
+        --border-color: rgba(25, 135, 84, 0.2);
+    }
+
+    body {
+        background-color: #f0f7f2;
+        color: #333;
+    }
+
+    .cart-wrapper {
+        padding: 30px 0 80px 0;
+        min-height: 85vh;
+    }
+
+    /* Custom Checkbox Green */
+    .shopee-checkbox {
+        width: 19px;
+        height: 19px;
+        cursor: pointer;
+        accent-color: var(--primary-green);
+    }
+
+    /* Elevations with Green Touch */
+    .shopee-elevation {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 15px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .cart-header-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        background: #fdfdfd;
+        color: var(--primary-green);
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-bottom: 2px solid var(--light-green-bg);
+    }
+
+    .cart-item-row {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .cart-item-row:hover {
+            background: #f9fff9;
+        }
+
+    .col-check {
+        width: 50px;
+        flex-shrink: 0;
+    }
+
+    .product-col {
+        flex: 4;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .price-col {
+        flex: 1.5;
+        text-align: center;
+    }
+
+    .qty-col {
+        flex: 1.5;
+        text-align: center;
+    }
+
+    .qty-box {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--primary-green);
+        border-radius: 6px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .qty-btn {
+        width: 36px;
+        height: 36px;
+        background: #f8fdf9;
+        border: none;
+        color: var(--primary-green);
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .qty-btn:hover {
+            background: var(--primary-green);
+            color: #fff;
+        }
+
+        .qty-btn:active {
+            transform: scale(0.95);
+        }
+
+    .qty-input {
+        width: 45px;
+        height: 36px;
+        border: none;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: #fff;
+        color: #333;
+    }
+
+
+    .total-col {
+        flex: 1.5;
+        text-align: center;
+        color: var(--primary-green);
+        font-weight: 700;
+    }
+
+    .action-col {
+        flex: 0.8;
+        text-align: center;
+    }
+
+    .product-img {
+        width: 85px;
+        height: 85px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #eee;
+    }
+
+    .product-name {
+        font-size: 0.95rem;
+        color: #2c3e50;
+        font-weight: 500;
+        text-decoration: none;
+        line-height: 1.4;
+    }
+
+        .product-name:hover {
+            color: var(--primary-green);
+        }
+
+    /* Floating Bar Green */
+    .shopee-floating-bar {
+        position: sticky;
+        bottom: 15px;
+        background: white;
+        z-index: 100;
+        padding: 15px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 2px solid var(--primary-green);
+        box-shadow: 0 -5px 20px rgba(25, 135, 84, 0.1);
+    }
+
+    .btn-green-primary {
+        background: var(--primary-green);
+        color: white;
+        border: none;
+        padding: 12px 45px;
+        font-size: 1.1rem;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-transform: uppercase;
+    }
+
+        .btn-green-primary:hover {
+            background: var(--hover-green);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .final-total {
+        font-size: 1.7rem;
+        color: var(--primary-green);
+        font-weight: 800;
+    }
+
+    .text-green {
+        color: var(--primary-green);
+    }
+
+    .badge-eco {
+        background: var(--primary-green);
+        color: white;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+</style>
+
+<div class="cart-wrapper">
+    <div class="container">
+        <div class="d-flex align-items-center mb-4">
+            <div class="bg-success p-2 rounded-3 me-3">
+                <i class="fa-solid fa-cart-shopping text-white fs-4"></i>
+            </div>
+            <h3 class="mb-0 fw-bold text-green">GIỎ HÀNG CỦA BẠN</h3>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="shopee-elevation cart-header-sticky">
+                <div class="col-check">
+                    <form asp-action="ToggleSelectAll" method="post" id="formSelectAllTop">
+                        <input type="checkbox" class="shopee-checkbox" @(allSelected ? "checked" : "")
+                               onchange="document.getElementById('formSelectAllTop').submit()">
+                        <input type="hidden" name="selectAll" value="@(!allSelected ? "true" : "false")" />
+                    </form>
+                </div>
+                <div class="product-col fw-bold">Sản phẩm</div>
+                <div class="price-col fw-bold">Đơn giá</div>
+                <div class="qty-col fw-bold">Số lượng</div>
+                <div class="total-col fw-bold">Số tiền</div>
+                <div class="action-col"></div>
+            </div>
+
+            <div class="shopee-elevation">
+                @foreach (var item in Model)
+                {
+                    <div class="cart-item-row">
+                        <div class="col-check">
+                            <form asp-action="ToggleSelect" method="post" id="formToggle-@item.MaSP">
+                                <input type="hidden" name="maSP" value="@item.MaSP" />
+                                <input type="checkbox" class="shopee-checkbox" @(item.IsSelected ? "checked" : "")
+                                       onchange="document.getElementById('formToggle-@item.MaSP').submit()">
+                            </form>
+                        </div>
+
+                        <div class="product-col">
+                            <a href="@Url.Action("Details", "SanPham", new { id = item.MaSP })">
+                                <img src="@(string.IsNullOrEmpty(item.AnhMH) ? Url.Content("~/images/default-product.png") : Url.Content("~/images/products/" + item.AnhMH))"
+                                     class="product-img" alt="@item.TenSP">
+                            </a>
+                            <div>
+                                <a href="@Url.Action("Details", "SanPham", new { id = item.MaSP })" class="product-name">
+                                    <span class="badge-eco">Ưu đãi</span>@item.TenSP
+                                </a>
+                                <p class="small text-muted mb-0 mt-1"><i class="fa-solid fa-shield-halved text-success me-1"></i> Bảo hành chính hãng</p>
+                            </div>
+                        </div>
+
+                        <div class="price-col">
+                            <div class="fw-bold">₫@string.Format("{0:N0}", item.GiaBan)</div>
+                        </div>
+
+                        <div class="qty-col">
+                            <form asp-action="UpdateQuantity" method="post" class="qty-box">
+                                <input type="hidden" name="maSP" value="@item.MaSP" />
+
+                                <button type="button" class="qty-btn"
+                                        onclick="updateQty(this, -1, @item.SoLuongTon)">
+                                    −
+                                </button>
+
+                                <input type="text" name="soLuong" value="@item.SoLuong"
+                                       class="qty-input" readonly>
+
+                                <button type="button" class="qty-btn"
+                                        onclick="updateQty(this, 1, @item.SoLuongTon)">
+                                    +
+                                </button>
+                            </form>
+                            <div class="small mt-1 @(item.SoLuong > item.SoLuongTon ? "text-danger fw-bold" : "text-muted")">
+                                Còn: @item.SoLuongTon
+                            </div>
+                            @if (item.SoLuong > item.SoLuongTon)
+                            {
+                                <div class="text-danger x-small mt-1 fw-bold" style="font-size: 10px;">
+                                    Vượt quá tồn kho!
+                                </div>
+                            }
+                        </div>
+
+
+                        <div class="total-col">
+                            ₫@string.Format("{0:N0}", item.ThanhTien)
+                        </div>
+
+                        <div class="action-col">
+                            <form asp-action="RemoveFromCart" method="post">
+                                <input type="hidden" name="maSP" value="@item.MaSP" />
+                                <button type="submit" class="btn btn-sm text-danger border-0 fw-500">
+                                    <i class="fa-solid fa-trash-can"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="shopee-elevation shopee-floating-bar">
+                <div class="d-flex align-items-center">
+                    <form asp-action="ToggleSelectAll" method="post" id="formSelectAllBottom" class="d-flex align-items-center">
+                        <input type="checkbox" class="shopee-checkbox me-2" @(allSelected ? "checked" : "")
+                               onchange="document.getElementById('formSelectAllBottom').submit()">
+                        <input type="hidden" name="selectAll" value="@(!allSelected ? "true" : "false")" />
+                        <span class="fw-500">Chọn tất cả (@Model.Count)</span>
+                    </form>
+                    <form asp-action="ClearSelected" method="post" class="ms-4">
+                        <button type="submit" class="btn btn-link text-secondary text-decoration-none p-0 small">Làm trống mục đã chọn</button>
+                    </form>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <div class="text-end me-4">
+                        <div class="fw-500">Tổng thanh toán (<span class="text-green">@selectedCount</span> sản phẩm):</div>
+                        <div class="final-total">₫@string.Format("{0:N0}", selectedTotal)</div>
+                    </div>
+                    @{
+                        bool hasStockError = Model.Any(i => i.IsSelected && i.SoLuong > i.SoLuongTon);
+                    }
+                    <a href="@Url.Action("Checkout")" class="btn-green-primary @(selectedCount == 0 || hasStockError ? "disabled" : "")" 
+                       onclick="@(hasStockError ? "event.preventDefault(); Swal.fire('Lỗi', 'Một số sản phẩm vượt quá tồn kho. Vui lòng điều chỉnh lại.', 'error');" : "")">
+                        Đặt hàng ngay
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="shopee-elevation text-center py-5">
+                <i class="fa-solid fa-basket-shopping fa-5x text-light mb-3"></i>
+                <h4 class="text-secondary">Giỏ hàng của bạn đang trống</h4>
+                <p class="text-muted">Hãy chọn thêm sản phẩm để tiếp tục mua sắm nhé!</p>
+                <a href="@Url.Action("Index", "SanPham")" class="btn-green-primary mt-3">TIẾP TỤC MUA SẮM</a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       function updateQty(btn, delta, maxStock) {
+            const form = btn.closest('form');
+            const input = form.querySelector('input[name="soLuong"]');
+            let value = parseInt(input.value) || 1;
+
+            value += delta;
+            if (value < 1) value = 1;
+
+            if (value > maxStock) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giới hạn tồn kho',
+                    text: 'Số lượng trong giỏ hàng không thể vượt quá ' + maxStock,
+                    confirmButtonColor: '#198754'
+                });
+                return;
+            }
+
+            input.value = value;
+            form.submit();
+        }
+    </script>
+}

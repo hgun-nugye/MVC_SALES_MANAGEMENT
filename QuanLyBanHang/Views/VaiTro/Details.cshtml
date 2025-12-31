@@ -20,9 +20,9 @@
         <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "VaiTro", new { id = Model.MaVT })">
             <i class="fa-solid fa-trash"></i> Xóa
         </a>
-        <a asp-action="Index" class="btn btn-secondary">
+        <button type="button" onclick="history.back()" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
+        </button>
     </div>
 </div>
 

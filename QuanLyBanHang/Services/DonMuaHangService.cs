@@ -32,7 +32,7 @@ namespace QuanLyBanHang.Services
 			};
 
 			var data = await _context.CTMHDetailDtos
-				.FromSqlRaw("EXEC CTMH_GetById_Detail @MaDMH, @MaSP", parameters)
+				.FromSqlRaw("EXEC CTMH_GetByID @MaDMH, @MaSP", parameters)
 				.ToListAsync();
 
 			var model = data.FirstOrDefault();
@@ -158,18 +158,19 @@ namespace QuanLyBanHang.Services
 			{
 				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
 				new SqlParameter("@Month", (object?)month ?? DBNull.Value),
-				new SqlParameter("@Year", (object?)year ?? DBNull.Value)
+				new SqlParameter("@Year", (object?)year ?? DBNull.Value),
+				new SqlParameter("@MaTTMH", (object?)status ?? DBNull.Value)
 			};
 
 			return await _context.DonMuaHangDetail
-				.FromSqlRaw("EXEC DonMuaHang_Search @Search, @Month, @Year", parameters)
+				.FromSqlRaw("EXEC DonMuaHang_Search @Search, @Month, @Year, @MaTTMH", parameters)
 				.ToListAsync();
 		}
 
 		public async Task<List<DonMuaHang>> Reset()
 		{
 			var data = await _context.DonMuaHang
-				.FromSqlRaw("EXEC DonMuaHang_Search @Search=NULL, @Month=NULL, @Year=NULL")
+				.FromSqlRaw("EXEC DonMuaHang_Search @Search=NULL, @Month=NULL, @Year=NULL, @MaTTMH=NULL")
 				.ToListAsync();
 
 			return data;

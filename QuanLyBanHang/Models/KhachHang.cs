@@ -103,5 +103,8 @@ namespace QuanLyBanHang.Models
 
 		[Display(Name = "Tên tỉnh")]
 		public string? TenTinh { get; set; }
+
+        [Display(Name = "Mã xã")]
+        public string? MaXa { get; set; }
 	}
 }

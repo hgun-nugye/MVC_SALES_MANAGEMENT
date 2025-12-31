@@ -51,6 +51,9 @@ namespace QuanLyBanHang.Services
 		// Thêm Nhân Viên
 		public async Task Create(NhanVien model, string maVT)
 		{
+			// Hash password
+			string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.MatKhauNV);
+
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC NhanVien_Insert 
                     @CCCD = {model.CCCD},
@@ -63,7 +66,7 @@ namespace QuanLyBanHang.Services
                     @DiaChiNV = {model.DiaChiNV},
                     @MaXa = {model.MaXa},
                     @TenDNNV = {model.TenDNNV},
-                    @MatKhauNV = {model.MatKhauNV},
+                    @MatKhauNV = {hashedPassword},
                     @MaVT = {maVT}");
 		}
 
@@ -104,6 +107,54 @@ namespace QuanLyBanHang.Services
 		{
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC NhanVien_Delete @MaNV = {id}");
+		}
+
+		public async Task ResetPassword(string id, string newPassword)
+		{
+			var nv = await GetByIDEdit(id);
+			if (nv == null) throw new Exception("Nhân viên không tìm thấy!");
+
+			// Lấy Vai trò hiện tại bằng Proc (Thay vì LINQ)
+			var phanQuyenList = await _context.PhanQuyenDto
+				.FromSqlRaw("EXEC PhanQuyen_GetByNhanVien @MaNV", new SqlParameter("@MaNV", id))
+				.ToListAsync();
+			
+			string maVT = phanQuyenList.FirstOrDefault()?.MaVT ?? ""; 
+
+			string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+			await _context.Database.ExecuteSqlInterpolatedAsync($@"
+			EXEC NhanVien_Update 
+				@MaNV = {nv.MaNV},
+				@CCCD = {nv.CCCD},
+				@TenNV = {nv.TenNV},
+				@GioiTinh = {nv.GioiTinh},
+				@NgaySinh = {nv.NgaySinh},
+				@SDT = {nv.SDT},
+				@Email = {nv.Email},
+				@DiaChiNV = {nv.DiaChiNV},
+				@MaXa = {nv.MaXa},
+				@TenDNNV = {nv.TenDNNV},
+				@MatKhauNV = {hashedPassword}, 
+				@AnhNV = {nv.AnhNV},
+				@MaVT = {maVT}");
+		}
+
+		public async Task<NhanVien?> GetByUsername(string username)
+		{
+			return (await _context.NhanVien
+				.FromSqlInterpolated($"EXEC NhanVien_GetByUsername @Username = {username}")
+				.ToListAsync())
+				.FirstOrDefault();
+		}
+
+		public async Task<string> GetRole(string maNV)
+		{
+			var phanQuyenList = await _context.PhanQuyenDto
+				.FromSqlRaw("EXEC PhanQuyen_GetByNhanVien @MaNV", new SqlParameter("@MaNV", maNV))
+				.ToListAsync();
+			
+			return phanQuyenList.FirstOrDefault()?.TenVT ?? "Employee";
 		}
 	}
 }

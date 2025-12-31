@@ -14,7 +14,7 @@ namespace QuanLyBanHang.Models
 		public string MaXa { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Tên xã không được để trống")]
-		[StringLength(90, ErrorMessage = "Tên xã không được quá 90 ký tự")]
+		[StringLength(50, ErrorMessage = "Tên xã không được quá 50 ký tự")]
 		[Display(Name = "Tên xã")]
 		public string TenXa { get; set; } = string.Empty;
 

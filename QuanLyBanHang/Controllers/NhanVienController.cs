@@ -10,13 +10,26 @@ namespace QuanLyBanHang.Controllers
 	{
 		private readonly NhanVienService _nhanVienService;
 		private readonly XaService _xaService;
+		private readonly TinhService _tinhService;
+		private readonly VaiTroService _vaiTroService;
+		private readonly PhanQuyenService _phanQuyenService;
 		private readonly AppDbContext _context;
 		private readonly IWebHostEnvironment _webHostEnvironment;
-		public NhanVienController(NhanVienService nhanVienService,XaService xaService, AppDbContext context, IWebHostEnvironment webHostEnvironment)
+		public NhanVienController(
+			NhanVienService nhanVienService,
+			XaService xaService, 
+			TinhService tinhService,
+			VaiTroService vaiTroService,
+			PhanQuyenService phanQuyenService,
+			AppDbContext context, 
+			IWebHostEnvironment webHostEnvironment)
 		{
 			_nhanVienService = nhanVienService;
 			_context = context;
 			_xaService = xaService;
+			_tinhService = tinhService;
+			_vaiTroService = vaiTroService;
+			_phanQuyenService = phanQuyenService;
 			_webHostEnvironment = webHostEnvironment;
 		}
 	
@@ -44,10 +57,11 @@ namespace QuanLyBanHang.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
-			var vaiTros = await _context.VaiTro.ToListAsync();
+			var vaiTros = await _vaiTroService.GetAll();
 			ViewBag.VaiTro = new SelectList(vaiTros, "MaVT", "TenVT");
 
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			var tinhs = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(tinhs, "MaTinh", "TenTinh");
 			ViewBag.Xa = new SelectList(Enumerable.Empty<object>(), "MaXa", "TenXa");
 			ViewData["MaXaSelected"] = null;
 			return View();
@@ -102,10 +116,11 @@ namespace QuanLyBanHang.Controllers
 				}
 			}
 
-			var vaiTros = await _context.VaiTro.ToListAsync();
-			ViewBag.VaiTro = new SelectList(vaiTros, "MaVT", "TenVT", maVT);
+			var vaiTrosPost = await _vaiTroService.GetAll();
+			ViewBag.VaiTro = new SelectList(vaiTrosPost, "MaVT", "TenVT", maVT);
 
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+			var allTinhs = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinhs, "MaTinh", "TenTinh", maTinh);
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
 			ViewData["MaXaSelected"] = model.MaXa;
@@ -125,20 +140,19 @@ namespace QuanLyBanHang.Controllers
 			if (nhanVien == null)
 				return NotFound();
 
-			// Get MaVT from PhanQuyen
-			var phanQuyen = await _context.PhanQuyen
-				.Where(pq => pq.MaNV == id)
-				.FirstOrDefaultAsync();
-			var maVT = phanQuyen?.MaVT ?? "";
+			// Get MaVT from PhanQuyen - Dùng service (Proc)
+			var listPQ = await _phanQuyenService.GetByNhanVien(id);
+			var maVT = listPQ.FirstOrDefault()?.MaVT ?? "";
 
-			var vaiTros = await _context.VaiTro.ToListAsync();
-			ViewBag.VaiTro = new SelectList(vaiTros, "MaVT", "TenVT", maVT);
+			var vaiTrosEdit = await _vaiTroService.GetAll();
+			ViewBag.VaiTro = new SelectList(vaiTrosEdit, "MaVT", "TenVT", maVT);
 
 			string? maTinh = !string.IsNullOrEmpty(nhanVien.MaXa) ? await _xaService.GetMaTinhByXa(nhanVien.MaXa) : null;
 
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
-			var xaList = await _xaService.GetByIDTinh(maTinh);
-			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", nhanVien.MaXa);
+			var allTinhsEdit = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinhsEdit, "MaTinh", "TenTinh", maTinh);
+			var xaListEdit = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(xaListEdit, "MaXa", "TenXa", nhanVien.MaXa);
 			ViewData["MaXaSelected"] = nhanVien.MaXa;
 
 			return View(nhanVien);
@@ -187,9 +201,8 @@ namespace QuanLyBanHang.Controllers
 						model.AnhNV = currentNV.AnhNV;
 					}
 
-					string finalPassword = string.IsNullOrEmpty(newPassword) ? currentNV.MatKhauNV : newPassword;
-
-					await _nhanVienService.Update(model, maVT, finalPassword);
+					model.MatKhauNV = currentNV.MatKhauNV;
+					await _nhanVienService.Update(model, maVT, newPassword);
 
 					TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
 					return RedirectToAction(nameof(Index));
@@ -201,14 +214,15 @@ namespace QuanLyBanHang.Controllers
 			}
 
 			// Nếu có lỗi, load lại dữ liệu cho các Dropdown
-			var vaiTros = await _context.VaiTro.ToListAsync();
-			ViewBag.VaiTro = new SelectList(vaiTros, "MaVT", "TenVT", maVT);
+			var vaiTrosErr = await _vaiTroService.GetAll();
+			ViewBag.VaiTro = new SelectList(vaiTrosErr, "MaVT", "TenVT", maVT);
 
 			// Logic load lại Tỉnh/Xã để tránh lỗi giao diện
 			string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
-			var xaList = await _xaService.GetByIDTinh(maTinh);
-			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+			var tinhsErr = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(tinhsErr, "MaTinh", "TenTinh", maTinh);
+			var xaListErr = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(xaListErr, "MaXa", "TenXa", model.MaXa);
 
 			return View(model);
 		}
@@ -252,6 +266,25 @@ namespace QuanLyBanHang.Controllers
 			}
 
 			return RedirectToAction(nameof(Index));
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> ResetPassword(string id)
+		{
+			if (string.IsNullOrEmpty(id)) return BadRequest();
+
+			try
+			{
+				await _nhanVienService.ResetPassword(id, "123456");
+				TempData["SuccessMessage"] = "Đã reset mật khẩu thành công";
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = "Lỗi reset mật khẩu: " + ex.Message;
+			}
+
+			return RedirectToAction(nameof(Details), new { id });
 		}
 	}
 }

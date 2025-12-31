@@ -242,9 +242,17 @@
                     </label>
                     <div class="input-group-icon">
                         <i class="fa-solid fa-user"></i>
-                        <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
-                            <option value="">-- Chọn nhân viên --</option>
-                        </select>
+                        @if (ViewBag.CurrentMaNV != null)
+                        {
+                             <input type="text" class="form-control" value="@ViewBag.CurrentTenNV" readonly />
+                             <input type="hidden" asp-for="MaNV" value="@ViewBag.CurrentMaNV" />
+                        }
+                        else
+                        {
+                            <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
+                                <option value="">-- Chọn nhân viên --</option>
+                            </select>
+                        }
                     </div>
                     <span asp-validation-for="MaNV" class="text-danger small mt-1"></span>
                 </div>
@@ -256,9 +264,9 @@
                     </label>
                     <div class="input-group-icon">
                         <i class="fa-solid fa-list"></i>
-                        <select asp-for="MaTTMH" asp-items="ViewBag.MaTTMH" class="form-select">
-                            <option value="">-- Chọn trạng thái --</option>
-                        </select>
+                        @* Luôn hiển thị Chờ xử lý và disable/readonly vì hệ thống tự gán *@
+                        <input type="text" class="form-control bg-light" value="Chờ xử lý" readonly />
+                        <input type="hidden" asp-for="MaTTMH" value="CHO" />
                     </div>
                     <span asp-validation-for="MaTTMH" class="text-danger small mt-1"></span>
                 </div>

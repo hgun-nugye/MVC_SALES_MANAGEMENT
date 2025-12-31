@@ -18,7 +18,6 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã Nhân Viên")]
 		public string MaNV { get; set; } = string.Empty;
 
-		// Navigation properties
 		[ForeignKey("MaVT")]
 		[Display(Name = "Vai Trò")]
 		public virtual VaiTro? VaiTro { get; set; }
@@ -26,6 +25,23 @@ namespace QuanLyBanHang.Models
 		[ForeignKey("MaNV")]
 		[Display(Name = "Nhân Viên")]
 		public virtual NhanVien? NhanVien { get; set; }
+
+		[NotMapped]
+		[Display(Name = "Tên Vai Trò")]
+		public string TenVT { get; set; } = string.Empty;
+
+		[NotMapped]
+		[Display(Name = "Tên Nhân Viên")]
+		public string TenNV { get; set; } = string.Empty;
+	}
+
+	public class PhanQuyenDto
+	{
+		public string MaVT { get; set; } = string.Empty;
+		public string TenVT { get; set; } = string.Empty;
+		public string MaNV { get; set; } = string.Empty;
+		[NotMapped]
+		public string TenNV { get; set; } = string.Empty;
 	}
 }
 

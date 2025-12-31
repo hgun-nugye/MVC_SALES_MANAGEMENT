@@ -181,12 +181,96 @@
             font-weight: bold;
         }
 
+        .page-header {
+            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+            color: white;
+            padding: 2rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(25, 135, 84, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+            /* Ensure all interactive elements inside page-header are clickable */
+            .page-header > * {
+                position: relative;
+                z-index: 2;
+            }
+
+            .page-header::after {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -10%;
+                width: 300px;
+                height: 300px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+        /* Global Filter and Search Styles */
+        .filter-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 2.5rem;
+            border: 1px solid #f0f4f2;
+        }
+
+        .search-input-group {
+            position: relative;
+        }
+
+            .search-input-group i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #999;
+            }
+
+            .search-input-group .form-control {
+                padding-left: 2.8rem;
+                border-radius: 12px;
+                border: 1.5px solid #edf2ef;
+                height: 50px;
+            }
+
+        .form-select {
+            border-radius: 12px;
+            border: 1.5px solid #edf2ef;
+            height: 50px;
+        }
+
+        .btn-clear {
+            border-radius: 12px;
+            height: 50px;
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-outline-light:hover {
+            color: mediumseagreen !important;
+        }
+
     </style>
 </head>
 
 <body>
 
     <!-- SIDEBAR -->
+    @{
+        var isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
+    }
+
+    @if (isLoggedIn)
+    {
     <div class="sidebar shadow-lg">
         <div class="pb-3 text-center">
             <img src="~/images/logo.png" class="rounded-circle w-50 text-center mb-2" />           
@@ -194,15 +278,20 @@
 
         @{
             var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
-            bool isCustomer = ViewBag.IsCustomer == true;
         }              
 
-        @if (!isCustomer)
+            @if (!(ViewBag.IsCustomer == true))
         {
             <!-- Dashboard -->
             <div class="menu-label">Tổng quan</div>
             <a href="@Url.Action("Index", "Dashboard")" class="ajax-link @(ctrl == "Dashboard" ? "active" : "")">
                 <i class="fa-solid fa-chart-line me-2"></i>Dashboard
+            </a>
+
+            <!-- Địa lý -->
+            <div class="menu-label">Đơn vị hành chính</div>
+            <a href="@Url.Action("Index", "Xa")" class="ajax-link @(ctrl == "Xa" ? "active" : "")">
+                <i class="fa-solid fa-map-location-dot me-2"></i>Xã / Phường
             </a>
 
             <!-- Hàng hóa -->
@@ -213,16 +302,11 @@
             <a href="@Url.Action("Index", "LoaiSP")" class="ajax-link @(ctrl == "LoaiSP" ? "active" : "")">
                 <i class="fa-solid fa-tags me-2"></i>Loại Sản Phẩm
             </a>
-            <!-- Thông tin cơ bản -->
-            <div class="menu-label">Thông tin cơ bản</div>
+            <!-- Thông tin hãng -->
+            <div class="menu-label">Thông tin hãng</div>
             <a href="@Url.Action("Index", "HangSX")" class="ajax-link @(ctrl == "HangSX" ? "active" : "")">
                 <i class="fa-solid fa-box me-2"></i>Hãng sản xuất
             </a>
-
-            <a href="@Url.Action("Index", "Nuoc")" class="ajax-link @(ctrl == "Nuoc" ? "active" : "")">
-                <i class="fa-solid fa-flag me-2"></i>Nước
-            </a>
-
             <!-- Khách hàng & Đối tác -->
             <div class="menu-label">Khách hàng & Đối tác</div>
             <a href="@Url.Action("Index", "KhachHang")" class="ajax-link @(ctrl == "KhachHang" ? "active" : "")">
@@ -242,39 +326,42 @@
             </a>
             <a href="@Url.Action("Index", "DonMuaHang")" class="ajax-link @(ctrl == "DonMuaHang" ? "active" : "")">
                 <i class="fa-solid fa-shopping-bag me-2"></i>Đơn Mua Hàng
-            </a>
-
-            <!-- Địa lý -->
-            <div class="menu-label">Đơn vị hành chính</div>
-            <a href="@Url.Action("Index", "Xa")" class="ajax-link @(ctrl == "Xa" ? "active" : "")">
-                <i class="fa-solid fa-map-location-dot me-2"></i>Xã / Phường
-            </a>
+            </a>           
         }
         else
         {
             <!-- Menu rút gọn cho Khách hàng -->
             <div class="menu-label">Khách hàng</div>
+            <a href="@Url.Action("Profile", "KhachHang")" class="ajax-link @(ctrl == "KhachHang" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
+                <i class="fa-solid fa-user-circle me-2"></i>Thông tin cá nhân
+            </a>
             <a href="@Url.Action("Index", "SanPham")" class="ajax-link @(ctrl == "SanPham" ? "active" : "")">
                 <i class="fa-solid fa-box me-2"></i>Xem sản phẩm
             </a>
             <a href="@Url.Action("Index", "DonBanHang")" class="ajax-link @(ctrl == "DonBanHang" ? "active" : "")">
                 <i class="fa-solid fa-shopping-cart me-2"></i>Đơn mua hàng
             </a>
+            <a href="@Url.Action("Index", "Cart")" class="ajax-link @(ctrl == "Cart" ? "active" : "")">
+                <i class="fa-solid fa-cart-shopping me-2"></i>Giỏ hàng
+            </a>
         }
     </div>
+    }
 
     <!-- CONTENT -->
-    <div class="content p-4 d-flex flex-column">
+    <div class="content p-4 d-flex flex-column" style="@(isLoggedIn ? "" : "margin-left: 0; width: 100%;")">
 
         <!-- Header với thông tin người dùng và nút đăng xuất -->
         <div class="d-flex justify-content-between align-items-center mb-3">
+            @if (isLoggedIn)
+            {
             <div>
                 @{                    
                     string userName = Context.Session.GetString("UserName");
                     string userAvatar = Context.Session.GetString("UserAvatar"); // Lấy tên file ảnh từ Session
 
                     // Xác định thư mục chứa ảnh dựa trên loại người dùng
-                    string folder = isCustomer ? "customers" : "employees";
+                        string folder = ViewBag.IsCustomer == true ? "customers" : "employees";
 
                     // Tạo đường dẫn ảnh hoàn chỉnh
                     string avatarPath = string.IsNullOrEmpty(userAvatar)
@@ -288,7 +375,7 @@
                          height="40"
                          style="object-fit:cover; border-radius:50%; border: 1px solid #ddd;">
 
-                    @if (isCustomer)
+                        @if (ViewBag.IsCustomer == true)
                     {
                         <span class="text-info">Khách hàng: </span>
                     }
@@ -296,7 +383,7 @@
                     {
                         <span class="text-success">Nhân viên: </span>
                     }
-                    <strong>@userName</strong>
+                    <strong class="text-success">@userName</strong>
                 </h5>
             </div>
             <div>
@@ -308,6 +395,23 @@
                     @Html.AntiForgeryToken()
                 </form>
             </div>
+            }
+            else
+            {
+                <div class="d-flex align-items-center">
+                    <a href="@Url.Action("Index", "Home")" class="text-decoration-none">
+                         <img src="~/images/logo.png" height="50" alt="Logo" />
+                    </a>
+                </div>
+                <div>
+                    <a href="@Url.Action("Login", "Home")" class="btn btn-outline-success me-2 fw-bold">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập
+                    </a>
+                    <a href="@Url.Action("SignUp", "Home")" class="btn btn-success fw-bold text-white">
+                        <i class="fa-solid fa-user-plus me-2"></i>Đăng ký
+                    </a>
+                </div>
+            }
         </div>
 
         <main role="main" id="main-content" class="p-4 mb-4 flex-grow-1 main">
@@ -459,6 +563,17 @@
                     document.getElementById('logoutForm').submit();
                 }
             })
+        }
+
+        function goBack(fallbackUrl) {
+            const referrer = document.referrer;
+            if (referrer && (referrer.includes('/Edit') || referrer.includes('/Delete'))) {
+                window.location.href = fallbackUrl;
+            } else if (referrer && referrer !== window.location.href && !referrer.includes(window.location.pathname)) {
+                history.back();
+            } else {
+                window.location.href = fallbackUrl;
+            }
         }
     </script>
     

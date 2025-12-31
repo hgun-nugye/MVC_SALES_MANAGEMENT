@@ -40,31 +40,26 @@
         min-width: 110px;
         text-align: center;
     }
-
+    /* Chờ xác nhận - Vàng */
     .status-cho {
         background-color: #fff3cd;
         color: #856404;
         border: 1px solid #ffeeba;
     }
-    /* Chờ xác nhận - Vàng */
-    .status-dnh {
-        background-color: #cfe2ff;
-        color: #084298;
-        border: 1px solid #b6d4fe;
-    }
-    /* Đã nhận hàng - Xanh biển */
-    .status-dtt {
+    /* Đã thanh toán - Xanh lá */
+
+    .status-hth {
         background-color: #d1e7dd;
         color: #0f5132;
         border: 1px solid #badbcc;
     }
-    /* Đã thanh toán - Xanh lá */
+    /* Đã hủy - Đỏ */
+
     .status-huy {
         background-color: #f8d7da;
         color: #842029;
         border: 1px solid #f5c2c7;
     }
-    /* Đã hủy - Đỏ */
     .status-default {
         background-color: #e2e3e5;
         color: #41464b;
@@ -77,7 +72,7 @@
         bool isCustomer = ViewBag.IsCustomer == true;
     }
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <h4 class="mb-5 text-success">
+        <h4 class="mb-5 fw-bold text-success">
             Danh sách Đơn mua hàng
         </h4>
 
@@ -89,40 +84,45 @@
         }
     </div>
     <!-- FORM LỌC -->
-    <form id="Form" method="get"
-          class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+    <div class="filter-card">
+        <form id="Form" method="get" class="row g-3 align-items-end">
+            <!-- SEARCH BOX -->
+            <div class="col-lg-4">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tìm kiếm nhanh</label>
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="searchBox" type="text" name="search" value="@ViewBag.Search"
+                           class="form-control"
+                           placeholder="Tìm đơn hàng, nhà cung cấp...">
+                </div>
+            </div>
 
-        <!-- SEARCH BOX -->
-        <div class="search-wrapper flex-grow-1">
-            <i class="fa fa-search"></i>
-            <input id="searchBox" type="text" name="search" value="@ViewBag.Search"
-                   class="form-control bg-light"
-                   placeholder="Tìm đơn hàng, nhà cung cấp, ngày mua...">
-        </div>
-
-        <!--  GROUP -->
-        <div class="d-flex flex-wrap align-items-center gap-2">
-
-            <div class="d-flex align-items-center gap-2">
-                <!-- THÁNG -->
-                <select name="month" id="monthSelect" class="form-select" style="width: 130px;">
+            <!-- FILTERS -->
+            <div class="col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tháng</label>
+                <select name="month" id="monthSelect" class="form-select">
                     <option value="">-- Tháng --</option>
                     @for (int i = 1; i <= 12; i++)
                     {
                         @Html.Raw($"<option value='{i}' {(ViewBag.Month == i ? "selected" : "")}>Tháng {i}</option>")
                     }
                 </select>
+            </div>
 
-                <!-- NĂM -->
-                <select name="year" id="yearSelect" class="form-select" style="width: 130px;">
+            <div class="col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Năm</label>
+                <select name="year" id="yearSelect" class="form-select">
                     <option value="">-- Năm --</option>
                     @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 10; y--)
                     {
                         @Html.Raw($"<option value='{y}' {(ViewBag.Year == y ? "selected" : "")}>{y}</option>")
                     }
                 </select>
+            </div>
 
-                <select name="MaTTMH" id="ttdhSelect" class="form-select" style="width: 180px;">
+            <div class="col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Trạng thái</label>
+                <select name="MaTTMH" id="ttdhSelect" class="form-select">
                     <option value="">-- Trạng thái --</option>
                     @foreach (var tt in (IEnumerable<SelectListItem>)ViewBag.TrangThaiMH)
                     {
@@ -133,15 +133,17 @@
                 </select>
             </div>
 
-            <button type="button" id="btnClear" class="btn btn-secondary">
-                <i class="fa-solid fa-rotate-left"></i> Xóa
-            </button>
-
-            <a href="@Url.Action("Create", "DonMuaHang")" class="btn btn-success">
-                <i class="fa-solid fa-circle-plus"></i> Thêm
-            </a>
-        </div>
-    </form>
+            <!-- BUTTONS -->
+            <div class="col-lg-2 d-flex gap-2">
+                <button type="button" id="btnClear" class="btn btn-outline-secondary btn-clear">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <a href="@Url.Action("Create", "DonMuaHang")" class="btn btn-success d-flex align-items-center justify-content-center flex-grow-1" style="border-radius:12px; height:50px;">
+                    <i class="fa-solid fa-plus-circle me-2"></i> Thêm
+                </a>
+            </div>
+        </form>
+    </div>
 
 
     <!-- TABLE -->
@@ -161,7 +163,7 @@
                 {
                     foreach (var item in Model)
                     {
-                        <tr class="clickable-row" data-href="@Url.Action("Details", "DonMuaHang", new { id = item.MaDMH })">
+                        <tr class="clickable-row" data-href="@Url.Action("Details", "DonMuaHang", new { id = item.MaDMH, search = ViewBag.Search, month = ViewBag.Month, year = ViewBag.Year, MaTTMH = ViewBag.MaTTMH })">
 
                             <td class="text-center">@item.MaDMH</td>
                             <td class="text-center">@item.NgayMH.ToString("dd/MM/yyyy")</td>

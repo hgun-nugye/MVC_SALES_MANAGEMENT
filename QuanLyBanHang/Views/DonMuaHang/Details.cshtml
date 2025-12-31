@@ -25,6 +25,9 @@
 
                 <dt class="col-sm-3">Trạng thái:</dt>
                 <dd class="col-sm-9">@don.TenTTMH</dd>
+
+                <dt class="col-sm-3">Nhân viên:</dt>
+                <dd class="col-sm-9">@don.TenNV</dd>
             </dl>
         </div>
 
@@ -102,8 +105,8 @@
             </a>
         }
 
-         <a asp-action="Index" class="btn btn-secondary">
+         <a href="@Url.Action("Index", "DonMuaHang", new { search = ViewBag.Search, month = ViewBag.Month, year = ViewBag.Year, MaTTMH = ViewBag.MaTTMH })" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
+         </a>
     </div>
 </div>

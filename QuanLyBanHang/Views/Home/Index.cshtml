@@ -167,18 +167,17 @@
                                     <span>Liên hệ</span>
                                 }
                             </div>
-                            @if (Context.Session.GetString("IsLoggedIn") == "true")
-                            {
-                                <a href="@Url.Action("Details", "SanPham", new { id = product.MaSP })" class="btn btn-success btn-view-detail">
+                            <div class="d-flex justify-content-between gap-2">
+                                <form asp-action="AddToCart" asp-controller="Cart" method="post" class="mt-2">
+                                <input type="hidden" name="maSP" value="@product.MaSP" />
+                                <button type="submit" class="btn btn-outline-success w-100">
+                                    <i class="fa-solid fa-cart-plus me-2"></i>
+                                </button>
+                                </form>
+                                <a href="@Url.Action("Details", "SanPham", new { id = product.MaSP })" class="btn btn-success btn-view-detail mt-2">
                                     <i class="fa-solid fa-eye me-2"></i>Xem chi tiết
                                 </a>
-                            }
-                            else
-                            {
-                                <a href="@Url.Action("Login", "Home")" class="btn btn-success btn-view-detail">
-                                    <i class="fa-solid fa-sign-in-alt me-2"></i>Đăng nhập để xem
-                                </a>
-                            }
+                            </div>
                         </div>
                     </div>
                 </div>

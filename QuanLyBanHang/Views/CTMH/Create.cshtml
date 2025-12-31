@@ -1,0 +1,92 @@
+@model QuanLyBanHang.Models.CTMH
+@{
+    ViewBag.Title = "Thêm chi tiết mua hàng";
+}
+
+<style>
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid #f0f4f2;
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #dee2e6;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="page-header text-center mb-4">
+        <h4 class="fw-bold text-success">
+            <i class="fa-solid fa-cart-plus me-2"></i>
+            Thêm sản phẩm nhập kho
+        </h4>
+        <p class="text-muted">Mã Đơn: <span class="badge bg-success">@Model.MaDMH</span></p>
+    </div>
+
+    <div class="form-card">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MaDMH" />
+
+            <div class="mb-4">
+                <label asp-for="MaSP" class="form-label">Chọn sản phẩm</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-box text-success"></i></span>
+                    <select asp-for="MaSP" class="form-select border-start-0" asp-items="@ViewBag.MaSP">
+                        <option value="">-- Chọn sản phẩm --</option>
+                    </select>
+                </div>
+                <span asp-validation-for="MaSP" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="SLM" class="form-label">Số lượng mua</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calculator text-success"></i></span>
+                    <input asp-for="SLM" class="form-control border-start-0" type="number" min="1" placeholder="Nhập số lượng..." required />
+                </div>
+                <span asp-validation-for="SLM" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DGM" class="form-label">Đơn giá nhập (₫)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-tag text-success"></i></span>
+                    <input asp-for="DGM" class="form-control border-start-0" type="number" step="0.01" placeholder="Nhập giá nhập..." required />
+                </div>
+                <span asp-validation-for="DGM" class="text-danger small"></span>
+            </div>
+
+            <div class="d-grid gap-2 mt-5">
+                <button type="submit" class="btn btn-success py-2 fw-bold shadow-sm">
+                    <i class="fa-solid fa-plus me-2"></i> Thêm vào đơn hàng
+                </button>
+                <button type="button" onclick="history.back()" class="btn btn-outline-secondary py-2 fw-bold">
+                    Hủy bỏ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

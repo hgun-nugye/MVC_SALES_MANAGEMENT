@@ -1,4 +1,4 @@
-﻿@model QuanLyBanHang.Models.NhanVien
+﻿@model QuanLyBanHang.Models.NhanVienDetailView
 
 @{
     ViewBag.Title = "Xóa Nhân Viên";
@@ -6,158 +6,127 @@
 
 <style>
     .delete-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 12px;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    .warning-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
         padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e9ecef;
+        text-align: center;
     }
 
-    .detail-item {
+    .warning-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .info-display {
+        padding: 2rem;
+        background: #fff;
+    }
+
+    .info-row {
         display: flex;
+        justify-content: space-between;
         padding: 0.75rem 0;
-        border-bottom: 1px dotted #dee2e6;
+        border-bottom: 1px solid #f1f3f5;
     }
 
-    .detail-item:last-child {
+    .info-row:last-child {
         border-bottom: none;
     }
 
-    .detail-label {
+    .info-label {
+        color: #6c757d;
         font-weight: 600;
-        color: #495057;
-        min-width: 180px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
     }
 
-    .detail-label i {
-        color: #dc3545;
-        width: 20px;
-    }
-
-    .detail-value {
+    .info-value {
         color: #212529;
-        flex: 1;
+        font-weight: 700;
     }
 
-    .page-header {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        color: white;
+    .action-footer {
         padding: 1.5rem 2rem;
+        background: #f8f9fa;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .employee-avatar-small {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
         border-radius: 12px;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        border: 2px solid white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 </style>
 
-<div class="container-fluid">
-    <div class="page-header">
-        <h4>
-            <i class="fa-solid fa-trash-can"></i>
-            Xóa Nhân Viên
-        </h4>
-    </div>
-
-    <div class="alert alert-warning shadow-sm">
-        <i class="fa-solid fa-triangle-exclamation me-2"></i>
-        <strong>Cảnh báo:</strong> Bạn có chắc muốn xóa nhân viên <strong>@Model.TenNV</strong> không? Hành động này không thể hoàn tác!
-    </div>
-
+<div class="container py-5">
     <div class="delete-card">
-        <div class="detail-item">
-            <div class="detail-label">
-                <i class="fa-solid fa-id-card"></i>
-                Mã nhân viên:
+        <div class="warning-header">
+            <div class="warning-icon">
+                <i class="fa-solid fa-user-slash"></i>
             </div>
-            <div class="detail-value">@Model.MaNV</div>
+            <h3 class="fw-bold mb-1">Xác nhận xóa nhân sự?</h3>
+            <p class="mb-0 opacity-75">Hành động này sẽ xóa vĩnh viễn dữ liệu nhân viên khỏi hệ thống.</p>
         </div>
 
-        <div class="detail-item">
-            <div class="detail-label">
-                <i class="fa-solid fa-id-card"></i>
-                CCCD:
+        <div class="info-display">
+            <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
+                <img src="@(string.IsNullOrEmpty(Model.AnhNV) ? Url.Content("~/images/default-user.png") : Url.Content("~/images/employees/" + Model.AnhNV))" 
+                     class="employee-avatar-small" alt="@Model.TenNV">
+                <div>
+                    <div class="info-value" style="font-size: 1.2rem;">@Model.TenNV</div>
+                    <div class="small text-muted">Mã NV: @Model.MaNV</div>
+                </div>
             </div>
-            <div class="detail-value">@Model.CCCD</div>
+
+            <div class="info-row">
+                <span class="info-label">Số CCCD</span>
+                <span class="info-value">@Model.CCCD</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Số điện thoại</span>
+                <span class="info-value">@Model.SDT</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Vai trò</span>
+                <span class="info-value text-success">@(Model.TenVT ?? "Chưa phân công")</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tên đăng nhập</span>
+                <span class="info-value">@(Model.TenDNNV ?? "N/A")</span>
+            </div>
         </div>
 
-        <div class="detail-item">
-            <div class="detail-label">
-                <i class="fa-solid fa-user"></i>
-                Tên nhân viên:
-            </div>
-            <div class="detail-value">@Model.TenNV</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">
-                <i class="fa-solid fa-venus-mars"></i>
-                Giới tính:
-            </div>
-            <div class="detail-value">@(Model.GioiTinh ? "Nam" : "Nữ")</div>
-        </div>
-
-        @if (!string.IsNullOrEmpty(Model.SDT))
-        {
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fa-solid fa-phone"></i>
-                    Số điện thoại:
-                </div>
-                <div class="detail-value">@Model.SDT</div>
-            </div>
-        }
-
-        @if (!string.IsNullOrEmpty(Model.Email))
-        {
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fa-solid fa-envelope"></i>
-                    Email:
-                </div>
-                <div class="detail-value">@Model.Email</div>
-            </div>
-        }
-
-        @if (!string.IsNullOrEmpty(Model.TenVT))
-        {
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fa-solid fa-user-tag"></i>
-                    Vai trò:
-                </div>
-                <div class="detail-value">
-                    <span class="badge bg-primary">@Model.TenVT</span>
-                </div>
-            </div>
-        }
-
-        @if (!string.IsNullOrEmpty(Model.TenDNNV))
-        {
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fa-solid fa-user-circle"></i>
-                    Tên đăng nhập:
-                </div>
-                <div class="detail-value">@Model.TenDNNV</div>
-            </div>
-        }
-    </div>
-
-    <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
-        <input type="hidden" asp-for="MaNV" />
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fa-solid fa-trash-can me-2"></i>
-                Xóa
-            </button>
-            <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Quay lại
+        <div class="action-footer">
+            <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-light px-4 fw-bold">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
             </a>
+            <form id="deleteForm" asp-action="Delete" method="post">
+                <input type="hidden" asp-for="MaNV" />
+                <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmDelete()">
+                    <i class="fa-solid fa-trash-can me-2"></i> Xác nhận xóa
+                </button>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
@@ -165,19 +134,26 @@
     <script>
         function confirmDelete() {
             Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa nhân viên này? Hành động này không thể hoàn tác!',
+                title: 'Bạn có chắc chắn?',
+                text: "Dữ liệu về nhân viên này sẽ bị xóa vĩnh viễn!",
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Xóa',
                 cancelButtonText: 'Hủy',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6'
+                background: '#fff',
+                customClass: {
+                    confirmButton: 'btn btn-danger px-4',
+                    cancelButton: 'btn btn-light px-4'
+                },
+                buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('deleteForm').submit();
                 }
-            });
+            })
         }
     </script>
 }
+

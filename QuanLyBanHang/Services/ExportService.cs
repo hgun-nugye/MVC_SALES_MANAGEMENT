@@ -1,6 +1,5 @@
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using QuanLyBanHang.Models;
 using System.Drawing;
 
 namespace QuanLyBanHang.Services
@@ -11,6 +10,7 @@ namespace QuanLyBanHang.Services
 			DashboardStats stats,
 			List<MonthlyRevenueData> monthlyRevenue,
 			List<OrderDetailReport> orders,
+			List<ImportOrderDetailReport> importOrders,
 			List<ProductRevenueReport> productRevenue,
 			List<TopProductData> topProducts,
 			List<TopProductData> slowProducts)
@@ -25,16 +25,19 @@ namespace QuanLyBanHang.Services
 				// Sheet 2: Doanh thu theo tháng
 				CreateMonthlyRevenueSheet(package.Workbook.Worksheets.Add("Doanh thu tháng"), monthlyRevenue);
 
-				// Sheet 3: Chi tiết hóa đơn
-				CreateOrderDetailsSheet(package.Workbook.Worksheets.Add("Chi tiết hóa đơn"), orders);
+				// Sheet 3: Chi tiết hóa đơn bán
+				CreateOrderDetailsSheet(package.Workbook.Worksheets.Add("Chi tiết hóa đơn bán hàng"), orders);
 
-				// Sheet 4: Doanh thu theo sản phẩm
+				// Sheet 4: Chi tiết hóa đơn nhập
+				CreateImportOrderDetailsSheet(package.Workbook.Worksheets.Add("Chi tiết hóa đơn nhập hàng"), importOrders);
+
+				// Sheet 5: Doanh thu theo sản phẩm
 				CreateProductRevenueSheet(package.Workbook.Worksheets.Add("Doanh thu sản phẩm"), productRevenue);
 
-				// Sheet 5: Sản phẩm bán chạy
+				// Sheet 6: Sản phẩm bán chạy
 				CreateTopProductsSheet(package.Workbook.Worksheets.Add("Sản phẩm bán chạy"), topProducts);
 
-				// Sheet 6: Sản phẩm ít bán
+				// Sheet 7: Sản phẩm ít bán
 				CreateSlowProductsSheet(package.Workbook.Worksheets.Add("Sản phẩm ít bán"), slowProducts);
 
 				return package.GetAsByteArray();
@@ -189,6 +192,52 @@ namespace QuanLyBanHang.Services
 				ws.Cells[row, 7].Formula = $"SUM(G4:G{row - 1})";
 				ws.Cells[row, 1, row, 7].Style.Font.Bold = true;
 				ws.Cells[row, 7].Style.Numberformat.Format = "#,##0";
+			}
+
+			ws.Cells.AutoFitColumns();
+		}
+
+		private void CreateImportOrderDetailsSheet(	ExcelWorksheet ws, List<ImportOrderDetailReport> orders)
+		{
+			ws.Cells["A1"].Value = "CHI TIẾT HÓA ĐƠN NHẬP HÀNG";
+			ws.Cells["A1:E1"].Merge = true;
+			ws.Cells["A1"].Style.Font.Size = 14;
+			ws.Cells["A1"].Style.Font.Bold = true;
+			ws.Cells["A1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+			ws.Cells["A1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+			ws.Cells["A1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(244, 67, 54));
+			ws.Cells["A1"].Style.Font.Color.SetColor(Color.White);
+
+			int row = 3;
+			ws.Cells[row, 1].Value = "Mã đơn nhập";
+			ws.Cells[row, 2].Value = "Ngày nhập";
+			ws.Cells[row, 3].Value = "Nhà cung cấp";
+			ws.Cells[row, 4].Value = "Số lượng SP";
+			ws.Cells[row, 5].Value = "Tổng tiền (VNĐ)";
+			ws.Cells[row, 1, row, 5].Style.Font.Bold = true;
+			ws.Cells[row, 1, row, 5].Style.Fill.PatternType = ExcelFillStyle.Solid;
+			ws.Cells[row, 1, row, 5].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 205, 210));
+
+			row++;
+			foreach (var item in orders)
+			{
+				ws.Cells[row, 1].Value = item.MaDMH;
+				ws.Cells[row, 2].Value = item.NgayMH;
+				ws.Cells[row, 2].Style.Numberformat.Format = "dd/MM/yyyy";
+				ws.Cells[row, 3].Value = item.TenNCC;
+				ws.Cells[row, 4].Value = item.SoLuongSP;
+				ws.Cells[row, 5].Value = item.TongTien;
+				ws.Cells[row, 5].Style.Numberformat.Format = "#,##0";
+				row++;
+			}
+
+			if (orders.Any())
+			{
+				ws.Cells[row, 1].Value = "TỔNG CỘNG";
+				ws.Cells[row, 1, row, 4].Merge = true;
+				ws.Cells[row, 5].Formula = $"SUM(E4:E{row - 1})";
+				ws.Cells[row, 1, row, 5].Style.Font.Bold = true;
+				ws.Cells[row, 5].Style.Numberformat.Format = "#,##0";
 			}
 
 			ws.Cells.AutoFitColumns();

@@ -75,5 +75,19 @@ namespace QuanLyBanHang.Services
 			await _context.Database.ExecuteSqlRawAsync(
 				"EXEC CTMH_Delete @MaDMH, @MaSP", parameters);
 		}
+
+		public async Task Insert(CTMH model)
+		{
+			var parameters = new[]
+			{
+				new SqlParameter("@MaDMH", model.MaDMH),
+				new SqlParameter("@MaSP", model.MaSP),
+				new SqlParameter("@SLM", model.SLM),
+				new SqlParameter("@DGM", model.DGM)
+			};
+
+			await _context.Database.ExecuteSqlRawAsync(
+				"EXEC CTMH_Insert @MaDMH, @MaSP, @SLM, @DGM", parameters);
+		}
 	}
 }

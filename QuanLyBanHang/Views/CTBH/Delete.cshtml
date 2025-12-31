@@ -1,72 +1,103 @@
-﻿@model QuanLyBanHang.Models.CTBH
+﻿@model QuanLyBanHang.Models.CTBHDetailDto
 
 @{
     ViewBag.Title = "Xóa Chi tiết bán hàng";
 }
 
-<div class="container">
-    <h4 class="mb-3 text-danger">
-        <i class="fa-solid fa-trash"></i> Xóa Chi tiết bán hàng
-    </h4>
+<style>
+    .delete-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.1);
+        max-width: 700px;
+        margin: 2rem auto;
+    }
 
-    <div class="alert alert-warning">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc chắn muốn xóa chi tiết bán hàng <strong>@Model.MaSP</strong> của đơn <strong>@Model.MaDBH</strong> không?
-    </div>
+    .warning-header {
+        background: #fff5f5;
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid #ffe3e3;
+    }
 
-    <div class="card shadow-sm p-4">
-        <dl class="row">
-            <dt class="col-sm-3">Mã đơn bán hàng:</dt>
-            <dd class="col-sm-9">@Model.MaDBH</dd>
+    .warning-icon {
+        font-size: 3rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+    }
 
-            <dt class="col-sm-3">Mã sản phẩm:</dt>
-            <dd class="col-sm-9">@Model.MaSP</dd>
+    .info-section {
+        padding: 2rem;
+    }
 
-            <dt class="col-sm-3">Tên sản phẩm:</dt>
-            <dd class="col-sm-9">@Model.TenSP</dd>
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed #eee;
+    }
 
-            <dt class="col-sm-3">Số lượng bán:</dt>
-            <dd class="col-sm-9">@Model.SLB</dd>
+    .info-row:last-child {
+        border-bottom: none;
+    }
 
-            <dt class="col-sm-3">Đơn giá bán:</dt>
-            <dd class="col-sm-9">@Model.DGB?.ToString("N0")</dd>
+    .label {
+        color: #6c757d;
+        font-weight: 600;
+    }
 
-        </dl>
+    .value {
+        color: #2d3436;
+        font-weight: 700;
+    }
+</style>
 
-        <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
-            <input type="hidden" asp-for="MaDBH" />
-            <input type="hidden" asp-for="MaSP" />
-            
-            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fa-solid fa-trash"></i> Xóa
+<div class="container py-4">
+    <div class="delete-card animate__animated animate__fadeIn">
+        <div class="warning-header">
+            <div class="warning-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h4 class="text-danger fw-bold">Xác nhận xóa chi tiết?</h4>
+            <p class="text-muted mb-0">Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa sản phẩm này khỏi đơn hàng?</p>
+        </div>
+
+        <div class="info-section">
+            <div class="info-row">
+                <span class="label">Mã đơn hàng</span>
+                <span class="value text-success">@Model.MaDBH</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Sản phẩm</span>
+                <span class="value">@Model.TenSP</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Mã SP</span>
+                <span class="value">@Model.MaSP</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Số lượng</span>
+                <span class="value">@Model.SLB</span>
+            </div>
+            <div class="info-row bg-light p-2 rounded mt-2">
+                <span class="label">Thành tiền sẽ trừ</span>
+                <span class="value text-danger fs-5">@((Model.SLB * Model.DGB).ToString("N0")) ₫</span>
+            </div>
+        </div>
+
+        <div class="p-4 bg-light d-flex justify-content-center gap-3">
+            <button type="button" onclick="history.back()" class="btn btn-outline-secondary px-5 fw-bold">
+                <i class="fa-solid fa-xmark me-2"></i> Hủy bỏ
             </button>
-
-            <a href="@Url.Action("CTBH_Admin", "CTBH", new { maDBH = Model.MaDBH })" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Hủy
-            </a>
-        </form>
+            <form id="deleteForm" asp-action="Delete" method="post" class="d-inline">
+                <input type="hidden" name="maDBH" value="@Model.MaDBH" />
+                <input type="hidden" name="maSP" value="@Model.MaSP" />
+                <button type="submit" class="btn btn-danger px-5 fw-bold shadow-sm">
+                    <i class="fa-solid fa-trash-can me-2"></i> Xác nhận xóa
+                </button>
+            </form>
+        </div>
     </div>
-
-
 </div>
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmDelete() {
-            Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa chi tiết bán hàng này?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('deleteForm').submit();
-                }
-            });
-        }
-    </script>
-}

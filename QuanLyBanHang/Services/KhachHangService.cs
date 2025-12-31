@@ -15,17 +15,14 @@ namespace QuanLyBanHang.Services
 
 		public async Task<List<KhachHangDetailView>> Search(string? search, string? tinh)
 		{
-			SqlParameter pSearch = new("@Search", (object?)search ?? DBNull.Value);
-
-			SqlParameter pMaTinh;
-
-			if (short.TryParse(tinh, out short maTinh))
-				pMaTinh = new("@MaTinh", maTinh);
-			else
-				pMaTinh = new("@MaTinh", DBNull.Value);
+			var parameters = new SqlParameter[]
+			{
+				new SqlParameter("@Search", (object?)search ?? DBNull.Value),
+				new SqlParameter("@MaTinh", (object?)tinh ?? DBNull.Value)
+			};
 
 			return await _context.KhachHangDetailView
-				.FromSqlRaw("EXEC KhachHang_Search @Search, @MaTinh", pSearch, pMaTinh)
+				.FromSqlRaw("EXEC KhachHang_Search @Search, @MaTinh",parameters)
 				.ToListAsync();
 		}
 
@@ -57,20 +54,27 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Create KhachHang
-		public async Task<string> Create(KhachHang model, IFormFile anhFile)
+		public async Task<string> Create(KhachHang model, IFormFile? anhFile)
 		{			
 			// Upload ảnh
-			var fileName = Guid.NewGuid() + Path.GetExtension(anhFile.FileName);
-			var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/customers");
-			if (!Directory.Exists(folderPath))
-				Directory.CreateDirectory(folderPath);
-
-			var savePath = Path.Combine(folderPath, fileName);
-			using (var stream = new FileStream(savePath, FileMode.Create))
+			string fileName = "";
+			if (anhFile != null && anhFile.Length > 0)
 			{
-				await anhFile.CopyToAsync(stream);
+				fileName = Guid.NewGuid() + Path.GetExtension(anhFile.FileName);
+				var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/customers");
+				if (!Directory.Exists(folderPath))
+					Directory.CreateDirectory(folderPath);
+
+				var savePath = Path.Combine(folderPath, fileName);
+				using (var stream = new FileStream(savePath, FileMode.Create))
+				{
+					await anhFile.CopyToAsync(stream);
+				}
 			}
 			model.AnhKH = fileName;
+
+			// Hash password
+			string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.MatKhauKH);
 
 			// Call stored procedure
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"
@@ -83,7 +87,7 @@ namespace QuanLyBanHang.Services
                     @AnhKH = {model.AnhKH},
                     @MaXa = {model.MaXa},
                     @TenDNKH = {model.TenDNKH},
-                    @MatKhauKH = {model.MatKhauKH}
+                    @MatKhauKH = {hashedPassword}
             ");
 
 			return fileName;
@@ -133,7 +137,10 @@ namespace QuanLyBanHang.Services
 					@EmailKH = {model.EmailKH},
 					@DiaChiKH = {model.DiaChiKH},
 					@AnhKH = {anhPath},
-					@MaXa = {model.MaXa}
+					@MaXa = {model.MaXa},
+					@GioiTinh = {model.GioiTinh},
+					@TenDNKH = {model.TenDNKH},
+					@MatKhauKH = {oldKH.MatKhauKH}
 			");
 
 			return anhPath;
@@ -149,6 +156,35 @@ namespace QuanLyBanHang.Services
 
 			await _context.Database.ExecuteSqlInterpolatedAsync($@"EXEC KhachHang_Delete @MaKH = {id}");
 		}
-		
+
+		public async Task ResetPassword(string id, string newPassword)
+		{
+			var kh = await GetByID(id);
+			if (kh == null) throw new KeyNotFoundException("Khách hàng không tồn tại!");
+
+			string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+			await _context.Database.ExecuteSqlInterpolatedAsync($@"
+				EXEC KhachHang_Update
+					@MaKH = {kh.MaKH},
+					@TenKH = {kh.TenKH},
+					@DienThoaiKH = {kh.DienThoaiKH},
+					@EmailKH = {kh.EmailKH},
+					@DiaChiKH = {kh.DiaChiKH},
+					@AnhKH = {kh.AnhKH},
+					@MaXa = {kh.MaXa},
+					@GioiTinh = {kh.GioiTinh},
+					@TenDNKH = {kh.TenDNKH},
+					@MatKhauKH = {hashedPassword}
+			");
+		}
+
+		public async Task<KhachHang?> GetByUsername(string username)
+		{
+			return (await _context.KhachHang
+				.FromSqlInterpolated($"EXEC KhachHang_GetByUsername @Username = {username}")
+				.ToListAsync())
+				.FirstOrDefault();
+		}
 	}
 }

@@ -3,103 +3,195 @@
     ViewBag.Title = "Sửa Nhà Cung Cấp";
 }
 
-<div class="container">
-    <h4 class="text-success mb-3">
-       Sửa Thông Tin Nhà Cung Cấp
-    </h4>
+<style>
+    .form-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
 
-    <form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="MaNCC" class="form-label"></label>
-            <input asp-for="MaNCC" class="form-control" readonly />
-        </div>
-        <div class="form-group mb-3">
-            <label asp-for="TenNCC" class="form-label"></label>
-            <input asp-for="TenNCC" class="form-control" />
-            <span asp-validation-for="TenNCC" class="text-danger"></span>
-        </div>
-       <div class="row">
-            <div class="form-group mb-3 col-md-6">
-                <label asp-for="DienThoaiNCC" class="form-label"></label>
-                <input asp-for="DienThoaiNCC" class="form-control" />
-                <span asp-validation-for="DienThoaiNCC" class="text-danger"></span>
+    .section-title {
+        color: #198754;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #198754;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control {
+        padding-left: 2.5rem;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="page-header">
+        <h4 class="mb-0">
+            <i class="fa-solid fa-pen-to-square me-2"></i>
+            Chỉnh sửa Nhà Cung Cấp
+        </h4>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+        <input type="hidden" asp-for="MaNCC" />
+
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-info-circle"></i>
+                Thông tin cơ bản
             </div>
-            <div class="form-group mb-3 col-md-6">
-                <label asp-for="EmailNCC" class="form-label"></label>
-                <input asp-for="EmailNCC" class="form-control" />
-                <span asp-validation-for="EmailNCC" class="text-danger"></span>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="TenNCC" class="form-label">Tên nhà cung cấp</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-industry"></i>
+                        <input asp-for="TenNCC" class="form-control" placeholder="Nhập tên nhà cung cấp..." />
+                    </div>
+                    <span asp-validation-for="TenNCC" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="DienThoaiNCC" class="form-label">Số điện thoại</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-phone"></i>
+                        <input asp-for="DienThoaiNCC" class="form-control" placeholder="Số điện thoại liên lạc..." />
+                    </div>
+                    <span asp-validation-for="DienThoaiNCC" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="EmailNCC" class="form-label">Email</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input asp-for="EmailNCC" class="form-control" placeholder="Email công ty..." />
+                    </div>
+                    <span asp-validation-for="EmailNCC" class="text-danger small"></span>
+                </div>
             </div>
-       </div>
-        
-        <div class="form-group mb-3">
-            <label asp-for="DiaChiNCC" class="form-label"></label>
-            <input asp-for="DiaChiNCC" class="form-control mb-2" />
-            <span asp-validation-for="DiaChiNCC" class="text-danger"></span>
         </div>
 
-        <div class="form-group mb-3">
-            <label class="form-label">Tỉnh</label>
-            <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.Tinh">
-                <option value="">@Model.TenTinh</option>
-            </select>
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-map"></i>
+                Địa chỉ văn phòng
+            </div>
+            <div class="row g-4">
+                <div class="col-12">
+                    <label asp-for="DiaChiNCC" class="form-label">Địa chỉ (Số nhà, tên đường)</label>
+                    <input asp-for="DiaChiNCC" class="form-control" placeholder="Nhập địa chỉ..." />
+                    <span asp-validation-for="DiaChiNCC" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Tỉnh / Thành phố</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-city"></i>
+                        <select id="MaTinh" name="maTinh" class="form-select" asp-items="@ViewBag.Tinh">
+                            <option value="">-- @Model.TenTinh --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MaXa" class="form-label">Phường / Xã</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <select id="MaXa" asp-for="MaXa" class="form-select" asp-items="@ViewBag.Xa">
+                            <option value="">-- @Model.TenXa --</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="MaXa" class="text-danger small"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group mb-3">
-            <label asp-for="MaXa" class="form-label"></label>
-            <select id="MaXa" asp-for="MaXa" class="form-control" asp-items="@ViewBag.Xa">
-                <option value="">@Model.TenXa</option>
-            </select>
-            <span asp-validation-for="MaXa" class="text-danger"></span>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-warning text-white">
-                <i class="fa-solid fa-save"></i> Cập nhật
-            </button>
-            <a asp-action="Details" asp-route-id="@Model.MaNCC" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
+        <div class="d-flex gap-3 justify-content-end mb-4">
+            <a asp-action="Details" asp-route-id="@Model.MaNCC" class="btn btn-outline-secondary px-4">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
             </a>
+            <button type="submit" class="btn btn-warning text-white px-4 fw-bold">
+                <i class="fa-solid fa-save me-2"></i> Cập nhật thông tin
+            </button>
         </div>
-
     </form>
-
-    
 </div>
-
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script>
         $(function () {
-
-            // Khi chọn Tỉnh → load Xã
             $('#MaTinh').change(function () {
                 var maTinh = $(this).val();
-
                 $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
-
                 if (maTinh) {
                     $.getJSON('/KhachHang/GetXaByTinh', { maTinh: maTinh }, function (data) {
-
                         var options = '<option value="">-- Chọn Xã --</option>';
-
                         $.each(data, function (i, xa) {
                             options += `<option value="${xa.maXa}">${xa.tenXa}</option>`;
                         });
-
                         $('#MaXa').html(options);
                     });
                 }
             });
 
-            // Khi load trang → Tự chọn lại Xã đúng với Model.MaXa
             var selectedXa = "@Model.MaXa";
             if ($('#MaTinh').val()) {
                 $('#MaTinh').trigger('change');
-
                 setTimeout(() => {
                     $('#MaXa').val(selectedXa);
                 }, 300);
@@ -107,3 +199,4 @@
         });
     </script>
 }
+

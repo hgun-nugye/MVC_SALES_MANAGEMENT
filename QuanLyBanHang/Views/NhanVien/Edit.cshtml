@@ -11,15 +11,21 @@
         margin-bottom: 1.5rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
     }
 
     .section-title {
-        color: #ffc107;
+        color: #198754;
         font-weight: 600;
         font-size: 1.1rem;
         margin-bottom: 1.25rem;
         padding-bottom: 0.75rem;
-        border-bottom: 2px solid #ffc107;
+        border-bottom: 2px solid #198754;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -29,34 +35,70 @@
         color: #495057;
         font-weight: 600;
         margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .form-control, .form-select {
         border-radius: 8px;
         border: 1.5px solid #dee2e6;
         padding: 0.65rem 0.85rem;
+        transition: all 0.3s ease;
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: #ffc107;
-        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.15);
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
     }
 
     .page-header {
-        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
         color: white;
         padding: 1.5rem 2rem;
         border-radius: 12px;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .input-group-icon {
+        position: relative;
+    }
+
+    .input-group-icon i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .input-group-icon .form-control {
+        padding-left: 2.5rem;
+    }
+
+    .image-preview-container {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        background: #f8f9fa;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 </style>
 
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <div class="page-header">
-        <h4>
-            <i class="fa-solid fa-edit"></i>
-            Sửa thông tin nhân viên
+        <h4 class="mb-0">
+            <i class="fa-solid fa-user-pen me-2"></i>
+            Chỉnh sửa Hồ sơ Nhân viên
         </h4>
     </div>
 
@@ -64,223 +106,206 @@
         @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
         @Html.HiddenFor(m => m.MaNV)
 
-        <!-- Thông tin cá nhân -->
         <div class="form-section">
             <div class="section-title">
-                <i class="fa-solid fa-info-circle"></i>
+                <i class="fa-solid fa-id-badge"></i>
+                Thông tin định danh
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <label asp-for="MaNV" class="form-label">Mã nhân viên</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <input asp-for="MaNV" class="form-control" readonly />
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <label asp-for="CCCD" class="form-label">Số CCCD / CMND</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input asp-for="CCCD" class="form-control" maxlength="12" placeholder="Nhập số căn cước..." />
+                    </div>
+                    <span asp-validation-for="CCCD" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-user"></i>
                 Thông tin cá nhân
             </div>
             <div class="row g-4">
-                <div class="col-md-3">
-                    <label asp-for="MaNV" class="form-label">Mã nhân viên</label>
-                    <input asp-for="MaNV" class="form-control" readonly />
-                </div>
-
                 <div class="col-md-6">
-                    <label asp-for="CCCD" class="form-label required-field">CCCD</label>
-                    <input asp-for="CCCD" class="form-control" maxlength="12" />
-                    <span asp-validation-for="CCCD" class="text-danger small"></span>
-                </div>
-
-                <div class="col-md-6">
-                    <label asp-for="TenNV" class="form-label required-field">Tên nhân viên</label>
-                    <input asp-for="TenNV" class="form-control" />
+                    <label asp-for="TenNV" class="form-label">Họ và tên</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-user-tag"></i>
+                        <input asp-for="TenNV" class="form-control" placeholder="Nhập họ và tên..." />
+                    </div>
                     <span asp-validation-for="TenNV" class="text-danger small"></span>
                 </div>
-
                 <div class="col-md-3">
-                    <label asp-for="GioiTinh" class="form-label required-field">Giới tính</label>
+                    <label asp-for="GioiTinh" class="form-label">Giới tính</label>
                     <select asp-for="GioiTinh" class="form-select">
                         <option value="true">Nam</option>
                         <option value="false">Nữ</option>
                     </select>
-                    <span asp-validation-for="GioiTinh" class="text-danger small"></span>
                 </div>
-
                 <div class="col-md-3">
                     <label asp-for="NgaySinh" class="form-label">Ngày sinh</label>
                     <input asp-for="NgaySinh" type="date" class="form-control" />
-                    <span asp-validation-for="NgaySinh" class="text-danger small"></span>
                 </div>
-
-                <div class="col-md-3">
-                    <label asp-for="SDT" class="form-label required-field">Số điện thoại</label>
-                    <input asp-for="SDT" class="form-control" maxlength="10" />
+                <div class="col-md-4">
+                    <label asp-for="SDT" class="form-label">Số điện thoại</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-phone"></i>
+                        <input asp-for="SDT" class="form-control" maxlength="10" placeholder="Số điện thoại di động..." />
+                    </div>
                     <span asp-validation-for="SDT" class="text-danger small"></span>
                 </div>
-
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label asp-for="Email" class="form-label">Email</label>
-                    <input asp-for="Email" type="email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger small"></span>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Email cá nhân..." />
+                    </div>
                 </div>
-
-                <div class="col-md-3">
-                    <label asp-for="NgayLam" class="form-label">Ngày làm việc</label>
+                <div class="col-md-4">
+                    <label asp-for="NgayLam" class="form-label">Ngày vào làm</label>
                     <input asp-for="NgayLam" type="date" class="form-control" />
-                    <span asp-validation-for="NgayLam" class="text-danger small"></span>
                 </div>
             </div>
         </div>
 
-        <!-- Địa chỉ -->
         <div class="form-section">
             <div class="section-title">
-                <i class="fa-solid fa-map-marker-alt"></i>
-                Địa chỉ
+                <i class="fa-solid fa-map-location-dot"></i>
+                Địa chỉ cư trú
             </div>
             <div class="row g-4">
-                <div class="col-md-6">
-                    <label asp-for="DiaChiNV" class="form-label required-field">Địa chỉ</label>
-                    <input asp-for="DiaChiNV" class="form-control" />
-                    <span asp-validation-for="DiaChiNV" class="text-danger small"></span>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Tỉnh</label>
-                    <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.Tinh">
-                        <option value="">@Model.TenTinh</option>
-                    </select>
+                <div class="col-12">
+                    <label asp-for="DiaChiNV" class="form-label">Số nhà, tên đường</label>
+                    <input asp-for="DiaChiNV" class="form-control" placeholder="Nhập địa chỉ cư trú..." />
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="MaXa" class="form-label"></label>
-                    <select id="MaXa" asp-for="MaXa" class="form-control" asp-items="@ViewBag.Xa">
-                        <option value="">@Model.TenXa</option>
-                    </select>
-                    <span asp-validation-for="MaXa" class="text-danger"></span>
+                    <label class="form-label">Tỉnh / Thành phố</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-city"></i>
+                        <select id="MaTinh" name="maTinh" class="form-select" asp-items="@ViewBag.Tinh">
+                            <option value="">-- @Model.TenTinh --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MaXa" class="form-label">Phường / Xã</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-map-marker"></i>
+                        <select id="MaXa" asp-for="MaXa" class="form-select" asp-items="@ViewBag.Xa">
+                            <option value="">-- @Model.TenXa --</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-           
-
         </div>
 
-        <!-- Thông tin đăng nhập -->
         <div class="form-section">
             <div class="section-title">
-                <i class="fa-solid fa-user-shield"></i>
-                Thông tin đăng nhập
+                <i class="fa-solid fa-shield-halved"></i>
+                Tài khoản & Vai trò
             </div>
             <div class="row g-4">
-                <div class="col-md-9">
+                <div class="col-md-4">
                     <label asp-for="TenDNNV" class="form-label">Tên đăng nhập</label>
-                    <input asp-for="TenDNNV" class="form-control" />
-                    <span asp-validation-for="TenDNNV" class="text-danger small"></span>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <input asp-for="TenDNNV" class="form-control" placeholder="Tên đăng nhập hệ thống..." />
+                    </div>
                 </div>
-
-                <div class="col-md-6">
-                    <label asp-for="MatKhauNV" class="form-label">Mật khẩu</label>
-                    <input type="password" name="newPassword" class="form-control" placeholder="Để trống nếu không đổi" />
-                    <span asp-validation-for="MatKhauNV" class="text-danger small"></span>
+                <div class="col-md-4">
+                    <label class="form-label">Mật khẩu mới</label>
+                    <div class="input-group-icon">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" name="newPassword" class="form-control" placeholder="Để trống nếu giữ nguyên..." />
+                    </div>
                 </div>
-
-                <div class="col-md-6">
-                    <label class="form-label required-field">Vai trò</label>
+                <div class="col-md-4">
+                    <label class="form-label">Vị trí công tác</label>
                     <select name="maVT" asp-items="ViewBag.VaiTro" class="form-select">
                         <option value="">-- Chọn vai trò --</option>
                     </select>
-                    <span class="text-danger small" id="maVT-error"></span>
                 </div>
             </div>
         </div>
 
-        <!-- Ảnh nhân viên -->        
         <div class="form-section">
             <div class="section-title">
                 <i class="fa-solid fa-image"></i>
-                Ảnh nhân viên
+                Ảnh đại diện
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Ảnh hiện tại / xem trước:</label>
-                    <img id="previewImage"
-                         src="@(string.IsNullOrEmpty(Model?.AnhNV) ? "" : Url.Content("~/images/employees" + Model.AnhNV))"
-                         alt="@Model.TenNV"
-                         style="max-width: 240px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); object-fit: cover; background: #f8f9fa;" />
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="image-preview-container">
+                        <img id="previewImage"
+                             src="@(string.IsNullOrEmpty(Model.AnhNV) ? Url.Content("~/images/default-user.png") : Url.Content("~/images/employees/" + Model.AnhNV))"
+                             class="image-preview" alt="Preview" />
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Chọn ảnh mới:</label>
+                    <label class="form-label">Thay đổi ảnh đại diện</label>
                     <input type="file" name="AnhFile" id="AnhFile" class="form-control" accept="image/*" />
-                    <small class="text-muted d-block mt-2">
-                        <i class="fa-solid fa-info-circle"></i>
-                        Chấp nhận định dạng: JPG, PNG, GIF. Kích thước tối đa: 5MB
-                    </small>
+                    <p class="text-muted small mt-2">Dung lượng tối đa 5MB. Định dạng: JPG, PNG, GIF.</p>
                 </div>
             </div>
         </div>
 
         <div class="d-flex gap-3 justify-content-end mb-4">
-            <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Quay lại
+            <a asp-action="Details" asp-route-id="@Model.MaNV" class="btn btn-outline-secondary px-4">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
             </a>
-            <button type="submit" class="btn btn-warning text-white">
-                <i class="fa-solid fa-save me-2"></i>
-                Cập nhật
+            <button type="submit" class="btn btn-success text-white px-4 fw-bold">
+                <i class="fa-solid fa-save me-2"></i> Lưu thay đổi
             </button>
         </div>
     </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const maVT = document.querySelector('select[name="maVT"]').value;
-            if (!maVT) {
-                e.preventDefault();
-                document.getElementById('maVT-error').textContent = 'Vui lòng chọn vai trò';
-                return false;
-            }
-        });
-
         $(function () {
-            // Khi chọn Tỉnh → load Xã
             $('#MaTinh').change(function () {
                 var maTinh = $(this).val();
-
                 $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
-
                 if (maTinh) {
                     $.getJSON('/KhachHang/GetXaByTinh', { maTinh: maTinh }, function (data) {
-
                         var options = '<option value="">-- Chọn Xã --</option>';
-
                         $.each(data, function (i, xa) {
                             options += `<option value="${xa.maXa}">${xa.tenXa}</option>`;
                         });
-
                         $('#MaXa').html(options);
                     });
                 }
             });
 
-            // Khi load trang → Tự chọn lại Xã đúng với Model.MaXa
             var selectedXa = "@Model.MaXa";
             if ($('#MaTinh').val()) {
                 $('#MaTinh').trigger('change');
-
                 setTimeout(() => {
                     $('#MaXa').val(selectedXa);
                 }, 300);
             }
+
+            $("#AnhFile").change(function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        $("#previewImage").attr("src", ev.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         });
     </script>
-
-    <script>
-        const fileInput = document.getElementById("AnhFile");
-        const previewImg = document.getElementById("previewImage");
-
-        if (fileInput && previewImg) {
-            fileInput.addEventListener("change", function (e) {
-                const file = e.target.files?.[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = function (ev) {
-                    previewImg.src = ev.target?.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-    </script>
 }
+

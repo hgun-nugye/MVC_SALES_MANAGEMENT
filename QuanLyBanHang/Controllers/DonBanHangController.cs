@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
-using System.Threading.Tasks;
 
 namespace QuanLyBanHang.Controllers
 {
@@ -51,7 +50,7 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.TrangThaiBH = new SelectList(await _ttdhService.GetAll(), "MaTTBH", "TenTTBH", MaTTBH);
 
 			var model = await _dbhService.Search(search, month, year, MaTTBH);
-			
+
 			// Nếu là khách hàng, chỉ hiển thị đơn hàng của họ
 			if (IsCustomerMode())
 			{
@@ -65,9 +64,15 @@ namespace QuanLyBanHang.Controllers
 			return View(model);
 		}
 
-		public async Task<IActionResult> Details(string id)
+		public async Task<IActionResult> Details(string id, string? search, int? month, int? year, string? MaTTBH)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
+
+			ViewBag.IsCustomer = IsCustomerMode(); 
+			ViewBag.Search = search;
+			ViewBag.Month = month;
+			ViewBag.Year = year;
+			ViewBag.MaTTBH = MaTTBH;
 
 			var result = await _dbhService.GetByID(id);
 			return View(result);
@@ -75,16 +80,24 @@ namespace QuanLyBanHang.Controllers
 
 		private async Task LoadDropdowns(string? selectedKH = null, string? selectedTTDH = null, string? selectedXa = null)
 		{
-			// Nạp danh sách Khách hàng
-			var khachHangs = await _context.KhachHang.ToListAsync();
+			// Nạp danh sách Khách hàng - Dùng service (Proc) thay vì _context
+			//var khachHangs = await (new KhachHangService(_context)).GetAllWithXa();
+			//ViewBag.MaKH = new SelectList(khachHangs, "MaKH", "TenKH", selectedKH);
+
+			var khachHangs = await _context.KhachHang
+							.Select(kh => new { kh.MaKH, kh.TenKH })
+							.ToListAsync();
+
 			ViewBag.MaKH = new SelectList(khachHangs, "MaKH", "TenKH", selectedKH);
 
-			// Nạp danh sách Trạng thái bán hàng - Đây là cái View đang cần
-			var trangThais = await _context.TrangThaiBH.ToListAsync();
+
+			// Nạp danh sách Trạng thái bán hàng - Dùng service (Proc) thay vì _context
+			var trangThais = await _ttdhService.GetAll();
 			ViewBag.MaTTBH = new SelectList(trangThais, "MaTTBH", "TenTTBH", selectedTTDH);
 
-			// Nạp danh sách Sản phẩm cho chi tiết đơn hàng
-			ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
+			// Nạp danh sách Sản phẩm cho chi tiết đơn hàng - Dùng service (Proc) thay vì _context
+			var sanPhams = await _spService.GetAll();
+			ViewBag.MaSP = new SelectList(sanPhams, "MaSP", "TenSP");
 		}
 
 		public async Task<IActionResult> Create()
@@ -100,14 +113,17 @@ namespace QuanLyBanHang.Controllers
 				}
 			}
 
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			var tinhs = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(tinhs, "MaTinh", "TenTinh");
 			ViewBag.Xa = new SelectList(Enumerable.Empty<object>(), "MaXa", "TenXa");
-			ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
+			
+			var sanPhams = await _spService.GetAll();
+			ViewBag.MaSP = new SelectList(sanPhams, "MaSP", "TenSP");
 			await LoadDropdowns();
 			ViewData["MaXaSelected"] = null;
 
 			var model = new DonBanHang();
-			
+
 			// Nếu là khách hàng, tự động gán MaKH
 			if (IsCustomerMode())
 			{
@@ -184,7 +200,8 @@ namespace QuanLyBanHang.Controllers
 						: "Vui lòng chọn ngày bán hàng.");
 				}
 
-				ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+				var allTinhs = await _tinhService.GetAll();
+				ViewBag.Tinh = new SelectList(allTinhs, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);
 				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
@@ -313,37 +330,51 @@ namespace QuanLyBanHang.Controllers
 				MaKH = header.MaKH!,
 				DiaChiDBH = header.DiaChiDBH ?? "",
 				MaXa = header.MaXa ?? "",
-				TenXa= header.TenXa,
+				TenXa = header.TenXa,
 				TenTinh = header.TenTinh,
 				CTBHs = details,
 				MaTTBH = header.MaTTBH ?? string.Empty
 			};
-						
+
 			string? currentMaTinh = null;
 
 			if (!string.IsNullOrEmpty(header.MaXa))
-	{
-		currentMaTinh = await _xaService.GetMaTinhByXa(header.MaXa);
-	}
+			{
+				currentMaTinh = await _xaService.GetMaTinhByXa(header.MaXa);
+			}
 
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", currentMaTinh);
+			var allTinhsForEdit = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinhsForEdit, "MaTinh", "TenTinh", currentMaTinh);
 
 			var listXa = !string.IsNullOrEmpty(currentMaTinh)
-			? _context.Xa.Where(x => x.MaTinh == currentMaTinh).ToList()
+			? await _xaService.GetByIDTinh(currentMaTinh)
 			: new List<Xa>();
 
 			ViewData["MaXaSelected"] = header.MaXa;
 			ViewBag.Xa = new SelectList(listXa, "MaXa", "TenXa", header.MaXa);
 
 			await LoadDropdowns(header.MaKH, header.MaTTBH);
-			
+
 			return View(ct);
 		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(DonBanHang model)
+		public async Task<IActionResult> Edit(DonBanHang model, string maTinh)
 		{
+			// Xóa các lỗi validation không cần thiết cho việc Update
+			ModelState.Remove("MaDBH");
+			ModelState.Remove("MaXa");
+			
+			if (model.CTBHs != null)
+			{
+				for (int i = 0; i < model.CTBHs.Count; i++)
+				{
+					ModelState.Remove($"CTBHs[{i}].MaDBH");
+					ModelState.Remove($"CTBHs[{i}].MaSP"); // Key of nested item
+				}
+			}
+
 			try
 			{
 				model.CTBHs ??= new List<CTBH>();
@@ -353,14 +384,22 @@ namespace QuanLyBanHang.Controllers
 
 				if (!cleanedDetails.Any())
 				{
-					ModelState.AddModelError("ChiTiet", "Vui lòng chọn ít nhất 1 sản phẩm.");
+					ModelState.AddModelError("CTBHs", "Vui lòng chọn ít nhất 1 sản phẩm.");
 				}
 
-				// Gán giá trị mặc định
+				// Gán giá trị mặc định và lấy tên SP để hiển thị lại nếu lỗi
+				var sanPhamsForNames = await _spService.GetAll();
+				var nameLookup = sanPhamsForNames.ToDictionary(x => x.MaSP!, x => x.TenSP);
+
 				foreach (var ct in cleanedDetails)
 				{
 					ct.SLB ??= 1;
 					ct.DGB ??= 0;
+					if (string.IsNullOrEmpty(ct.TenSP) && !string.IsNullOrEmpty(ct.MaSP))
+					{
+						nameLookup.TryGetValue(ct.MaSP, out var ten);
+						ct.TenSP = ten;
+					}
 				}
 
 				// Kiểm tra tồn kho
@@ -372,8 +411,7 @@ namespace QuanLyBanHang.Controllers
 				var stockLookup = new Dictionary<string, int>();
 				if (selectedIds.Any())
 				{
-					var sanPhams = await _spService.GetAll();
-					stockLookup = sanPhams
+					stockLookup = sanPhamsForNames
 						.Where(x => !string.IsNullOrEmpty(x.MaSP) && selectedIds.Contains(x.MaSP))
 						.ToDictionary(x => x.MaSP!, x => x.SoLuongTon ?? 0);
 				}
@@ -386,26 +424,27 @@ namespace QuanLyBanHang.Controllers
 						var slb = ct.SLB ?? 0;
 						if (slb > ton)
 						{
-							ModelState.AddModelError($"ChiTiet[{i}].SLB", $"Số lượng bán ({slb}) vượt tồn kho ({ton}).");
+							ModelState.AddModelError($"CTBHs[{i}].SLB", $"Số lượng bán ({slb}) vượt tồn kho ({ton}).");
 						}
 					}
 				}
 
 				if (!ModelState.IsValid)
 				{
-					await LoadDropdowns(model.MaKH, model.MaTTBH, model.MaXa);
-					return View(model);
-				}
+					var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+					TempData["ErrorMessage"] = "Dữ liệu không hợp lệ: " + string.Join(" | ", errors);
 
-				if (!ModelState.IsValid)
-				{
 					await LoadDropdowns(model.MaKH, model.MaTTBH, model.MaXa);
-					model.CTBHs = cleanedDetails.Any() ? cleanedDetails : model.CTBHs;
+					var tinhsForErr = await _tinhService.GetAll();
+					ViewBag.Tinh = new SelectList(tinhsForErr, "MaTinh", "TenTinh", maTinh);
+					var xaList = await _xaService.GetByIDTinh(maTinh);
+					ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+					ViewData["MaXaSelected"] = model.MaXa;
+					model.CTBHs = cleanedDetails;
 					return View(model);
 				}
 
 				model.CTBHs = cleanedDetails;
-
 				await _dbhService.Update(model);
 
 				TempData["SuccessMessage"] = "Cập nhật đơn bán hàng thành công!";
@@ -413,15 +452,20 @@ namespace QuanLyBanHang.Controllers
 			}
 			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = ex.Message;
+				TempData["ErrorMessage"] = "Lỗi khi cập nhật: " + ex.Message;
 			}
 
 			await LoadDropdowns(model.MaKH, model.MaTTBH, model.MaXa);
+			var tinhsFinal = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(tinhsFinal, "MaTinh", "TenTinh", maTinh);
+			var finalXaList = await _xaService.GetByIDTinh(maTinh);
+			ViewBag.Xa = new SelectList(finalXaList, "MaXa", "TenXa", model.MaXa);
+			ViewData["MaXaSelected"] = model.MaXa;
+
 			if (model.CTBHs == null || !model.CTBHs.Any())
 				model.CTBHs = new List<CTBH> { new CTBH() };
 
 			return View(model);
-
 		}
 
 		public async Task<IActionResult> Delete(string id)
@@ -479,6 +523,62 @@ namespace QuanLyBanHang.Controllers
 			return RedirectToAction("Details", new { id = maDBH });
 		}
 
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> ConfirmOrder(string id, string? search, int? month, int? year, string? MaTTBH)
+		{
+			if (string.IsNullOrEmpty(id)) return NotFound();
+
+			// Chỉ nhân viên mới được xác nhận đơn
+			if (IsCustomerMode()) return Forbid();
+
+			try
+			{
+				await _dbhService.ConfirmOrder(id);
+				TempData["SuccessMessage"] = "Đã xác nhận đơn hàng thành công!";
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = "Lỗi khi xác nhận đơn hàng: " + ex.Message;
+			}
+
+			return RedirectToAction(nameof(Details), new { id = id, search, month, year, MaTTBH });
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> CancelOrder(string id, string? search, int? month, int? year, string? MaTTBH)
+		{
+			if (string.IsNullOrEmpty(id)) return NotFound();
+
+			try
+			{
+				var rows = await _dbhService.GetByID(id);
+				var don = rows.FirstOrDefault();
+				if (don == null) return NotFound();
+
+				if (IsCustomerMode())
+				{
+					var userId = HttpContext.Session.GetString("UserId");
+					if (don.MaKH != userId) return Forbid();
+
+					if (don.MaTTBH?.Trim() != "CHO")
+					{
+						TempData["ErrorMessage"] = "Bạn chỉ có thể hủy đơn hàng khi đơn đang ở trạng thái Chờ xác nhận.";
+						return RedirectToAction(nameof(Details), new { id, search, month, year, MaTTBH });
+					}
+				}
+
+				await _dbhService.CancelOrder(id.Trim());
+				TempData["SuccessMessage"] = "Đã hủy đơn hàng thành công!";
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = "Lỗi khi hủy đơn hàng: " + ex.Message;
+			}
+
+			return RedirectToAction(nameof(Details), new { id, search, month, year, MaTTBH });
+		}
 	}
 }
 

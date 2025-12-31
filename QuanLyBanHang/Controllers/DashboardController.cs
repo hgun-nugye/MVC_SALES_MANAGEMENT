@@ -20,7 +20,6 @@ namespace QuanLyBanHang.Controllers
 			return View(stats);
 		}
 
-		// API endpoints
 		[HttpGet]
 		public async Task<IActionResult> GetMonthlyRevenue(int year)
 		{
@@ -50,6 +49,13 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		[HttpGet]
+		public async Task<IActionResult> GetImportOrderDetails(DateTime? fromDate, DateTime? toDate)
+		{
+			var data = await _dashboardService.GetImportOrderDetailsReport(fromDate, toDate);
+			return Json(data);
+		}
+
+		[HttpGet]
 		public async Task<IActionResult> GetProductRevenue()
 		{
 			var data = await _dashboardService.GetProductRevenueReport();
@@ -65,6 +71,7 @@ namespace QuanLyBanHang.Controllers
 				var stats = await _dashboardService.GetDashboardStats();
 				var monthlyRevenue = await _dashboardService.GetMonthlyRevenue(DateTime.Now.Year);
 				var orders = await _dashboardService.GetOrderDetailsReport(fromDate, toDate);
+				var importOrders = await _dashboardService.GetImportOrderDetailsReport(fromDate, toDate);
 				var productRevenue = await _dashboardService.GetProductRevenueReport();
 				var topProducts = await _dashboardService.GetTopSellingProducts(10);
 				var slowProducts = await _dashboardService.GetSlowMovingProducts(10);
@@ -73,6 +80,7 @@ namespace QuanLyBanHang.Controllers
 					stats,
 					monthlyRevenue,
 					orders,
+					importOrders,
 					productRevenue,
 					topProducts,
 					slowProducts

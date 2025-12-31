@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Models;
 using QuanLyBanHang.Services;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace QuanLyBanHang.Controllers
 {
@@ -19,6 +20,7 @@ namespace QuanLyBanHang.Controllers
 		private readonly IWebHostEnvironment _environment;
 
 
+
 		public HomeController(
 			ILogger<HomeController> logger,
 			SanPhamService sanPhamService,
@@ -26,8 +28,7 @@ namespace QuanLyBanHang.Controllers
 			NhanVienService nhanVienService,
 			XaService xaService,
 			TinhService tinhService,
-			AppDbContext context
-,
+			AppDbContext context,
 			IWebHostEnvironment environment)
 		{
 			_logger = logger;
@@ -38,6 +39,7 @@ namespace QuanLyBanHang.Controllers
 			_tinhService = tinhService;
 			_context = context;
 			_environment = environment;
+
 		}
 
 		public async Task<IActionResult> Index()
@@ -66,9 +68,8 @@ namespace QuanLyBanHang.Controllers
 				return View();
 			}
 
-			// 1. Kiểm tra trong bảng KhachHang
-			var khachHang = await _context.KhachHang
-				.FirstOrDefaultAsync(kh => kh.TenDNKH == username);
+			// 1. Kiểm tra trong bảng KhachHang - Dùng service (Proc)
+			var khachHang = await _khachHangService.GetByUsername(username);
 
 			// Sử dụng BCrypt.Verify để so sánh mật khẩu nhập vào với mật khẩu hash trong DB
 			if (khachHang != null && BCrypt.Net.BCrypt.Verify(password, khachHang.MatKhauKH))
@@ -81,27 +82,20 @@ namespace QuanLyBanHang.Controllers
 					khachHang.AnhKH ?? ""
 				);
 
+				// Giỏ hàng được lưu trong Session, không cần merge vào DB
+
 				TempData["SuccessMessage"] = "Đăng nhập thành công!";
 				return RedirectToAction("Index", "SanPham");
 			}
 
-			// 2. Kiểm tra trong bảng NhanVien
-			var nhanVien = await _context.NhanVien
-				.FirstOrDefaultAsync(nv => nv.TenDNNV == username);
+			// 2. Kiểm tra trong bảng NhanVien - Dùng service (Proc)
+			var nhanVien = await _nhanVienService.GetByUsername(username);
 
 			// Sử dụng BCrypt.Verify cho Nhân viên
 			if (nhanVien != null && BCrypt.Net.BCrypt.Verify(password, nhanVien.MatKhauNV))
 			{
-				// Lấy vai trò từ bảng PhanQuyen
-				var phanQuyen = await _context.PhanQuyen
-					.Where(pq => pq.MaNV == nhanVien.MaNV)
-					.Join(_context.VaiTro,
-						pq => pq.MaVT,
-						vt => vt.MaVT,
-						(pq, vt) => new { pq, vt })
-					.FirstOrDefaultAsync();
-
-				string userRole = phanQuyen?.vt.TenVT ?? "Employee"; // Mặc định là Employee nếu không có vai trò
+				// Lấy vai trò - Dùng service (Proc)
+				string userRole = await _nhanVienService.GetRole(nhanVien.MaNV);
 
 				// Đăng nhập thành công - Nhân viên
 				Helpers.SessionHelper.SetEmployeeSession(
@@ -133,7 +127,8 @@ namespace QuanLyBanHang.Controllers
 		[HttpGet]
 		public async Task<IActionResult> SignUp()
 		{
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh");
+			var tinhs = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(tinhs, "MaTinh", "TenTinh");
 			ViewBag.Xa = new SelectList(Enumerable.Empty<object>(), "MaXa", "TenXa");
 			ViewData["MaXaSelected"] = null;
 			return View();
@@ -189,8 +184,8 @@ namespace QuanLyBanHang.Controllers
 				}
 			}
 
-
-			ViewBag.Tinh = new SelectList(_context.Tinh, "MaTinh", "TenTinh", maTinh);
+			var allTinhs = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinhs, "MaTinh", "TenTinh", maTinh);
 
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);

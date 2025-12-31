@@ -16,11 +16,57 @@ namespace QuanLyBanHang.Controllers
 			_service = new CTMHService(context);
 		}
 
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string search, string maDMH)
 		{
 			var list = await _service.GetAll();
+
+            if (!string.IsNullOrEmpty(maDMH))
+            {
+                list = list.Where(x => x.MaDMH == maDMH).ToList();
+                ViewBag.MaDMH = maDMH;
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                list = list.Where(x => 
+                    x.MaDMH.ToLower().Contains(search) || 
+                    x.MaSP.ToLower().Contains(search) ||
+                    x.TenSP.ToLower().Contains(search)
+                ).ToList();
+            }
+
+            ViewBag.Search = search;
 			return View(list);
 		}
+
+        public IActionResult Create(string maDMH)
+        {
+            ViewBag.MaDMH = maDMH;
+            ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP");
+            return View(new CTMH { MaDMH = maDMH });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CTMH model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _service.Insert(model);
+                    TempData["SuccessMessage"] = "Thêm chi tiết mua hàng thành công!";
+                    return RedirectToAction(nameof(Index), new { maDMH = model.MaDMH });
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Lỗi: " + ex.Message;
+                }
+            }
+            ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP", model.MaSP);
+            return View(model);
+        }
 
 		public async Task<IActionResult> Details(string maDMH, string maSP)
 		{
@@ -75,7 +121,7 @@ namespace QuanLyBanHang.Controllers
 			if (string.IsNullOrEmpty(maDMH) || string.IsNullOrEmpty(maSP))
 				return NotFound();
 
-			var ctmh = await _service.GetByID(maDMH, maSP);
+			var ctmh = await _service.GetDetail(maDMH, maSP);
 			if (ctmh == null) return NotFound();
 
 			return View(ctmh);

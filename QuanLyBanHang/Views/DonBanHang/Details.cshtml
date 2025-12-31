@@ -26,7 +26,7 @@
                     <dd class="col-sm-9">@don.TenTTBH</dd>
                     
                 <dt class="col-sm-3" >Địa chỉ giao hàng:</dt>
-                <dd class="col-sm-9">@don.DiaChiDBH, @don.TenXa, @don.TenTinh</dd>
+                <dd class="col-sm-9">@Html.Raw(don.DiaChiDBH), @don.TenXa, @don.TenTinh</dd>
                 </dl>
             </div>
 
@@ -97,17 +97,53 @@
     }
 
     <div class="mt-4">
-        @if (don != null && !isCustomer)
+        @if (don != null)
         {
-            <a href="@Url.Action("Edit", "DonBanHang", new { id = don.MaDBH })" class="btn btn-warning text-white me-2">
-                <i class="fa-solid fa-pen-to-square"></i> Sửa
-            </a>
+            @if (don.MaTTBH?.Trim() == "CHO")
+            {
+                if (!isCustomer)
+                {
+                    <form asp-action="ConfirmOrder" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@don.MaDBH" />
+                        <input type="hidden" name="search" value="@ViewBag.Search" />
+                        <input type="hidden" name="month" value="@ViewBag.Month" />
+                        <input type="hidden" name="year" value="@ViewBag.Year" />
+                        <input type="hidden" name="MaTTBH" value="@ViewBag.MaTTBH" />
+                        <button type="submit" class="btn btn-success text-white me-2" onclick="return confirm('Xác nhận duyệt đơn hàng này?')">
+                            <i class="fa-solid fa-check"></i> Xác nhận
+                        </button>
+                    </form>
+                }
 
-            <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "DonBanHang", new { id = don.MaDBH })">
-                <i class="fa-solid fa-trash"></i> Xóa
-            </a>
+                @if (isCustomer)
+                {
+                    <form asp-action="CancelOrder" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@don.MaDBH" />
+                        <input type="hidden" name="search" value="@ViewBag.Search" />
+                        <input type="hidden" name="month" value="@ViewBag.Month" />
+                        <input type="hidden" name="year" value="@ViewBag.Year" />
+                        <input type="hidden" name="MaTTBH" value="@ViewBag.MaTTBH" />
+                        <button type="submit" class="btn btn-outline-danger me-2" onclick="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?')">
+                            <i class="fa-solid fa-xmark"></i> Hủy đơn
+                        </button>
+                    </form>
+                }
+            }
+
+            @if (!isCustomer)
+            {
+                <a href="@Url.Action("Edit", "DonBanHang", new { id = don.MaDBH })" class="btn btn-warning text-white me-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                </a>
+
+                <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "DonBanHang", new { id = don.MaDBH })">
+                    <i class="fa-solid fa-trash"></i> Xóa
+                </a>
+            }
         }
-        <a asp-action="Index" asp-route-id="@don.MaDBH" class="btn btn-secondary">
+        <a href="@Url.Action("Index", "DonBanHang", new { search = ViewBag.Search, month = ViewBag.Month, year = ViewBag.Year, MaTTBH = ViewBag.MaTTBH })" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </div>

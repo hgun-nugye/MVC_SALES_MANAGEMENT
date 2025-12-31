@@ -21,25 +21,9 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaTinh", (object?)tinh ?? DBNull.Value)
 			};
 
-			var result = await _context.XaDTO
+			return await _context.XaDTO
 				.FromSqlRaw("EXEC Xa_Search @Search, @MaTinh", parameters)
 				.ToListAsync();
-
-            // Fallback: Populate TenTinh nếu SP trả về null hoặc mapping không khớp
-            // Lấy danh sách tất cả tỉnh để lookup (giả sử số lượng tỉnh ít ~63)
-            if (result.Any(x => string.IsNullOrEmpty(x.TenTinh)))
-            {
-                var tinhList = await _context.Tinh.ToDictionaryAsync(t => t.MaTinh, t => t.TenTinh);
-                foreach (var item in result)
-                {
-                    if (string.IsNullOrEmpty(item.TenTinh) && !string.IsNullOrEmpty(item.MaTinh) && tinhList.ContainsKey(item.MaTinh))
-                    {
-                        item.TenTinh = tinhList[item.MaTinh];
-                    }
-                }
-            }
-            
-            return result;
 		}
 
 
@@ -59,18 +43,19 @@ namespace QuanLyBanHang.Services
 		// DETAILS - Xem chi tiết
 		public async Task<Xa?> GetByID(string id)
 		{
-			var xa = (await _context.Xa.FromSqlInterpolated($"EXEC Xa_GetByIDWithTinh @MaXa = {id}")
+			var dto = (await _context.XaDTO.FromSqlInterpolated($"EXEC Xa_GetByIDWithTinh @MaXa = {id}")
 				.ToListAsync())
 				.FirstOrDefault();
 
-			// Populate TenTinh thủ công vì property này là [NotMapped]
-			if (xa != null && !string.IsNullOrEmpty(xa.MaTinh))
-			{
-				var tinh = await _context.Tinh.FindAsync(xa.MaTinh);
-				xa.TenTinh = tinh?.TenTinh;
-			}
+			if (dto == null) return null;
 
-			return xa;
+			return new Xa
+			{
+				MaXa = dto.MaXa ?? "",
+				TenXa = dto.TenXa ?? "",
+				MaTinh = dto.MaTinh ?? "",
+				TenTinh = dto.TenTinh
+			};
 		}
 
 		// CREATE

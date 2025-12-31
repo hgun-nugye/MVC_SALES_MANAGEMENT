@@ -37,31 +37,40 @@
     }
 </style>
 
-<div class="container">
-    <h4 class="mb-5 text-success">
-        Danh sách Hãng
-    </h4>
-
-    @* Form  *@
-    <form id="Form" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
-              <div class="search-wrapper" style="max-width: 350px; position: relative;">
-            <i class="fa fa-search" style="
-            position: absolute; left: 12px; top: 50%;
-            transform: translateY(-50%); color: #777;
-        "></i>
-
-            <input id="searchBox" name="search" type="text" class="form-control"
-                   value="@ViewBag.Search"
-                   placeholder="Tìm mã hãng, tên hãng..."
-                   style="padding-left: 35px;">
-
+<div class="container">   
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold">
+            <i class="fa-solid fa-industry me-2"></i>
+            Quản lý Hãng sản xuất
+        </h4>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index", "Nuoc")" class="btn btn-outline-light fw-bold px-4">
+                <i class="fa-solid fa-earth-americas me-2"></i> Quốc gia
+            </a>
+            <a href="@Url.Action("Create", "HangSX")" class="btn btn-light text-success fw-bold px-4">
+                <i class="fa-solid fa-plus-circle me-2"></i> Thêm
+            </a>
         </div>
+    </div>
 
-        <div class="d-flex flex-wrap align-items-center gap-2">           
-            <button type="button" id="btnClear" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i>Reset</button>
-            <a href="@Url.Action("Create", "HangSX")" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Add</a>
-        </div>
-    </form>
+    <!-- FORM LỌC -->
+    <div class="filter-card">
+        <form id="Form" method="get" class="row g-3 align-items-end">
+            <div class="col-lg-11">
+                <label class="form-label small fw-bold text-muted text-uppercase">Tìm kiếm</label>
+                <div class="search-input-group">
+                    <i class="fa fa-search"></i>
+                    <input id="searchBox" type="text" name="search" value="@ViewBag.Search"
+                           class="form-control" placeholder="Tìm mã hãng, tên hãng...">
+                </div>
+            </div>
+            <div class="col-lg-1 d-flex gap-2">
+                <button type="button" id="btnClear" class="btn btn-outline-secondary btn-clear">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </form>
+    </div>
 
 
     <div class="table">

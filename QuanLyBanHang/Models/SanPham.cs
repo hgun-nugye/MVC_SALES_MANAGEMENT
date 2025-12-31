@@ -55,31 +55,26 @@ namespace QuanLyBanHang.Models
 		[Column(TypeName = "decimal(5,2)")]
 		public decimal TrongLuong { get; set; }
 
+		[Display(Name = "Đối tượng sử dụng")]
+		public string? DoiTuongSuDung { get; set; } = string.Empty;
+
 		[Display(Name = "Mã Trạng Thái")]
 		[Required(ErrorMessage = "Mã trạng thái không được để trống")]
 		[StringLength(3, ErrorMessage = "Mã trạng thái tối đa 3 ký tự")]
-		public string MaTT { get; set; } = string.Empty;
+		public string? MaTT { get; set; } = string.Empty;
 
 		[Display(Name = "Mã loại")]
 		[Required(ErrorMessage = "Mã loại không được để trống")]
-		public string MaLoai { get; set; } = string.Empty;
+		public string? MaLoai { get; set; } = string.Empty;
 
 		[Display(Name = "Mã hãng")]
 		[Required(ErrorMessage = "Mã hãng không được để trống")]
 		[StringLength(5, ErrorMessage = "Mã hãng tối đa 5 ký tự")]
-		public string MaHangSX { get; set; } = string.Empty;
-
-		// Quan hệ
-		//[ForeignKey("MaLoai")]
-		//public LoaiSP? LoaiSP { get; set; }
-
-		//[ForeignKey("MaHangSX")]
-		//public Hang? Hang { get; set; }
-
-		//public virtual ICollection<CTMH>? CTMHs { get; set; }
-		//public virtual ICollection<CTBH>? CTBHs { get; set; }
-
-		// Thuộc tính hiển thị (NotMapped)
+		public string? MaHangSX { get; set; } = string.Empty;
+		[NotMapped]
+		[Display(Name = "Số lượng tồn")]
+		public int? SoLuongTon { get; set; }
+		
 		[NotMapped]
 		[Display(Name = "Tên loại sản phẩm")]
 		public string? TenLoai { get; set; }
@@ -132,6 +127,9 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Trọng lượng")]
 		[Column(TypeName = "decimal(5,2)")]
 		public decimal? TrongLuong { get; set; }
+
+		[Display(Name = "Đối tượng sử dụng")]
+		public string DoiTuongSuDung { get; set; } = string.Empty;
 
 		[Display(Name = "Mã Trạng Thái")]
 		public string? MaTT { get; set; }

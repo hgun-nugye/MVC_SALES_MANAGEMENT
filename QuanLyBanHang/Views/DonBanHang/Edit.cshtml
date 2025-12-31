@@ -50,7 +50,7 @@
                 </label>
                 <div class="input-group-icon">
                     <select id="MaTinh" name="maTinh" asp-items="@ViewBag.Tinh" class="form-select">
-                        <option value="">@Model.TenTinh</option>
+                        <option value="">-- Chọn Tỉnh --</option>
                     </select>
                 </div>
             </div>
@@ -62,8 +62,8 @@
                 </label>
                 <div class="input-group-icon">
                     
-                    <select id="MaXa" name="maXa" asp-for="MaXa" asp-items="@ViewBag.Xa" class="form-select">
-                        <option value="">@Model.TenXa</option>
+                    <select id="MaXa" asp-for="MaXa" asp-items="@ViewBag.Xa" class="form-select">
+                        <option value="">-- Chọn Xã --</option>
                     </select>
                 </div>
                 <span asp-validation-for="MaXa" class="text-danger small mt-1"></span>

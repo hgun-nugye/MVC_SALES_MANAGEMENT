@@ -61,15 +61,43 @@
     .table tbody tr:hover {
         background-color: #F9F9F9;
     }
+
+    /* Chờ xử lý - Vàng */
+    .status-cho {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    /* Đã xác nhận - Xanh dương */
+    .status-dxn {
+        background-color: #cfe2ff;
+        color: #084298;
+        border: 1px solid #b6d4fe;
+    }
+
+    /* Đã hoàn thành - Xanh lơ */
+    .status-hth {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+    /* Đã hủy - Đỏ */
+    .status-huy {
+        background-color: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
 </style>
 
 <div class="container-fluid">
     <!-- Header với nút Export -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-success mb-0">
-            <i class="fas fa-chart-line me-2"></i>Dashboard - Báo cáo tổng hợp
+        <h2 class="text-success fw-bold mb-0">
+            <i class="fas fa-chart-line me-2"></i>Báo cáo tổng hợp
         </h2>
-        <div>
+        <div class="d-flex gap-2">        
+            
             <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fas fa-file-excel me-2"></i>Xuất Excel (Toàn bộ)
             </button>
@@ -121,45 +149,136 @@
         </div>
     </div>
 
-    <!-- Chi tiết hóa đơn -->
+    <!-- Thống kê Thu - Chi -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="report-section" style="border-top: 4px solid #4CAF50;">
+                <h4 class="section-title">
+                    <i class="fas fa-balance-scale me-2 text-success"></i>
+                    Thống kê Thu - Chi
+                </h4>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <div class="stats-label text-uppercase fw-bold">Doanh thu</div>
+                            <h3 class="text-success fw-bold mt-2">@Model.TotalRevenue.ToString("N0") ₫</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <div class="stats-label text-uppercase fw-bold">Nhập hàng</div>
+                            <h3 class="text-danger fw-bold mt-2">@((Model.TotalCost).ToString("N0")) ₫</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded @(Model.TotalProfit >= 0 ? "bg-success-subtle" : "bg-danger-subtle")">
+                            <div class="stats-label text-uppercase fw-bold">Lợi nhuận</div>
+                            <h3 class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger") fw-bold mt-2">
+                                @(Model.TotalProfit.ToString("N0")) ₫
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chi tiết hóa đơn bán hàng -->
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="report-section">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="section-title mb-0">
-                        <i class="fas fa-file-invoice me-2 text-success"></i>
+                    <h4 class="section-title mb-0" style="border-bottom: none;">
+                        <i class="fa-solid fa-file-invoice-dollar me-2 text-success"></i>
                         Chi tiết hóa đơn bán hàng
                     </h4>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 align-items-center">
                         <input type="date" id="fromDate" class="form-control form-control-sm" style="width: auto;">
                         <input type="date" id="toDate" class="form-control form-control-sm" style="width: auto;">
-                        <button class="btn btn-sm btn-primary" onclick="filterOrders()">
-                            <i class="fas fa-filter me-1"></i>Lọc
+                        <button class="btn btn-sm btn-dark px-3" onclick="filterOrders()">
+                            <i class="fas fa-filter me-1"></i>
                         </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="resetOrderFilter()">
+                            <i class="fas fa-undo me-1"></i>
+                        </button>
+                        <a href="@Url.Action("Index", "CTBH")" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-list-ul me-2"></i>Quản lý CTBH
+                        </a>
                     </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover" id="ordersTable">
-                        <thead>
-                            <tr>
-                                <th>Mã đơn</th>
-                                <th>Ngày bán</th>
-                                <th>Khách hàng</th>
-                                <th>Địa chỉ</th>
-                                <th>Trạng thái</th>
-                                <th class="text-end">Số SP</th>
-                                <th class="text-end">Tổng tiền</th>
+                <div class="table-responsive border rounded">
+                    <table class="table table-hover mb-0" id="ordersTable">
+                        <thead class="table-light">
+                            <tr class="text-secondary">
+                                <th class="py-3">MÃ ĐƠN</th>
+                                <th class="py-3">NGÀY BÁN</th>
+                                <th class="py-3">KHÁCH HÀNG</th>
+                                <th class="py-3">ĐỊA CHỈ</th>
+                                <th class="py-3">TRẠNG THÁI</th>
+                                <th class="py-3 text-center">SỐ SP</th>
+                                <th class="py-3 text-end">TỔNG TIỀN</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="7" class="text-center">
+                                <td colspan="7" class="text-center py-5">
                                     <div class="spinner-border text-success" role="status">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
+                        <tfoot id="ordersFooter">
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chi tiết hóa đơn nhập -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="report-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="section-title mb-0" style="border-bottom: none;">
+                        <i class="fa-solid fa-file-invoice me-2 text-success"></i>
+                        Chi tiết hóa đơn nhập hàng
+                    </h4>
+                    <div class="d-flex gap-2 align-items-center">
+                        <input type="date" id="fromDateImport" class="form-control form-control-sm" style="width: auto;">
+                        <input type="date" id="toDateImport" class="form-control form-control-sm" style="width: auto;">
+                        <button class="btn btn-sm btn-dark px-3" onclick="filterImportOrders()">
+                            <i class="fas fa-filter me-1"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="resetImportFilter()">
+                            <i class="fas fa-undo me-1"></i>
+                        </button>
+                        <a href="@Url.Action("Index", "CTMH")" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-list-ul me-2"></i>Quản lý CTMH
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive border rounded">
+                    <table class="table table-hover mb-0" id="importOrdersTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>MÃ ĐƠN NHẬP</th>
+                                <th>NGÀY NHẬP</th>
+                                <th>NHÀ CUNG CẤP</th>
+                                <th class="text-center">SỐ LƯỢNG</th>
+                                <th class="text-end">TỔNG TIỀN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="spinner-border text-success"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot id="importOrdersFooter"></tfoot>
                     </table>
                 </div>
             </div>
@@ -254,9 +373,11 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let revenueChart;
         $(document).ready(function () {
             loadRevenueChart();
             loadOrders();
+            loadImportOrders();
             loadProductRevenue();
             loadTopProducts();
             loadSlowProducts();
@@ -264,8 +385,9 @@
 
         function loadRevenueChart() {
             $.get('@Url.Action("GetMonthlyRevenue", "Dashboard")?year=@DateTime.Now.Year', function (data) {
+                if (revenueChart) revenueChart.destroy();
                 const ctx = document.getElementById('revenueChart').getContext('2d');
-                new Chart(ctx, {
+                revenueChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: data.map(d => d.monthName),
@@ -321,30 +443,100 @@
                 let html = '';
                 let total = 0;
                 data.forEach(order => {
+                            let statusBadge = 'bg-secondary';
+        if (order.trangThai === 'Đã xác nhận') statusBadge = 'status-dxn';
+        else if (order.trangThai === 'Hoàn thành') statusBadge = 'status-hth';
+        else if (order.trangThai === 'Chờ xác nhận') statusBadge = 'status-cho';
+        else if (order.trangThai === 'Đã hủy') statusBadge = 'status-huy';
+
+
                     html += `
                         <tr>
-                            <td>${order.maDBH}</td>
-                            <td>${new Date(order.ngayBH).toLocaleDateString('vi-VN')}</td>
-                            <td>${order.tenKH}</td>
-                            <td>${order.diaChiDBH}</td>
-                            <td><span class="badge bg-success">${order.trangThai}</span></td>
-                            <td class="text-end">${order.soLuongSP}</td>
-                            <td class="text-end"><strong>${order.tongTien.toLocaleString('vi-VN')} đ</strong></td>
+                            <td class="fw-bold text-muted">${order.maDBH}</td>
+                            <td class="text-secondary">${new Date(order.ngayBH).toLocaleDateString('vi-VN')}</td>
+                            <td class="fw-bold">${order.tenKH}</td>
+                            <td class="text-muted small">${order.diaChiDBH}</td>
+                            <td class="text-cent"><span class="badge ${statusBadge} px-3 py-2 text-cent" style="font-weight: 500;">${order.trangThai}</span></td>
+                            <td class="text-center">${order.soLuongSP}</td>
+                            <td class="text-end fw-bold"><strong>${order.tongTien.toLocaleString('vi-VN')} đ</strong></td>
                         </tr>
                     `;
                     total += order.tongTien;
                 });
 
-                html += `
-                    <tr class="table-success fw-bold">
-                        <td colspan="6" class="text-end">TỔNG CỘNG:</td>
-                        <td class="text-end">${total.toLocaleString('vi-VN')} đ</td>
-                    </tr>
-                `;
-
-                $('#ordersTable tbody').html(html || '<tr><td colspan="7" class="text-center text-muted">Chưa có dữ liệu</td></tr>');
+                if (data.length > 0) {
+                    let footerHtml = `
+                        <tr style="background-color: #d1e7dd; font-weight: bold;">
+                            <td colspan="6" class="text-end py-3 px-4" style="letter-spacing: 1px;">TỔNG CỘNG:</td>
+                            <td class="text-end py-3 px-4 fs-5 text-dark">${total.toLocaleString('vi-VN')} đ</td>
+                        </tr>
+                    `;
+                    $('#ordersFooter').html(footerHtml);
+                    $('#ordersTable tbody').html(html);
+                } else {
+                    $('#ordersFooter').empty();
+                    $('#ordersTable tbody').html('<tr><td colspan="7" class="text-center py-5 text-muted">Chưa có dữ liệu</td></tr>');
+                }
             });
         }
+
+                function loadImportOrders(fromDate, toDate) {
+            let url = '@Url.Action("GetImportOrderDetails", "Dashboard")';
+            if (fromDate || toDate) {
+                url += '?';
+                if (fromDate) url += 'fromDate=' + fromDate + '&';
+                if (toDate) url += 'toDate=' + toDate;
+            }
+
+            $.get(url, function (data) {
+                let html = '';
+                let total = 0;
+
+                data.forEach(item => {
+                    html += `
+                        <tr>
+                            <td class="fw-bold text-muted">${item.maDMH}</td>
+                            <td>${new Date(item.ngayMH).toLocaleDateString('vi-VN')}</td>
+                            <td class="fw-bold">${item.tenNCC}</td>
+                            <td class="text-center">${item.soLuongSP}</td>
+                            <td class="text-end fw-bold text-dark">
+                                ${item.tongTien.toLocaleString('vi-VN')} đ
+                            </td>
+                        </tr>
+                    `;
+                    total += item.tongTien;
+                });
+
+                if (data.length > 0) {
+                    $('#importOrdersTable tbody').html(html);
+                    $('#importOrdersFooter').html(`
+                        <tr class="table-success fw-bold">
+                            <td colspan="4" class="text-end">TỔNG CỘNG:</td>
+                            <td class="text-end">${total.toLocaleString('vi-VN')} đ</td>
+                        </tr>
+                    `);
+                } else {
+                    $('#importOrdersTable tbody').html(
+                        '<tr><td colspan="5" class="text-center text-muted">Chưa có dữ liệu</td></tr>'
+                    );
+                    $('#importOrdersFooter').empty();
+                }
+            });
+        }
+
+        function filterImportOrders() {
+            loadImportOrders(
+                $('#fromDateImport').val(),
+                $('#toDateImport').val()
+            );
+        }
+
+        function resetImportFilter() {
+            $('#fromDateImport').val('');
+            $('#toDateImport').val('');
+            loadImportOrders();
+        }
+
 
         function loadProductRevenue() {
             $.get('@Url.Action("GetProductRevenue", "Dashboard")', function (data) {
@@ -407,7 +599,7 @@
                         </tr>
                     `;
                 });
-                $('#slowProductsTable tbody').html(html || '<tr><td colspan="5" class="text-center text-muted">Chưa có dữ liệu</td></tr>');
+                $('#slowProductsTable tbody').html(html || '<tr><td colspan="5" class="text-center text-muted fst-italic">Chưa có dữ liệu</td></tr>');
             });
         }
 
@@ -415,6 +607,12 @@
             const fromDate = $('#fromDate').val();
             const toDate = $('#toDate').val();
             loadOrders(fromDate, toDate);
+        }
+
+        function resetOrderFilter() {
+            $('#fromDate').val('');
+            $('#toDate').val('');
+            loadOrders();
         }
 
         function exportToExcel() {

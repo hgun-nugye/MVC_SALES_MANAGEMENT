@@ -13,7 +13,7 @@ namespace QuanLyBanHang.Models
 		public string MaTinh { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Tên tỉnh không được để trống")]
-		[StringLength(90, ErrorMessage = "Tên tỉnh không được quá 90 ký tự")]
+		[StringLength(50, ErrorMessage = "Tên tỉnh không được quá 50 ký tự")]
 		[Display(Name = "Tên tỉnh")]
 		public string TenTinh { get; set; } = string.Empty;
 

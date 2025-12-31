@@ -68,8 +68,10 @@ namespace QuanLyBanHang.Services
 
 			foreach (var ct in model.CTBHs)
 			{
-				var sp = await _context.SanPham.AsNoTracking()
-								.FirstOrDefaultAsync(s => s.MaSP == ct.MaSP);
+				var spList = await _context.SanPhamDto
+								.FromSqlRaw("EXEC SanPham_GetByID @MaSP", new SqlParameter("@MaSP", ct.MaSP))
+								.ToListAsync();
+				var sp = spList.FirstOrDefault();
 
 				decimal giaThucTe = sp?.GiaBan ?? 0;
 
@@ -143,7 +145,7 @@ namespace QuanLyBanHang.Services
 			);
 		}
 
-		public async Task<List<DonBanHangDetail>> Search(string? keyword, int? month, int? year, string? MaTTBH)
+		public async Task<List<DonBanHangDetailDto>> Search(string? keyword, int? month, int? year, string? MaTTBH)
 		{
 			var parameters = new[]
 			{
@@ -153,7 +155,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaTTBH", (object?)MaTTBH ?? DBNull.Value)
 			};
 
-			var data = await _context.DonBanHangDetail
+			var data = await _context.DonBanHangDetailDto
 				.FromSqlRaw("EXEC DonBanHang_Search @Search, @Month, @Year, @MaTTBH", parameters)
 				.ToListAsync();
 
@@ -167,6 +169,22 @@ namespace QuanLyBanHang.Services
 				.ToListAsync();
 
 			return data;
+		}
+
+		public async Task ConfirmOrder(string maDBH)
+		{
+			await _context.Database.ExecuteSqlRawAsync(
+				"EXEC DonBanHang_Confirm @MaDBH",
+				new SqlParameter("@MaDBH", maDBH)
+			);
+		}
+
+		public async Task CancelOrder(string maDBH)
+		{
+			await _context.Database.ExecuteSqlRawAsync(
+				"EXEC DonBanHang_Cancel @MaDBH",
+				new SqlParameter("@MaDBH", maDBH)
+			);
 		}
 	}
 }

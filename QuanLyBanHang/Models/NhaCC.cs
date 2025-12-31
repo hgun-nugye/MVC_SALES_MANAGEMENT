@@ -20,7 +20,7 @@ namespace QuanLyBanHang.Models
 
 		[Required(ErrorMessage = "Số điện thoại không được để trống.")]
 		[Display(Name = "Số Điện Thoại")]
-		[RegularExpression(@"^\d{10}$", ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số")]
+		[RegularExpression(@"^\d+$", ErrorMessage = "Số điện thoại chỉ được chứa chữ số")]
 
 		public string DienThoaiNCC { get; set; } = string.Empty;
 

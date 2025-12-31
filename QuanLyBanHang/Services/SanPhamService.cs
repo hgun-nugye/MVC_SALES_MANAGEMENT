@@ -48,7 +48,7 @@ namespace QuanLyBanHang.Services
 		public async Task Create(SanPham sp, string? filePath)
 		{
 			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC SanPham_Insert @TenSP, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong, @MaTT, @MaLoai, @MaHangSX",
+				"EXEC SanPham_Insert @TenSP, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong, @DoiTuongSuDung, @MaTT, @MaLoai, @MaHangSX",
 				new SqlParameter("@TenSP", sp.TenSP),
 				new SqlParameter("@GiaBan", sp.GiaBan),
 				new SqlParameter("@MoTaSP", sp.MoTaSP),
@@ -58,6 +58,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@HDSD", sp.HDSD),
 				new SqlParameter("@HDBaoQuan", sp.HDBaoQuan),
 				new SqlParameter("@TrongLuong", sp.TrongLuong),
+				new SqlParameter("@DoiTuongSuDung", sp.DoiTuongSuDung ?? (object)DBNull.Value),
 				new SqlParameter("@MaTT", sp.MaTT),
 				new SqlParameter("@MaLoai", sp.MaLoai),
 				new SqlParameter("@MaHangSX", sp.MaHangSX)
@@ -65,10 +66,10 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Cập nhật sản phẩm
-		public async Task Update(SanPham sp, string? filePath)
+		public async Task Update(SanPhamDto sp, string? filePath)
 		{
 			await _context.Database.ExecuteSqlRawAsync(
-				"EXEC SanPham_Update @MaSP, @TenSP, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong, @MaTT, @MaLoai, @MaHangSX",
+				"EXEC SanPham_Update @MaSP, @TenSP, @GiaBan, @MoTaSP, @AnhMH, @ThanhPhan, @CongDung, @HDSD, @HDBaoQuan, @TrongLuong, @DoiTuongSuDung, @MaTT, @MaLoai, @MaHangSX",
 				new SqlParameter("@MaSP", sp.MaSP),
 				new SqlParameter("@TenSP", sp.TenSP),
 				new SqlParameter("@GiaBan", sp.GiaBan),
@@ -79,6 +80,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@HDSD", sp.HDSD),
 				new SqlParameter("@HDBaoQuan", sp.HDBaoQuan),
 				new SqlParameter("@TrongLuong", sp.TrongLuong),
+				new SqlParameter("@DoiTuongSuDung", sp.DoiTuongSuDung ?? (object)DBNull.Value),
 				new SqlParameter("@MaTT", sp.MaTT),
 				new SqlParameter("@MaLoai", sp.MaLoai),
 				new SqlParameter("@MaHangSX", sp.MaHangSX)

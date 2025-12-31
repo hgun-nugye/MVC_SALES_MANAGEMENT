@@ -3,113 +3,227 @@
     ViewBag.Title = "Sửa Khách hàng";
 }
 
-<div class="container">
-    <h4 class="text-success mb-4">
-        Sửa Thông Tin Khách hàng
-    </h4>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
 
-    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="border p-4 rounded shadow-sm bg-light">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eef2f0;
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="MaKH" class="form-label"></label>
-            <input asp-for="MaKH" class="form-control" readonly />
-        </div>
+    .section-title {
+        color: #198754;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f8fbf9;
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="TenKH" class="form-label"></label>
-            <input asp-for="TenKH" class="form-control" />
-            <span asp-validation-for="TenKH" class="text-danger"></span>
-        </div>
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="DienThoaiKH" class="form-label"></label>
-            <input asp-for="DienThoaiKH" class="form-control" />
-            <span asp-validation-for="DienThoaiKH" class="text-danger"></span>
-        </div>
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.65rem 0.85rem;
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="EmailKH" class="form-label"></label>
-            <input asp-for="EmailKH" class="form-control" />
-            <span asp-validation-for="EmailKH" class="text-danger"></span>
-        </div>
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1);
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="DiaChiKH" class="form-label"></label>
-            <input asp-for="DiaChiKH" class="form-control" />
-            <span asp-validation-for="DiaChiKH" class="text-danger"></span>
-        </div>
+    .preview-container {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        background: #f8f9fa;
+    }
 
-        <div class="form-group mb-3">
-            <label class="form-label">Tỉnh</label>
-            <select id="MaTinh" name="maTinh" class="form-control" asp-items="@ViewBag.Tinh">
-                <option value="">@Model.TenTinh</option>
-            </select>
-        </div>
+    .img-preview {
+        max-width: 150px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
 
-        <div class="form-group mb-3">
-            <label asp-for="MaXa" class="form-label"></label>
-            <select id="MaXa" asp-for="MaXa" class="form-control" asp-items="@ViewBag.Xa">
-                <option value="">@Model.TenXa</option>
-            </select>
-            <span asp-validation-for="MaXa" class="text-danger"></span>
-        </div>
+    .required-label::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
 
-        <div class="form-group mb-3">
-            <label class="form-label">Ảnh</label>
-            <input type="file" name="AnhFile" class="form-control" />
-            <p>Ảnh hiện tại:</p>
-            <img src="/images/@Model.AnhKH" width="120" />
-        </div>
+<div class="container py-4">
+    <div class="page-header">
+        <h4 class="mb-0">
+            <i class="fa-solid fa-user-pen me-2"></i>
+            Chỉnh sửa thông tin khách hàng
+        </h4>
+    </div>
 
-        <div class="mt-4 d-flex gap-2">
-            <button type="submit" class="btn btn-warning text-white">
-                <i class="fa-solid fa-save"></i> Cập nhật
-            </button>
-            <a asp-action="Details" asp-route-id="@Model.MaKH" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
-            </a>
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+        @Html.HiddenFor(m => m.MaKH)
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Thông tin cá nhân -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-id-card-clip"></i>
+                        Thông tin cơ bản
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6 text-muted">
+                            <label class="form-label">Mã khách hàng</label>
+                            <input asp-for="MaKH" class="form-control bg-light" disabled />
+                        </div>
+                        <div class="col-md-12">
+                            <label asp-for="TenKH" class="form-label required-label">Họ và tên</label>
+                            <input asp-for="TenKH" class="form-control" placeholder="Nhập họ tên khách hàng..." />
+                            <span asp-validation-for="TenKH" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="GioiTinh" class="form-label">Giới tính</label>
+                            <select asp-for="GioiTinh" class="form-select">
+                                <option value="true">Nam</option>
+                                <option value="false">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TenDNKH" class="form-label">Tên đăng nhập</label>
+                            <input asp-for="TenDNKH" class="form-control" placeholder="Tên tài khoản..." />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liên hệ & Địa chỉ -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Liên hệ & Địa chỉ
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="DienThoaiKH" class="form-label required-label">Số điện thoại</label>
+                            <input asp-for="DienThoaiKH" class="form-control" placeholder="0xxx_xxx_xxx" />
+                            <span asp-validation-for="DienThoaiKH" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EmailKH" class="form-label">Email</label>
+                            <input asp-for="EmailKH" type="email" class="form-control" placeholder="example@mail.com" />
+                            <span asp-validation-for="EmailKH" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="DiaChiKH" class="form-label required-label">Địa chỉ (Số nhà, đường)</label>
+                            <input asp-for="DiaChiKH" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tỉnh / Thành phố</label>
+                            <select id="MaTinh" name="maTinh" class="form-select" asp-items="@ViewBag.Tinh">
+                                <option value="">-- Chọn Tỉnh --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="MaXa" class="form-label">Phường / Xã</label>
+                            <select id="MaXa" asp-for="MaXa" class="form-select" asp-items="@ViewBag.Xa">
+                                <option value="">-- Chọn Xã --</option>
+                            </select>
+                            <span asp-validation-for="MaXa" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-image"></i>
+                        Ảnh đại diện
+                    </div>
+                    <div class="preview-container mb-3">
+                        <img id="imgPreview" src="@(string.IsNullOrEmpty(Model.AnhKH) ? Url.Content("~/images/default-user.png") : Url.Content("~/images/customers/" + Model.AnhKH))" 
+                             class="img-preview mb-2" alt="Preview">
+                        <div class="small text-muted mb-2">Xem trước hình ảnh</div>
+                    </div>
+                    <input type="file" name="AnhFile" id="AnhFile" class="form-control" accept="image/*" />
+                    <div class="small text-muted mt-2">
+                        <i class="fa-solid fa-circle-info me-1"></i> Định dạng hỗ trợ: JPG, PNG, WEBP
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-warning text-white py-2 fw-bold">
+                        <i class="fa-solid fa-floppy-disk me-2"></i> Lưu thay đổi
+                    </button>
+                    <a asp-action="Details" asp-route-id="@Model.MaKH" class="btn btn-outline-secondary py-2">
+                        Hủy bỏ
+                    </a>
+                </div>
+            </div>
         </div>
     </form>
-
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script>
         $(function () {
+            // Preview image
+            $('#AnhFile').change(function(){
+                const file = this.files[0];
+                if (file){
+                    let reader = new FileReader();
+                    reader.onload = function(event){
+                        $('#imgPreview').attr('src', event.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
 
-            // Khi chọn Tỉnh → load Xã
+            // Cascading dropdown
             $('#MaTinh').change(function () {
                 var maTinh = $(this).val();
-
                 $('#MaXa').html('<option value="">-- Chọn Xã --</option>');
 
                 if (maTinh) {
                     $.getJSON('/KhachHang/GetXaByTinh', { maTinh: maTinh }, function (data) {
-
                         var options = '<option value="">-- Chọn Xã --</option>';
-
                         $.each(data, function (i, xa) {
-                            options += `<option value="${xa.maXa}">${xa.tenXa}</option>`;
+                            var maXa = xa.MaXa !== undefined ? xa.MaXa : xa.maXa;
+                            var tenXa = xa.TenXa !== undefined ? xa.TenXa : xa.tenXa;
+                            options += `<option value="${maXa}">${tenXa}</option>`;
                         });
-
                         $('#MaXa').html(options);
                     });
                 }
             });
 
-            // Khi load trang → Tự chọn lại Xã đúng với Model.MaXa
+            // Initial load for Xa if Tinh is present
             var selectedXa = "@Model.MaXa";
-            if ($('#MaTinh').val()) {
-                $('#MaTinh').trigger('change');
-
-                setTimeout(() => {
-                    $('#MaXa').val(selectedXa);
-                }, 300);
+            if ($('#MaTinh').val() && !@Json.Serialize(string.IsNullOrEmpty(Model.MaXa))) {
+                // Trigger only if we need to reload list but keep selection
+                // Logic here depends on how controller passes ViewBag.Xa
             }
         });
     </script>
 }
-

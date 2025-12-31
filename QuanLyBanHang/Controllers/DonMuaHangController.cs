@@ -34,25 +34,30 @@ namespace QuanLyBanHang.Controllers
 			_context = context;
 		}
 
-	public async Task<IActionResult> Index(string? search, int? month, int? year, string? MaTTMH)
-	{
-		ViewBag.Search = search;
-		ViewBag.Month = month;
-		ViewBag.Year = year;
-		ViewBag.MaTTMH = MaTTMH;
+		public async Task<IActionResult> Index(string? search, int? month, int? year, string? MaTTMH)
+		{
+			ViewBag.Search = search;
+			ViewBag.Month = month;
+			ViewBag.Year = year;
+			ViewBag.MaTTMH = MaTTMH;
 
-		// Đảm bảo ViewBag.TrangThaiMH không null
-		var trangThaiList = await _context.TrangThaiMH.ToListAsync();
-		ViewBag.TrangThaiMH = new SelectList(trangThaiList ?? new List<TrangThaiMH>(), "MaTTMH", "TenTTMH", MaTTMH);
-		
-		var model = await _dmhService.Search(search, month, year, MaTTMH);
+			// Đảm bảo ViewBag.TrangThaiMH không null - Dùng service (Proc)
+			var trangThaiList = await _trangThaiMHService.GetAll();
+			ViewBag.TrangThaiMH = new SelectList(trangThaiList ?? new List<TrangThaiMH>(), "MaTTMH", "TenTTMH", MaTTMH);
 
-		return View(model);
-	}
+			var model = await _dmhService.Search(search, month, year, MaTTMH);
 
-		public async Task<IActionResult> Details(string id)
+			return View(model);
+		}
+
+		public async Task<IActionResult> Details(string id, string? search, int? month, int? year, string? MaTTMH)
 		{
 			if (string.IsNullOrEmpty(id)) return NotFound();
+
+			ViewBag.Search = search;
+			ViewBag.Month = month;
+			ViewBag.Year = year;
+			ViewBag.MaTTMH = MaTTMH;
 
 			var result = await _dmhService.GetByID(id);
 			return View(result);
@@ -65,15 +70,28 @@ namespace QuanLyBanHang.Controllers
 			var sanPhamList = await _spService.GetAll();
 			var trangThaiMHList = await _trangThaiMHService.GetAll();
 
-			ViewBag.MaNCC = new SelectList(_context.NhaCC.ToList(), "MaNCC", "TenNCC");
-			ViewBag.MaNV = new SelectList(_context.NhanVien.ToList(), "MaNV", "TenNV");
-			ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
+			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC");
+			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV");
+			ViewBag.MaSP = new SelectList(sanPhamList, "MaSP", "TenSP");
 			ViewBag.MaTTMH = new SelectList(trangThaiMHList, "MaTTMH", "TenTTMH", "CHO");
 
+			// Lấy thông tin nhân viên đang đăng nhập
+			var currentMaNV = HttpContext.Session.GetString("UserId");
+			var currentTenNV = HttpContext.Session.GetString("UserName");
+
+			if (!string.IsNullOrEmpty(currentMaNV))
+			{
+				ViewBag.CurrentMaNV = currentMaNV;
+				ViewBag.CurrentTenNV = currentTenNV;
+			}
+
+			// Mặc định
 			var model = new DonMuaHang
 			{
 				NgayMH = DateTime.Today,
-				CTMHs = new List<CTMH> { new CTMH() }
+				CTMHs = new List<CTMH> { new CTMH() },
+				MaTTMH = "CHO", // Mặc định Chờ
+				MaNV = currentMaNV // Pre-fill model
 			};
 
 			return View(model);
@@ -86,6 +104,18 @@ namespace QuanLyBanHang.Controllers
 			// Bỏ qua validate MaDMH vì sẽ được sinh ở tầng DB / SP
 			ModelState.Remove("MaDMH");
 			model.CTMHs ??= new List<CTMH>();
+
+			// Tự động gán trạng thái là CHO (Chờ xử lý)
+			model.MaTTMH = "CHO";
+			ModelState.Remove("MaTTMH");
+
+			// Tự động gán Nhân viên đang login
+			var currentMaNV = HttpContext.Session.GetString("UserId");
+			if (!string.IsNullOrEmpty(currentMaNV))
+			{
+				model.MaNV = currentMaNV;
+				ModelState.Remove("MaNV"); // Bỏ validate vì ta tự gán
+			}
 
 			for (int i = 0; i < model.CTMHs.Count; i++)
 			{

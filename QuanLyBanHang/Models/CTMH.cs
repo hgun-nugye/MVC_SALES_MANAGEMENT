@@ -35,19 +35,7 @@ namespace QuanLyBanHang.Models
 		[Column(TypeName = "decimal(18,2)")]
 		[Display(Name = "Đơn Giá Mua")]
 		public decimal? DGM { get; set; }
-
-		
-		// QUAN HỆ
-		
-		//[ForeignKey("MaDMH")]
-		//[Display(Name = "Đơn Mua Hàng")]
-		//public virtual DonMuaHang? DonMuaHang { get; set; }
-
-		//[ForeignKey("MaSP")]
-		//[Display(Name = "Sản Phẩm")]
-		//public virtual SanPham? SanPham { get; set; }
-
-		
+						
 		// THUỘC TÍNH HIỂN THỊ (không lưu DB)
 		
 		[NotMapped]

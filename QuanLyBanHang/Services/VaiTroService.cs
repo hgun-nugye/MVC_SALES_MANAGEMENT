@@ -1,5 +1,6 @@
 using QuanLyBanHang.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace QuanLyBanHang.Services
 {
@@ -49,18 +50,12 @@ namespace QuanLyBanHang.Services
                 EXEC VaiTro_Delete @MaVT = {id}");
 		}
 
-		// Search using LINQ since there's no Search procedure
 		public async Task<List<VaiTro>> Search(string? search)
 		{
-			var all = await GetAll();
-			if (string.IsNullOrWhiteSpace(search))
-				return all;
-
-			search = search.ToLower();
-			return all.Where(v => 
-				v.MaVT.ToLower().Contains(search) || 
-				v.TenVT.ToLower().Contains(search)
-			).ToList();
+			var parameter = new SqlParameter("@Search", (object?)search ?? DBNull.Value);
+			return await _context.VaiTro
+				.FromSqlRaw("EXEC VaiTro_Search @Search", parameter)
+				.ToListAsync();
 		}
 	}
 }

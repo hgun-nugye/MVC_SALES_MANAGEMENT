@@ -10,19 +10,21 @@ namespace QuanLyBanHang.Controllers
 		private readonly SanPhamService _spService;
 		private readonly LoaiSPService _loaiSPService;
 		private readonly HangSXService _hangService;
+		private readonly TrangThaiService _trangThaiService;
 		private readonly AppDbContext _context;
 		private readonly IWebHostEnvironment _environment;
 		public SanPhamController(
 			AppDbContext context,
 			SanPhamService spService,
-			SanPhamService service,
 			LoaiSPService loaiSPService,
 			HangSXService hangService,
+			TrangThaiService trangThaiService,
 			IWebHostEnvironment environment)
 		{
-			_spService = service;
+			_spService = spService;
 			_loaiSPService = loaiSPService;
 			_hangService = hangService;
+			_trangThaiService = trangThaiService;
 			_environment = environment;
 			_context = context;
 		}
@@ -64,6 +66,10 @@ namespace QuanLyBanHang.Controllers
 			// Bỏ qua validation cho MaSP vì nó được tự động generate trong stored procedure
 			ModelState.Remove("MaSP");
 			ModelState.Remove("AnhFile"); // Bỏ qua validation cho AnhFile vì dùng parameter riêng
+			if (string.IsNullOrEmpty(sp.MaTT))
+			{
+				sp.MaTT = "TT1"; // mặc định: còn bán
+			}
 
 			// Validate file upload (allow dùng lại ảnh cũ khi form reload)
 			var hasExistingImage = !string.IsNullOrEmpty(sp.AnhMH);
@@ -165,7 +171,8 @@ namespace QuanLyBanHang.Controllers
 				HDSD = sp.HDSD,
 				HDBaoQuan = sp.HDBaoQuan,
 				MaLoai = sp.MaLoai,
-				MaHangSX = sp.MaHangSX
+				MaHangSX = sp.MaHangSX,
+				DoiTuongSuDung = sp.DoiTuongSuDung
 			};
 
 			await LoadDropdownsAsync(sp.MaLoai, sp.MaTT, sp.MaHangSX);
@@ -174,7 +181,7 @@ namespace QuanLyBanHang.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(string id, SanPham sp, IFormFile? AnhFile)
+		public async Task<IActionResult> Edit(string id, SanPhamDto sp, IFormFile? AnhFile)
 		{
 			if (id != sp.MaSP) return NotFound();
 
@@ -239,16 +246,16 @@ namespace QuanLyBanHang.Controllers
 			var hangList = await _hangService.GetAll();
 			ViewBag.MaHangSX = new SelectList(hangList, "MaHangSX", "TenHangSX", selectedHang);
 
-			// Load TrangThai from database
-			var trangThaiList = await _context.TrangThai.ToListAsync();
+			// Load TrangThai from service (Proc)
+			var trangThaiList = await _trangThaiService.GetAll();
 			ViewBag.MaTT = new SelectList(trangThaiList, "MaTT", "TenTT", selectedMaTT);
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> GetGia(string id)
 		{
-			var sp = await _context.SanPham.FindAsync(id);
-			return Json(new { gia = sp?.GiaBan ?? 0 });
+			var sp = await _spService.GetById(id);
+			return Json(new { gia = sp?.GiaBan ?? 0, ton = sp?.SoLuongTon ?? 0 });
 		}
 	}
 }

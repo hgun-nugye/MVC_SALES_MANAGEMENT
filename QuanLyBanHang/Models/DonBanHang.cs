@@ -7,25 +7,25 @@ namespace QuanLyBanHang.Models
 	[Table("DonBanHang")]
 	public class DonBanHang
 	{
-		
+
 		//  KHÓA CHÍNH
-		
+
 		[Key]
 		[StringLength(11, ErrorMessage = "Mã đơn bán hàng tối đa 11 ký tự.")]
 		[Display(Name = "Mã Đơn Bán Hàng")]
 		public string? MaDBH { get; set; }
 
-		
+
 		//  NGÀY BÁN
-		
+
 		[Required(ErrorMessage = "Ngày bán hàng không được để trống.")]
 		[DataType(DataType.Date)]
 		[Display(Name = "Ngày Bán Hàng")]
 		public DateTime NgayBH { get; set; } = DateTime.Now;
 
-		
+
 		//  KHÁCH HÀNG
-		
+
 		[Required(ErrorMessage = "Mã khách hàng không được để trống.")]
 		[StringLength(10)]
 		[Display(Name = "Mã Khách Hàng")]
@@ -71,6 +71,46 @@ namespace QuanLyBanHang.Models
 
 	// DTO hiển thị chi tiết đơn bán
 	[Keyless]
+	public class DonBanHangDetailDto
+	{
+		[Display(Name = "Mã Đơn Bán Hàng")]
+		public string? MaDBH { get; set; }
+
+		[Display(Name = "Ngày Bán Hàng")]
+		public DateTime NgayBH { get; set; }
+
+		[Display(Name = "Mã Khách Hàng")]
+		public string? MaKH { get; set; }
+
+		[Display(Name = "Tên Khách Hàng")]
+		public string? TenKH { get; set; }
+
+		[Display(Name = "Mã Sản Phẩm")]
+		public string? MaSP { get; set; }
+
+		[Display(Name = "Tên Sản Phẩm")]
+		public string? TenSP { get; set; }
+
+		[Display(Name = "Tên Tỉnh")]
+		public string? TenTinh { get; set; }
+
+		[Display(Name = "Địa Chỉ Đơn Bán Hàng")]
+		public string? DiaChiDBH { get; set; }
+
+		[Display(Name = "Mã Xã")]
+		public string? MaXa { get; set; }
+
+		[Display(Name = "Mã trạng thái đơn hàng")]
+		public string? MaTTBH { get; set; }
+
+		[Display(Name = "Tên Xã")]
+		public string? TenXa { get; set; }
+
+		[Display(Name = "Trạng thái đơn hàng")]
+		public string? TenTTBH { get; set; }
+	}
+
+	[Keyless]
 	public class DonBanHangDetail
 	{
 		[Display(Name = "Mã Đơn Bán Hàng")]
@@ -106,13 +146,12 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Mã Xã")]
 		public string? MaXa { get; set; }
 
-		[Display(Name ="Mã trạng thái đơn hàng")]
+		[Display(Name = "Mã trạng thái đơn hàng")]
 		public string? MaTTBH { get; set; }
 
 		[Display(Name = "Tên Xã")]
 		public string? TenXa { get; set; }
-		
-		[NotMapped]
+
 		[Display(Name = "Thành Tiền")]
 		public decimal? ThanhTien => SLB * DGB;
 
@@ -143,9 +182,9 @@ namespace QuanLyBanHang.Models
 		public string DiaChiDBH { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Mã xã không được để trống.")]
-	[StringLength(5, ErrorMessage = "Mã xã tối đa 5 ký tự")]
-	[Display(Name = "Mã Xã")]
-	public string MaXa { get; set; } = string.Empty;
+		[StringLength(5, ErrorMessage = "Mã xã tối đa 5 ký tự")]
+		[Display(Name = "Mã Xã")]
+		public string MaXa { get; set; } = string.Empty;
 
 		[NotMapped]
 		public string? TenXa { get; set; }

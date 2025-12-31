@@ -1,76 +1,153 @@
 ﻿@model QuanLyBanHang.Models.CTMH
 
 @{
-    ViewBag.Title = "Xóa Chi tiết mua hàng";
+    ViewBag.Title = "Xóa Chi tiết nhập hàng";
 }
 
-<div class="container">
-    <h4 class="mb-3 text-danger">
-        Xóa Chi tiết mua hàng
-    </h4>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-    <div class="alert alert-warning">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc chắn muốn xóa chi tiết mua hàng <strong>@Model.MaSP</strong> của đơn <strong>@Model.MaDMH</strong> không?
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .card-body {
+        padding: 2.5rem;
+    }
+
+    .item-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #6c757d;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .item-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .warning-box {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .action-bar {
+        background: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="page-header">
+                <div>
+                    <h4 class="mb-0 fw-bold">Xác nhận xóa chi tiết nhập</h4>
+                    <small class="opacity-75">Hành động này không thể hoàn tác</small>
+                </div>
+                <i class="fa-solid fa-trash-can fa-2x opacity-50"></i>
+            </div>
+
+            <div class="info-card">
+                <div class="card-body">
+                    <div class="warning-box">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x text-warning"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1">Cảnh báo</h5>
+                            <p class="mb-0">Bạn đang thực hiện xóa sản phẩm <strong>@Model.TenSP</strong> khỏi đơn nhập <strong>#@Model.MaDMH</strong>. Kho hàng sẽ được cập nhật lại.</p>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-6">
+                            <div class="item-label">Mã đơn nhập</div>
+                            <div class="item-value">#@Model.MaDMH</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="item-label">Mã sản phẩm</div>
+                            <div class="item-value">@Model.MaSP</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="item-label">Tên sản phẩm</div>
+                            <div class="item-value text-primary">@Model.TenSP</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="item-label">Số lượng nhập</div>
+                            <div class="item-value">@Model.SLM</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="item-label">Đơn giá nhập</div>
+                            <div class="item-value text-success">@String.Format("{0:N0} đ", Model.DGM)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <form id="deleteForm" method="post" action="@Url.Action("DeleteDetailConfirmed", "DonMuaHang")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="MaDMH" value="@Model.MaDMH" />
+                        <input type="hidden" name="maSP" value="@Model.MaSP" />
+                        
+                        <a href="@Url.Action("Details", "DonMuaHang", new { MaDMH = Model.MaDMH })" class="btn btn-outline-secondary fw-bold px-4" style="border-radius: 8px;">
+                            <i class="fa-solid fa-xmark me-2"></i> Hủy bỏ
+                        </a>
+                        <button type="button" class="btn btn-danger fw-bold px-4" style="border-radius: 8px;" onclick="confirmDelete()">
+                            <i class="fa-solid fa-trash me-2"></i> Xác nhận xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="card shadow-sm p-4">
-        <dl class="row">
-            <dt class="col-sm-3">Mã đơn mua hàng:</dt>
-            <dd class="col-sm-9">@Model.MaDMH</dd>
-
-            <dt class="col-sm-3">Mã sản phẩm:</dt>
-            <dd class="col-sm-9">@Model.MaSP</dd>
-
-            <dt class="col-sm-3">Tên sản phẩm:</dt>
-            <dd class="col-sm-9">@Model.TenSP</dd>
-
-            <dt class="col-sm-3">Số lượng mua:</dt>
-            <dd class="col-sm-9">@Model.SLM</dd>
-
-            <dt class="col-sm-3">Đơn giá mua:</dt>
-            <dd class="col-sm-9">@Model.DGM?.ToString("N0")</dd>
-
-        </dl>
-
-        <form id="deleteForm" method="post"
-              action="@Url.Action("DeleteDetailConfirmed", "DonMuaHang")">
-            @Html.AntiForgeryToken()
-
-            <input type="hidden" name="MaDMH" value="@Model.MaDMH" />
-            <input type="hidden" name="maSP" value="@Model.MaSP" />
-
-
-            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fa-solid fa-trash"></i> Xóa
-            </button>
-
-            <a href="@Url.Action("Details", "DonMuaHang", new { MaDMH = Model.MaDMH, maSP = Model.MaSP })" class="btn btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Hủy
-            </a>
-        </form>
-    </div>
-
-
 </div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmDelete() {
             Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: 'Bạn có chắc chắn muốn xóa chi tiết mua hàng này?',
+                title: 'Xóa dữ liệu?',
+                text: "Bạn thực sự muốn xóa chi tiết nhập hàng này?",
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6'
+                cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('deleteForm').submit();
                 }
-            });
+            })
         }
     </script>
 }

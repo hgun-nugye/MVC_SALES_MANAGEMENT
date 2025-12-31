@@ -33,20 +33,6 @@ namespace QuanLyBanHang.Models
 		[Column(TypeName = "decimal(18,2)")]
 		[Display(Name = "Đơn Giá Bán")]
 		public decimal? DGB { get; set; }
-
-		
-		// QUAN HỆ
-		
-		//[ForeignKey("MaSP")]
-		//[Display(Name = "Sản Phẩm")]
-		//public virtual SanPham? SanPham { get; set; }
-
-		//[ForeignKey("MaDBH")]
-		//[Display(Name = "Đơn Bán Hàng")]
-		//public virtual DonBanHang? DonBanHang { get; set; }
-
-		
-		// THUỘC TÍNH HIỂN THỊ (không lưu DB)
 		
 		[NotMapped]
 		[Display(Name = "Tên Sản Phẩm")]
@@ -56,10 +42,7 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Thành Tiền")]
 		public decimal? ThanhTien => SLB * DGB;
 	}
-
-	
-	// DTO chi tiết CTBH
-	
+		
 	[Keyless]
 	public class CTBHDetailDto
 	{
@@ -78,6 +61,9 @@ namespace QuanLyBanHang.Models
 
 		[Display(Name = "Số Lượng Bán")]
 		public int SLB { get; set; }
+		
+		[Display(Name = "Số Lượng Tồn")]
+		public int SoLuongTon { get; set; }
 
 		[Display(Name = "Đơn Giá Bán")]
 		[Column(TypeName = "decimal(18,2)")]

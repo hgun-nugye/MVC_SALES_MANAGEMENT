@@ -1,0 +1,335 @@
+@model List<QuanLyBanHang.Models.CartItem>
+@using QuanLyBanHang.Models
+@{
+    ViewBag.Title = "Xác nhận đơn hàng";
+    var kh = ViewBag.Customer as KhachHang;
+    decimal total = Model.Sum(i => i.ThanhTien);
+}
+
+<style>
+    .checkout-container {
+        padding: 2rem 0;
+        background: #f8fbf9;
+        min-height: 90vh;
+    }
+
+    .checkout-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        border: 1px solid #edf2ef;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-weight: 800;
+        color: #198754;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid #f1f8f4;
+        padding-bottom: 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    .address-option {
+        border: 2px solid #edf2ef;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .address-option.active {
+        border-color: #198754;
+        background: #f1f8f4;
+    }
+
+    .address-option input[type="radio"] {
+        display: none;
+    }
+
+    .address-option .check-mark {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        color: #198754;
+        font-size: 1.25rem;
+        display: none;
+    }
+
+    .address-option.active .check-mark {
+        display: block;
+    }
+
+    .custom-address-fields {
+        display: none;
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .item-preview {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem 0;
+        border-bottom: 1px solid #f1f5f3;
+    }
+
+    .item-preview:last-child {
+        border-bottom: none;
+    }
+
+    .item-preview img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .total-price {
+        font-size: 1.85rem;
+        color: #198754;
+        font-weight: 900;
+        letter-spacing: -1px;
+    }
+
+    .btn-confirm {
+        background: #198754;
+        color: white;
+        border: none;
+        padding: 1.25rem;
+        border-radius: 16px;
+        font-weight: 800;
+        font-size: 1.2rem;
+        width: 100%;
+        box-shadow: 0 10px 25px rgba(238, 77, 45, 0.2);
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-confirm:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(238, 77, 45, 0.3);
+        color: white;
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="container">
+        <div class="page-header d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0 fw-bold">
+                <i class="fa-solid fa-shield-check me-2"></i> Xác nhận & Thanh toán
+            </h4>
+            <div class="text-white-50 small">An toàn • Bảo mật • Nhanh chóng</div>
+        </div>
+
+        <form asp-action="PlaceOrder" method="post" id="checkoutForm">
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Lựa chọn địa chỉ -->
+                    <div class="checkout-card">
+                        <div class="section-title">
+                            <i class="fa-solid fa-truck-ramp-box"></i> Hình thức nhận hàng
+                        </div>
+
+                        <!-- Phương án 1: Địa chỉ mặc định -->
+                        <label class="address-option active" id="labelDefault">
+                            <input type="radio" name="addressType" value="default" checked onchange="toggleAddress('default')">
+                            <div class="check-mark"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="d-flex gap-3">
+                                <i class="fa-solid fa-home-user fs-4 text-success mt-1"></i>
+                                <div>
+                                    <div class="fw-bold fs-5 mb-1">Dùng địa chỉ đã đăng ký</div>
+                                    <div class="text-dark">
+                                        <b>@kh?.TenKH</b> | @kh?.DienThoaiKH
+                                    </div>
+                                    <div class="text-muted small">
+                                        @kh?.DiaChiKH, @kh?.TenXa, @kh?.TenTinh
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Phương án 2: Địa chỉ tùy chỉnh -->
+                        <label class="address-option" id="labelCustom">
+                            <input type="radio" name="addressType" value="custom" onchange="toggleAddress('custom')">
+                            <div class="check-mark"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="d-flex gap-3">
+                                <i class="fa-solid fa-map-location-dot fs-4 text-warning mt-1"></i>
+                                <div>
+                                    <div class="fw-bold fs-5 mb-1">Giao đến địa chỉ khác</div>
+                                    <div class="text-muted small">Nhập thông tin nhận hàng mới bên dưới</div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Form nhập địa chỉ tùy chỉnh -->
+                        <div class="custom-address-fields" id="customAddressBox">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-uppercase">Số nhà, tên đường</label>
+                                    <input type="text" id="customStreet" class="form-control" placeholder="Ví dụ: 123 Đường ABC...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase">Tỉnh / Thành phố</label>
+                                    <select id="customProvince" class="form-select" asp-items="ViewBag.TinhList">
+                                        <option value="">-- Chọn Tỉnh/Thành --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase">Phường / Xã</label>
+                                    <select id="customWard" class="form-select">
+                                        <option value="">-- Chọn Phường/Xã --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden inputs để gửi về server -->
+                        <input type="hidden" name="diaChiGiaoHang" id="finalAddress" value="@kh?.DiaChiKH" />
+                        <input type="hidden" name="maXa" id="finalWard" value="@kh?.MaXa" />
+                    </div>
+
+                    <!-- Danh sách sản phẩm -->
+                    <div class="checkout-card">
+                        <div class="section-title">
+                            <i class="fa-solid fa-basket-shopping"></i> Kiện hàng của bạn (@Model.Sum(i => i.SoLuong))
+                        </div>
+                        <div class="px-2">
+                            @foreach (var item in Model)
+                            {
+                                <div class="item-preview">
+                                    <img src="@(string.IsNullOrEmpty(item.AnhMH) ? Url.Content("~/images/default-product.png") : Url.Content("~/images/products/" + item.AnhMH))" />
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold text-dark">@item.TenSP</div>
+                                        <div class="small text-muted">Số lượng: @item.SoLuong</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">@string.Format("{0:N0} đ", item.ThanhTien)</div>
+                                        <div class="small text-muted">@string.Format("{0:N0} đ", item.GiaBan) / sản phẩm</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Tổng thanh toán -->
+                    <div class="checkout-card sticky-top" style="top: 2rem;">
+                        <div class="section-title">
+                            <i class="fa-solid fa-receipt"></i> Tóm tắt thanh toán
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tổng tiền hàng:</span>
+                            <span class="fw-bold text-dark">@string.Format("{0:N0} đ", total)</span>
+                        </div>                       
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fw-bold text-dark fs-5">Tổng số tiền:</span>
+                            <span class="total-price">@string.Format("{0:N0} đ", total)</span>
+                        </div>
+
+                        <button type="button" class="btn btn-confirm mb-3" onclick="validateAndSubmit()">
+                            <i class="fa-solid fa-cash-register me-2"></i> ĐẶT HÀNG NGAY
+                        </button>
+
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary w-100 py-3 border-2 fw-bold" style="border-radius:16px;">
+                            <i class="fa-solid fa-arrow-left-to-bracket me-2"></i> QUAY LẠI GIỎ HÀNG
+                        </a>
+
+                        <div class="mt-4 p-3 bg-light rounded-3 small text-muted text-center">
+                            <i class="fa-solid fa-lock text-success me-1"></i>
+                            Thông tin của bạn được bảo mật tuyệt đối theo tiêu chuẩn quốc tế.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleAddress(type) {
+            const defaultLabel = document.getElementById('labelDefault');
+            const customLabel = document.getElementById('labelCustom');
+            const customBox = document.getElementById('customAddressBox');
+
+            if (type === 'default') {
+                defaultLabel.classList.add('active');
+                customLabel.classList.remove('active');
+                $(customBox).slideUp(300);
+            } else {
+                defaultLabel.classList.remove('active');
+                customLabel.classList.add('active');
+                $(customBox).slideDown(300);
+            }
+        }
+
+        // Load Xã khi chọn Tỉnh
+        $('#customProvince').change(function() {
+            const maTinh = $(this).val();
+            const wardSelect = $('#customWard');
+            
+            wardSelect.empty().append('<option value="">-- Đang tải... --</option>');
+            
+            if (maTinh) {
+                $.getJSON('/Home/GetXaByTinh', { maTinh: maTinh }, function(data) {
+                    wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>');
+                    data.forEach(item => {
+                        wardSelect.append(`<option value="${item.maXa}">${item.tenXa}</option>`);
+                    });
+                });
+            } else {
+                wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>');
+            }
+        });
+
+        function validateAndSubmit() {
+            const addressType = $('input[name="addressType"]:checked').val();
+            const finalAddressInput = document.getElementById('finalAddress');
+            const finalWardInput = document.getElementById('finalWard');
+
+            if (addressType === 'default') {
+                finalAddressInput.value = @Json.Serialize(kh?.DiaChiKH);
+                finalWardInput.value = @Json.Serialize(kh?.MaXa);
+            } else {
+                const street = $('#customStreet').val();
+                const ward = $('#customWard').val();
+                
+                if (!street || !ward) {
+                    Swal.fire('Thiếu thông tin!', 'Vui lòng nhập đầy đủ địa chỉ giao hàng mới.', 'warning');
+                    return;
+                }
+                finalAddressInput.value = street;
+                finalWardInput.value = ward;
+            }
+
+            Swal.fire({
+                title: 'Xác nhận đặt hàng?',
+                text: "Đơn hàng của bạn sẽ được chuyển đến bộ phận xử lý ngay lập tức.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Đồng ý đặt hàng',
+                cancelButtonText: 'Kiểm tra lại'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('checkoutForm').submit();
+                }
+            });
+        }
+    </script>
+}
