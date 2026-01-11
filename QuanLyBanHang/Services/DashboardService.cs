@@ -44,29 +44,31 @@ namespace QuanLyBanHang.Services
 		}
 
 		// Lấy chi tiết hóa đơn bán hàng
-		public async Task<List<OrderDetailReport>> GetOrderDetailsReport(DateTime? fromDate, DateTime? toDate)
+		public async Task<List<OrderDetailReport>> GetOrderDetailsReport(DateTime? fromDate, DateTime? toDate, string? status = null)
 		{
 			var parameters = new[]
 			{
 				new SqlParameter("@FromDate", (object?)fromDate ?? DBNull.Value),
-				new SqlParameter("@ToDate", (object?)toDate ?? DBNull.Value)
+				new SqlParameter("@ToDate", (object?)toDate ?? DBNull.Value),
+				new SqlParameter("@MaTTBH", (object?)status ?? DBNull.Value)
 			};
 
 			return await _context.OrderDetailReport
-				.FromSqlRaw("EXEC BaoCao_GetOrderDetailsReport @FromDate, @ToDate", parameters)
+				.FromSqlRaw("EXEC BaoCao_GetOrderDetailsReport @FromDate, @ToDate, @MaTTBH", parameters)
 				.ToListAsync();
 		}
 
-		public async Task<List<ImportOrderDetailReport>> GetImportOrderDetailsReport(DateTime? fromDate, DateTime? toDate)
+		public async Task<List<ImportOrderDetailReport>> GetImportOrderDetailsReport(DateTime? fromDate, DateTime? toDate, string? status = null)
 		{
 			var parameters = new[]
 			{
 				new SqlParameter("@FromDate", (object?)fromDate ?? DBNull.Value),
-				new SqlParameter("@ToDate", (object?)toDate ?? DBNull.Value)
+				new SqlParameter("@ToDate", (object?)toDate ?? DBNull.Value),
+				new SqlParameter("@MaTTMH", (object?)status ?? DBNull.Value)
 			};
 
 			return await _context.ImportOrderDetailReport
-				.FromSqlRaw("EXEC BaoCao_GetImportOrderDetailsReport @FromDate, @ToDate", parameters)
+				.FromSqlRaw("EXEC BaoCao_GetImportOrderDetailsReport @FromDate, @ToDate, @MaTTMH", parameters)
 				.ToListAsync();
 		}
 
@@ -129,6 +131,7 @@ namespace QuanLyBanHang.Services
 		public string MaDMH { get; set; }
 		public DateTime NgayMH { get; set; }
 		public string TenNCC { get; set; }
+		public string TrangThai { get; set; } = string.Empty;
 		public int SoLuongSP { get; set; }
 		public decimal TongTien { get; set; }
 	}

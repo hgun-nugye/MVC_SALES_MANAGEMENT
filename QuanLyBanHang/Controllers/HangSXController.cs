@@ -147,16 +147,27 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var hang = (await _hangService.GetByID(id));
-
-			if (hang != null)
+			try
 			{
-				await _hangService.Delete(id);
-				TempData["SuccessMessage"] = "Đã xóa hãng thành công!";
+				var hang = (await _hangService.GetByID(id));
+				if (hang != null)
+				{
+					await _hangService.Delete(id);
+					TempData["SuccessMessage"] = "Đã xóa hãng thành công!";
+				}
+				else
+				{
+					TempData["ErrorMessage"] = "Không tìm thấy hãng cần xóa!";
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy hãng cần xóa!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Hãng sản xuất";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa hãng sản xuất: " + ex.Message;
 			}
 
 			return RedirectToAction(nameof(Index));

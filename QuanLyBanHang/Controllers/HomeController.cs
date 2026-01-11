@@ -68,7 +68,7 @@ namespace QuanLyBanHang.Controllers
 				return View();
 			}
 
-			// 1. Kiểm tra trong bảng KhachHang - Dùng service (Proc)
+			// Kiểm tra trong bảng KhachHang
 			var khachHang = await _khachHangService.GetByUsername(username);
 
 			// Sử dụng BCrypt.Verify để so sánh mật khẩu nhập vào với mật khẩu hash trong DB
@@ -82,13 +82,12 @@ namespace QuanLyBanHang.Controllers
 					khachHang.AnhKH ?? ""
 				);
 
-				// Giỏ hàng được lưu trong Session, không cần merge vào DB
-
+				// Giỏ hàng được lưu trong Session
 				TempData["SuccessMessage"] = "Đăng nhập thành công!";
 				return RedirectToAction("Index", "SanPham");
 			}
 
-			// 2. Kiểm tra trong bảng NhanVien - Dùng service (Proc)
+			// Kiểm tra trong bảng NhanVien
 			var nhanVien = await _nhanVienService.GetByUsername(username);
 
 			// Sử dụng BCrypt.Verify cho Nhân viên
@@ -109,13 +108,17 @@ namespace QuanLyBanHang.Controllers
 				TempData["SuccessMessage"] = "Đăng nhập thành công!";
 
 				// Chuyển hướng theo vai trò
-				if (userRole == "Admin")
+				if (userRole == "Quản trị")
 				{
-					return RedirectToAction("Index", "NhanVien"); // Trang quản lý nhân viên
+					return RedirectToAction("Index", "Dashboard"); 
+				}
+				else if (userRole == "Quản lý" || userRole == "Nhân viên")
+				{
+					return RedirectToAction("Index", "SanPham");
 				}
 				else
 				{
-					return RedirectToAction("Index", "SanPham"); // Trang quản lý sản phẩm
+					return RedirectToAction("Profile", "KhachHang");
 				}
 			}
 
@@ -138,7 +141,7 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> SignUp(KhachHang model, string maTinh, IFormFile? AnhFile)
 		{
-			// Mã khách hàng sinh bởi DB/SP
+			// Mã khách hàng tự sinh
 			ModelState.Remove("MaKH");
 
 			var hasExistingImage = !string.IsNullOrEmpty(model.AnhKH);

@@ -1,4 +1,4 @@
-@model QuanLyBanHang.Models.PhanQuyen
+@model QuanLyBanHang.Models.PhanQuyenDto
 @{
     ViewBag.Title = "Sửa Phân quyền";
 }
@@ -45,8 +45,8 @@
             </div>
             <div class="col-md-6">
                 <label asp-for="MaNV" class="form-label"></label>
-                <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select" disabled>
-                    <option value="@Model.MaNV">@(Model.NhanVien?.TenNV ?? Model.MaNV)</option>
+                <select asp-for="MaNV" asp-items="ViewBag.MaNV" class="form-select">
+                    <option value="@Model.MaNV">@(Model.TenNV ?? Model.MaNV)</option>
                 </select>
                 <input type="hidden" asp-for="MaNV" />
                 <span asp-validation-for="MaNV" class="text-danger"></span>

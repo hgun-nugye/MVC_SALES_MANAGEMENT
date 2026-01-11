@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "Lỗi xung đột dữ liệu";
+}
+
+<style>
+    .error-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        padding: 20px;
+    }
+    .error-card {
+        max-width: 600px;
+        width: 100%;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        overflow: hidden;
+        border: none;
+    }
+    .error-header {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        padding: 60px 20px;
+        text-align: center;
+        color: white;
+    }
+    .error-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: shake 0.5s ease-in-out infinite alternate;
+    }
+    @@keyframes shake {
+        from { transform: rotate(-5deg); }
+        to { transform: rotate(5deg); }
+    }
+    .error-body {
+        padding: 40px;
+        text-align: center;
+    }
+    .info-box {
+        background: #fff8f8;
+        border-left: 4px solid #ff4b2b;
+        padding: 20px;
+        text-align: left;
+        margin-bottom: 30px;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="error-container">
+    <div class="error-card h-100">
+        <div class="error-header">
+            <div class="error-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 class="fw-bold">KHÔNG THỂ XÓA DỮ LIỆU</h2>
+        </div>
+        <div class="error-body">
+            <h4 class="text-dark mb-3">Xung đột ràng buộc hệ thống</h4>
+            <p class="text-muted mb-4 fs-5">
+                Dữ liệu bạn muốn xóa hiện đang liên kết với các bản ghi khác trong hệ thống. Để đảm bảo tính toàn vẹn, thao tác xóa đã bị chặn.
+            </p>
+
+            <div class="info-box shadow-sm">
+                <h6 class="text-danger fw-bold mb-2">
+                    <i class="fas fa-info-circle me-2"></i>Hướng dẫn xử lý:
+                </h6>
+                <ul class="mb-0 small text-secondary">
+                    <li>Kiểm tra xem @(ViewBag.ObjectName ?? "mục này") có đang nằm trong hóa đơn nào không.</li>
+                    <li>Vui lòng xóa các dữ liệu liên quan (chi tiết hóa đơn, lịch sử giao dịch) trước khi xóa mục này.</li>
+                    <li>Nếu đây là thông tin quan trọng, bạn nên chuyển sang trạng thái "Ngừng hoạt động" thay vì xóa.</li>
+                </ul>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-center">
+                <a href="javascript:history.back()" class="btn btn-outline-dark px-4 py-2 rounded-pill fw-bold">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+                <a asp-controller="Dashboard" asp-action="Index" class="btn btn-danger px-4 py-2 rounded-pill fw-bold shadow">
+                    <i class="fas fa-home me-2"></i>Về Dashboard
+                </a>
+            </div>
+        </div>
+        <div class="card-footer bg-light py-3 border-0 text-center">
+            <code class="text-muted">Error: SQL_FK_CONSTRAINT_VIOLATION</code>
+        </div>
+    </div>
+</div>

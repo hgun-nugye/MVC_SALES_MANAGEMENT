@@ -1,4 +1,4 @@
-@model QuanLyBanHang.Models.PhanQuyen
+@model QuanLyBanHang.Models.PhanQuyenDto
 
 @{
     ViewBag.Title = "Xóa Phân quyền";
@@ -11,14 +11,14 @@
 
     <div class="alert alert-warning shadow-sm">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        Bạn có chắc muốn xóa phân quyền <strong>@(Model.VaiTro?.TenVT ?? Model.MaVT)</strong> của nhân viên <strong>@(Model.NhanVien?.TenNV ?? Model.MaNV)</strong> không?
+        Bạn có chắc muốn xóa phân quyền <strong>@(Model.TenVT ?? Model.MaVT)</strong> của nhân viên <strong>@(Model.TenNV ?? Model.MaNV)</strong> không?
     </div>
 
     <div class="border p-4 rounded shadow-sm bg-light">
         <p><strong>@Html.DisplayNameFor(m => m.MaVT):</strong> @Model.MaVT</p>
-        <p><strong>Tên vai trò:</strong> @(Model.VaiTro?.TenVT ?? "")</p>
+        <p><strong>Tên vai trò:</strong> @(Model.TenVT ?? "")</p>
         <p><strong>@Html.DisplayNameFor(m => m.MaNV):</strong> @Model.MaNV</p>
-        <p><strong>Tên nhân viên:</strong> @(Model.NhanVien?.TenNV ?? "")</p>
+        <p><strong>Tên nhân viên:</strong> @(Model.TenNV ?? "")</p>
     </div>
 
     <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">

@@ -14,7 +14,6 @@ namespace QuanLyBanHang.Controllers
 		private readonly NhaCCService _nhaCCService;
 		private readonly NhanVienService _nhanVienService;
 		private readonly TrangThaiMHService _trangThaiMHService;
-		private readonly AppDbContext _context;
 
 		public DonMuaHangController(
 			DonMuaHangService service,
@@ -22,8 +21,7 @@ namespace QuanLyBanHang.Controllers
 			SanPhamService spService,
 			NhaCCService nhaCCService,
 			NhanVienService nhanVienService,
-			TrangThaiMHService trangThaiMHService,
-			AppDbContext context)
+			TrangThaiMHService trangThaiMHService)
 		{
 			_dmhService = service;
 			_ctmhService = ctmhService;
@@ -31,7 +29,6 @@ namespace QuanLyBanHang.Controllers
 			_nhaCCService = nhaCCService;
 			_nhanVienService = nhanVienService;
 			_trangThaiMHService = trangThaiMHService;
-			_context = context;
 		}
 
 		public async Task<IActionResult> Index(string? search, int? month, int? year, string? MaTTMH)
@@ -282,13 +279,18 @@ namespace QuanLyBanHang.Controllers
 			{
 				await _dmhService.Delete(id);
 				TempData["SuccessMessage"] = "Xóa đơn mua hàng thành công!";
+				return RedirectToAction(nameof(Index));
 			}
 			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = ex.Message;
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Đơn mua hàng";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa đơn hàng: " + ex.Message;
+				return RedirectToAction(nameof(Index));
 			}
-
-			return RedirectToAction(nameof(Index));
 		}
 
 
@@ -331,7 +333,6 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.MaNCC = new SelectList(nhaCCList, "MaNCC", "TenNCC", model.MaNCC);
 			ViewBag.MaNV = new SelectList(nhanVienList, "MaNV", "TenNV", model.MaNV);
 			ViewBag.MaSP = new SelectList(sanPhamList, "MaSP", "TenSP");
-			//ViewBag.MaSP = new SelectList(_context.SanPham.ToList(), "MaSP", "TenSP");
 
 			// Gán dropdown cho từng dòng CTMH
 			for (int i = 0; i < model.CTMHs.Count; i++)
@@ -343,6 +344,23 @@ namespace QuanLyBanHang.Controllers
 					model.CTMHs[i].MaSP);
 			}
 		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> CompleteOrder(string id, string? search, int? month, int? year, string? MaTTMH)
+		{
+			if (string.IsNullOrEmpty(id)) return NotFound();
 
+			try
+			{
+				await _dmhService.CompleteOrder(id);
+				TempData["SuccessMessage"] = "Đã hoàn thành đơn mua hàng!";
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = "Lỗi khi hoàn thành đơn: " + ex.Message;
+			}
+
+			return RedirectToAction(nameof(Details), new { id, search, month, year, MaTTMH });
+		}
 	}
 }

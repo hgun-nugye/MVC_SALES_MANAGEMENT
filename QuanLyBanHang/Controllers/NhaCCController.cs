@@ -144,17 +144,19 @@ namespace QuanLyBanHang.Controllers
 			try
 			{
 				await _nhaCCService.Delete(id);
-				TempData["SuccessMessage"] = "Đã xóa thành công!";
+				TempData["SuccessMessage"] = "Đã xóa Nhà cung cấp thành công!";
+				return RedirectToAction(nameof(Index));
 			}
-			catch (KeyNotFoundException)
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy Nhà cung cấp cần xóa!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Nhà cung cấp";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Không thể xóa Nhà cung cấp! Lỗi: " + ex.Message;
+				return RedirectToAction(nameof(Index));
 			}
-			catch
-			{
-				TempData["ErrorMessage"] = $"Không thể xóa Nhà cung cấp!";
-			}
-			return RedirectToAction(nameof(Index));
 		}
 	}
 }

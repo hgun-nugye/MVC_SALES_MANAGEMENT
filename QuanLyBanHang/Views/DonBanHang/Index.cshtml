@@ -140,9 +140,18 @@
                 <button type="button" id="btnClear" class="btn btn-outline-secondary btn-clear">
                     <i class="fa-solid fa-rotate-left"></i>
                 </button>
-                <a href="@Url.Action("Create", "DonBanHang")" class="btn btn-success d-flex align-items-center justify-content-center flex-grow-1" style="border-radius:12px; height:50px;">
-                    <i class="fa-solid fa-plus-circle me-2"></i> Thêm
-                </a>
+                @if (!isCustomer)
+                {
+                    <a href="@Url.Action("Create", "DonBanHang")" class="btn btn-success d-flex align-items-center justify-content-center flex-grow-1" style="border-radius:12px; height:50px;">
+                        <i class="fa-solid fa-plus-circle me-2"></i> Thêm
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Index", "Cart")" class="btn btn-success d-flex align-items-center justify-content-center flex-grow-1" style="border-radius:12px; height:50px;">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </a>
+                }
             </div>
         </form>
     </div>

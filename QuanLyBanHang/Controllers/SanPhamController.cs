@@ -11,10 +11,8 @@ namespace QuanLyBanHang.Controllers
 		private readonly LoaiSPService _loaiSPService;
 		private readonly HangSXService _hangService;
 		private readonly TrangThaiService _trangThaiService;
-		private readonly AppDbContext _context;
 		private readonly IWebHostEnvironment _environment;
 		public SanPhamController(
-			AppDbContext context,
 			SanPhamService spService,
 			LoaiSPService loaiSPService,
 			HangSXService hangService,
@@ -26,7 +24,6 @@ namespace QuanLyBanHang.Controllers
 			_hangService = hangService;
 			_trangThaiService = trangThaiService;
 			_environment = environment;
-			_context = context;
 		}
 
 		public async Task<IActionResult> Index(string? search, string? maTT, string? maLoai)
@@ -229,12 +226,18 @@ namespace QuanLyBanHang.Controllers
 			{
 				await _spService.Delete(id);
 				TempData["SuccessMessage"] = "Xóa sản phẩm thành công!";
+				return RedirectToAction(nameof(Index));
 			}
-			catch
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không thể xóa sản phẩm này!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Sản phẩm";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa sản phẩm: " + ex.Message;
+				return RedirectToAction(nameof(Index));
 			}
-			return RedirectToAction(nameof(Index));
 		}
 
 		// Load dropdowns

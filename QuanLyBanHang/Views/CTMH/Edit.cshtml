@@ -38,14 +38,14 @@
 
 <div class="container py-4">
     <div class="page-header text-center mb-4">
-        <h4 class="fw-bold text-success">
+        <h4 class="fw-bold text-white">
             <i class="fa-solid fa-pen-to-square me-2"></i>
             Cập nhật chi tiết đơn mua
         </h4>
-        <p class="text-muted">Mã Đơn: <span class="badge bg-success">@Model.MaDMH</span></p>
+        <p class="text-white fw-bold">Mã Đơn: <span class="badge bg-success">@Model.MaDMH</span></p>
     </div>
 
-    <div class="form-card">
+    <div class="form-card" data-aos="fade-up" data-aos-duration="800">
         <form asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.MaDMH)
@@ -77,7 +77,11 @@
                 <label asp-for="SLM" class="form-label">Số lượng mua</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calculator text-success"></i></span>
-                    @Html.TextBoxFor(m => m.SLM, new { @class = "form-control border-start-0", type = "number", min = 1 })
+                    <input asp-for="SLM" id="QuantityInput" class="form-control border-start-0" type="number" min="1" required />
+                </div>
+                 <div id="QuantityWarning" class="alert alert-danger d-flex align-items-center mt-2 py-2 small" style="display:none;">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> 
+                    <div>Chú ý số lượng tồn kho!</div>
                 </div>
                 @Html.ValidationMessageFor(m => m.SLM, "", new { @class = "text-danger small" })
             </div>
@@ -86,19 +90,40 @@
                 <label asp-for="DGM" class="form-label">Đơn giá nhập (₫)</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-tag text-success"></i></span>
-                    @Html.TextBoxFor(m => m.DGM, new { @class = "form-control border-start-0", type = "number", step = 100 })
+                    <input asp-for="DGM" class="form-control border-start-0" type="number" step="0.01" required />
                 </div>
                 @Html.ValidationMessageFor(m => m.DGM, "", new { @class = "text-danger small" })
             </div>
 
             <div class="d-grid gap-2 mt-5">
-                <button type="submit" class="btn btn-success py-2 fw-bold shadow-sm">
+                <button type="submit" id="SubmitBtn" class="btn btn-success py-2 fw-bold shadow-sm text-uppercase">
                     <i class="fa-solid fa-floppy-disk me-2"></i> Lưu thay đổi
                 </button>
-                <button type="button" onclick="history.back()" class="btn btn-outline-secondary py-2 fw-bold">
-                    Hủy bỏ
-                </button>
+                <a asp-action="Index" asp-route-maDMH="@Model.MaDMH" class="btn btn-outline-secondary py-2 fw-bold">
+                    <i class="fa-solid fa-xmark me-2"></i> Hủy bỏ
+                </a>
             </div>
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+             $('#QuantityInput').on('input change', function() {
+                validateQuantity();
+            });
+
+            function validateQuantity() {
+                const qty = parseInt($('#QuantityInput').val()) || 0;
+                if (qty <= 0 && $('#QuantityInput').val() !== "") {
+                   $('#QuantityWarning').show();
+                   $('#SubmitBtn').attr('disabled', true).addClass('opacity-50');
+                } else {
+                   $('#QuantityWarning').hide();
+                   $('#SubmitBtn').attr('disabled', false).removeClass('opacity-50');
+                }
+            }
+        });
+    </script>
+}

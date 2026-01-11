@@ -4,16 +4,66 @@
     ViewBag.Title = "Chi tiết bán hàng";
 }
 
-<div class="container">
-    <div class="page-header d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold mb-1">
+<style>
+    .clickable-row {
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .clickable-row:hover {
+        background-color: #f1f8e9 !important; /* Light green hover matching theme */
+        transform: scale(1.005);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        z-index: 1;
+        position: relative;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .search-wrapper input {
+        padding-left: 40px !important;
+        border-radius: 50px; /* Rounder search bar */
+        background: #fff;
+        border: 1px solid #dfe6e9;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .search-wrapper input:focus {
+        background: #fff;
+        border-color: #2ecc71;
+        box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.1);
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #b2bec3;
+        pointer-events: none;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0 text-success">
             <i class="fa-solid fa-list-check me-2"></i>
             Chi tiết bán hàng
         </h2>
         <div class="d-flex gap-2">
-            <a asp-action="Index" asp-controller="DonBanHang" class="btn btn-outline-light fw-bold px-4">
+            <a asp-action="Index" asp-controller="DonBanHang" class="btn btn-outline-success fw-bold px-4 rounded-pill">
                 <i class="fa-solid fa-cart-shopping me-2"></i> Đơn bán hàng
             </a>
+            @if (!string.IsNullOrEmpty(ViewBag.MaDBH as string))
+            {
+                <a asp-action="Create" asp-route-maDBH="@(ViewBag.MaDBH)" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm">
+                    <i class="fa-solid fa-plus-circle me-2"></i> Thêm sản phẩm
+                </a>
+            }
         </div>
     </div>
 
@@ -36,14 +86,14 @@
         </form>
     </div>
 
-    <table class="table  table-hover align-middle text-center shadow-sm">
-        <thead class="table-success">
+    <table class="table table-hover align-middle text-center shadow-sm">
+        <thead class="bg-light text-secondary small text-uppercase fw-bold">
             <tr>
-                <th>Mã đơn</th>
-                <th>Tên SP</th>
-                <th>Số lượng</th>
-                <th>Đơn giá</th>
-                <th>Thành tiền</th>
+                <th class="py-3">Mã đơn</th>
+                <th class="py-3">Sản phẩm</th>
+                <th class="py-3">Số lượng</th>
+                <th class="py-3">Đơn giá</th>
+                <th class="py-3">Thành tiền</th>
             </tr>
         </thead>
         <tbody>
@@ -51,12 +101,15 @@
             {
                 foreach (var item in Model)
                 {
-                    <tr>
-                        <td>@item.MaDBH</td>
-                        <td class="text-start">@item.TenSP</td>
-                        <td>@item.SLB</td>
-                        <td>@item.DGB.ToString("N0")</td>
-                        <td>@((item.SLB * item.DGB).ToString("N0"))</td>                        
+                    <tr class="clickable-row" data-href="@Url.Action("Details", "CTBH", new { maDBH = item.MaDBH, maSP = item.MaSP })">
+                        <td class="fw-bold text-success">@item.MaDBH</td>
+                        <td class="text-start">
+                            <span class="fw-bold">@item.TenSP</span>
+                            <div class="small text-muted">Mã SP: @item.MaSP</div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">x @item.SLB</span></td>
+                        <td>@item.DGB.ToString("N0") ₫</td>
+                        <td class="fw-bold text-primary">@((item.SLB * item.DGB).ToString("N0")) ₫</td>                        
                     </tr>
                 }
                 <tr class="table-secondary fw-bold">
@@ -105,6 +158,11 @@
             $('#btnClear').on('click', function () {
                 $('#searchBox').val('');
                 $('#Form').submit();
+            });
+
+            // Make rows clickable
+            $(".clickable-row").click(function() {
+                window.location = $(this).data("href");
             });
         });
     </script>

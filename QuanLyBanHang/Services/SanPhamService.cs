@@ -95,5 +95,26 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaSP", id)
 			);
 		}
+
+		public async Task<List<SanPhamDto>> GetStockBatch(List<CTBH> details)
+		{
+			var table = new DataTable();
+			table.Columns.Add("MaSP", typeof(string));
+			table.Columns.Add("SLB", typeof(int));
+			table.Columns.Add("DGB", typeof(decimal));
+
+			foreach (var item in details)
+				table.Rows.Add(item.MaSP, 0, 0);
+
+			var parameter = new SqlParameter("@ChiTiet", table)
+			{
+				SqlDbType = SqlDbType.Structured,
+				TypeName = "dbo.CTBH_List"
+			};
+
+			return await _context.SanPhamDto
+				.FromSqlRaw("EXEC SanPham_GetStockBatch @ChiTiet", parameter)
+				.ToListAsync();
+		}
 	}
 }

@@ -197,6 +197,8 @@ BEGIN
         KH.DiaChiKH,
         KH.AnhKH,
         KH.MaXa,
+		KH.TenDNKH,
+		KH.MatKhauKH,
         X.TenXa,
         T.TenTinh
     FROM KhachHang KH
@@ -260,4 +262,18 @@ BEGIN
             @GioiTinh IS NULL OR KH.GioiTinh = @GioiTinh
         );
 END;
+GO
+
+-- =========================
+-- Lấy thông tin từ TenDNKH
+-- =========================
+CREATE OR ALTER PROCEDURE KhachHang_GetByUsername
+	@Username VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT MaKH, TenKH, DienThoaiKH, EmailKH, DiaChiKH, AnhKH, MaXa, GioiTinh, TenDNKH, MatKhauKH
+    FROM KhachHang
+    WHERE TenDNKH = @Username;
+END
 GO

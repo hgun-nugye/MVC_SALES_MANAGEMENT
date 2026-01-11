@@ -7,15 +7,13 @@ namespace QuanLyBanHang.Controllers
 {
 	public class KhachHangController : Controller
 	{
-		private readonly AppDbContext _context;
 		private readonly KhachHangService _khService;
 		private readonly XaService _xaService;
 		private readonly TinhService _tinhService;
 		private readonly IWebHostEnvironment _environment;
 
-		public KhachHangController(AppDbContext context, KhachHangService khService, XaService xaService, TinhService tinhService, IWebHostEnvironment environment)
+		public KhachHangController(KhachHangService khService, XaService xaService, TinhService tinhService, IWebHostEnvironment environment)
 		{
-			_context = context;
 			_khService = khService;
 			_xaService = xaService;
 			_tinhService = tinhService;
@@ -121,8 +119,8 @@ namespace QuanLyBanHang.Controllers
 				TempData["ErrorMessage"] = ex.Message;
 
 				string? maTinh = !string.IsNullOrEmpty(model.MaXa) ? await _xaService.GetMaTinhByXa(model.MaXa) : null;
-				var allTinhsFail = await _tinhService.GetAll();
-				ViewBag.Tinh = new SelectList(allTinhsFail, "MaTinh", "TenTinh", maTinh);
+				var allTinh = await _tinhService.GetAll();
+				ViewBag.Tinh = new SelectList(allTinh, "MaTinh", "TenTinh", maTinh);
 
 				var xaList = await _xaService.GetByIDTinh(maTinh);
 				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
@@ -232,9 +230,8 @@ namespace QuanLyBanHang.Controllers
 				}
 			}
 
-
-			var allTinhsPost = await _tinhService.GetAll();
-			ViewBag.Tinh = new SelectList(allTinhsPost, "MaTinh", "TenTinh", maTinh);
+			var allTinh = await _tinhService.GetAll();
+			ViewBag.Tinh = new SelectList(allTinh, "MaTinh", "TenTinh", maTinh);
 
 			var xaList = await _xaService.GetByIDTinh(maTinh);
 			ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
@@ -355,17 +352,18 @@ namespace QuanLyBanHang.Controllers
 			{
 				await _khService.Delete(id);
 				TempData["SuccessMessage"] = "Đã xóa Khách hàng thành công!";
+				return RedirectToAction(nameof(Index));
 			}
-			catch (KeyNotFoundException)
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy Khách hàng cần xóa!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Khách hàng";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Không thể xóa Khách hàng! Lỗi: " + ex.Message;
+				return RedirectToAction(nameof(Index));
 			}
-			catch
-			{
-				TempData["ErrorMessage"] = $"Không thể xóa Khách hàng!";
-			}
-
-			return RedirectToAction(nameof(Index));
 		}
 
 		[HttpGet]

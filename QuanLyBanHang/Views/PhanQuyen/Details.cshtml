@@ -1,4 +1,4 @@
-@model QuanLyBanHang.Models.PhanQuyen
+@model QuanLyBanHang.Models.PhanQuyenDto
 @{
     ViewBag.Title = "Chi tiết Phân quyền";
 }
@@ -10,9 +10,9 @@
 
     <div class="border p-4 rounded shadow-sm bg-light">
         <p><strong>@Html.DisplayNameFor(m => m.MaVT):</strong> @Model.MaVT</p>
-        <p><strong>Tên vai trò:</strong> @(Model.VaiTro?.TenVT ?? "")</p>
+        <p><strong>Tên vai trò:</strong> @(Model.TenVT ?? "")</p>
         <p><strong>@Html.DisplayNameFor(m => m.MaNV):</strong> @Model.MaNV</p>
-        <p><strong>Tên nhân viên:</strong> @(Model.NhanVien?.TenNV ?? "")</p>
+        <p><strong>Tên nhân viên:</strong> @(Model.TenNV ?? "")</p>
     </div>
 
     <div class="mt-4">

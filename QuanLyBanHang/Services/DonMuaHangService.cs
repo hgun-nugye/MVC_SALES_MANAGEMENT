@@ -88,51 +88,34 @@ namespace QuanLyBanHang.Services
 
 		public async Task Update(DonMuaHangEditCTMH model)
 		{
-			using (var transaction = await _context.Database.BeginTransactionAsync())
+			var table = new DataTable();
+			table.Columns.Add("MaSP", typeof(string));
+			table.Columns.Add("SLM", typeof(int));
+			table.Columns.Add("DGM", typeof(decimal));
+
+			if (model.ChiTiet != null)
 			{
-				try
-				{
-					// 1. Cập nhật Header
-					await _context.Database.ExecuteSqlRawAsync(
-						"EXEC DonMuaHang_Update @MaDMH, @NgayMH, @MaNCC, @MaNV, @MaTTMH",
-						new SqlParameter("@MaDMH", model.MaDMH),
-						new SqlParameter("@NgayMH", model.NgayMH),
-						new SqlParameter("@MaNCC", model.MaNCC ?? (object)DBNull.Value),
-						new SqlParameter("@MaNV", model.MaNV ?? (object)DBNull.Value),
-						new SqlParameter("@MaTTMH", model.MaTTMH)
-					);
-
-					// 2. Xóa sạch chi tiết cũ (Sử dụng Procedure đã sửa ở Bước 1)
-					await _context.Database.ExecuteSqlRawAsync(
-						"EXEC CTMH_DeleteByMaDMH @MaDMH",
-						new SqlParameter("@MaDMH", model.MaDMH)
-					);
-
-					// 3. Chèn lại chi tiết mới
-					if (model.ChiTiet != null)
-					{
-						foreach (var ct in model.ChiTiet.Where(x => !string.IsNullOrEmpty(x.MaSP)))
-						{
-							await _context.Database.ExecuteSqlRawAsync(
-								"EXEC CTMH_Insert @MaDMH, @MaSP, @SLM, @DGM",
-								new SqlParameter("@MaDMH", model.MaDMH),
-								new SqlParameter("@MaSP", ct.MaSP),
-								new SqlParameter("@SLM", ct.SLM),
-								new SqlParameter("@DGM", ct.DGM)
-							);
-						}
-					}
-
-					// Nếu mọi thứ ổn thì mới lưu vĩnh viễn
-					await transaction.CommitAsync();
-				}
-				catch (Exception ex)
-				{
-					// Nếu bất kỳ bước nào lỗi, Rollback ở đây là đủ
-					await transaction.RollbackAsync();
-					throw new Exception("Lỗi hệ thống khi cập nhật: " + ex.Message);
-				}
+				foreach (var ct in model.ChiTiet.Where(x => !string.IsNullOrEmpty(x.MaSP)))
+					table.Rows.Add(ct.MaSP, ct.SLM, ct.DGM);
 			}
+
+			var parameters = new[]
+			{
+				new SqlParameter("@MaDMH", model.MaDMH),
+				new SqlParameter("@NgayMH", model.NgayMH),
+				new SqlParameter("@MaNCC", model.MaNCC ?? (object)DBNull.Value),
+				new SqlParameter("@MaNV", model.MaNV ?? (object)DBNull.Value),
+				new SqlParameter("@MaTTMH", model.MaTTMH),
+				new SqlParameter("@ChiTiet", table)
+				{
+					SqlDbType = SqlDbType.Structured,
+					TypeName = "dbo.CTMH_List"
+				}
+			};
+
+			await _context.Database.ExecuteSqlRawAsync(
+				"EXEC DonMuaHang_Update @MaDMH, @NgayMH, @MaNCC, @MaNV, @MaTTMH, @ChiTiet", parameters
+			);
 		}
 
 		public async Task Delete(string id)
@@ -152,7 +135,7 @@ namespace QuanLyBanHang.Services
 			);
 		}
 
-		public async Task<List<DonMuaHangDetail>> Search(string? search, int? month, int? year, string? status)
+		public async Task<List<DonMuaHangDetailDto>> Search(string? search, int? month, int? year, string? status)
 		{
 			var parameters = new[]
 			{
@@ -162,7 +145,7 @@ namespace QuanLyBanHang.Services
 				new SqlParameter("@MaTTMH", (object?)status ?? DBNull.Value)
 			};
 
-			return await _context.DonMuaHangDetail
+			return await _context.DonMuaHangDetailDto
 				.FromSqlRaw("EXEC DonMuaHang_Search @Search, @Month, @Year, @MaTTMH", parameters)
 				.ToListAsync();
 		}
@@ -174,6 +157,14 @@ namespace QuanLyBanHang.Services
 				.ToListAsync();
 
 			return data;
+		}
+
+		public async Task CompleteOrder(string id)
+		{
+			await _context.Database.ExecuteSqlRawAsync(
+				"EXEC DonMuaHang_Complete @MaDMH",
+				new SqlParameter("@MaDMH", id)
+			);
 		}
 	}
 }

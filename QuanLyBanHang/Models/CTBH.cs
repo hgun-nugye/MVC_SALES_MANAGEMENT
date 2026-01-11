@@ -39,6 +39,10 @@ namespace QuanLyBanHang.Models
 		public string? TenSP { get; set; }
 
 		[NotMapped]
+		[Display(Name = "Số Lượng Tồn")]
+		public int? SoLuongTon { get; set; }
+
+		[NotMapped]
 		[Display(Name = "Thành Tiền")]
 		public decimal? ThanhTien => SLB * DGB;
 	}
@@ -62,6 +66,7 @@ namespace QuanLyBanHang.Models
 		[Display(Name = "Số Lượng Bán")]
 		public int SLB { get; set; }
 		
+		[NotMapped]
 		[Display(Name = "Số Lượng Tồn")]
 		public int SoLuongTon { get; set; }
 

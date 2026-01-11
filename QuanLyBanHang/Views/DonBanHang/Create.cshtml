@@ -1,7 +1,7 @@
 ﻿@model QuanLyBanHang.Models.DonBanHang
 
 @{
-    var spList = ViewBag.MaSP as IEnumerable<SelectListItem>;
+    var spList = (ViewBag.MaSP as IEnumerable<SelectListItem>) ?? new List<SelectListItem>();
     bool isCustomer = ViewBag.IsCustomer == true;
 
     ViewBag.Title = isCustomer ? "Mua hàng" : "Thêm Đơn bán hàng";
@@ -200,7 +200,7 @@
                     </label>
                     <div class="input-group-icon">
                         <i class="fa-solid fa-calendar-days"></i>
-                        <input asp-for="NgayBH" class="form-control" type="date" readonly />
+                        <input asp-for="NgayBH" class="form-control" type="date" readonly="@(isCustomer ? "readonly" : null)" />
                     </div>
                     <span asp-validation-for="NgayBH" class="text-danger small mt-1"></span>
                 </div>
@@ -208,12 +208,11 @@
                 <div class="col-md-6">
                     @if (!isCustomer)
                     {
-                        <label asp-for="MaKH" class="form-label required-field">
+                        <label class="form-label required-field">
                             <i class="fa-solid fa-user"></i>
                             Khách hàng
                         </label>
-                        <div class="input-group-icon">
-                            <i class="fa-solid fa-users"></i>
+                        <div class="input-group-icon">                            
                             <select asp-for="MaKH" asp-items="ViewBag.MaKH" class="form-select">
                                 <option value="">-- Chọn khách hàng --</option>
                             </select>
@@ -341,11 +340,15 @@
                                             }
                                         </select>
                                     </td>
-                                    <td><input name="CTBHs[@i].SLB" type="number" min="1" class="form-control" value="@Model.CTBHs[i].SLB" /></td>
+                                    <td>
+                                        <input name="CTBHs[@i].SLB" type="number" min="1" class="form-control" value="@Model.CTBHs[i].SLB" data-ton="@Model.CTBHs[i].SoLuongTon" />
+                                        @Html.ValidationMessageFor(m => m.CTBHs[i].SLB, "", new { @class = "text-danger small mt-1" })
+                                    </td>
                                     <td>
                                         <input name="CTBHs[@i].DGB" type="number" min="0" step="1000"
                                                class="form-control" value="@Model.CTBHs[i].DGB"
                                                @(isCustomer ? "readonly" : "") />
+                                        @Html.ValidationMessageFor(m => m.CTBHs[i].DGB, "", new { @class = "text-danger small mt-1" })
                                     </td>
                                     <td><button type="button" class="btn btn-danger btn-sm removeRow"><i class="fa-solid fa-trash"></i></button></td>
                                 </tr>
@@ -397,56 +400,42 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-                document.addEventListener("DOMContentLoaded", function () {
+
+        document.addEventListener("DOMContentLoaded", function () {
             const addRowBtn = document.getElementById("addRow");
             const tableBody = document.querySelector("#ctbhTable tbody");
             const isCustomer = @(isCustomer.ToString().ToLower());
 
-            // Hàm cập nhật đơn giá qua AJAX
-            async function updatePrice(selectElement) {
-                const maSP = selectElement.value;
-                const row = selectElement.closest("tr");
-                const priceInput = row.querySelector('input[name*=".DGB"]');
+            function updateNames() {
+                const rows = tableBody.querySelectorAll("tr");
+                rows.forEach((row, index) => {
+                    const select = row.cells[0].querySelector("select");
+                    const slb = row.cells[1].querySelector("input");
+                    const dgb = row.cells[2].querySelector("input");
 
-                if (!maSP) {
-                    priceInput.value = 0;
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/SanPham/GetGia?id=${maSP}`);
-                    const data = await response.json();
-                    priceInput.value = data.gia;
-                } catch (error) {
-                    console.error("Lỗi lấy giá:", error);
-                }
+                    if (select) select.name = `CTBHs[${index}].MaSP`;
+                    if (slb) slb.name = `CTBHs[${index}].SLB`;
+                    if (dgb) dgb.name = `CTBHs[${index}].DGB`;
+                });
             }
-
-            // Sự kiện khi thay đổi sản phẩm (cho các dòng có sẵn)
-            tableBody.addEventListener("change", function (e) {
-                if (e.target.classList.contains("form-select")) {
-                    updatePrice(e.target);
-                }
-            });
 
             // Thêm dòng mới
             addRowBtn.addEventListener("click", () => {
-                let index = tableBody.rows.length;
                 const spOptionsHtml = document.getElementById("spTemplate").innerHTML;
                 const newRow = document.createElement("tr");
 
                 newRow.innerHTML = `
                     <td>
-                        <select name="CTBHs[${index}].MaSP" class="form-select select-sp">
+                        <select class="form-select select-sp">
                             <option value="">-- Chọn sản phẩm --</option>
                             ${spOptionsHtml}
                         </select>
                     </td>
                     <td>
-                        <input name="CTBHs[${index}].SLB" type="number" min="1" class="form-control" value="1" />
+                        <input type="number" min="1" class="form-control" value="" data-ton="0" />
                     </td>
                     <td>
-                        <input name="CTBHs[${index}].DGB" type="number" class="form-control"
+                        <input type="number" step="1000" class="form-control"
                                ${isCustomer ? "readonly" : ""} value="0" />
                     </td>
                     <td>
@@ -456,13 +445,88 @@
                     </td>
                 `;
                 tableBody.appendChild(newRow);
+                updateNames();
             });
 
             // Xóa dòng
             tableBody.addEventListener("click", function (e) {
                 if (e.target.closest(".removeRow")) {
                     e.target.closest("tr").remove();
-                    // Cập nhật lại index nếu cần thiết để tránh đứt quãng mảng (tùy chọn)
+                    updateNames();
+                }
+            });
+
+            // Hàm cập nhật đơn giá và tồn kho qua AJAX
+            async function updatePrice(selectElement) {
+                const maSP = selectElement.value;
+                const row = selectElement.closest("tr");
+                const priceInput = row.cells[2].querySelector("input");
+                const slbInput = row.cells[1].querySelector("input");
+
+                if (!maSP) {
+                    if (priceInput) priceInput.value = 0;
+                    if (slbInput) slbInput.dataset.ton = 0;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/SanPham/GetGia?id=${maSP}`);
+                    const data = await response.json();
+                    if (priceInput) priceInput.value = data.gia;
+                    if (slbInput) {
+                        slbInput.dataset.ton = data.ton;
+                        validateStock(slbInput);
+                    }
+                } catch (error) {
+                    console.error("Lỗi lấy giá:", error);
+                }
+            }
+
+            // Hàm kiểm tra tồn kho
+            function validateStock(input) {
+                const slb = parseInt(input.value) || 0;
+                const ton = parseInt(input.dataset.ton) || 0;
+                const row = input.closest("tr");
+                
+                // Xóa cảnh báo cũ nếu có
+                const oldWarning = row.querySelector(".stock-warning");
+                if (oldWarning) oldWarning.remove();
+                input.classList.remove("is-invalid");
+
+                if (slb > ton) {
+                    input.classList.add("is-invalid");
+                    const warning = document.createElement("div");
+                    warning.className = "stock-warning text-danger small mt-1";
+                    warning.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Vượt tồn kho (Hiện còn: ${ton})`;
+                    input.parentNode.appendChild(warning);
+                }
+            }
+
+            // Sự kiện khi thay đổi sản phẩm
+            tableBody.addEventListener("change", function (e) {
+                if (e.target.classList.contains("form-select") || e.target.classList.contains("select-sp")) {
+                    updatePrice(e.target);
+                    updateNames(); // Ensure names are synced if it's a dynamic row
+                }
+                if (e.target.tagName === "INPUT" && (e.target.name.includes(".SLB") || (e.target.type === "number" && !e.target.step))) {
+                    validateStock(e.target);
+                }
+            });
+
+            // Sự kiện khi nhập số lượng
+            tableBody.addEventListener("input", function (e) {
+                if (e.target.tagName === "INPUT" && e.target.name.includes(".SLB")) {
+                    validateStock(e.target);
+                }
+            });
+
+            // Gọi updateNames ban đầu để chuẩn hóa
+            updateNames();
+
+            // Kích hoạt validate tồn kho cho các dòng đã có sẵn (sau khi post-back bị lỗi)
+            document.querySelectorAll('input[name*=".SLB"]').forEach(input => {
+                if(input.dataset.ton) {
+                    validateStock(input);
                 }
             });
         });

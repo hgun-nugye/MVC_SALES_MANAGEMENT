@@ -87,6 +87,9 @@ namespace QuanLyBanHang.Controllers
 			var ctbh = await _service.GetDetail(maDBH, maSP);
 			if (ctbh == null) return NotFound();
 
+			// Adjust SoLuongTon to include the quantity currently held by this detail
+			ctbh.SoLuongTon += ctbh.SLB;
+
 			ViewBag.MaSP = new SelectList(_context.SanPham, "MaSP", "TenSP", ctbh.MaSP);
 			return View(ctbh);
 		}
@@ -104,6 +107,13 @@ namespace QuanLyBanHang.Controllers
 				{
 					dto.SLB = model.SLB ?? 0;
 					dto.DGB = model.DGB ?? 0;
+					
+					// Re-calculate max stock for display
+					var oldItem = await _service.GetDetail(model.MaDBH!, model.MaSP!);
+					if (oldItem != null) {
+						dto.SoLuongTon = dto.SoLuongTon + oldItem.SLB;
+					}
+					
 					return View(dto);
 				}
 				return View(model); // Fallback
@@ -124,8 +134,16 @@ namespace QuanLyBanHang.Controllers
 			var errorDto = await _service.GetDetail(model.MaDBH!, model.MaSP!);
 			if (errorDto != null)
 			{
+				// For display, use the entered values
 				errorDto.SLB = model.SLB ?? 0;
 				errorDto.DGB = model.DGB ?? 0;
+				
+				// Fix stock limit for display
+				var cleanOld = await _service.GetDetail(model.MaDBH!, model.MaSP!);
+				if(cleanOld != null) {
+					errorDto.SoLuongTon = (cleanOld.SoLuongTon) + cleanOld.SLB;
+				}
+
 				return View(errorDto);
 			}
 			return View(model);

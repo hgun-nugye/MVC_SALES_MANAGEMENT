@@ -3,16 +3,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace QuanLyBanHang.Attributes
 {
-	/// <summary>
-	/// Custom Authorization Attribute để kiểm tra đăng nhập và phân quyền
-	/// </summary>
+	
+	/// Custom Authorization Attribute để kiểm tra đăng nhập và phân quyền	
 	public class CustomAuthorizeAttribute : Attribute, IAuthorizationFilter
 	{
 		private readonly string[] _allowedRoles;
-
-		/// <summary>
+		
 		/// Khởi tạo attribute với các vai trò được phép truy cập
-		/// </summary>
+		
 		/// <param name="allowedRoles">Danh sách vai trò: "Admin", "Employee", "Customer"</param>
 		public CustomAuthorizeAttribute(params string[] allowedRoles)
 		{
@@ -72,25 +70,25 @@ namespace QuanLyBanHang.Attributes
 		}
 	}
 
-	/// <summary>
+	
 	/// Chỉ cho phép Admin truy cập
-	/// </summary>
+	
 	public class AdminOnlyAttribute : CustomAuthorizeAttribute
 	{
 		public AdminOnlyAttribute() : base("Admin") { }
 	}
 
-	/// <summary>
+	
 	/// Chỉ cho phép Employee (bao gồm Admin) truy cập
-	/// </summary>
+	
 	public class EmployeeOnlyAttribute : CustomAuthorizeAttribute
 	{
 		public EmployeeOnlyAttribute() : base("Employee", "Admin") { }
 	}
 
-	/// <summary>
+	
 	/// Chỉ cho phép Customer truy cập
-	/// </summary>
+	
 	public class CustomerOnlyAttribute : CustomAuthorizeAttribute
 	{
 		public CustomerOnlyAttribute() : base("Customer") { }

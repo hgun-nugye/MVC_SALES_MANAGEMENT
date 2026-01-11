@@ -40,7 +40,6 @@ namespace QuanLyBanHang.Models
 		public string MaVT { get; set; } = string.Empty;
 		public string TenVT { get; set; } = string.Empty;
 		public string MaNV { get; set; } = string.Empty;
-		[NotMapped]
 		public string TenNV { get; set; } = string.Empty;
 	}
 }

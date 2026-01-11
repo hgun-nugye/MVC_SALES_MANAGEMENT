@@ -45,6 +45,7 @@ namespace QuanLyBanHang.Services
 		public DbSet<CTMHDetailDto> CTMHDetailDtos { get; set; } = null!;
 		public DbSet<CTBHDetailDto> CTBHDetailDtos { get; set; } = null!;
 		public DbSet<DonBanHangDetailDto> DonBanHangDetailDto { get; set; } = null!;
+		public DbSet<DonMuaHangDetailDto> DonMuaHangDetailDto { get; set; } = null!;
 		public DbSet<XaDTO> XaDTO { get; set; } = null!;
 		public DbSet<PhanQuyenDto> PhanQuyenDto { get; set; } = null!;
 		public DbSet<DashboardStats> DashboardStats { get; set; } = null!;

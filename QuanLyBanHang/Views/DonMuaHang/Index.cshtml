@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyBanHang.Models.DonMuaHangDetail>
+﻿@model IEnumerable<QuanLyBanHang.Models.DonMuaHangDetailDto>
 
 @{
     ViewBag.Title = "Quản lý Đơn mua hàng";
@@ -171,12 +171,17 @@
                             <td class="text-center">@item.TenNCC</td>
                             <td class="text-center">
                                 @{
-                                    // Lấy mã trạng thái để áp dụng class CSS (ví dụ: status-cho, status-dtt)
-                                    var statusClass = item.MaTTMH?.ToLower().Trim() ?? "default";
+                                    var statusClass = item.TenTTMH switch
+                                    {
+                                        "Chờ nhập" => "cho",
+                                        "Hoàn thành" => "hth",
+                                        _ => "default"
+                                    };
                                 }
                                 <span class="badge-status status-@statusClass">
                                     @item.TenTTMH
                                 </span>
+
                             </td>
                         </tr>
                     }

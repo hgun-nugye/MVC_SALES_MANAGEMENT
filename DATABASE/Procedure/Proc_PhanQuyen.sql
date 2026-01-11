@@ -76,9 +76,10 @@ CREATE OR ALTER PROC PhanQuyen_GetByNhanVien
 )
 AS
 BEGIN
-    SELECT pq.MaNV, vt.MaVT, vt.TenVT
+    SELECT pq.MaNV, vt.MaVT, vt.TenVT, nv.TenNV
     FROM PhanQuyen pq
     JOIN VaiTro vt ON pq.MaVT = vt.MaVT
+	JOIN NhanVien nv ON nv.MaNV = pq.MaNV
     WHERE pq.MaNV = @MaNV;
 END;
 GO

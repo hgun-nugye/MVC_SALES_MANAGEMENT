@@ -1,24 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyBanHang.Services;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Cấu hình Database
 builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb")));
+
+// 2. Đăng ký Controllers và Filter
 builder.Services.AddControllersWithViews(options =>
 {
-    options.Filters.Add<QuanLyBanHang.Filters.AuthenticationFilter>();
+	options.Filters.Add<QuanLyBanHang.Filters.AuthenticationFilter>();
 });
 
-// Cấu hình Session
+// 3. Cấu hình Session (Quan trọng cho Cart và Login)
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
 	// Thời gian session tồn tại khi không hoạt động (30 phút)
 	options.IdleTimeout = TimeSpan.FromMinutes(30);
-	
+
 	// Cookie settings cho session
 	options.Cookie.HttpOnly = true; // Chỉ cho phép truy cập từ HTTP, không cho JavaScript
 	options.Cookie.IsEssential = true; // Cookie cần thiết cho ứng dụng
@@ -41,6 +42,7 @@ builder.Services.AddAuthentication("CookieAuth")
 		options.Cookie.Name = ".QuanLyBanHang.Auth";
 	});
 
+// 5. Đăng ký các Services
 builder.Services.AddScoped<CTMHService>();
 builder.Services.AddScoped<CTBHService>();
 builder.Services.AddScoped<DonMuaHangService>();
@@ -54,7 +56,6 @@ builder.Services.AddScoped<TinhService>();
 builder.Services.AddScoped<XaService>();
 builder.Services.AddScoped<NuocService>();
 builder.Services.AddScoped<HangSXService>();
-builder.Services.AddScoped<NuocService>();
 builder.Services.AddScoped<NhanVienService>();
 builder.Services.AddScoped<TrangThaiBHService>();
 builder.Services.AddScoped<TrangThaiService>();
@@ -80,7 +81,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Thứ tự middleware quan trọng: Session -> Authentication -> Authorization
+// Thứ tự quan trọng: Session -> Authentication -> Authorization
 app.UseSession();
 app.UseAuthentication(); // Phải đặt trước UseAuthorization
 app.UseAuthorization();

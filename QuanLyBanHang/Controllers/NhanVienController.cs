@@ -13,7 +13,6 @@ namespace QuanLyBanHang.Controllers
 		private readonly TinhService _tinhService;
 		private readonly VaiTroService _vaiTroService;
 		private readonly PhanQuyenService _phanQuyenService;
-		private readonly AppDbContext _context;
 		private readonly IWebHostEnvironment _webHostEnvironment;
 		public NhanVienController(
 			NhanVienService nhanVienService,
@@ -21,11 +20,9 @@ namespace QuanLyBanHang.Controllers
 			TinhService tinhService,
 			VaiTroService vaiTroService,
 			PhanQuyenService phanQuyenService,
-			AppDbContext context, 
 			IWebHostEnvironment webHostEnvironment)
 		{
 			_nhanVienService = nhanVienService;
-			_context = context;
 			_xaService = xaService;
 			_tinhService = tinhService;
 			_vaiTroService = vaiTroService;
@@ -253,16 +250,27 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var nhanVien = (await _nhanVienService.GetByID(id));
-
-			if (nhanVien != null)
+			try
 			{
-				await _nhanVienService.Delete(id);
-				TempData["SuccessMessage"] = "Đã xóa nhân viên thành công!";
+				var nhanVien = (await _nhanVienService.GetByID(id));
+				if (nhanVien != null)
+				{
+					await _nhanVienService.Delete(id);
+					TempData["SuccessMessage"] = "Đã xóa nhân viên thành công!";
+				}
+				else
+				{
+					TempData["ErrorMessage"] = "Không tìm thấy nhân viên cần xóa!";
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy nhân viên cần xóa!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Nhân viên";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa nhân viên: " + ex.Message;
 			}
 
 			return RedirectToAction(nameof(Index));

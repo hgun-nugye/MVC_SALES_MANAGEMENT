@@ -1,7 +1,8 @@
 ﻿@model QuanLyBanHang.Models.DonBanHang
 
 @{
-    ViewBag.Title = "Sửa Đơn bán hàng";
+    bool isCustomer = ViewBag.IsCustomer == true;
+    ViewBag.Title = isCustomer ? "Sửa đơn mua hàng" : "Sửa Đơn bán hàng";
 }
 
 @if (TempData["ErrorMessage"] != null)
@@ -27,13 +28,24 @@
 
         <!-- THÔNG TIN ĐƠN -->
         <div class="mb-3">
-            <label class="form-label fw-bold">Ngày Bán hàng </label>
-            <input asp-for="NgayBH" type="date" class="form-control" />
+            <label class="form-label fw-bold">@(isCustomer ? "Ngày mua hàng" : "Ngày bán hàng")</label>
+            <input asp-for="NgayBH" type="date" class="form-control" readonly="@(isCustomer ? "readonly" : null)" />
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-bold">Khách hàng</label>
-            <select asp-for="MaKH" asp-items="ViewBag.MaKH" class="form-select"></select>
+            @if (!isCustomer)
+            {
+                <label class="form-label fw-bold">Khách hàng</label>
+                <select asp-for="MaKH" asp-items="ViewBag.MaKH" class="form-select"></select>
+            }
+            else
+            {
+                <label class="form-label fw-bold">Khách hàng</label>
+                <div class="alert alert-info py-2">
+                    <strong>@Context.Session.GetString("UserName")</strong>
+                </div>
+                <input type="hidden" asp-for="MaKH" />
+            }
         </div>
 
         <div class="mb-3">

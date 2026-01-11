@@ -10,7 +10,6 @@ namespace QuanLyBanHang.Controllers
     {
         private readonly SanPhamService _spService;
         private readonly DonBanHangService _dbhService;
-        private readonly AppDbContext _context;
         private readonly KhachHangService _khService;
         private readonly TinhService _tinhService;
         private const string CART_SESSION_KEY = "UserCart";
@@ -18,13 +17,11 @@ namespace QuanLyBanHang.Controllers
         public CartController(
             SanPhamService spService, 
             DonBanHangService dbhService, 
-            AppDbContext context, 
             KhachHangService khService,
             TinhService tinhService)
         {
             _spService = spService;
             _dbhService = dbhService;
-            _context = context;
             _khService = khService;
             _tinhService = tinhService;
         }
@@ -48,7 +45,7 @@ namespace QuanLyBanHang.Controllers
         public async Task<IActionResult> Index()
         {
             var cart = GetCartFromSession();
-            // Cập nhật số lượng tồn mới nhất từ DB
+            // Cập nhật số lượng tồn mới nhất
             foreach (var item in cart)
             {
                 var sp = await _spService.GetById(item.MaSP);
@@ -189,7 +186,7 @@ namespace QuanLyBanHang.Controllers
             
             if (!selectedItems.Any()) 
             {
-                TempData["ErrorMessage"] = "Bạn chưa chọn sản phẩm nào để thanh toán.";
+                TempData["ErrorMessage"] = "Chưa chọn sản phẩm để thanh toán.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -197,7 +194,7 @@ namespace QuanLyBanHang.Controllers
             foreach (var item in selectedItems) {
                 var sp = await _spService.GetById(item.MaSP);
                 if (sp == null || item.SoLuong > (sp.SoLuongTon ?? 0)) {
-                    TempData["ErrorMessage"] = $"Sản phẩm {item.TenSP} không đủ số lượng tồn kho (Còn {sp?.SoLuongTon ?? 0}). Vui lòng điều chỉnh lại.";
+                    TempData["ErrorMessage"] = $"Sản phẩm {item.TenSP} không đủ số lượng tồn kho (Còn {sp?.SoLuongTon ?? 0}).";
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -219,7 +216,7 @@ namespace QuanLyBanHang.Controllers
             
             ViewBag.TinhList = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _tinhService.GetAll(), "MaTinh", "TenTinh");
 
-            return View(selectedItems); // View uses List<CartItem> model
+            return View(selectedItems); 
         }
 
         [HttpPost]
@@ -234,11 +231,11 @@ namespace QuanLyBanHang.Controllers
 
             if (!selectedItems.Any()) return RedirectToAction(nameof(Index));
 
-            // Kiểm tra tồn kho lần cuối cùng trước khi lưu vào DB
+            // Kiểm tra tồn kho lần cuối cùng trước khi lưu
             foreach (var item in selectedItems) {
                 var sp = await _spService.GetById(item.MaSP);
                 if (sp == null || item.SoLuong > (sp.SoLuongTon ?? 0)) {
-                    TempData["ErrorMessage"] = $"Sản phẩm {item.TenSP} vừa mới hết hàng hoặc không đủ số lượng. Vui lòng kiểm tra lại.";
+                    TempData["ErrorMessage"] = $"Sản phẩm {item.TenSP} không đủ số lượng.";
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -265,7 +262,7 @@ namespace QuanLyBanHang.Controllers
                 cart.RemoveAll(c => c.IsSelected);
 				SaveCartToSession(cart);
                 
-                TempData["SuccessMessage"] = "Bạn đã đặt hàng thành công! Đơn hàng đang chờ xử lý.";
+                TempData["SuccessMessage"] = "Đặt hàng thành công! Đơn hàng đang chờ xử lý.";
                 return RedirectToAction("Index", "DonBanHang"); 
             }
 

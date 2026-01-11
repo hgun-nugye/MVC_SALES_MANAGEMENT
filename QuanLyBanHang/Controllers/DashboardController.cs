@@ -42,16 +42,16 @@ namespace QuanLyBanHang.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetOrderDetails(DateTime? fromDate, DateTime? toDate)
+		public async Task<IActionResult> GetOrderDetails(DateTime? fromDate, DateTime? toDate, string? status)
 		{
-			var data = await _dashboardService.GetOrderDetailsReport(fromDate, toDate);
+			var data = await _dashboardService.GetOrderDetailsReport(fromDate, toDate, status);
 			return Json(data);
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetImportOrderDetails(DateTime? fromDate, DateTime? toDate)
+		public async Task<IActionResult> GetImportOrderDetails(DateTime? fromDate, DateTime? toDate, string? status)
 		{
-			var data = await _dashboardService.GetImportOrderDetailsReport(fromDate, toDate);
+			var data = await _dashboardService.GetImportOrderDetailsReport(fromDate, toDate, status);
 			return Json(data);
 		}
 
@@ -64,14 +64,15 @@ namespace QuanLyBanHang.Controllers
 
 		// Export to Excel với đầy đủ báo cáo
 		[HttpGet]
-		public async Task<IActionResult> ExportToExcel(DateTime? fromDate, DateTime? toDate)
+		public async Task<IActionResult> ExportToExcel(DateTime? fromDate, DateTime? toDate, int? year, string? statusBH, string? statusMH)
 		{
 			try
 			{
+				int targetYear = year ?? DateTime.Now.Year;
 				var stats = await _dashboardService.GetDashboardStats();
-				var monthlyRevenue = await _dashboardService.GetMonthlyRevenue(DateTime.Now.Year);
-				var orders = await _dashboardService.GetOrderDetailsReport(fromDate, toDate);
-				var importOrders = await _dashboardService.GetImportOrderDetailsReport(fromDate, toDate);
+				var monthlyRevenue = await _dashboardService.GetMonthlyRevenue(targetYear);
+				var orders = await _dashboardService.GetOrderDetailsReport(fromDate, toDate, statusBH);
+				var importOrders = await _dashboardService.GetImportOrderDetailsReport(fromDate, toDate, statusMH);
 				var productRevenue = await _dashboardService.GetProductRevenueReport();
 				var topProducts = await _dashboardService.GetTopSellingProducts(10);
 				var slowProducts = await _dashboardService.GetSlowMovingProducts(10);

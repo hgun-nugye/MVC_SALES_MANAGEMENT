@@ -154,7 +154,7 @@ namespace QuanLyBanHang.Services
 				.FromSqlRaw("EXEC PhanQuyen_GetByNhanVien @MaNV", new SqlParameter("@MaNV", maNV))
 				.ToListAsync();
 			
-			return phanQuyenList.FirstOrDefault()?.TenVT ?? "Employee";
+			return phanQuyenList.FirstOrDefault()?.TenVT ?? "Nhân viên";
 		}
 	}
 }

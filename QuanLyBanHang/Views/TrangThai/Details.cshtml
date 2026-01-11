@@ -20,9 +20,9 @@
         <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "TrangThai", new { id = Model.MaTT })">
             <i class="fa-solid fa-trash"></i> Xóa
         </a>
-        <button type="button" onclick="history.back()" class="btn btn-secondary">
+        <a href="@Url.Action("Index", "TrangThai")" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </button>
+        </a>
     </div>
 </div>
 

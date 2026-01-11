@@ -14,11 +14,25 @@
         height: 100%;
     }
 
-    .stats-card.green { border-left-color: #4CAF50; }
-    .stats-card.blue { border-left-color: #2196F3; }
-    .stats-card.orange { border-left-color: #FF9800; }
-    .stats-card.purple { border-left-color: #9C27B0; }
-    .stats-card.red { border-left-color: #F44336; }
+        .stats-card.green {
+            border-left-color: #4CAF50;
+        }
+
+        .stats-card.blue {
+            border-left-color: #2196F3;
+        }
+
+        .stats-card.orange {
+            border-left-color: #FF9800;
+        }
+
+        .stats-card.purple {
+            border-left-color: #9C27B0;
+        }
+
+        .stats-card.red {
+            border-left-color: #F44336;
+        }
 
     .stats-value {
         font-size: 2rem;
@@ -96,8 +110,8 @@
         <h2 class="text-success fw-bold mb-0">
             <i class="fas fa-chart-line me-2"></i>Báo cáo tổng hợp
         </h2>
-        <div class="d-flex gap-2">        
-            
+        <div class="d-flex gap-2">
+
             <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fas fa-file-excel me-2"></i>Xuất Excel (Toàn bộ)
             </button>
@@ -140,11 +154,24 @@
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="report-section">
-                <h4 class="section-title">
-                    <i class="fas fa-chart-bar me-2 text-success"></i>
-                    Doanh thu theo tháng (@DateTime.Now.Year)
-                </h4>
-                <canvas id="revenueChart" height="60"></canvas>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="section-title mb-0">
+                        <i class="fas fa-chart-bar me-2 text-success"></i>
+                        Doanh thu theo tháng
+                    </h4>
+                    <div class="d-flex align-items-center">
+                        <label class="me-2 fw-bold">Chọn năm:</label>
+                        <select id="yearFilter" class="form-select shadow-sm" style="width: 120px;">
+                            @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 3; i--)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container" style="position: relative; height:60vh;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -192,7 +219,14 @@
                         <i class="fa-solid fa-file-invoice-dollar me-2 text-success"></i>
                         Chi tiết hóa đơn bán hàng
                     </h4>
-                    <div class="d-flex gap-2 align-items-center">
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <select id="statusBH" class="form-select form-select-sm" style="width: auto;">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="CHO">Chờ xác nhận</option>
+                            <option value="DXN">Đã xác nhận</option>
+                            <option value="HTH">Hoàn thành</option>
+                            <option value="HUY">Đã hủy</option>
+                        </select>
                         <input type="date" id="fromDate" class="form-control form-control-sm" style="width: auto;">
                         <input type="date" id="toDate" class="form-control form-control-sm" style="width: auto;">
                         <button class="btn btn-sm btn-dark px-3" onclick="filterOrders()">
@@ -245,7 +279,12 @@
                         <i class="fa-solid fa-file-invoice me-2 text-success"></i>
                         Chi tiết hóa đơn nhập hàng
                     </h4>
-                    <div class="d-flex gap-2 align-items-center">
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <select id="statusMH" class="form-select form-select-sm" style="width: auto;">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="CHO">Chờ nhập</option>
+                            <option value="HTH">Hoàn thành</option>
+                        </select>
                         <input type="date" id="fromDateImport" class="form-control form-control-sm" style="width: auto;">
                         <input type="date" id="toDateImport" class="form-control form-control-sm" style="width: auto;">
                         <button class="btn btn-sm btn-dark px-3" onclick="filterImportOrders()">
@@ -267,13 +306,14 @@
                                 <th>MÃ ĐƠN NHẬP</th>
                                 <th>NGÀY NHẬP</th>
                                 <th>NHÀ CUNG CẤP</th>
+                                <th>TRẠNG THÁI</th>
                                 <th class="text-center">SỐ LƯỢNG</th>
                                 <th class="text-end">TỔNG TIỀN</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="5" class="text-center py-5">
+                                <td colspan="6" class="text-center py-5">
                                     <div class="spinner-border text-success"></div>
                                 </td>
                             </tr>
@@ -373,19 +413,41 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let revenueChart;
+                let revenueChart;
+
         $(document).ready(function () {
-            loadRevenueChart();
-            loadOrders();
-            loadImportOrders();
+            // Thiết lập mặc định là ngày hôm nay
+            const today = new Date().toISOString().split('T')[0];
+            $('#fromDate, #toDate, #fromDateImport, #toDateImport').val(today);
+
+            // 1. Load các bảng dữ liệu tĩnh/chi tiết
+            loadOrders(today, today);
+            loadImportOrders(today, today);
             loadProductRevenue();
             loadTopProducts();
             loadSlowProducts();
+
+            // 2. Xác định ID chính xác từ HTML (ví dụ là #yearFilter)
+            const yearSelect = $('#yearFilter');
+
+            // 3. Load biểu đồ lần đầu khi trang vừa tải xong
+            loadRevenueChart(yearSelect.val());
+
+            // 4. Lắng nghe sự kiện thay đổi năm
+            yearSelect.on('change', function () {
+                const selectedYear = $(this).val();
+                loadRevenueChart(selectedYear);
+            });
         });
 
-        function loadRevenueChart() {
-            $.get('@Url.Action("GetMonthlyRevenue", "Dashboard")?year=@DateTime.Now.Year', function (data) {
+        function loadRevenueChart(year) {
+            // Nếu year bị trống hoặc undefined, lấy năm hiện tại của hệ thống
+            if (!year) year = new Date().getFullYear();
+
+            $.get('@Url.Action("GetMonthlyRevenue", "Dashboard")?year=' + year, function (data) {
+                // Xóa biểu đồ cũ nếu tồn tại để tránh lỗi hiển thị đè (flicker) khi di chuột vào
                 if (revenueChart) revenueChart.destroy();
+
                 const ctx = document.getElementById('revenueChart').getContext('2d');
                 revenueChart = new Chart(ctx, {
                     type: 'bar',
@@ -394,24 +456,27 @@
                         datasets: [{
                             label: 'Doanh thu (VNĐ)',
                             data: data.map(d => d.revenue),
-                            backgroundColor: '#4CAF50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
                             borderColor: '#388E3C',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            yAxisID: 'y' // Trục bên trái
                         }, {
                             label: 'Số đơn hàng',
                             data: data.map(d => d.orderCount),
-                            backgroundColor: '#2196F3',
+                            backgroundColor: 'rgba(33, 150, 243, 0.7)',
                             borderColor: '#1976D2',
                             borderWidth: 1,
-                            yAxisID: 'y1'
+                            yAxisID: 'y1' // Trục bên phải
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 position: 'left',
+                                title: { display: true, text: 'Doanh thu (VNĐ)', color: '#388E3C' },
                                 ticks: {
                                     callback: function (value) {
                                         return value.toLocaleString('vi-VN') + ' đ';
@@ -421,23 +486,41 @@
                             y1: {
                                 beginAtZero: true,
                                 position: 'right',
-                                grid: {
-                                    drawOnChartArea: false
+                                title: { display: true, text: 'Số lượng đơn', color: '#1976D2' },
+                                grid: { drawOnChartArea: false } // Ẩn lưới để tránh rối mắt
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.datasetIndex === 0) {
+                                            label += context.raw.toLocaleString('vi-VN') + ' đ';
+                                        } else {
+                                            label += context.raw + ' đơn';
+                                        }
+                                        return label;
+                                    }
                                 }
                             }
                         }
                     }
                 });
+            }).fail(function() {
+                alert("Lỗi: Không thể kết nối với máy chủ để lấy dữ liệu doanh thu.");
             });
         }
 
-        function loadOrders(fromDate, toDate) {
+        function loadOrders(fromDate, toDate, status) {
             let url = '@Url.Action("GetOrderDetails", "Dashboard")';
-            if (fromDate || toDate) {
-                url += '?';
-                if (fromDate) url += 'fromDate=' + fromDate + '&';
-                if (toDate) url += 'toDate=' + toDate;
-            }
+            let params = new URLSearchParams();
+            if (fromDate) params.append('fromDate', fromDate);
+            if (toDate) params.append('toDate', toDate);
+            if (status) params.append('status', status);
+
+            if (params.toString()) url += '?' + params.toString();
 
             $.get(url, function (data) {
                 let html = '';
@@ -456,7 +539,7 @@
                             <td class="text-secondary">${new Date(order.ngayBH).toLocaleDateString('vi-VN')}</td>
                             <td class="fw-bold">${order.tenKH}</td>
                             <td class="text-muted small">${order.diaChiDBH}</td>
-                            <td class="text-cent"><span class="badge ${statusBadge} px-3 py-2 text-cent" style="font-weight: 500;">${order.trangThai}</span></td>
+                            <td class="text-center"><span class="badge ${statusBadge} px-3 py-2" style="font-weight: 500;">${order.trangThai}</span></td>
                             <td class="text-center">${order.soLuongSP}</td>
                             <td class="text-end fw-bold"><strong>${order.tongTien.toLocaleString('vi-VN')} đ</strong></td>
                         </tr>
@@ -475,29 +558,35 @@
                     $('#ordersTable tbody').html(html);
                 } else {
                     $('#ordersFooter').empty();
-                    $('#ordersTable tbody').html('<tr><td colspan="7" class="text-center py-5 text-muted">Chưa có dữ liệu</td></tr>');
+                    $('#ordersTable tbody').html('<tr><td colspan="7" class="text-center py-5 text-muted fst-italic">Chưa có dữ liệu</td></tr>');
                 }
             });
         }
 
-                function loadImportOrders(fromDate, toDate) {
+        function loadImportOrders(fromDate, toDate, status) {
             let url = '@Url.Action("GetImportOrderDetails", "Dashboard")';
-            if (fromDate || toDate) {
-                url += '?';
-                if (fromDate) url += 'fromDate=' + fromDate + '&';
-                if (toDate) url += 'toDate=' + toDate;
-            }
+            let params = new URLSearchParams();
+            if (fromDate) params.append('fromDate', fromDate);
+            if (toDate) params.append('toDate', toDate);
+            if (status) params.append('status', status);
+
+            if (params.toString()) url += '?' + params.toString();
 
             $.get(url, function (data) {
                 let html = '';
                 let total = 0;
 
                 data.forEach(item => {
+                    let statusBadge = 'bg-secondary';
+                    if (item.trangThai === 'Hoàn thành') statusBadge = 'status-hth';
+                    else if (item.trangThai === 'Chờ nhập') statusBadge = 'status-cho';
+
                     html += `
                         <tr>
                             <td class="fw-bold text-muted">${item.maDMH}</td>
                             <td>${new Date(item.ngayMH).toLocaleDateString('vi-VN')}</td>
                             <td class="fw-bold">${item.tenNCC}</td>
+                            <td class="text-center"><span class="badge ${statusBadge} px-3 py-2" style="font-weight: 500;">${item.trangThai}</span></td>
                             <td class="text-center">${item.soLuongSP}</td>
                             <td class="text-end fw-bold text-dark">
                                 ${item.tongTien.toLocaleString('vi-VN')} đ
@@ -511,13 +600,13 @@
                     $('#importOrdersTable tbody').html(html);
                     $('#importOrdersFooter').html(`
                         <tr class="table-success fw-bold">
-                            <td colspan="4" class="text-end">TỔNG CỘNG:</td>
+                            <td colspan="5" class="text-end">TỔNG CỘNG:</td>
                             <td class="text-end">${total.toLocaleString('vi-VN')} đ</td>
                         </tr>
                     `);
                 } else {
                     $('#importOrdersTable tbody').html(
-                        '<tr><td colspan="5" class="text-center text-muted">Chưa có dữ liệu</td></tr>'
+                        '<tr><td colspan="6" class="text-center text-muted fs-italic">Chưa có dữ liệu</td></tr>'
                     );
                     $('#importOrdersFooter').empty();
                 }
@@ -527,14 +616,17 @@
         function filterImportOrders() {
             loadImportOrders(
                 $('#fromDateImport').val(),
-                $('#toDateImport').val()
+                $('#toDateImport').val(),
+                $('#statusMH').val()
             );
         }
 
         function resetImportFilter() {
-            $('#fromDateImport').val('');
-            $('#toDateImport').val('');
-            loadImportOrders();
+            const today = new Date().toISOString().split('T')[0];
+            $('#fromDateImport').val(today);
+            $('#toDateImport').val(today);
+            $('#statusMH').val('');
+            loadImportOrders(today, today);
         }
 
 
@@ -563,7 +655,7 @@
                     </tr>
                 `;
 
-                $('#productRevenueTable tbody').html(html || '<tr><td colspan="6" class="text-center text-muted">Chưa có dữ liệu</td></tr>');
+                $('#productRevenueTable tbody').html(html || '<tr><td colspan="6" class="text-center text-muted fs-italic">Chưa có dữ liệu</td></tr>');
             });
         }
 
@@ -606,26 +698,36 @@
         function filterOrders() {
             const fromDate = $('#fromDate').val();
             const toDate = $('#toDate').val();
-            loadOrders(fromDate, toDate);
+            const status = $('#statusBH').val();
+            loadOrders(fromDate, toDate, status);
         }
 
         function resetOrderFilter() {
-            $('#fromDate').val('');
-            $('#toDate').val('');
-            loadOrders();
+            const today = new Date().toISOString().split('T')[0];
+            $('#fromDate').val(today);
+            $('#toDate').val(today);
+            $('#statusBH').val('');
+            loadOrders(today, today);
         }
 
         function exportToExcel() {
             const fromDate = $('#fromDate').val();
             const toDate = $('#toDate').val();
+            const year = $('#yearFilter').val();
+            const statusBH = $('#statusBH').val();
+            const statusMH = $('#statusMH').val();
             let url = '@Url.Action("ExportToExcel", "Dashboard")';
-            
-            if (fromDate || toDate) {
-                url += '?';
-                if (fromDate) url += 'fromDate=' + fromDate + '&';
-                if (toDate) url += 'toDate=' + toDate;
-            }
-            
+
+            const params = new URLSearchParams();
+            if (fromDate) params.append('fromDate', fromDate);
+            if (toDate) params.append('toDate', toDate);
+            if (year) params.append('year', year);
+            if (statusBH) params.append('statusBH', statusBH);
+            if (statusMH) params.append('statusMH', statusMH);
+
+            const queryString = params.toString();
+            if (queryString) url += '?' + queryString;
+
             window.location.href = url;
         }
     </script>

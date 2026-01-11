@@ -3,7 +3,7 @@ GO
 
 CREATE OR ALTER PROC TrangThai_Insert
 (
-    @TenTT VARCHAR(50)
+    @TenTT NVARCHAR(50)
 )
 AS
 BEGIN
@@ -31,7 +31,7 @@ GO
 CREATE OR ALTER PROC TrangThai_Update
 (
     @MaTT CHAR(3),
-    @TenTT VARCHAR(50)
+    @TenTT NVARCHAR(50)
 )
 AS
 BEGIN
@@ -77,7 +77,7 @@ CREATE OR ALTER PROC TrangThai_GetByID
 )
 AS
 BEGIN
-    SELECT * FROM TrangThai ORDER BY MaTT;
+    SELECT * FROM TrangThai WHERE @MaTT= MaTT ORDER BY MaTT;
 END;
 GO
 

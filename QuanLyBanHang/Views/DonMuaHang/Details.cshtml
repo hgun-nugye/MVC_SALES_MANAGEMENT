@@ -42,7 +42,7 @@
                     <th class="text-center">Số lượng mua</th>
                     <th class="text-end">Đơn giá mua</th>
                     <th class="text-end">Thành tiền</th>
-                    <th class="text-center">Xóa sản phẩm</th>
+                    <th class="text-center">Thao tác</th>
 
                 </tr>
             </thead>
@@ -91,21 +91,36 @@
     }
 
     <div class="mt-4">
-        @if (don != null)
+        @if (don != null && don.MaTTMH != "HTH")
         {
             <a href="@Url.Action("Edit", "DonMuaHang", new { id = don.MaDMH })" class="btn btn-warning text-white me-2">
                 <i class="fa-solid fa-pen-to-square"></i> Sửa
             </a>
         }
 
-        @if (don != null)
+        @if (don != null && don.MaTTMH != "HTH")
         {
             <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "DonMuaHang", new { id = don.MaDMH })">
                 <i class="fa-solid fa-trash"></i> Xóa
             </a>
         }
 
-         <a href="@Url.Action("Index", "DonMuaHang", new { search = ViewBag.Search, month = ViewBag.Month, year = ViewBag.Year, MaTTMH = ViewBag.MaTTMH })" class="btn btn-secondary">
+        @if (don != null && don.MaTTMH != "HTH")
+        {
+            <form asp-action="CompleteOrder" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@don.MaDMH" />
+                <input type="hidden" name="search" value="@ViewBag.Search" />
+                <input type="hidden" name="month" value="@ViewBag.Month" />
+                <input type="hidden" name="year" value="@ViewBag.Year" />
+                <input type="hidden" name="MaTTMH" value="@ViewBag.MaTTMH" />
+                <button type="submit" class="btn btn-success me-2" onclick="return confirm('Bạn có chắc chắn muốn hoàn thành đơn hàng này? Thao tác này sẽ không thể hoàn tác.')">
+                    <i class="fa-solid fa-check-double"></i> Hoàn thành
+                </button>
+            </form>
+        }
+
+        <a href="@Url.Action("Index", "DonMuaHang", new { search = ViewBag.Search, month = ViewBag.Month, year = ViewBag.Year, MaTTMH = ViewBag.MaTTMH })" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
          </a>
     </div>

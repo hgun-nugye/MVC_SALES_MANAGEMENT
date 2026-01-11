@@ -126,13 +126,18 @@ namespace QuanLyBanHang.Controllers
 			{
 				await _loaiService.Delete(id);
 				TempData["SuccessMessage"] = "Đã xóa loại sản phẩm thành công!";
+				return RedirectToAction(nameof(Index));
 			}
 			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Đã xảy ra lỗi khi xóa loại sản phẩm!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Loại sản phẩm";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa loại sản phẩm: " + ex.Message;
+				return RedirectToAction(nameof(Index));
 			}
-
-			return RedirectToAction(nameof(Index));
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace QuanLyBanHang.Controllers
 		private readonly TrangThaiBHService _ttdhService;
 		private readonly XaService _xaService;
 		private readonly TinhService _tinhService;
-		private readonly AppDbContext _context;
+		private readonly KhachHangService _khService;
 
 		public DonBanHangController(
 			XaService xaService,
@@ -24,13 +24,13 @@ namespace QuanLyBanHang.Controllers
 			CTBHService ctbhService,
 			SanPhamService spService,
 			TrangThaiBHService ttdhService,
-			AppDbContext context)
+			KhachHangService khService)
 		{
 			_dbhService = service;
 			_ctbhService = ctbhService;
 			_spService = spService;
 			_ttdhService = ttdhService;
-			_context = context;
+			_khService = khService;
 			_xaService = xaService;
 			_tinhService = tinhService;
 		}
@@ -49,17 +49,13 @@ namespace QuanLyBanHang.Controllers
 
 			ViewBag.TrangThaiBH = new SelectList(await _ttdhService.GetAll(), "MaTTBH", "TenTTBH", MaTTBH);
 
-			var model = await _dbhService.Search(search, month, year, MaTTBH);
-
-			// Nếu là khách hàng, chỉ hiển thị đơn hàng của họ
+			string? currentMaKH = null;
 			if (IsCustomerMode())
 			{
-				var userId = HttpContext.Session.GetString("UserId");
-				if (!string.IsNullOrEmpty(userId))
-				{
-					model = model.Where(x => x.MaKH == userId).ToList();
-				}
+				currentMaKH = HttpContext.Session.GetString("UserId");
 			}
+
+			var model = await _dbhService.Search(search, month, year, MaTTBH, currentMaKH);
 
 			return View(model);
 		}
@@ -84,10 +80,7 @@ namespace QuanLyBanHang.Controllers
 			//var khachHangs = await (new KhachHangService(_context)).GetAllWithXa();
 			//ViewBag.MaKH = new SelectList(khachHangs, "MaKH", "TenKH", selectedKH);
 
-			var khachHangs = await _context.KhachHang
-							.Select(kh => new { kh.MaKH, kh.TenKH })
-							.ToListAsync();
-
+			var khachHangs = await _khService.GetAllWithXa();
 			ViewBag.MaKH = new SelectList(khachHangs, "MaKH", "TenKH", selectedKH);
 
 
@@ -122,10 +115,14 @@ namespace QuanLyBanHang.Controllers
 			await LoadDropdowns();
 			ViewData["MaXaSelected"] = null;
 
-			var model = new DonBanHang();
+			ViewBag.IsCustomer = IsCustomerMode();
+			var model = new DonBanHang
+			{
+				NgayBH = DateTime.Now
+			};
 
 			// Nếu là khách hàng, tự động gán MaKH
-			if (IsCustomerMode())
+			if (ViewBag.IsCustomer)
 			{
 				var userId = HttpContext.Session.GetString("UserId");
 				model.MaKH = userId;
@@ -138,9 +135,9 @@ namespace QuanLyBanHang.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(DonBanHang model, string maTinh)
 		{
+			bool isCustomer = IsCustomerMode();
 			try
 			{
-				bool isCustomer = IsCustomerMode();
 
 				ModelState.Remove("MaDBH");
 				ModelState.Remove("Xa");
@@ -229,20 +226,14 @@ namespace QuanLyBanHang.Controllers
 				}
 
 				// Nếu là khách hàng: tự động dùng giá bán từ bảng Sản phẩm, KH không được nhập giá
-				Dictionary<string, decimal> priceLookup = new();
 				if (isCustomer && cleanedDetails.Any())
 				{
-					var sanPhamsForPrice = await _spService.GetAll();
-					priceLookup = sanPhamsForPrice
-						.Where(x => !string.IsNullOrEmpty(x.MaSP))
-						.ToDictionary(x => x.MaSP!, x => x.GiaBan ?? 0m);
-
 					foreach (var ct in cleanedDetails)
 					{
-						if (!string.IsNullOrEmpty(ct.MaSP) &&
-							priceLookup.TryGetValue(ct.MaSP, out var giaBan))
+						if (!string.IsNullOrEmpty(ct.MaSP))
 						{
-							ct.DGB = giaBan;
+							var sp = await _spService.GetById(ct.MaSP);
+							ct.DGB = sp?.GiaBan ?? 0m;
 						}
 					}
 				}
@@ -256,10 +247,14 @@ namespace QuanLyBanHang.Controllers
 				var stockLookup = new Dictionary<string, int>();
 				if (selectedIds.Any())
 				{
-					var sanPhams = await _spService.GetAll();
-					stockLookup = sanPhams
-						.Where(x => !string.IsNullOrEmpty(x.MaSP) && selectedIds.Contains(x.MaSP))
-						.ToDictionary(x => x.MaSP!, x => x.SoLuongTon ?? 0);
+					foreach (var id in selectedIds)
+					{
+						var sp = await _spService.GetById(id);
+						if (sp != null)
+						{
+							stockLookup[id] = sp.SoLuongTon ?? 0;
+						}
+					}
 				}
 
 				for (int i = 0; i < cleanedDetails.Count; i++)
@@ -275,18 +270,43 @@ namespace QuanLyBanHang.Controllers
 					}
 				}
 
-				if (ModelState.IsValid && cleanedDetails.Any())
+				if (ModelState.IsValid)
 				{
-					model.CTBHs = cleanedDetails;
-					await _dbhService.Create(model);
+					if (cleanedDetails.Any())
+					{
+						model.CTBHs = cleanedDetails;
+						await _dbhService.Create(model);
 
-					TempData["SuccessMessage"] = isCustomer
-						? "Đặt hàng thành công!"
-						: "Thêm đơn bán hàng thành công!";
-					return RedirectToAction(nameof(Index));
+						TempData["SuccessMessage"] = isCustomer
+							? "Đặt hàng thành công!"
+							: "Thêm đơn bán hàng thành công!";
+						return RedirectToAction(nameof(Index));
+					}
+					else
+					{
+						ModelState.AddModelError("", "Vui lòng chọn ít nhất 1 sản phẩm.");
+					}
 				}
 
-				TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ thông tin đơn hàng và chi tiết sản phẩm.";
+				// Nếu có lỗi, thu thập lỗi để hiển thị popup
+				var stockErrors = ModelState.Keys
+					.Where(k => k.Contains(".SLB"))
+					.SelectMany(k => ModelState[k]!.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList();
+
+				if (stockErrors.Any())
+				{
+					TempData["ErrorMessage"] = "Lỗi tồn kho: <br/>- " + string.Join("<br/>- ", stockErrors);
+				}
+				else if (!cleanedDetails.Any())
+				{
+					TempData["ErrorMessage"] = "Vui lòng chọn ít nhất 1 sản phẩm.";
+				}
+				else
+				{
+					TempData["ErrorMessage"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại các trường thông tin.";
+				}
 			}
 			catch (Exception ex)
 			{
@@ -299,6 +319,7 @@ namespace QuanLyBanHang.Controllers
 				model.CTBHs = new List<CTBH> { new CTBH() };
 			}
 
+			ViewBag.IsCustomer = isCustomer;
 			await LoadDropdowns(model.MaKH, model.MaTTBH, model.MaXa);
 
 			return View(model);
@@ -316,8 +337,8 @@ namespace QuanLyBanHang.Controllers
 			// Lấy chi tiết
 			var details = rows.Select(x => new CTBH
 			{
-				MaDBH = x.MaDBH!,
-				MaSP = x.MaSP!,
+				MaDBH = x.MaDBH,
+				MaSP = x.MaSP,
 				SLB = x.SLB ?? 0,
 				DGB = x.DGB ?? 0,
 				TenSP = x.TenSP
@@ -353,6 +374,7 @@ namespace QuanLyBanHang.Controllers
 			ViewData["MaXaSelected"] = header.MaXa;
 			ViewBag.Xa = new SelectList(listXa, "MaXa", "TenXa", header.MaXa);
 
+			ViewBag.IsCustomer = IsCustomerMode();
 			await LoadDropdowns(header.MaKH, header.MaTTBH);
 
 			return View(ct);
@@ -387,18 +409,14 @@ namespace QuanLyBanHang.Controllers
 					ModelState.AddModelError("CTBHs", "Vui lòng chọn ít nhất 1 sản phẩm.");
 				}
 
-				// Gán giá trị mặc định và lấy tên SP để hiển thị lại nếu lỗi
-				var sanPhamsForNames = await _spService.GetAll();
-				var nameLookup = sanPhamsForNames.ToDictionary(x => x.MaSP!, x => x.TenSP);
-
 				foreach (var ct in cleanedDetails)
 				{
-					ct.SLB ??= 1;
+					ct.SLB ??= 0;
 					ct.DGB ??= 0;
 					if (string.IsNullOrEmpty(ct.TenSP) && !string.IsNullOrEmpty(ct.MaSP))
 					{
-						nameLookup.TryGetValue(ct.MaSP, out var ten);
-						ct.TenSP = ten;
+						var sp = await _spService.GetById(ct.MaSP);
+						ct.TenSP = sp?.TenSP;
 					}
 				}
 
@@ -408,53 +426,81 @@ namespace QuanLyBanHang.Controllers
 					.Distinct()
 					.ToList();
 
+				// Get Current Product Stock (Remaining)
 				var stockLookup = new Dictionary<string, int>();
 				if (selectedIds.Any())
 				{
-					stockLookup = sanPhamsForNames
-						.Where(x => !string.IsNullOrEmpty(x.MaSP) && selectedIds.Contains(x.MaSP))
-						.ToDictionary(x => x.MaSP!, x => x.SoLuongTon ?? 0);
-				}
-
-				for (int i = 0; i < cleanedDetails.Count; i++)
-				{
-					var ct = cleanedDetails[i];
-					if (!string.IsNullOrEmpty(ct.MaSP) && stockLookup.TryGetValue(ct.MaSP, out var ton))
+					foreach (var id in selectedIds)
 					{
-						var slb = ct.SLB ?? 0;
-						if (slb > ton)
+						var sp = await _spService.GetById(id);
+						if (sp != null)
 						{
-							ModelState.AddModelError($"CTBHs[{i}].SLB", $"Số lượng bán ({slb}) vượt tồn kho ({ton}).");
+							stockLookup[id] = sp.SoLuongTon ?? 0;
 						}
 					}
 				}
 
-				if (!ModelState.IsValid)
-				{
-					var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-					TempData["ErrorMessage"] = "Dữ liệu không hợp lệ: " + string.Join(" | ", errors);
+				// Get Existing Quantity usage in this specific order (since we are updating it)
+				var existingDetails = await _ctbhService.GetByIDDBH(model.MaDBH);
+				var existingQtyLookup = existingDetails.ToDictionary(x => x.MaSP ?? "", x => x.SLB ?? 0);
 
-					await LoadDropdowns(model.MaKH, model.MaTTBH, model.MaXa);
-					var tinhsForErr = await _tinhService.GetAll();
-					ViewBag.Tinh = new SelectList(tinhsForErr, "MaTinh", "TenTinh", maTinh);
-					var xaList = await _xaService.GetByIDTinh(maTinh);
-					ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
-					ViewData["MaXaSelected"] = model.MaXa;
-					model.CTBHs = cleanedDetails;
-					return View(model);
+				for (int i = 0; i < cleanedDetails.Count; i++)
+				{
+					var ct = cleanedDetails[i];
+					if (!string.IsNullOrEmpty(ct.MaSP) && stockLookup.TryGetValue(ct.MaSP, out var remainingStock))
+					{
+						var newSLB = ct.SLB ?? 0;
+						var oldSLB = existingQtyLookup.GetValueOrDefault(ct.MaSP, 0); // 0 if new item
+						
+						// Maximum allowed is Remaining Stock + What we already hold
+						if (newSLB > (remainingStock + oldSLB))
+						{
+							ModelState.AddModelError($"CTBHs[{i}].SLB", $"Số lượng bán ({newSLB}) vượt tồn kho ({(remainingStock + oldSLB)}).");
+						}
+					}
 				}
 
-				model.CTBHs = cleanedDetails;
-				await _dbhService.Update(model);
+				if (ModelState.IsValid)
+				{
+					model.CTBHs = cleanedDetails;
+					await _dbhService.Update(model);
 
-				TempData["SuccessMessage"] = "Cập nhật đơn bán hàng thành công!";
-				return RedirectToAction(nameof(Details), new { id = model.MaDBH });
+					TempData["SuccessMessage"] = "Cập nhật đơn bán hàng thành công!";
+					return RedirectToAction(nameof(Details), new { id = model.MaDBH });
+				}
+
+				var stockErrorsUpdate = ModelState.Keys
+					.Where(k => k.Contains(".SLB"))
+					.SelectMany(k => ModelState[k]!.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList();
+
+				if (stockErrorsUpdate.Any())
+				{
+					TempData["ErrorMessage"] = "Lỗi tồn kho: " + string.Join("<br/>- ", stockErrorsUpdate);
+				}
+				else
+				{
+					var updateErrors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+					TempData["ErrorMessage"] = "Dữ liệu không hợp lệ: " + string.Join(" | ", updateErrors);
+				}
+
+				await LoadDropdowns(model.MaKH, model.MaTTBH, model.MaXa);
+				var tinhsForErr = await _tinhService.GetAll();
+				ViewBag.Tinh = new SelectList(tinhsForErr, "MaTinh", "TenTinh", maTinh);
+				var xaList = await _xaService.GetByIDTinh(maTinh);
+				ViewBag.Xa = new SelectList(xaList, "MaXa", "TenXa", model.MaXa);
+				ViewData["MaXaSelected"] = model.MaXa;
+				model.CTBHs = cleanedDetails;
+				ViewBag.IsCustomer = IsCustomerMode(); // Thêm dòng này
+				return View(model);
 			}
 			catch (Exception ex)
 			{
 				TempData["ErrorMessage"] = "Lỗi khi cập nhật: " + ex.Message;
 			}
 
+			ViewBag.IsCustomer = IsCustomerMode(); // Thêm dòng này
 			await LoadDropdowns(model.MaKH, model.MaTTBH, model.MaXa);
 			var tinhsFinal = await _tinhService.GetAll();
 			ViewBag.Tinh = new SelectList(tinhsFinal, "MaTinh", "TenTinh", maTinh);
@@ -462,6 +508,7 @@ namespace QuanLyBanHang.Controllers
 			ViewBag.Xa = new SelectList(finalXaList, "MaXa", "TenXa", model.MaXa);
 			ViewData["MaXaSelected"] = model.MaXa;
 
+			ViewBag.IsCustomer = IsCustomerMode();
 			if (model.CTBHs == null || !model.CTBHs.Any())
 				model.CTBHs = new List<CTBH> { new CTBH() };
 
@@ -487,13 +534,18 @@ namespace QuanLyBanHang.Controllers
 			{
 				await _dbhService.Delete(id);
 				TempData["SuccessMessage"] = "Xóa đơn bán hàng thành công!";
+				return RedirectToAction(nameof(Index));
 			}
 			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = ex.Message;
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Đơn bán hàng";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa đơn hàng: " + ex.Message;
+				return RedirectToAction(nameof(Index));
 			}
-
-			return RedirectToAction(nameof(Index));
 		}
 
 		[HttpGet]

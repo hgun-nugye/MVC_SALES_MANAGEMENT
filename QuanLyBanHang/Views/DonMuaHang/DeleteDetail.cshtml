@@ -117,7 +117,7 @@
                         <input type="hidden" name="MaDMH" value="@Model.MaDMH" />
                         <input type="hidden" name="maSP" value="@Model.MaSP" />
                         
-                        <a href="@Url.Action("Details", "DonMuaHang", new { MaDMH = Model.MaDMH })" class="btn btn-outline-secondary fw-bold px-4" style="border-radius: 8px;">
+                        <a asp-action="Details" asp-route-id="@Model.MaDMH" class="btn btn-outline-secondary fw-bold px-4" style="border-radius: 8px;">
                             <i class="fa-solid fa-xmark me-2"></i> Hủy bỏ
                         </a>
                         <button type="button" class="btn btn-danger fw-bold px-4" style="border-radius: 8px;" onclick="confirmDelete()">

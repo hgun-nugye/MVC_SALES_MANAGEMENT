@@ -7,13 +7,11 @@ namespace QuanLyBanHang.Controllers
 {
 	public class XaController : Controller
 	{
-		private readonly AppDbContext _context;
 		private readonly XaService _xaService;
 		private readonly TinhService _tinhService;
 
-		public XaController(AppDbContext context, XaService xaService, TinhService tinhService)
+		public XaController(XaService xaService, TinhService tinhService)
 		{
-			_context = context;
 			_xaService = xaService;
 			_tinhService = tinhService;
 		}
@@ -163,16 +161,27 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var xa = (await _xaService.GetByID(id));
-
-			if (xa != null)
+			try
 			{
-				await _xaService.Delete(id);
-				TempData["SuccessMessage"] = "Đã xóa xã thành công!";
+				var xa = (await _xaService.GetByID(id));
+				if (xa != null)
+				{
+					await _xaService.Delete(id);
+					TempData["SuccessMessage"] = "Đã xóa xã thành công!";
+				}
+				else
+				{
+					TempData["ErrorMessage"] = "Không tìm thấy xã cần xóa!";
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy xã cần xóa!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Xã/Phường";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa xã: " + ex.Message;
 			}
 
 			return RedirectToAction(nameof(Index));

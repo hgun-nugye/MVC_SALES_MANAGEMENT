@@ -154,9 +154,9 @@ BEGIN
             L.TenLoai,
             H.TenHangSX,
             (
-                ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+                ISNULL((SELECT SUM(SLM) FROM CTMH JOIN DonMuaHang DMH ON CTMH.MaDMH = DMH.MaDMH WHERE MaSP = S.MaSP AND DMH.MaTTMH = 'HTH'), 0) 
                 - 
-                ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+                ISNULL((SELECT SUM(SLB) FROM CTBH JOIN DonBanHang DBH ON CTBH.MaDBH = DBH.MaDBH WHERE MaSP = S.MaSP AND DBH.MaTTBH <> 'HUY'), 0)
             ) AS SoLuongTon
         FROM SanPham S
         JOIN LoaiSP L ON L.MaLoai = S.MaLoai
@@ -205,9 +205,9 @@ BEGIN
             L.TenLoai,
             H.TenHangSX,
             (
-                ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+                ISNULL((SELECT SUM(SLM) FROM CTMH JOIN DonMuaHang DMH ON CTMH.MaDMH = DMH.MaDMH WHERE MaSP = S.MaSP AND DMH.MaTTMH = 'HTH'), 0) 
                 - 
-                ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+                ISNULL((SELECT SUM(SLB) FROM CTBH JOIN DonBanHang DBH ON CTBH.MaDBH = DBH.MaDBH WHERE MaSP = S.MaSP AND DBH.MaTTBH <> 'HUY'), 0)
             ) AS SoLuongTon
         FROM SanPham S
         JOIN LoaiSP L ON L.MaLoai = S.MaLoai
@@ -258,9 +258,9 @@ BEGIN
             L.TenLoai,
             H.TenHangSX,
             (
-                ISNULL((SELECT SUM(SLM) FROM CTMH WHERE MaSP = S.MaSP), 0) 
+                ISNULL((SELECT SUM(SLM) FROM CTMH JOIN DonMuaHang DMH ON CTMH.MaDMH = DMH.MaDMH WHERE MaSP = S.MaSP AND DMH.MaTTMH = 'HTH'), 0) 
                 - 
-                ISNULL((SELECT SUM(SLB) FROM CTBH WHERE MaSP = S.MaSP), 0)
+                ISNULL((SELECT SUM(SLB) FROM CTBH JOIN DonBanHang DBH ON CTBH.MaDBH = DBH.MaDBH WHERE MaSP = S.MaSP AND DBH.MaTTBH <> 'HUY'), 0)
             ) AS SoLuongTon
         FROM SanPham S
         JOIN LoaiSP L ON L.MaLoai = S.MaLoai
@@ -306,5 +306,29 @@ BEGIN
             ELSE 'TT1'
         END
     ) = @MaTT)
+END;
+GO
+-- =========================
+-- Lấy tồn kho hàng loạt
+-- =========================
+CREATE OR ALTER PROC SanPham_GetStockBatch
+(
+    @ChiTiet CTBH_List READONLY
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        S.MaSP,
+        S.TenSP,
+        S.GiaBan,
+        (
+            ISNULL((SELECT SUM(SLM) FROM CTMH JOIN DonMuaHang DMH ON CTMH.MaDMH = DMH.MaDMH WHERE MaSP = S.MaSP AND DMH.MaTTMH = 'HTH'), 0) 
+            - 
+            ISNULL((SELECT SUM(SLB) FROM CTBH JOIN DonBanHang DBH ON CTBH.MaDBH = DBH.MaDBH WHERE MaSP = S.MaSP AND DBH.MaTTBH <> 'HUY'), 0)
+        ) AS SoLuongTon
+    FROM SanPham S
+    WHERE S.MaSP IN (SELECT MaSP FROM @ChiTiet);
 END;
 GO

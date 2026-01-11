@@ -118,13 +118,18 @@ namespace QuanLyBanHang.Controllers
 			{
 				await _nspService.Delete(id);
 				TempData["SuccessMessage"] = "Đã xóa nhóm sản phẩm thành công!";
+				return RedirectToAction(nameof(Index));
 			}
-			catch
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không thể xóa nhóm sản phẩm này!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Nhóm sản phẩm";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Không thể xóa nhóm sản phẩm! Lỗi: " + ex.Message;
+				return RedirectToAction(nameof(Index));
 			}
-
-			return RedirectToAction(nameof(Index));
 		}
 	}
 }

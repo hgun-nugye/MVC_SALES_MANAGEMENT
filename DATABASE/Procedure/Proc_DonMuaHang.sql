@@ -236,12 +236,24 @@ BEGIN
             D.MaDMH LIKE '%' + @Search + '%' OR
             N.TenNCC LIKE N'%' + @Search + '%' OR
             D.MaNCC LIKE '%' + @Search + '%' OR
-            NV.TenNV LIKE N'%' + @Search + '%'
+            NV.TenNV LIKE N'%' + @Search + '%' OR
+            TenSP LIKE N'%' + @Search + '%'
         )
         AND (@Month IS NULL OR MONTH(D.NgayMH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayMH) = @Year)
 		AND (@MaTTMH IS NULL OR D.MaTTMH = @MaTTMH)
     GROUP BY D.MaDMH, D.NgayMH, D.MaDMH, D.NgayMH, D.MaNCC, N.TenNCC, D.MaNV, NV.TenNV, D.MaTTMH, TT.TenTTMH
 	ORDER BY D.NgayMH ASC
+END;
+GO
+
+CREATE OR ALTER PROC DonMuaHang_Complete
+(
+    @MaDMH CHAR(11)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE DonMuaHang SET MaTTMH = 'HTH' WHERE MaDMH = @MaDMH;
 END;
 GO

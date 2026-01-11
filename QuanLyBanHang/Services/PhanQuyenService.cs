@@ -40,16 +40,17 @@ namespace QuanLyBanHang.Services
 			return MapToPhanQuyen(dtos);
 		}
 
-		public async Task<PhanQuyen?> GetById(string maVT, string maNV)
+		public async Task<PhanQuyenDto?> GetById(string maVT, string maNV)
 		{
 			var parameters = new[] {
 				new SqlParameter("@MaVT", maVT),
 				new SqlParameter("@MaNV", maNV)
 			};
-			var dtos = await _context.PhanQuyenDto
-				.FromSqlRaw("EXEC PhanQuyen_GetByID @MaVT, @MaNV", parameters)
-				.ToListAsync();
-			return MapToPhanQuyen(dtos).FirstOrDefault();
+			var list = await _context.PhanQuyenDto
+		.FromSqlRaw("EXEC PhanQuyen_GetByID @MaVT, @MaNV", parameters)
+		.ToListAsync();
+
+			return list.FirstOrDefault();
 		}
 
 		public async Task Create(PhanQuyen model)

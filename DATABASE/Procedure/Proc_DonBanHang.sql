@@ -236,7 +236,8 @@ CREATE OR ALTER PROC DonBanHang_Search
     @Search NVARCHAR(100) = NULL,
     @Month INT = NULL,
     @Year INT = NULL,
-    @MaTTBH CHAR(3) = NULL
+    @MaTTBH CHAR(3) = NULL,
+    @MaKH VARCHAR(10) = NULL
 )
 AS
 BEGIN
@@ -268,10 +269,12 @@ BEGIN
         (@Search IS NULL OR @Search = ''
             OR D.MaDBH LIKE '%' + @Search + '%'
             OR K.TenKH LIKE N'%' + @Search + '%'
+            OR TenSP LIKE N'%' + @Search + '%'
         )
         AND (@Month IS NULL OR MONTH(D.NgayBH) = @Month)
         AND (@Year IS NULL OR YEAR(D.NgayBH) = @Year)
         AND (@MaTTBH IS NULL OR D.MaTTBH = @MaTTBH)
+        AND (@MaKH IS NULL OR D.MaKH = @MaKH)
     GROUP BY
         D.MaDBH, D.NgayBH, D.MaKH, K.TenKH,
         D.DiaChiDBH, D.MaTTBH, TT.TenTTBH,

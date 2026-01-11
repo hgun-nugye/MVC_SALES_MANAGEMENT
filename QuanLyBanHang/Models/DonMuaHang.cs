@@ -50,6 +50,41 @@ namespace QuanLyBanHang.Models
 	}
 
 	[Keyless]
+	public class DonMuaHangDetailDto
+	{
+		[Display(Name = "Mã Đơn Mua Hàng")]
+		public string? MaDMH { get; set; }
+
+		[Display(Name = "Ngày Mua Hàng")]
+		[DataType(DataType.Date)]
+		public DateTime NgayMH { get; set; }
+
+		[Display(Name = "Mã Nhà Cung Cấp")]
+		public string? MaNCC { get; set; }
+
+		[Display(Name = "Tên Nhà Cung Cấp")]
+		public string? TenNCC { get; set; }
+
+		[Display(Name = "Mã Nhân Viên")]
+		public string? MaNV { get; set; }
+
+		[Display(Name = "Tên Nhân Viên")]
+		public string? TenNV { get; set; }
+
+		[Display(Name = "Mã Trạng Thái Mua Hàng")]
+		public string? MaTTMH { get; set; }
+
+		[Display(Name = "Trạng Thái Mua Hàng")]
+		public string? TenTTMH { get; set; }
+
+		[Display(Name = "Mã Sản Phẩm")]
+		public string? MaSP { get; set; }
+
+		[Display(Name = "Tên Sản Phẩm")]
+		public string? TenSP { get; set; }
+	}
+
+	[Keyless]
 	public class DonMuaHangDetail
 	{
 		[Display(Name = "Mã Đơn Mua Hàng")]

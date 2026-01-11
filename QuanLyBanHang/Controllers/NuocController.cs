@@ -134,16 +134,27 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var nuoc = (await _nuocService.GetByID(id));
-
-			if (nuoc != null)
+			try
 			{
-				await _nuocService.Delete(id);
-				TempData["SuccessMessage"] = "Đã xóa nước thành công!";
+				var nuoc = (await _nuocService.GetByID(id));
+				if (nuoc != null)
+				{
+					await _nuocService.Delete(id);
+					TempData["SuccessMessage"] = "Đã xóa nước thành công!";
+				}
+				else
+				{
+					TempData["ErrorMessage"] = "Không tìm thấy nước cần xóa!";
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy nước cần xóa!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Quốc gia/Vùng lãnh thổ";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa nước: " + ex.Message;
 			}
 
 			return RedirectToAction(nameof(Index));

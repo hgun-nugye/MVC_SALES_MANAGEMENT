@@ -32,20 +32,19 @@
 
     .form-control:focus, .form-select:focus {
         border-color: #198754;
-        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1);
+        box-shadow: 0 0 2px 0.25rem rgba(25, 135, 84, 0.1);
     }
 </style>
 
 <div class="container py-4">
     <div class="page-header text-center mb-4">
-        <h4 class="fw-bold text-success">
+        <h4 class="fw-bold text-white">
             <i class="fa-solid fa-cart-plus me-2"></i>
             Thêm sản phẩm nhập kho
         </h4>
-        <p class="text-muted">Mã Đơn: <span class="badge bg-success">@Model.MaDMH</span></p>
     </div>
 
-    <div class="form-card">
+    <div class="form-card" data-aos="fade-up" data-aos-duration="800">
         <form asp-action="Create" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="MaDMH" />
@@ -65,7 +64,11 @@
                 <label asp-for="SLM" class="form-label">Số lượng mua</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calculator text-success"></i></span>
-                    <input asp-for="SLM" class="form-control border-start-0" type="number" min="1" placeholder="Nhập số lượng..." required />
+                    <input asp-for="SLM" id="QuantityInput" class="form-control border-start-0" type="number" min="1" placeholder="Nhập số lượng..." required />
+                </div>
+                 <div id="QuantityWarning" class="alert alert-danger d-flex align-items-center mt-2 py-2 small" style="display:none;">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> 
+                    <div>Số lượng mua không hợp lệ!</div>
                 </div>
                 <span asp-validation-for="SLM" class="text-danger small"></span>
             </div>
@@ -80,13 +83,36 @@
             </div>
 
             <div class="d-grid gap-2 mt-5">
-                <button type="submit" class="btn btn-success py-2 fw-bold shadow-sm">
+                <button type="submit" id="SubmitBtn" class="btn btn-success py-2 fw-bold shadow-sm text-uppercase">
                     <i class="fa-solid fa-plus me-2"></i> Thêm vào đơn hàng
                 </button>
-                <button type="button" onclick="history.back()" class="btn btn-outline-secondary py-2 fw-bold">
-                    Hủy bỏ
-                </button>
+                    <a asp-action="Index" asp-route-maDMH="@Model.MaDMH" class="btn btn-outline-secondary py-2 fw-bold">
+                    <i class="fa-solid fa-xmark me-2"></i> Hủy bỏ
+                </a>
             </div>
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+             $('#QuantityInput').on('input change', function() {
+                validateQuantity();
+            });
+
+            function validateQuantity() {
+                const qty = parseInt($('#QuantityInput').val()) || 0;
+                 // Validation logic: Show warning if quantity is <= 0 BUT allow empty (handled by required attr)
+                 // Or just strict check if they typed something invalid.
+                if (qty <= 0 && $('#QuantityInput').val() !== "") {
+                   $('#QuantityWarning').show();
+                   $('#SubmitBtn').attr('disabled', true).addClass('opacity-50');
+                } else {
+                   $('#QuantityWarning').hide();
+                   $('#SubmitBtn').attr('disabled', false).removeClass('opacity-50');
+                }
+            }
+        });
+    </script>
+}

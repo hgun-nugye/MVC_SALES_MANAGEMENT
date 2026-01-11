@@ -8,12 +8,10 @@ namespace QuanLyBanHang.Controllers
 	public class TinhController : Controller
 	{
 		private readonly TinhService _tinhService;
-		private readonly AppDbContext _context;
 
-		public TinhController(TinhService tinhService, AppDbContext context)
+		public TinhController(TinhService tinhService)
 		{
 			_tinhService = tinhService;
-			_context = context;
 		}
 	
 		// READ - Danh sách Tỉnh 
@@ -134,16 +132,27 @@ namespace QuanLyBanHang.Controllers
 				return BadRequest();
 			}
 
-			var tinh = (await _tinhService.GetByID(id));
-
-			if (tinh != null)
+			try
 			{
-				await _tinhService.Delete(id);
-				TempData["SuccessMessage"] = "Đã xóa tỉnh thành công!";
+				var tinh = (await _tinhService.GetByID(id));
+				if (tinh != null)
+				{
+					await _tinhService.Delete(id);
+					TempData["SuccessMessage"] = "Đã xóa tỉnh thành công!";
+				}
+				else
+				{
+					TempData["ErrorMessage"] = "Không tìm thấy tỉnh cần xóa!";
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy tỉnh cần xóa!";
+				if (ex.Message.Contains("REFERENCE constraint") || (ex.InnerException?.Message.Contains("REFERENCE constraint") ?? false))
+				{
+					ViewBag.ObjectName = "Tỉnh/Thành phố";
+					return View("DeleteError");
+				}
+				TempData["ErrorMessage"] = "Lỗi khi xóa tỉnh: " + ex.Message;
 			}
 
 			return RedirectToAction(nameof(Index));

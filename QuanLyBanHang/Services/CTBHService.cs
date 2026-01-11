@@ -20,18 +20,16 @@ namespace QuanLyBanHang.Services
 				.ToListAsync();
 		}
 
-		public async Task<CTBH?> GetByIDDBH(string maDBH)
+		public async Task<List<CTBH>> GetByIDDBH(string maDBH)
 		{
 			var parameters = new[]
 			{
 				new SqlParameter("@MaDBH", maDBH)
 			};
 
-			var data = await _context.CTBH
-				.FromSqlRaw("EXEC CTBH_GetByID @MaDBH", parameters)
+			return await _context.CTBH
+				.FromSqlRaw("EXEC CTBH_GetByIDDBH @MaDBH", parameters)
 				.ToListAsync();
-
-			return data.FirstOrDefault();
 		}
 
 		public async Task<CTBH?> GetByID(string maDBH, string maSP)
@@ -75,9 +73,14 @@ namespace QuanLyBanHang.Services
 		{
 			// Kiểm tra tồn kho trước khi update (Server side)
 			var sp = await (new SanPhamService(_context)).GetById(model.MaSP!);
-			if (sp != null && model.SLB > (sp.SoLuongTon ?? 0))
+			
+			// Lấy số lượng cũ để cộng lại vào kho tạm
+			var oldItem = await GetByID(model.MaDBH!, model.MaSP!);
+			var oldSLB = oldItem?.SLB ?? 0;
+
+			if (sp != null && model.SLB > ((sp.SoLuongTon ?? 0) + oldSLB))
 			{
-				throw new Exception($"Số lượng bán ({model.SLB}) vượt quá tồn kho hiện tại ({sp.SoLuongTon})");
+				throw new Exception($"Số lượng bán ({model.SLB}) vượt quá tồn kho hiện tại ({(sp.SoLuongTon + oldSLB)})");
 			}
 
 			var parameters = new[]

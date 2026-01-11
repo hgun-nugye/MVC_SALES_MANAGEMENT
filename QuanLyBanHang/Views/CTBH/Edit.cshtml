@@ -1,5 +1,4 @@
 ﻿@model QuanLyBanHang.Models.CTBHDetailDto
-
 @{
     ViewBag.Title = "Sửa chi tiết bán hàng";
 }
@@ -39,18 +38,19 @@
 
 <div class="container py-4">
     <div class="page-header text-center mb-4">
-        <h4 class="fw-bold text-success">
+        <h4 class="fw-bold text-white">
             <i class="fa-solid fa-pen-to-square me-2"></i>
             Cập nhật chi tiết đơn bán
         </h4>
-        <p class="text-muted">Mã Đơn: <span class="badge bg-success">@Model.MaDBH</span></p>
+        <p class="text-white fw-bold">Mã Đơn: <span class="badge bg-success">@Model.MaDBH</span></p>
     </div>
 
-    <div class="form-card">
+    <div class="form-card" data-aos="fade-up" data-aos-duration="800">
         <form asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="MaDBH" />
             <input type="hidden" asp-for="MaSP" />
+            <input type="hidden" asp-for="SoLuongTon" id="SoLuongTonHidden" /> <!-- Hidden field for validation if needed server-side or just passing -->
 
             <div class="mb-4">
                 <label class="form-label text-muted">Sản phẩm (Đang sửa)</label>
@@ -58,8 +58,11 @@
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-box text-success"></i></span>
                     <input asp-for="TenSP" class="form-control bg-light border-start-0" readonly />
                 </div>
-                <div class="mt-2 small text-muted">
-                    <i class="fa-solid fa-warehouse me-1"></i> Tồn kho hiện tại: <span id="AvailableStock" class="fw-bold text-success">@Model.SoLuongTon</span>
+                <div class="mt-2 small text-muted card p-2 bg-light border-0">
+                    <div class="d-flex align-items-center">
+                         <i class="fa-solid fa-warehouse me-2 text-primary"></i> 
+                         <span>Tồn kho hiện tại: <span id="AvailableStock" class="fw-bold text-success fs-6">@Model.SoLuongTon</span></span>
+                    </div>
                 </div>
             </div>
 
@@ -69,8 +72,9 @@
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calculator text-success"></i></span>
                     <input asp-for="SLB" id="QuantityInput" class="form-control border-start-0" type="number" min="1" required />
                 </div>
-                <div id="QuantityWarning" class="text-danger small mt-1" style="display:none;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Số lượng vượt quá tồn kho! (Tối đa: @Model.SoLuongTon)
+                <div id="QuantityWarning" class="alert alert-danger d-flex align-items-center mt-2 py-2 small" style="display:none;">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> 
+                    <div>Chú ý số lượng tồn kho!</div>
                 </div>
                 <span asp-validation-for="SLB" class="text-danger small"></span>
             </div>
@@ -85,12 +89,12 @@
             </div>
 
             <div class="d-grid gap-2 mt-5">
-                <button type="submit" id="SubmitBtn" class="btn btn-success py-2 fw-bold shadow-sm">
+                <button type="submit" id="SubmitBtn" class="btn btn-success py-2 fw-bold shadow-sm text-uppercase">
                     <i class="fa-solid fa-floppy-disk me-2"></i> Lưu thay đổi
                 </button>
-                <button type="button" onclick="history.back()" class="btn btn-outline-secondary py-2 fw-bold">
-                    Hủy bỏ
-                </button>
+                    <a asp-action="Index" asp-route-maDBH="@Model.MaDBH" class="btn btn-outline-secondary py-2 fw-bold">
+                    <i class="fa-solid fa-xmark me-2"></i> Hủy bỏ
+                </a>
             </div>
         </form>
     </div>
@@ -106,13 +110,25 @@
             });
 
             function validateQuantity() {
-                const qty = parseInt($('#QuantityInput').val()) || 0;
-                if (qty > availableStock) {
-                    $('#QuantityWarning').show();
+                const qtyVal = $('#QuantityInput').val();
+                const qty = parseInt(qtyVal) || 0;
+                
+                // Note: availableStock in Edit usually includes the current qty, but let's stick to logic
+                // Here availableStock is "limit for this detail"
+                
+                if (qty > 0 && qty > availableStock) {
+                     $('#QuantityWarning').html(`
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i> 
+                        <div>Số lượng (${qty}) vượt quá tồn kho (${availableStock})!</div>
+                    `).show();
                     $('#SubmitBtn').attr('disabled', true).addClass('opacity-50');
                 } else {
                     $('#QuantityWarning').hide();
-                    $('#SubmitBtn').attr('disabled', false).removeClass('opacity-50');
+                    if (qty > 0) { 
+                        $('#SubmitBtn').attr('disabled', false).removeClass('opacity-50');
+                    } else {
+                        $('#SubmitBtn').attr('disabled', false).removeClass('opacity-50');
+                    }
                 }
             }
             
