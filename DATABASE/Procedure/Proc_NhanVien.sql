@@ -238,3 +238,12 @@ BEGIN
         vt.TenVT LIKE N'%' + @Search + N'%';
 END;
 GO
+
+CREATE OR ALTER  PROCEDURE NhanVien_GetByUsername
+    @Username VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM NhanVien WHERE TenDNNV = @Username;
+END
+GO

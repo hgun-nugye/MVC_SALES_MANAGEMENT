@@ -9,11 +9,11 @@ CREATE OR ALTER PROC SanPham_Insert
     @AnhMH NVARCHAR(255),
 
     @ThanhPhan NVARCHAR(MAX),
-    @CongDung NVARCHAR(MAX),
-    @HDSD NVARCHAR(MAX),
-    @HDBaoQuan NVARCHAR(MAX),
+    @CongDung NVARCHAR(MAX) =NULL,
+    @HDSD NVARCHAR(MAX) = NULL,
+    @HDBaoQuan NVARCHAR(MAX) =NULL,
     @TrongLuong DECIMAL(5,2),
-	@DoiTuongSuDung NVARCHAR(MAX),
+	@DoiTuongSuDung NVARCHAR(MAX) =NULL,
     @MaTT CHAR(3),
     @MaLoai VARCHAR(10),
     @MaHangSX CHAR(5)

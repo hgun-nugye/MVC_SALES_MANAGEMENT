@@ -108,7 +108,7 @@ BEGIN
     JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH
     WHERE DBH.MaTTBH = 'HTH' OR DBH.MaTTBH = 'DXN'
     GROUP BY SP.MaSP, SP.TenSP
-    ORDER BY TotalQuantitySold DESC;
+    ORDER BY TotalRevenue DESC;
 END;
 GO
 
@@ -139,7 +139,7 @@ BEGIN
     LEFT JOIN DonBanHang DBH ON CT.MaDBH = DBH.MaDBH AND DBH.MaTTBH = 'HTH'
     WHERE SP.MaSP NOT IN (SELECT MaSP FROM TopSelling)
     GROUP BY SP.MaSP, SP.TenSP
-    ORDER BY TotalQuantitySold ASC;
+    ORDER BY TotalRevenue ASC;
 END;
 GO
 

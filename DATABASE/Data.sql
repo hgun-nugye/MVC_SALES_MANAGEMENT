@@ -79,17 +79,17 @@ VALUES
 ('NV25121001', '001201000001', N'Nguyễn Thị Hương', 0, '1995-03-15',
  '0901234567', 'admin@mypham.vn', '2022-01-10',
  NULL, N'10 Tràng Tiền', '01001',
- 'admin', '123456'),
+ 'admin', '$2a$12$WettUjh0ttGQ3Z7pIijZxORrvAUj5YQvUZzOzAJp6c0ToZSdUC5Ma'),
 
 ('NV25121002', '001201000002', N'Trần Mỹ Linh', 0, '1998-07-22',
  '0902345678', 'linh.tran@mypham.vn', '2023-03-05',
  NULL, N'25 Nguyễn Huệ', '02001',
- 'tuvan01', '123456'),
+ 'tuvan01', '$2a$12$WettUjh0ttGQ3Z7pIijZxORrvAUj5YQvUZzOzAJp6c0ToZSdUC5Ma'),
 
 ('NV25121101', '001201000003', N'Lê Hoàng Nam', 1, '1992-11-02',
  '0903456789', 'nam.le@mypham.vn', '2021-06-20',
  NULL, N'88 Hải Châu', '03001',
- 'quanly01', '123456');
+ 'quanly01', '$2a$12$WettUjh0ttGQ3Z7pIijZxORrvAUj5YQvUZzOzAJp6c0ToZSdUC5Ma');
 GO
 
 -- ======================
@@ -105,9 +105,9 @@ GO
 -- KHÁCH HÀNG
 -- ======================
 INSERT INTO KhachHang(MaKH, TenKH, AnhKH, GioiTinh, EmailKH, DienThoaiKH, DiaChiKH, TenDNKH, MatKhauKH, MaXa) VALUES
-('KH00000001', N'Nguyễn Thị Lan', NULL, 0, 'lan@gmail.com', '0901111222', N'10 Tràng Tiền', 'lannt', '123456', '01001'),
-('KH00000002', N'Trần Mỹ Anh', NULL, 0, 'anh@gmail.com', '0902222333', N'15 Nguyễn Huệ', 'anhtran', '123456', '02001'),
-('KH00000003', N'Lê Hoàng', NULL, 1, 'hoang@gmail.com', '0903333444', N'88 Hải Châu', 'lehoang', '123456', '03001');
+('KH00000001', N'Nguyễn Thị Lan', NULL, 0, 'lan@gmail.com', '0901111222', N'10 Tràng Tiền', 'lannt', '$2a$12$WettUjh0ttGQ3Z7pIijZxORrvAUj5YQvUZzOzAJp6c0ToZSdUC5Ma', '01001'),
+('KH00000002', N'Trần Mỹ Anh', NULL, 0, 'anh@gmail.com', '0902222333', N'15 Nguyễn Huệ', 'anhtran', '$2a$11$3isS.IZiijzgwCzhQ7hTXe7tOtv/7FYlqOVLsQNYvaD3FIwSzoM/O', '02001'),
+('KH00000003', N'Lê Hoàng', NULL, 1, 'hoang@gmail.com', '0903333444', N'88 Hải Châu', 'lehoang', '$2a$11$3isS.IZiijzgwCzhQ7hTXe7tOtv/7FYlqOVLsQNYvaD3FIwSzoM/O', '03001');
 GO
 
 -- ======================
