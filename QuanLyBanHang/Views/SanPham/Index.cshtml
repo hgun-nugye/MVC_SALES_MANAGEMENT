@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<QuanLyBanHang.Models.SanPhamDto>
 
 @{
-    ViewBag.Title = "Thế giới Sản phẩm";
+    ViewBag.Title = "Sản phẩm";
     bool isCustomer = ViewBag.IsCustomer == true;
     bool isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
     bool isManagementMode = isLoggedIn && !isCustomer;
@@ -269,7 +269,7 @@
                         {
                             @foreach (var sp in Model)
                             {
-                                // 1. Tính toán Logic hiển thị trước khi render HTML
+                                // Tính toán Logic hiển thị trước khi render HTML
                                 string statusClass = "bg-success";
                                 string progressColor = "bg-success";
                                 string statusText = sp.TenTT;
@@ -293,7 +293,7 @@
 
                                 var stockPercent = Math.Min(tonKho * 2, 100);
 
-                                // 2. Render Row
+                                // Render Row
                                 <tr class="clickable-row" data-href="@Url.Action("Details", "SanPham", new { id = sp.MaSP })" style="cursor:pointer;">
                                     <td class="ps-4">
                                         <div class="d-flex align-items-center gap-3">

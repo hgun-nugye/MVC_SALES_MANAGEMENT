@@ -99,36 +99,6 @@
 
         <div class="row">
             <div class="col-lg-8">
-                <!-- Thông tin chính -->
-                <div class="form-section">
-                    <div class="section-title">
-                        <i class="fa-solid fa-circle-info"></i>
-                        Thông tin cơ bản
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label asp-for="TenSP" class="form-label required-badge">Tên sản phẩm</label>
-                            @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", placeholder = "Ví dụ: Toner Saffron chiết xuất nhụy hoa nghệ tây..." })
-                            @Html.ValidationMessageFor(m => m.TenSP, "", new { @class = "text-danger small" })
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="GiaBan" class="form-label required-badge">Giá niêm yết (VNĐ)</label>
-                            @Html.TextBoxFor(m => m.GiaBan, new { @class = "form-control", type = "number", placeholder = "0" })
-                            @Html.ValidationMessageFor(m => m.GiaBan, "", new { @class = "text-danger small" })
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="TrongLuong" class="form-label">Trọng lượng (gram)</label>
-                            @Html.TextBoxFor(m => m.TrongLuong, new { @class = "form-control", type = "number", step="0.01", placeholder = "0.00" })
-                            @Html.ValidationMessageFor(m => m.TrongLuong, "", new { @class = "text-danger small" })
-                        </div>
-                        <div class="col-12">
-                            <label asp-for="MoTaSP" class="form-label">Mô tả ngắn gọn</label>
-                            @Html.TextAreaFor(m => m.MoTaSP, new { @class = "form-control", rows = "5", placeholder = "Giới thiệu nhanh về ưu điểm sản phẩm..." })
-                            @Html.ValidationMessageFor(m => m.MoTaSP, "", new { @class = "text-danger small" })
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Phân loại -->
                 <div class="form-section">
                     <div class="section-title">
@@ -155,6 +125,36 @@
                     </div>
                 </div>
 
+                <!-- Thông tin chính -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Thông tin cơ bản
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="TenSP" class="form-label required-badge">Tên sản phẩm</label>
+                            @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", placeholder = "Ví dụ: Toner Saffron chiết xuất nhụy hoa nghệ tây..." })
+                            @Html.ValidationMessageFor(m => m.TenSP, "", new { @class = "text-danger small" })
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="GiaBan" class="form-label required-badge">Giá niêm yết (VNĐ)</label>
+                            @Html.TextBoxFor(m => m.GiaBan, new { @class = "form-control", type = "number", placeholder = "0" })
+                            @Html.ValidationMessageFor(m => m.GiaBan, "", new { @class = "text-danger small" })
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TrongLuong" class="form-label required-badge">Trọng lượng (gram)</label>
+                            @Html.TextBoxFor(m => m.TrongLuong, new { @class = "form-control", type = "number", step="0.01", placeholder = "0.00" })
+                            @Html.ValidationMessageFor(m => m.TrongLuong, "", new { @class = "text-danger small" })
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="MoTaSP" class="form-label required-badge">Mô tả ngắn gọn</label>
+                            @Html.TextAreaFor(m => m.MoTaSP, new { @class = "form-control", rows = "5", placeholder = "Giới thiệu nhanh về ưu điểm sản phẩm..." })
+                            @Html.ValidationMessageFor(m => m.MoTaSP, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+                </div>
+                               
                 <!-- Chi tiết chi tiết -->
                 <div class="form-section">
                     <div class="section-title">
@@ -163,8 +163,9 @@
                     </div>
                     <div class="row g-3">
                         <div class="col-md-12">
-                            <label class="form-label">Thành phần chi tiết</label>
+                            <label class="form-label required-badge">Thành phần chi tiết</label>
                             @Html.TextAreaFor(m => m.ThanhPhan, new { @class = "form-control", rows = "3" })
+                            @Html.ValidationMessageFor(m => m.ThanhPhan, "", new { @class = "text-danger small" })
                         </div>
                         <div class="col-md-12">
                             <label class="form-label">Công dụng</label>
@@ -208,7 +209,7 @@
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success fw-bold py-3" style="border-radius:12px;">
-                                <i class="fa-solid fa-check-circle me-2"></i> Tạo sản phẩm mới
+                                <i class="fa-solid fa-check-circle me-2"></i> Thêm sản phẩm mới
                             </button>
                             <a href="@Url.Action("Index", "SanPham")" class="btn btn-outline-secondary py-3" style="border-radius:12px;">
                                 <i class="fa-solid fa-xmark me-2"></i> Hủy bỏ
@@ -242,4 +243,5 @@
             });
         });
     </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

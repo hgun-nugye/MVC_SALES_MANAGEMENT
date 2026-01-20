@@ -38,16 +38,16 @@ namespace QuanLyBanHang.Models
 		public string ThanhPhan { get; set; } = string.Empty;
 
 		[Display(Name = "Công dụng")]
-		[Required(ErrorMessage = "Công dụng không được để trống")]
-		public string CongDung { get; set; } = string.Empty;
+		//[Required(ErrorMessage = "Công dụng không được để trống")]
+		public string? CongDung { get; set; } = string.Empty;
 
 		[Display(Name = "Hướng dẫn sử dụng")]
-		[Required(ErrorMessage = "Hướng dẫn sử dụng không được để trống")]
-		public string HDSD { get; set; } = string.Empty;
+		//[Required(ErrorMessage = "Hướng dẫn sử dụng không được để trống")]
+		public string? HDSD { get; set; } = string.Empty;
 
 		[Display(Name = "Hướng dẫn bảo quản")]
-		[Required(ErrorMessage = "Hướng dẫn bảo quản không được để trống")]
-		public string HDBaoQuan { get; set; } = string.Empty;
+		//[Required(ErrorMessage = "Hướng dẫn bảo quản không được để trống")]
+		public string? HDBaoQuan { get; set; } = string.Empty;
 
 		[Display(Name = "Trọng lượng")]
 		[Required(ErrorMessage = "Trọng lượng không được để trống")]
@@ -129,7 +129,7 @@ namespace QuanLyBanHang.Models
 		public decimal? TrongLuong { get; set; }
 
 		[Display(Name = "Đối tượng sử dụng")]
-		public string DoiTuongSuDung { get; set; } = string.Empty;
+		public string? DoiTuongSuDung { get; set; } = string.Empty;
 
 		[Display(Name = "Mã Trạng Thái")]
 		public string? MaTT { get; set; }

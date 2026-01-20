@@ -305,7 +305,6 @@
                 Chi tiết sản phẩm
             </div>
 
-             <!-- TEMPLATE ẨN (SỬA LỖI CHÍNH) -->
             <select id="spTemplate" class="d-none">
                 @foreach (var sp in spList)
                 {
@@ -506,7 +505,7 @@
             tableBody.addEventListener("change", function (e) {
                 if (e.target.classList.contains("form-select") || e.target.classList.contains("select-sp")) {
                     updatePrice(e.target);
-                    updateNames(); // Ensure names are synced if it's a dynamic row
+                    updateNames(); 
                 }
                 if (e.target.tagName === "INPUT" && (e.target.name.includes(".SLB") || (e.target.type === "number" && !e.target.step))) {
                     validateStock(e.target);

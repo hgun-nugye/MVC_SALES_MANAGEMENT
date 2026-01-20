@@ -61,27 +61,27 @@
                         </td>
 
                                 <td class="text-center">
-                                    <a href="@Url.Action("DeleteDetail", "DonMuaHang",
-                                                                  new { maDMH = ct.MaDMH, maSP = ct.MaSP })"
-                               class="btn btn-sm btn-danger">
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
+                                    <a href="@Url.Action("DeleteDetail", "DonMuaHang", new { MaDMH = ct.MaDMH, maSP = ct.MaSP })"
+                                       class="btn btn-sm btn-danger" title="Xóa sản phẩm này"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm @ct.TenSP khỏi đơn hàng này?')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                             </tr>
+                        }
+                </tbody>
+                <tfoot>
+                    <tr class="table-success fw-bold">
+                        <td colspan="3" class="text-end">Tổng cộng:</td>
+                        <td colspan="2" class="text-end">
+                            @(
+                                Model.Sum(x => (x.SLM ?? 0) * (x.DGM ?? 0))
+                                .ToString("#,##0.################", new System.Globalization.CultureInfo("vi-VN"))
+                                ) ₫
                         </td>
-                     </tr>
-                }
-        </tbody>
-        <tfoot>
-            <tr class="table-success fw-bold">
-                <td colspan="3" class="text-end">Tổng cộng:</td>
-                <td colspan="2" class="text-end">
-                    @(
-                                        Model.Sum(x => (x.SLM ?? 0) * (x.DGM ?? 0))
-                                        .ToString("#,##0.################", new System.Globalization.CultureInfo("vi-VN"))
-                                        ) ₫
-                </td>
-            </tr>
-        </tfoot>
-    </table>
+                    </tr>
+                </tfoot>
+            </table>
         }
     else
     {
@@ -91,17 +91,13 @@
     }
 
     <div class="mt-4">
-        @if (don != null && don.MaTTMH != "HTH")
+        @if (don != null)
         {
             <a href="@Url.Action("Edit", "DonMuaHang", new { id = don.MaDMH })" class="btn btn-warning text-white me-2">
                 <i class="fa-solid fa-pen-to-square"></i> Sửa
             </a>
-        }
-
-        @if (don != null && don.MaTTMH != "HTH")
-        {
             <a class="btn btn-danger me-2 text-white" href="@Url.Action("Delete", "DonMuaHang", new { id = don.MaDMH })">
-                <i class="fa-solid fa-trash"></i> Xóa
+                <i class="fa-solid fa-trash"></i> Xóa đơn hàng
             </a>
         }
 

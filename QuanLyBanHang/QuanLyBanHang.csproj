@@ -68,6 +68,7 @@
     <Folder Include="obj\Debug\net8.0\scopedcss\projectbundle\" />
     <Folder Include="obj\Debug\net8.0\scopedcss\Views\Shared\" />
     <Folder Include="obj\Debug\net8.0\staticwebassets\" />
+    <Folder Include="Properties\" />
     <Folder Include="Views\Dashboard\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
