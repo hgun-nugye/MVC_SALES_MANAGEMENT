@@ -32,3 +32,8 @@ The system provides a modern, scalable solution for managing products, customers
 - SQL Server – Database management system.
 - Bootstrap / CSS / JavaScript – Frontend styling and interactivity.
 - Visual Studio / Visual Studio Code – Development environment.
+
+**👨‍🎓 Contributors**
+- Developed by a student of Nha Trang University
+- Course: Web Application Development
+- Instructor: PhD Nguyen Van Rang
